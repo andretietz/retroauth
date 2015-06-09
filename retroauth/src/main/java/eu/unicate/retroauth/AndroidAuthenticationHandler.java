@@ -1,6 +1,5 @@
 package eu.unicate.retroauth;
 
-import eu.unicate.retroauth.account.ServiceAccountProvider;
 import retrofit.RetrofitError;
 
 public class AndroidAuthenticationHandler implements AuthenticationHandler {
@@ -10,15 +9,13 @@ public class AndroidAuthenticationHandler implements AuthenticationHandler {
 	private static final int HTTP_UNAUTHORIZED = 401;
 
 	private final int maxRetries;
-	private final ServiceAccountProvider provider;
 
-	public AndroidAuthenticationHandler(ServiceAccountProvider provider) {
-		this(provider, MAX_RETRIES);
+	public AndroidAuthenticationHandler() {
+		this(MAX_RETRIES);
 	}
 
-	public AndroidAuthenticationHandler(ServiceAccountProvider provider, int maxRetries) {
+	public AndroidAuthenticationHandler(int maxRetries) {
 		this.maxRetries = maxRetries;
-		this.provider = provider;
 	}
 
 	@Override
