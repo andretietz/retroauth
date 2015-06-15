@@ -1,5 +1,7 @@
 package eu.unicate.retroauth;
 
+import android.app.Activity;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.LinkedHashMap;
@@ -29,7 +31,7 @@ public class AuthRestAdapter {
 
 	private AuthRestAdapter(RestAdapter adapter, AuthenticationHandler authHandler) {
 		this.adapter = adapter;
-		this.authHandler = (null == authHandler) ? new AndroidAuthenticationHandler() : authHandler;
+		this.authHandler = (null == authHandler) ? new AndroidAuthenticationHandler(null, "", "") : authHandler;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -43,7 +45,8 @@ public class AuthRestAdapter {
 		synchronized (serviceMethodInfoCache) {
 			Map<Method, AuthRestMethodInfo> methodInfoMap = serviceMethodInfoCache.get(serviceClass);
 			if (null == methodInfoMap) {
-				serviceMethodInfoCache.put(serviceClass, scanServiceClass(serviceClass));
+				methodInfoMap = scanServiceClass(serviceClass);
+				serviceMethodInfoCache.put(serviceClass, methodInfoMap);
 			}
 			return methodInfoMap;
 		}

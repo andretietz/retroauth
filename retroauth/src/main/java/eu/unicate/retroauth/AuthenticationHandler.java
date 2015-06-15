@@ -1,8 +1,10 @@
 package eu.unicate.retroauth;
 
+import android.accounts.Account;
+
 public interface AuthenticationHandler {
 
-	void checkForAccount();
-
 	boolean retry(int count, Throwable error);
+
+	Account getAccount();
 }

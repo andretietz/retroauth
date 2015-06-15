@@ -5,9 +5,10 @@ import java.util.List;
 import eu.unicate.retroauth.annotations.Authenticated;
 import retrofit.http.GET;
 import retrofit.http.Path;
+import rx.Observable;
 
 public interface GitHubService {
 	@Authenticated
 	@GET("/users/{user}/repos")
-	List<String> listRepos(@Path("user") String user);
+	Observable<List<String>> listRepos(@Path("user") String user);
 }

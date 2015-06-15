@@ -1,5 +1,7 @@
 package eu.unicate.retroauth;
 
+import android.accounts.Account;
+
 import java.lang.reflect.Method;
 
 import rx.Observable;
@@ -12,9 +14,9 @@ public class RxAuthInvoker {
 
 	public static Observable invoke(final Object service, final AuthenticationHandler authHandler, final Method method, final Object[] args) {
 		return doBeforeRequest(authHandler)
-				.flatMap(new Func1<Integer, Observable<?>>() {
+				.flatMap(new Func1<Account, Observable<?>>() {
 					@Override
-					public Observable<?> call(Integer integer) {
+					public Observable<?> call(Account account) {
 						return request(service, method, args);
 					}
 				})
@@ -27,12 +29,11 @@ public class RxAuthInvoker {
 	}
 
 
-	private static Observable<Integer> doBeforeRequest(final AuthenticationHandler authHandler) {
-		return Observable.create(new OnSubscribe<Integer>() {
+	private static Observable<Account> doBeforeRequest(final AuthenticationHandler authHandler) {
+		return Observable.create(new OnSubscribe<Account>() {
 			@Override
-			public void call(Subscriber<? super Integer> subscriber) {
-				authHandler.checkForAccount();
-				subscriber.onNext(0);
+			public void call(Subscriber<? super Account> subscriber) {
+				subscriber.onNext(authHandler.getAccount());
 				subscriber.onCompleted();
 			}
 		});
