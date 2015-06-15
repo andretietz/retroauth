@@ -5,7 +5,7 @@ android {
 	buildToolsVersion "23.0.0 rc1"
 
 	defaultConfig {
-		applicationId "eu.unicate.retrofit_auth_extension"
+		applicationId "eu.unicate.retroauth.demo"
 		minSdkVersion 15
 		targetSdkVersion 22
 		versionCode 1

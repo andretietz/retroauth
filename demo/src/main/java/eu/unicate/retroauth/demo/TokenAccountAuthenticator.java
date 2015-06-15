@@ -5,36 +5,39 @@ import android.accounts.Account;
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
 import android.accounts.NetworkErrorException;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 
 public class TokenAccountAuthenticator extends AbstractAccountAuthenticator {
 
 	private Context context;
-	private Class<? extends AppCompatActivity> loginActivityClass;
+	private Class<? extends Activity> loginActivityClass;
 
-	public TokenAccountAuthenticator(Context context, Class<? extends AppCompatActivity> loginActivity) {
+	public static final String PARAM_USER = "username";
+	public static final String PARAM_PASS = "pass";
+
+	public TokenAccountAuthenticator(Context context, Class<? extends Activity> loginActivity) {
 		super(context);
 		this.context = context;
 		this.loginActivityClass = loginActivity;
 	}
 
 
-
 	@Override
 	public Bundle addAccount(AccountAuthenticatorResponse response, String accountType, String authTokenType, String[] requiredFeatures, Bundle options) throws NetworkErrorException {
-//		final Intent intent = new Intent(context, loginActivityClass);
-//		intent.putExtra(AbstractAuthenticatorActivity.ARG_ACCOUNT_TYPE, accountType);
-//		intent.putExtra(AbstractAuthenticatorActivity.ARG_AUTH_TYPE, authTokenType);
-//		intent.putExtra(AbstractAuthenticatorActivity.ARG_IS_ADDING_NEW_ACCOUNT, true);
-//		intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
-//		final Bundle bundle = new Bundle();
-//		bundle.putParcelable(AccountManager.KEY_INTENT, intent);
-//		return bundle;
+		if (null != options) {
+			if(options.containsKey(PARAM_USER) && options.containsKey(PARAM_PASS)) {
+
+			}
+		}
 		return createLoginBundle(response, accountType, authTokenType);
+	}
+
+	private String login(String user, String pass) {
+		return "dummytoken";
 	}
 
 
@@ -62,21 +65,22 @@ public class TokenAccountAuthenticator extends AbstractAccountAuthenticator {
 
 	private Bundle createLoginBundle(AccountAuthenticatorResponse response, String accountType, String tokenType) {
 		final Intent intent = new Intent(context, loginActivityClass);
-		if(null != response) intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
+		if (null != response)
+			intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
 
-		intent.putExtra(AbstractAuthenticatorActivity.ARG_ACCOUNT_TYPE, accountType);
-		intent.putExtra(AbstractAuthenticatorActivity.ARG_AUTH_TYPE, tokenType);
+//		intent.putExtra(AbstractAuthenticatorActivity.ARG_ACCOUNT_TYPE, accountType);
+//		intent.putExtra(AbstractAuthenticatorActivity.ARG_AUTH_TYPE, tokenType);
 		final Bundle bundle = new Bundle();
 		bundle.putParcelable(AccountManager.KEY_INTENT, intent);
 		return bundle;
 	}
 
 
-
 	@Override
 	public Bundle editProperties(AccountAuthenticatorResponse response, String accountType) {
 		return null;
 	}
+
 	@Override
 	public String getAuthTokenLabel(String authTokenType) {
 		return null;

@@ -31,7 +31,7 @@ public class AuthRestAdapter {
 
 	private AuthRestAdapter(RestAdapter adapter, AuthenticationHandler authHandler) {
 		this.adapter = adapter;
-		this.authHandler = (null == authHandler) ? new AndroidAuthenticationHandler(null, "", "") : authHandler;
+		this.authHandler = authHandler;
 	}
 
 	@SuppressWarnings("unchecked")

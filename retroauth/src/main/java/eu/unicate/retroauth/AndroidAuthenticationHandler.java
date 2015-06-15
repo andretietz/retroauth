@@ -2,12 +2,19 @@ package eu.unicate.retroauth;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.accounts.AccountManagerFuture;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
 import android.app.Activity;
+import android.os.Bundle;
+
+import java.io.IOException;
 
 import retrofit.RetrofitError;
 
 public class AndroidAuthenticationHandler implements AuthenticationHandler {
 
+	private static final String DEFAULT_TOKENTYPE = "eu.unicate.retroauth.token.default";
 
 	private static final int MAX_RETRIES = 3;
 	private static final int HTTP_UNAUTHORIZED = 401;
@@ -17,8 +24,8 @@ public class AndroidAuthenticationHandler implements AuthenticationHandler {
 	private final String accountType;
 	private final String tokenType;
 
-	public AndroidAuthenticationHandler(Activity activity, String accountType, String tokenType) {
-		this(activity, accountType, tokenType, MAX_RETRIES);
+	public AndroidAuthenticationHandler(Activity activity, String accountType) {
+		this(activity, accountType, DEFAULT_TOKENTYPE, MAX_RETRIES);
 
 	}
 
@@ -36,12 +43,24 @@ public class AndroidAuthenticationHandler implements AuthenticationHandler {
 		if(accounts.length >= 1) {
 			return accounts[0];
 		}
-		accountManager.addAccount(accountType, tokenType, null, null, activity, null, null);
-		return null;
+		AccountManagerFuture<Bundle> future = accountManager.addAccount(accountType, tokenType, null, null, activity, null, null);
+		try {
+			future.getResult();
+		} catch (OperationCanceledException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (AuthenticatorException e) {
+			e.printStackTrace();
+		}
+		throw new NoAccountAvailableException();
 	}
 
 	@Override
 	public boolean retry(int count, Throwable error) {
+		if(error instanceof NoAccountAvailableException) {
+			return false;
+		} else
 		if (error instanceof RetrofitError) {
 			int status = ((RetrofitError) error).getResponse().getStatus();
 			if (HTTP_UNAUTHORIZED == status
