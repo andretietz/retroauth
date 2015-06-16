@@ -4,7 +4,9 @@ import android.app.Activity;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
@@ -85,12 +87,17 @@ public class AuthRestAdapter {
 	public static class Builder {
 		RestAdapter.Builder builder;
 		AuthenticationHandler authHandler;
-
+		RequestInterceptor interceptor;
 		public Builder() {
 			builder = new RestAdapter.Builder();
 		}
 
 		public AuthRestAdapter build() {
+			List<RequestInterceptor> interceptorList = new ArrayList<>();
+			interceptorList.add(interceptor);
+			// TODO add the token interceptor
+			CompositeRequestInterceptor interceptor = new CompositeRequestInterceptor(interceptorList);
+			builder.setRequestInterceptor(interceptor);
 			return new AuthRestAdapter(builder.build(), authHandler);
 		}
 
@@ -140,7 +147,7 @@ public class AuthRestAdapter {
 		 * A request interceptor for adding data to every request.
 		 */
 		public Builder setRequestInterceptor(RequestInterceptor requestInterceptor) {
-			builder.setRequestInterceptor(requestInterceptor);
+			interceptor = requestInterceptor;
 			return this;
 		}
 
