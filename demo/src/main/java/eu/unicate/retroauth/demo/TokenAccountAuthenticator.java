@@ -9,43 +9,55 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 public class TokenAccountAuthenticator extends AbstractAccountAuthenticator {
 
+	private AccountManager accountManager;
 	private Context context;
 	private Class<? extends Activity> loginActivityClass;
 
-	public static final String PARAM_USER = "username";
+	public static final String PARAM_USER = "user";
 	public static final String PARAM_PASS = "pass";
 
 	public TokenAccountAuthenticator(Context context, Class<? extends Activity> loginActivity) {
 		super(context);
 		this.context = context;
+		this.accountManager = AccountManager.get(context);
 		this.loginActivityClass = loginActivity;
 	}
 
 
 	@Override
 	public Bundle addAccount(AccountAuthenticatorResponse response, String accountType, String authTokenType, String[] requiredFeatures, Bundle options) throws NetworkErrorException {
-		if (null != options) {
-			if(options.containsKey(PARAM_USER) && options.containsKey(PARAM_PASS)) {
-
-			}
+		if (null != options && options.containsKey(PARAM_USER) && options.containsKey(PARAM_PASS)) {
+			String username = options.getString(PARAM_USER);
+			String token = login(username, options.getString(PARAM_PASS), authTokenType);
+			Account account = new Account(username, accountType);
+			accountManager.addAccountExplicitly(account, null, getUserData());
+			accountManager.setAuthToken(account, authTokenType, token);
+			Bundle successBundle = new Bundle();
+			successBundle.putString(AccountManager.KEY_ACCOUNT_NAME, username);
+			successBundle.putString(AccountManager.KEY_ACCOUNT_TYPE, accountType);
+			return successBundle;
 		}
 		return createLoginBundle(response, accountType, authTokenType);
 	}
 
-	private String login(String user, String pass) {
+	private String login(String user, String pass, String tokenType) throws NetworkErrorException {
 		return "dummytoken";
+	}
+
+	private Bundle getUserData() {
+		return null;
 	}
 
 
 	@Override
 	public Bundle getAuthToken(AccountAuthenticatorResponse response, Account account, String authTokenType, Bundle options) throws NetworkErrorException {
-		final AccountManager am = AccountManager.get(context);
 		// try to get the auth token
-		String authToken = am.peekAuthToken(account, authTokenType);
+		String authToken = accountManager.peekAuthToken(account, authTokenType);
 
 		// If we get an authToken - we return it
 		if (!TextUtils.isEmpty(authToken)) {
@@ -68,8 +80,8 @@ public class TokenAccountAuthenticator extends AbstractAccountAuthenticator {
 		if (null != response)
 			intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
 
-//		intent.putExtra(AbstractAuthenticatorActivity.ARG_ACCOUNT_TYPE, accountType);
-//		intent.putExtra(AbstractAuthenticatorActivity.ARG_AUTH_TYPE, tokenType);
+		intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, accountType);
+//		intent.putExtra(AccountManager.KEY_AUTH_TOKEN_LABEL, tokenType);
 		final Bundle bundle = new Bundle();
 		bundle.putParcelable(AccountManager.KEY_INTENT, intent);
 		return bundle;

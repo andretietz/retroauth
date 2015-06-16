@@ -12,6 +12,10 @@ import android.view.View;
 
 import java.io.IOException;
 
+import eu.unicate.retroauth.AndroidAuthenticationHandler;
+import eu.unicate.retroauth.AuthRestAdapter;
+import retrofit.RestAdapter;
+
 public class MainActivity extends AppCompatActivity {
 
 	private AuthenticationService service;
@@ -20,31 +24,19 @@ public class MainActivity extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-//		AuthRestAdapter restAdapter = new AuthRestAdapter.Builder()
-//				.setEndpoint("http://api.atekk.de/auth")
-//				.setLogLevel(RestAdapter.LogLevel.FULL)
-//				.setAuthHandler(new AndroidAuthenticationHandler(this, "eu.unicate.retroauth.demo"))
-//				.build();
-//		service = restAdapter.create(AuthenticationService.class);
+		AuthRestAdapter restAdapter = new AuthRestAdapter.Builder()
+				.setEndpoint("http://api.atekk.de/auth")
+				.setLogLevel(RestAdapter.LogLevel.FULL)
+				.setAuthHandler(new AndroidAuthenticationHandler(this, LoginActivity.ACCOUNT_TYPE, LoginActivity.TOKEN_TYPE, 3))
+				.build();
+		service = restAdapter.create(AuthenticationService.class);
 //
 		findViewById(R.id.buttonRequest).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				AccountManager.get(MainActivity.this).addAccount(LoginActivity.ACCOUNT_TYPE, "default", null, null, MainActivity.this, new AccountManagerCallback<Bundle>() {
-					@Override
-					public void run(AccountManagerFuture<Bundle> future) {
-						try {
-							Bundle bundle = future.getResult();
-							bundle.containsKey("");
-						} catch (OperationCanceledException e) {
-							e.printStackTrace();
-						} catch (IOException e) {
-							e.printStackTrace();
-						} catch (AuthenticatorException e) {
-							e.printStackTrace();
-						}
-					}
-				}, null);
+				service.getProfile().subscribe();
+//				AccountManager am = AccountManager.get(MainActivity.this);
+//				AccountManagerFuture<Bundle> bundleAccountManagerFuture = am.addAccount(LoginActivity.ACCOUNT_TYPE, LoginActivity.TOKEN_TYPE, null, null, MainActivity.this, null, null);
 			}
 		});
 

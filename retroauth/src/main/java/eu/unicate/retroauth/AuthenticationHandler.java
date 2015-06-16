@@ -1,10 +1,20 @@
 package eu.unicate.retroauth;
 
-import android.accounts.Account;
+import android.app.Activity;
 
-public interface AuthenticationHandler {
+public abstract class AuthenticationHandler {
 
-	boolean retry(int count, Throwable error);
+	private final Activity activity;
 
-	Account getAccount();
+	protected AuthenticationHandler(Activity activity) {
+		this.activity = activity;
+	}
+
+	public Activity getActivity() {
+		return activity;
+	}
+
+	public abstract String getAccountType();
+
+	public abstract String getTokenType();
 }
