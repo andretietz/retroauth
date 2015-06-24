@@ -3,25 +3,41 @@ package eu.unicate.retroauth;
 import android.accounts.AbstractAccountAuthenticator;
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorResponse;
+import android.accounts.AccountManager;
 import android.accounts.NetworkErrorException;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 public class AccountAuthenticator extends AbstractAccountAuthenticator {
 
+	private static final String AUTH_ACTION = "eu.unicate.auth.action.AUTH";
+
+	private AccountManager manager;
 
 	public AccountAuthenticator(Context context) {
 		super(context);
+		manager = AccountManager.get(context);
 	}
 
-	@Override
-	public Bundle editProperties(AccountAuthenticatorResponse response, String accountType) {
-		return null;
-	}
 
 	@Override
 	public Bundle addAccount(AccountAuthenticatorResponse response, String accountType, String authTokenType, String[] requiredFeatures, Bundle options) throws NetworkErrorException {
+		return createAuthBundle(response, accountType);
+	}
+
+	@Override
+	public Bundle getAuthToken(AccountAuthenticatorResponse response, Account account, String authTokenType, Bundle options) throws NetworkErrorException {
 		return null;
+	}
+
+	private Bundle createAuthBundle(AccountAuthenticatorResponse response, String accountType) {
+		Intent intent = new Intent(AUTH_ACTION);
+		intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
+		intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, accountType);
+		final Bundle bundle = new Bundle();
+		bundle.putParcelable(AccountManager.KEY_INTENT, intent);
+		return bundle;
 	}
 
 	@Override
@@ -30,7 +46,7 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
 	}
 
 	@Override
-	public Bundle getAuthToken(AccountAuthenticatorResponse response, Account account, String authTokenType, Bundle options) throws NetworkErrorException {
+	public Bundle editProperties(AccountAuthenticatorResponse response, String accountType) {
 		return null;
 	}
 

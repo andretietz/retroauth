@@ -24,7 +24,8 @@
         </activity>
 
         <service
-            android:name=".AuthService"
+            android:name="eu.unicate.android.auth.AuthService"
+            android:process=":auth"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator"/>

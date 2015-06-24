@@ -4,7 +4,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
-public class LoginActivity extends AccountAuthenticatorActivity {
+import eu.unicate.android.auth.AuthenticationActivity;
+
+public class LoginActivity extends AuthenticationActivity {
 
 	public static final String ACCOUNT_TYPE = "eu.unicate.retroauth.demo";
 	public static final String TOKEN_TYPE = "default-token";
@@ -23,7 +25,13 @@ public class LoginActivity extends AccountAuthenticatorActivity {
 		findViewById(R.id.buttonLogin).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				login(ACCOUNT_TYPE, TOKEN_TYPE, textUser.getText().toString(), textPass.getText().toString());
+				// TODO: do login request
+				String token = "this will be a token";
+				// TODO: do get userdata (name and additional stuff)
+				String accountName = "unicate";
+				Bundle userData = new Bundle();
+
+				finalizeAuthentication(accountName, token, userData);
 			}
 		});
 	}
