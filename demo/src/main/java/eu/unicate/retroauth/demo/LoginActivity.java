@@ -8,7 +8,6 @@ import eu.unicate.android.auth.AuthenticationActivity;
 
 public class LoginActivity extends AuthenticationActivity {
 
-	public static final String ACCOUNT_TYPE = "eu.unicate.retroauth.demo";
 	public static final String TOKEN_TYPE = "default-token";
 	private TextView textUser;
 	private TextView textPass;
@@ -28,12 +27,17 @@ public class LoginActivity extends AuthenticationActivity {
 				// TODO: do login request
 				String token = "this will be a token";
 				// TODO: do get userdata (name and additional stuff)
-				String accountName = "unicate";
-				Bundle userData = new Bundle();
+				String accountName = textUser.getText().toString();
 
-				finalizeAuthentication(accountName, token, userData);
+				finalizeAuthentication(accountName, token, null);
 			}
 		});
+
+		String username = getAccountName();
+		if(null != username) {
+			textUser.setText(username);
+		}
+
 	}
 
 

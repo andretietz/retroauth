@@ -7,15 +7,13 @@
     <android.support.v7.widget.AppCompatEditText
         android:id="@+id/textUser"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="testuser"/>
+        android:layout_height="wrap_content"/>
 
     <android.support.v7.widget.AppCompatEditText
         android:id="@+id/textPassword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textPassword"
-        android:text="testuser"/>
+        android:inputType="textPassword"/>
 
     <android.support.v7.widget.AppCompatButton
         android:id="@+id/buttonLogin"

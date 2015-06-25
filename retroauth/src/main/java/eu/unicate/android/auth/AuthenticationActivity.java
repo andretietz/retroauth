@@ -1,33 +1,23 @@
 package eu.unicate.android.auth;
 
+import android.accounts.Account;
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
-import android.accounts.AccountManagerCallback;
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
-/**
- * Created by André on 24.06.2015.
- */
+import eu.unicate.retroauth.AccountAuthenticator;
+
 public class AuthenticationActivity extends AppCompatActivity {
 
 	private String accountType;
+	private String accountName;
+	private String tokenType;
 	private AccountAuthenticatorResponse mAccountAuthenticatorResponse = null;
 	private Bundle mResultBundle = null;
-
-	/**
-	 * Set the result that is to be sent as the result of the request that caused this
-	 * Activity to be launched. If result is null or this method is never called then
-	 * the request will be canceled.
-	 *
-	 * @param result this is returned as the result of the AbstractAccountAuthenticator request
-	 */
-	public final void setAccountAuthenticatorResult(Bundle result) {
-		mResultBundle = result;
-	}
 
 	/**
 	 * Retrieves the AccountAuthenticatorResponse from either the intent of the icicle, if the
@@ -44,14 +34,26 @@ public class AuthenticationActivity extends AppCompatActivity {
 			mAccountAuthenticatorResponse.onRequestContinued();
 		}
 		accountType = intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE);
+		accountName = intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+		tokenType = intent.getStringExtra(AccountAuthenticator.KEY_TOKEN_TYPE);
 	}
 
-	protected void finalizeAuthentication(String accountName, String token, Bundle userData) {
+	/**
+	 * This method will finish the login process and add an account to
+	 * the {@link AccountManager}
+	 * @param accountName Name of the account owner
+	 * @param token Token to store
+	 * @param userData Additional Userdata to store
+	 */
+	protected void finalizeAuthentication(@NonNull String accountName, @NonNull String token, @Nullable Bundle userData) {
 		mResultBundle = new Bundle();
 		mResultBundle.putString(AccountManager.KEY_ACCOUNT_NAME, accountName);
-		mResultBundle.putString(AccountManager.KEY_AUTHTOKEN, token);
 		mResultBundle.putString(AccountManager.KEY_ACCOUNT_TYPE, accountType);
 		mResultBundle.putParcelable(AccountManager.KEY_USERDATA, userData);
+		AccountManager accountManager = AccountManager.get(this);
+		Account account = new Account(accountName, accountType);
+		accountManager.addAccountExplicitly(account, null, userData);
+		accountManager.setAuthToken(account, tokenType, token);
 		finish();
 	}
 
@@ -68,7 +70,24 @@ public class AuthenticationActivity extends AppCompatActivity {
 						"canceled");
 			}
 			mAccountAuthenticatorResponse = null;
+		} else {
+			if (mResultBundle != null) {
+				// TODO: send back the bundle
+				setResult(RESULT_OK, null);
+			} else {
+				setResult(RESULT_CANCELED);
+			}
 		}
 		super.finish();
+	}
+
+	/**
+	 * When the login token is not valid anymore, but the account already exists
+	 * this will return the account name of the user
+	 * @return account name of the user
+	 */
+	@Nullable
+	protected String getAccountName() {
+		return accountName;
 	}
 }

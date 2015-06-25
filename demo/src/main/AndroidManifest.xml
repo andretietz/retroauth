@@ -2,9 +2,6 @@
 <manifest package="eu.unicate.retroauth.demo"
           xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
-    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -20,11 +17,14 @@
         </activity>
 
         <activity android:name=".LoginActivity">
-
+            <intent-filter>
+                <action android:name="eu.unicate.auth.action.AUTH"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
         </activity>
 
         <service
-            android:name="eu.unicate.android.auth.AuthService"
+            android:name="eu.unicate.retroauth.demo.ExampleLoginService"
             android:process=":auth"
             android:exported="false">
             <intent-filter>

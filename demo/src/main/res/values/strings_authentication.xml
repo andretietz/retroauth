@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="auth_account_type">eu.unicate.retroauth.demo</string>
+	<string name="authentication_action">eu.unicate.auth.action.AUTH</string>
+</resources>

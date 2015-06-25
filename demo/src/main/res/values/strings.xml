@@ -1,7 +1,5 @@
 <resources>
 	<string name="app_name">Retrofit-Auth-Extension</string>
-	<string name="auth_account_type">eu.unicate.retroauth.demo</string>
-
 	<string name="hello_world">Hello world!</string>
 	<string name="action_settings">Settings</string>
 </resources>

@@ -11,30 +11,38 @@ import android.os.Bundle;
 
 public class AccountAuthenticator extends AbstractAccountAuthenticator {
 
-	private static final String AUTH_ACTION = "eu.unicate.auth.action.AUTH";
+	public static final String KEY_TOKEN_TYPE = "token_type";
+
+	private final String action;
 
 	private AccountManager manager;
 
-	public AccountAuthenticator(Context context) {
+	public AccountAuthenticator(Context context, String action) {
 		super(context);
 		manager = AccountManager.get(context);
+		this.action = action;
 	}
 
 
 	@Override
 	public Bundle addAccount(AccountAuthenticatorResponse response, String accountType, String authTokenType, String[] requiredFeatures, Bundle options) throws NetworkErrorException {
-		return createAuthBundle(response, accountType);
+		return createAuthBundle(response, accountType, authTokenType, null);
 	}
 
 	@Override
 	public Bundle getAuthToken(AccountAuthenticatorResponse response, Account account, String authTokenType, Bundle options) throws NetworkErrorException {
-		return null;
+		return createAuthBundle(response, account.type, authTokenType, account.name);
 	}
 
-	private Bundle createAuthBundle(AccountAuthenticatorResponse response, String accountType) {
-		Intent intent = new Intent(AUTH_ACTION);
+	private Bundle createAuthBundle(AccountAuthenticatorResponse response, String accountType, String tokenType, String accountName) {
+		Intent intent = new Intent(action);
 		intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
 		intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, accountType);
+		intent.putExtra(AccountAuthenticator.KEY_TOKEN_TYPE, tokenType);
+		if(null != accountName) {
+			intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, accountName);
+		}
+
 		final Bundle bundle = new Bundle();
 		bundle.putParcelable(AccountManager.KEY_INTENT, intent);
 		return bundle;
