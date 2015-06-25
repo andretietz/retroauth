@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
-import eu.unicate.android.auth.AuthenticationActivity;
+import eu.unicate.retroauth.AuthenticationActivity;
 
 public class LoginActivity extends AuthenticationActivity {
 

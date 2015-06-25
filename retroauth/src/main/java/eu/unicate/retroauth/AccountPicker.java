@@ -1,4 +1,4 @@
-package eu.unicate.android.auth;
+package eu.unicate.retroauth;
 
 
 import android.accounts.Account;

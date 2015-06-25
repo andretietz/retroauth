@@ -1,4 +1,4 @@
-package eu.unicate.android.auth;
+package eu.unicate.retroauth;
 
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorResponse;
@@ -11,7 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import eu.unicate.retroauth.AccountAuthenticator;
 
-public class AuthenticationActivity extends AppCompatActivity {
+public abstract class AuthenticationActivity extends AppCompatActivity {
 
 	private String accountType;
 	private String accountName;
@@ -41,9 +41,10 @@ public class AuthenticationActivity extends AppCompatActivity {
 	/**
 	 * This method will finish the login process and add an account to
 	 * the {@link AccountManager}
+	 *
 	 * @param accountName Name of the account owner
-	 * @param token Token to store
-	 * @param userData Additional Userdata to store
+	 * @param token       Token to store
+	 * @param userData    Additional Userdata to store
 	 */
 	protected void finalizeAuthentication(@NonNull String accountName, @NonNull String token, @Nullable Bundle userData) {
 		mResultBundle = new Bundle();
@@ -83,6 +84,7 @@ public class AuthenticationActivity extends AppCompatActivity {
 	/**
 	 * When the login token is not valid anymore, but the account already exists
 	 * this will return the account name of the user
+	 *
 	 * @return account name of the user
 	 */
 	@Nullable
