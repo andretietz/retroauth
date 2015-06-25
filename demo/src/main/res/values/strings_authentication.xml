@@ -2,4 +2,6 @@
 <resources>
 	<string name="auth_account_type">eu.unicate.retroauth.demo</string>
 	<string name="authentication_action">eu.unicate.auth.action.AUTH</string>
+
+	<string name="auth_token_type">eu.unicate.retroauth.demo.token</string>
 </resources>

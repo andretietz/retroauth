@@ -52,7 +52,6 @@ public class AuthenticationActivity extends AppCompatActivity {
 		mResultBundle.putParcelable(AccountManager.KEY_USERDATA, userData);
 		AccountManager accountManager = AccountManager.get(this);
 		Account account = new Account(accountName, accountType);
-		accountManager.addAccountExplicitly(account, null, userData);
 		accountManager.setAuthToken(account, tokenType, token);
 		finish();
 	}

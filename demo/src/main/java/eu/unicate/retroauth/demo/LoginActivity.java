@@ -8,7 +8,6 @@ import eu.unicate.android.auth.AuthenticationActivity;
 
 public class LoginActivity extends AuthenticationActivity {
 
-	public static final String TOKEN_TYPE = "default-token";
 	private TextView textUser;
 	private TextView textPass;
 
@@ -34,7 +33,7 @@ public class LoginActivity extends AuthenticationActivity {
 		});
 
 		String username = getAccountName();
-		if(null != username) {
+		if (null != username) {
 			textUser.setText(username);
 		}
 

@@ -1,6 +1,8 @@
 package eu.unicate.retroauth;
 
 import android.app.Activity;
+import android.support.annotation.Nullable;
+import android.support.v4.util.Pair;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -11,6 +13,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 
 import eu.unicate.retroauth.annotations.Authenticated;
+import eu.unicate.retroauth.annotations.Authentication;
 import retrofit.Callback;
 import retrofit.Endpoint;
 import retrofit.ErrorHandler;
@@ -25,21 +28,27 @@ import rx.Observable;
 
 public class AuthRestAdapter {
 
-	private final Map<Class<?>, Map<Method, AuthRestMethodInfo>> serviceMethodInfoCache =
-			new LinkedHashMap<>();
+	private final Map<Class<?>, Map<Method, AuthRestMethodInfo>> serviceMethodInfoCache = new LinkedHashMap<>();
+	private final Map<Class<?>, Pair<Integer, Integer>> serviceAuthTypes = new LinkedHashMap<>();
 	private final RestAdapter adapter;
-	private final AuthenticationHandler authHandler;
 
 
-	private AuthRestAdapter(RestAdapter adapter, AuthenticationHandler authHandler) {
+	private AuthRestAdapter(RestAdapter adapter) {
 		this.adapter = adapter;
-		this.authHandler = authHandler;
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T create(Class<T> serviceClass) {
+	public <T> T create(Activity activity, Class<T> serviceClass) {
+		Map<Method, AuthRestMethodInfo> methodInfoCache = getMethodInfoCache(serviceClass);
+		Pair<Integer, Integer> authTypeCache = getAuthTypeCache(serviceClass);
+		AndroidAuthenticationHandler authenticationHandler;
+		if(null != authTypeCache) {
+			authenticationHandler = new AndroidAuthenticationHandler(activity, activity.getString(authTypeCache.first), activity.getString(authTypeCache.second));
+		} else {
+			authenticationHandler = new AndroidAuthenticationHandler(activity, null, null);
+		}
 		return (T) Proxy.newProxyInstance(serviceClass.getClassLoader(), new Class<?>[]{serviceClass},
-				new AuthRestHandler<>(adapter.create(serviceClass), authHandler, getMethodInfoCache(serviceClass)));
+				new AuthRestHandler<>(adapter.create(serviceClass), authenticationHandler, methodInfoCache));
 
 	}
 
@@ -47,27 +56,50 @@ public class AuthRestAdapter {
 		synchronized (serviceMethodInfoCache) {
 			Map<Method, AuthRestMethodInfo> methodInfoMap = serviceMethodInfoCache.get(serviceClass);
 			if (null == methodInfoMap) {
-				methodInfoMap = scanServiceClass(serviceClass);
+				methodInfoMap = scanServiceMethods(serviceClass);
 				serviceMethodInfoCache.put(serviceClass, methodInfoMap);
 			}
 			return methodInfoMap;
 		}
 	}
 
-	private Map<Method, AuthRestMethodInfo> scanServiceClass(Class<?> serviceClass) {
+	private Pair<Integer, Integer> getAuthTypeCache(Class<?> serviceClass) {
+		synchronized (serviceAuthTypes) {
+			Pair<Integer, Integer> authTypes = serviceAuthTypes.get(serviceClass);
+			if (null == authTypes) {
+				authTypes = scanAuthTypes(serviceClass);
+				serviceAuthTypes.put(serviceClass, authTypes);
+			}
+			return authTypes;
+		}
+	}
+
+	private Pair<Integer, Integer> scanAuthTypes(Class<?> serviceClass) {
+		Authentication annotation = serviceClass.getAnnotation(Authentication.class);
+		if(null != annotation) {
+			return new Pair<>(annotation.accountType(), annotation.tokenType());
+		}
+		return null;
+	}
+
+	private Map<Method, AuthRestMethodInfo> scanServiceMethods(Class<?> serviceClass) {
 		Map<Method, AuthRestMethodInfo> map = new LinkedHashMap<>();
 		for (Method method : serviceClass.getMethods()) {
-			AuthRestMethodInfo methodInfo = scanServiceMethod(method);
+			AuthRestMethodInfo methodInfo = scanServiceMethod(serviceClass, method);
 			map.put(method, methodInfo);
 		}
 		return map;
 	}
 
-	private AuthRestMethodInfo scanServiceMethod(Method method) {
+	private AuthRestMethodInfo scanServiceMethod(Class<?> serviceClass, Method method) {
 		AuthRestMethodInfo info = new AuthRestMethodInfo();
 		if (method.isAnnotationPresent(Authenticated.class)) {
 			if (method.getReturnType().equals(Observable.class)) {
-				info.isAuthenticated = true;
+				if(null != getAuthTypeCache(serviceClass)) {
+					info.isAuthenticated = true;
+				} else {
+					throw methodError(method, "The Method %s contains the %s Annotation, but the interface does not implement the %s Annotation", method.getName(), Authenticated.class.getSimpleName(), Authentication.class.getSimpleName());
+				}
 			} else {
 				throw methodError(method, "Currently only rxjava methods are supported by the %s Annotation", Authenticated.class.getSimpleName());
 			}
@@ -86,8 +118,8 @@ public class AuthRestAdapter {
 
 	public static class Builder {
 		RestAdapter.Builder builder;
-		AuthenticationHandler authHandler;
 		RequestInterceptor interceptor;
+
 		public Builder() {
 			builder = new RestAdapter.Builder();
 		}
@@ -98,7 +130,7 @@ public class AuthRestAdapter {
 			// TODO add the token interceptor
 			CompositeRequestInterceptor interceptor = new CompositeRequestInterceptor(interceptorList);
 			builder.setRequestInterceptor(interceptor);
-			return new AuthRestAdapter(builder.build(), authHandler);
+			return new AuthRestAdapter(builder.build());
 		}
 
 		public Builder setEndpoint(String endpoint) {
@@ -109,6 +141,7 @@ public class AuthRestAdapter {
 		/**
 		 * API endpoint.
 		 */
+		@SuppressWarnings("unused")
 		public Builder setEndpoint(Endpoint endpoint) {
 			builder.setEndpoint(endpoint);
 			return this;
@@ -117,6 +150,7 @@ public class AuthRestAdapter {
 		/**
 		 * The HTTP client used for requests.
 		 */
+		@SuppressWarnings("unused")
 		public Builder setClient(final Client client) {
 			builder.setClient(client);
 			return this;
@@ -125,6 +159,7 @@ public class AuthRestAdapter {
 		/**
 		 * The HTTP client used for requests.
 		 */
+		@SuppressWarnings("unused")
 		public Builder setClient(Client.Provider clientProvider) {
 			builder.setClient(clientProvider);
 			return this;
@@ -138,6 +173,7 @@ public class AuthRestAdapter {
 		 *                         this argument is {@code null} then callback methods will be run on the same thread as the
 		 *                         HTTP client.
 		 */
+		@SuppressWarnings("unused")
 		public Builder setExecutors(Executor httpExecutor, Executor callbackExecutor) {
 			builder.setExecutors(httpExecutor, callbackExecutor);
 			return this;
@@ -146,6 +182,7 @@ public class AuthRestAdapter {
 		/**
 		 * A request interceptor for adding data to every request.
 		 */
+		@SuppressWarnings("unused")
 		public Builder setRequestInterceptor(RequestInterceptor requestInterceptor) {
 			interceptor = requestInterceptor;
 			return this;
@@ -154,6 +191,7 @@ public class AuthRestAdapter {
 		/**
 		 * The converter used for serialization and deserialization of objects.
 		 */
+		@SuppressWarnings("unused")
 		public Builder setConverter(Converter converter) {
 			builder.setConverter(converter);
 			return this;
@@ -162,6 +200,7 @@ public class AuthRestAdapter {
 		/**
 		 * Set the profiler used to measure requests.
 		 */
+		@SuppressWarnings("unused")
 		public Builder setProfiler(Profiler profiler) {
 			builder.setProfiler(profiler);
 			return this;
@@ -171,6 +210,7 @@ public class AuthRestAdapter {
 		 * The error handler allows you to customize the type of exception thrown for errors on
 		 * synchronous requests.
 		 */
+		@SuppressWarnings("unused")
 		public Builder setErrorHandler(ErrorHandler errorHandler) {
 			builder.setErrorHandler(errorHandler);
 			return this;
@@ -179,6 +219,7 @@ public class AuthRestAdapter {
 		/**
 		 * Configure debug logging mechanism.
 		 */
+		@SuppressWarnings("unused")
 		public Builder setLog(Log log) {
 			builder.setLog(log);
 			return this;
@@ -187,13 +228,9 @@ public class AuthRestAdapter {
 		/**
 		 * Change the level of logging.
 		 */
+		@SuppressWarnings("unused")
 		public Builder setLogLevel(LogLevel logLevel) {
 			builder.setLogLevel(logLevel);
-			return this;
-		}
-
-		public Builder setAuthHandler(AuthenticationHandler authHandler) {
-			this.authHandler = authHandler;
 			return this;
 		}
 	}
