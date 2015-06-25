@@ -1,7 +1,6 @@
 package eu.unicate.retroauth;
 
 import android.app.Activity;
-import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 
 import java.lang.reflect.Method;
@@ -39,16 +38,11 @@ public class AuthRestAdapter {
 
 	@SuppressWarnings("unchecked")
 	public <T> T create(Activity activity, Class<T> serviceClass) {
-		Map<Method, AuthRestMethodInfo> methodInfoCache = getMethodInfoCache(serviceClass);
 		Pair<Integer, Integer> authTypeCache = getAuthTypeCache(serviceClass);
-		AndroidAuthenticationHandler authenticationHandler;
-		if(null != authTypeCache) {
-			authenticationHandler = new AndroidAuthenticationHandler(activity, activity.getString(authTypeCache.first), activity.getString(authTypeCache.second));
-		} else {
-			authenticationHandler = new AndroidAuthenticationHandler(activity, null, null);
-		}
+		String accountType = activity.getString(authTypeCache.first);
+		String tokenType = activity.getString(authTypeCache.second);
 		return (T) Proxy.newProxyInstance(serviceClass.getClassLoader(), new Class<?>[]{serviceClass},
-				new AuthRestHandler<>(adapter.create(serviceClass), authenticationHandler, methodInfoCache));
+				new AuthRestHandler<>(adapter.create(serviceClass), new ServiceInfoCache(activity, getMethodInfoCache(serviceClass), accountType, tokenType)));
 
 	}
 
@@ -76,7 +70,7 @@ public class AuthRestAdapter {
 
 	private Pair<Integer, Integer> scanAuthTypes(Class<?> serviceClass) {
 		Authentication annotation = serviceClass.getAnnotation(Authentication.class);
-		if(null != annotation) {
+		if (null != annotation) {
 			return new Pair<>(annotation.accountType(), annotation.tokenType());
 		}
 		return null;
@@ -95,7 +89,7 @@ public class AuthRestAdapter {
 		AuthRestMethodInfo info = new AuthRestMethodInfo();
 		if (method.isAnnotationPresent(Authenticated.class)) {
 			if (method.getReturnType().equals(Observable.class)) {
-				if(null != getAuthTypeCache(serviceClass)) {
+				if (null != getAuthTypeCache(serviceClass)) {
 					info.isAuthenticated = true;
 				} else {
 					throw methodError(method, "The Method %s contains the %s Annotation, but the interface does not implement the %s Annotation", method.getName(), Authenticated.class.getSimpleName(), Authentication.class.getSimpleName());

@@ -5,7 +5,9 @@ import android.accounts.AccountManager;
 import android.accounts.AccountManagerFuture;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
+import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -16,17 +18,18 @@ import rx.Observable.OnSubscribe;
 import rx.Subscriber;
 import rx.functions.Func1;
 import rx.functions.Func2;
+import rx.schedulers.Schedulers;
 
 public class RxAuthInvoker {
 
 	private static final int HTTP_UNAUTHORIZED = 401;
 
-	public static Observable invoke(final Object service, final AuthenticationHandler authHandler, final Method method, final Object[] args) {
+	public static Observable invoke(final Object service, final ServiceInfoCache serviceInfo, final Method method, final Object[] args) {
 		return
-				getAccount(authHandler).flatMap(new Func1<Account, Observable<?>>() {
+				getAccount(serviceInfo.activity, serviceInfo.accountType, serviceInfo.tokenType).flatMap(new Func1<Account, Observable<?>>() {
 					@Override
 					public Observable<?> call(Account account) {
-						return getAuthToken(account, authHandler);
+						return getAuthToken(account, serviceInfo.activity, serviceInfo.tokenType);
 					}
 				})
 
@@ -42,7 +45,7 @@ public class RxAuthInvoker {
 								if (error instanceof RetrofitError) {
 									int status = ((RetrofitError) error).getResponse().getStatus();
 									if (HTTP_UNAUTHORIZED == status) {
-										AccountManager.get(authHandler.getActivity());
+										AccountManager.get(serviceInfo.activity);
 										// TODO: some re-authentication work
 										return true;
 									}
@@ -53,13 +56,13 @@ public class RxAuthInvoker {
 	}
 
 
-	private static Observable<String> getAuthToken(final Account account, final AuthenticationHandler authHandler) {
+	private static Observable<String> getAuthToken(final Account account, final Activity activity, final String tokenType) {
 		return Observable.create(new OnSubscribe<String>() {
 			@Override
 			public void call(Subscriber<? super String> subscriber) {
-				AccountManager accountManager = AccountManager.get(authHandler.getActivity());
+				AccountManager accountManager = AccountManager.get(activity);
 				try {
-					subscriber.onNext(accountManager.blockingGetAuthToken(account, authHandler.getTokenType(), true));
+					subscriber.onNext(accountManager.blockingGetAuthToken(account, tokenType, true));
 					subscriber.onCompleted();
 				} catch (OperationCanceledException | IOException | AuthenticatorException e) {
 					subscriber.onError(e);
@@ -84,16 +87,24 @@ public class RxAuthInvoker {
 		}
 	}
 
-	private static Observable<Account> getAccount(final AuthenticationHandler authHandler) {
+	private static Observable<Account> getAccount(final Activity activity, final String accountType, final String tokenType) {
 		return Observable.create(new OnSubscribe<Account>() {
 			@Override
 			public void call(Subscriber<? super Account> subscriber) {
-				AccountManager accountManager = AccountManager.get(authHandler.getActivity());
-				Account[] accounts = accountManager.getAccountsByType(authHandler.getAccountType());
+				AccountManager accountManager = AccountManager.get(activity);
+				Account[] accounts = accountManager.getAccountsByType(accountType);
 				if (accounts.length == 0) {
-					accountManager.addAccount(authHandler.getAccountType(), authHandler.getTokenType(), null, null, authHandler.getActivity(),
-							null, // TODO: add callback
-							null);
+					AccountManagerFuture<Bundle> future = accountManager.addAccount(accountType, tokenType, null, null, activity, null, null);
+					try {
+						Bundle result = future.getResult();
+						Log.e("", result.toString());
+					} catch (OperationCanceledException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
+					} catch (AuthenticatorException e) {
+						e.printStackTrace();
+					}
 				} else if (accounts.length == 1) {
 					subscriber.onNext(accounts[0]);
 					subscriber.onCompleted();
@@ -102,6 +113,6 @@ public class RxAuthInvoker {
 				}
 
 			}
-		});
+		}).subscribeOn(Schedulers.computation());
 	}
 }
