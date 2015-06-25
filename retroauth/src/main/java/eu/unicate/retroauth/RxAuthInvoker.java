@@ -24,12 +24,12 @@ public class RxAuthInvoker {
 
 	private static final int HTTP_UNAUTHORIZED = 401;
 
-	public static Observable invoke(final Object service, final ServiceInfo serviceInfo, final Method method, final Object[] args) {
+	public static Observable invoke(final Object service, final Activity activity, final ServiceInfo serviceInfo, final Method method, final Object[] args) {
 		return
-				getAccount(serviceInfo.activity, serviceInfo.accountType, serviceInfo.tokenType).flatMap(new Func1<Account, Observable<?>>() {
+				getAccount(activity, serviceInfo.accountType, serviceInfo.tokenType).flatMap(new Func1<Account, Observable<?>>() {
 					@Override
 					public Observable<?> call(Account account) {
-						return getAuthToken(account, serviceInfo.activity, serviceInfo.tokenType);
+						return getAuthToken(account, activity, serviceInfo.tokenType);
 					}
 				})
 
@@ -45,7 +45,7 @@ public class RxAuthInvoker {
 								if (error instanceof RetrofitError) {
 									int status = ((RetrofitError) error).getResponse().getStatus();
 									if (HTTP_UNAUTHORIZED == status) {
-										AccountManager.get(serviceInfo.activity);
+										AccountManager.get(activity);
 										// TODO: some re-authentication work
 										return true;
 									}
