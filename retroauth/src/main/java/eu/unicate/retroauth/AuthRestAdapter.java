@@ -42,7 +42,7 @@ public class AuthRestAdapter {
 		String accountType = activity.getString(authTypeCache.first);
 		String tokenType = activity.getString(authTypeCache.second);
 		return (T) Proxy.newProxyInstance(serviceClass.getClassLoader(), new Class<?>[]{serviceClass},
-				new AuthRestHandler<>(adapter.create(serviceClass), new ServiceInfoCache(activity, getMethodInfoCache(serviceClass), accountType, tokenType)));
+				new AuthRestHandler<>(adapter.create(serviceClass), new ServiceInfo(activity, getMethodInfoCache(serviceClass), accountType, tokenType)));
 
 	}
 

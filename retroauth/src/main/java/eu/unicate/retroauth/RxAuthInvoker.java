@@ -24,7 +24,7 @@ public class RxAuthInvoker {
 
 	private static final int HTTP_UNAUTHORIZED = 401;
 
-	public static Observable invoke(final Object service, final ServiceInfoCache serviceInfo, final Method method, final Object[] args) {
+	public static Observable invoke(final Object service, final ServiceInfo serviceInfo, final Method method, final Object[] args) {
 		return
 				getAccount(serviceInfo.activity, serviceInfo.accountType, serviceInfo.tokenType).flatMap(new Func1<Account, Observable<?>>() {
 					@Override

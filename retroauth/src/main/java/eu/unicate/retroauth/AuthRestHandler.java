@@ -6,10 +6,10 @@ import java.lang.reflect.Method;
 public class AuthRestHandler<T> implements InvocationHandler {
 
 
-	private final ServiceInfoCache serviceInfo;
+	private final ServiceInfo serviceInfo;
 	private final T retrofitService;
 
-	public AuthRestHandler(T retrofitService, ServiceInfoCache serviceInfo) {
+	public AuthRestHandler(T retrofitService, ServiceInfo serviceInfo) {
 		this.retrofitService = retrofitService;
 		this.serviceInfo = serviceInfo;
 	}
