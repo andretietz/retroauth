@@ -9,7 +9,7 @@ import retrofit.RestAdapter;
 
 public class MainActivity extends AppCompatActivity {
 
-	private AuthenticationService service;
+	private SomeAuthenticatedService service;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -19,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
 				.setEndpoint("http://api.atekk.de/auth")
 				.setLogLevel(RestAdapter.LogLevel.FULL)
 				.build();
-		service = restAdapter.create(this, AuthenticationService.class);
+		service = restAdapter.create(this, SomeAuthenticatedService.class);
 //
 		findViewById(R.id.buttonRequest).setOnClickListener(new View.OnClickListener() {
 			@Override

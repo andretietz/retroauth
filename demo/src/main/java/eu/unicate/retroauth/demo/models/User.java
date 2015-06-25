@@ -2,18 +2,15 @@ package eu.unicate.retroauth.demo.models;
 
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Created by André on 11.04.2015.
- */
 public class User {
     @SerializedName("username")
-    private String name;
+    public final String name;
     @SerializedName("first_name")
-    private String firstname;
+    public final String firstname;
     @SerializedName("last_name")
-    private String lastname;
+    public final String lastname;
     @SerializedName("email")
-    private String email;
+    public final String email;
 
     public User(String name, String firstname, String lastname, String email) {
         this.name = name;

@@ -39,8 +39,8 @@ public class AuthRestAdapter {
 	@SuppressWarnings("unchecked")
 	public <T> T create(Activity activity, Class<T> serviceClass) {
 		Pair<Integer, Integer> authTypeCache = getAuthTypeCache(serviceClass);
-		String accountType = activity.getString(authTypeCache.first);
-		String tokenType = activity.getString(authTypeCache.second);
+		String accountType = (null != authTypeCache)?activity.getString(authTypeCache.first):null;
+		String tokenType = (null != authTypeCache)?activity.getString(authTypeCache.second):null;
 		return (T) Proxy.newProxyInstance(serviceClass.getClassLoader(), new Class<?>[]{serviceClass},
 				new AuthRestHandler<>(adapter.create(serviceClass), activity, new ServiceInfo(getMethodInfoCache(serviceClass), accountType, tokenType)));
 
@@ -119,11 +119,11 @@ public class AuthRestAdapter {
 		}
 
 		public AuthRestAdapter build() {
-			List<RequestInterceptor> interceptorList = new ArrayList<>();
-			interceptorList.add(interceptor);
-			// TODO add the token interceptor
-			CompositeRequestInterceptor interceptor = new CompositeRequestInterceptor(interceptorList);
-			builder.setRequestInterceptor(interceptor);
+//			List<RequestInterceptor> interceptorList = new ArrayList<>();
+//			interceptorList.add(interceptor);
+//			// TODO add the token interceptor
+//			CompositeRequestInterceptor interceptor = new CompositeRequestInterceptor(interceptorList);
+//			builder.setRequestInterceptor(interceptor);
 			return new AuthRestAdapter(builder.build());
 		}
 
