@@ -51,7 +51,7 @@ public class RxAuthInvoker {
 											// TODO
 											throw new RuntimeException("Not implemented for more than one account");
 										}
-
+										// token has been invalidated, retry to fetch new token
 										return true;
 									}
 								}

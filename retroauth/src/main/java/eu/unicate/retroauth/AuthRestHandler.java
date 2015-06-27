@@ -1,6 +1,6 @@
 package eu.unicate.retroauth;
 
-import android.app.Activity;
+import android.content.Context;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -10,10 +10,10 @@ public class AuthRestHandler<T> implements InvocationHandler {
 
 	private final ServiceInfo serviceInfo;
 	private final T retrofitService;
-	private final Activity activity;
+	private final Context context;
 
-	public AuthRestHandler(T retrofitService, Activity activity, ServiceInfo serviceInfo) {
-		this.activity = activity;
+	public AuthRestHandler(T retrofitService, Context context, ServiceInfo serviceInfo) {
+		this.context = context;
 		this.retrofitService = retrofitService;
 		this.serviceInfo = serviceInfo;
 	}
@@ -24,7 +24,7 @@ public class AuthRestHandler<T> implements InvocationHandler {
 		if (!methodInfo.isAuthenticated) {
 			return method.invoke(retrofitService, args);
 		}
-		return RxAuthInvoker.invoke(retrofitService, activity, serviceInfo, method, args);
+		return RxAuthInvoker.invoke(retrofitService, context, serviceInfo, method, args);
 	}
 
 

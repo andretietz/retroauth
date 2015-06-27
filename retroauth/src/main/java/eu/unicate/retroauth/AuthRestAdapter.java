@@ -1,13 +1,11 @@
 package eu.unicate.retroauth;
 
-import android.app.Activity;
+import android.content.Context;
 import android.support.v4.util.Pair;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
@@ -37,12 +35,12 @@ public class AuthRestAdapter {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T create(Activity activity, Class<T> serviceClass) {
+	public <T> T create(Context context, Class<T> serviceClass) {
 		Pair<Integer, Integer> authTypeCache = getAuthTypeCache(serviceClass);
-		String accountType = (null != authTypeCache)?activity.getString(authTypeCache.first):null;
-		String tokenType = (null != authTypeCache)?activity.getString(authTypeCache.second):null;
+		String accountType = (null != authTypeCache) ? context.getString(authTypeCache.first) : null;
+		String tokenType = (null != authTypeCache) ? context.getString(authTypeCache.second) : null;
 		return (T) Proxy.newProxyInstance(serviceClass.getClassLoader(), new Class<?>[]{serviceClass},
-				new AuthRestHandler<>(adapter.create(serviceClass), activity, new ServiceInfo(getMethodInfoCache(serviceClass), accountType, tokenType)));
+				new AuthRestHandler<>(adapter.create(serviceClass), context, new ServiceInfo(getMethodInfoCache(serviceClass), accountType, tokenType)));
 
 	}
 
