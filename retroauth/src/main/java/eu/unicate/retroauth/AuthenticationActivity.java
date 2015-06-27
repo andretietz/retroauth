@@ -45,16 +45,32 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 	 * @param userData    Additional Userdata to store
 	 */
 	protected void finalizeAuthentication(@NonNull String accountName, @NonNull String tokenType, @NonNull String token, @Nullable Bundle userData) {
+		AccountManager accountManager = AccountManager.get(this);
+		Account account = getAccount(accountManager);
 		mResultBundle = new Bundle();
+		mResultBundle.putString(AccountManager.KEY_AUTHTOKEN, token);
 		mResultBundle.putString(AccountManager.KEY_ACCOUNT_NAME, accountName);
 		mResultBundle.putString(AccountManager.KEY_ACCOUNT_TYPE, accountType);
-		mResultBundle.putString(AccountManager.KEY_AUTHTOKEN, token);
-		mResultBundle.putParcelable(AccountManager.KEY_USERDATA, userData);
-		AccountManager accountManager = AccountManager.get(this);
-		Account account = new Account(accountName, accountType);
-		accountManager.addAccountExplicitly(account, null, userData);
+		if(null == account) {
+			mResultBundle.putParcelable(AccountManager.KEY_USERDATA, userData);
+			account = new Account(accountName, accountType);
+			accountManager.addAccountExplicitly(account, null, userData);
+		}
 		accountManager.setAuthToken(account, tokenType, token);
 		finish();
+	}
+
+	private Account getAccount(AccountManager accountManager) {
+		// if this is a relogin
+		if(null != accountName) {
+			Account[] accountList = accountManager.getAccountsByType(accountType);
+			for (Account account : accountList) {
+				if(account.name.equals(accountName))
+					return account;
+			}
+
+		}
+		return null;
 	}
 
 	/**

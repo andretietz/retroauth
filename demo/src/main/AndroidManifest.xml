@@ -24,8 +24,7 @@
         </activity>
 
         <service
-            android:name="eu.unicate.retroauth.demo.ExampleLoginService"
-            android:process=":auth"
+            android:name=".DemoLoginService"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator"/>

@@ -1,7 +1,6 @@
 package eu.unicate.retroauth;
 
 import android.content.Context;
-import android.support.v4.util.Pair;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -11,6 +10,8 @@ import java.util.concurrent.Executor;
 
 import eu.unicate.retroauth.annotations.Authenticated;
 import eu.unicate.retroauth.annotations.Authentication;
+import eu.unicate.retroauth.interceptors.TokenInterceptor;
+import eu.unicate.retroauth.interceptors.CompositeRequestInterceptor;
 import retrofit.Callback;
 import retrofit.Endpoint;
 import retrofit.ErrorHandler;
@@ -23,71 +24,59 @@ import retrofit.client.Client;
 import retrofit.converter.Converter;
 import rx.Observable;
 
-public class AuthRestAdapter {
+public final class AuthRestAdapter {
 
-	private final Map<Class<?>, Map<Method, AuthRestMethodInfo>> serviceMethodInfoCache = new LinkedHashMap<>();
-	private final Map<Class<?>, Pair<Integer, Integer>> serviceAuthTypes = new LinkedHashMap<>();
+	private final Map<Class<?>, ServiceInfo> serviceInfoCache = new LinkedHashMap<>();
 	private final RestAdapter adapter;
+	private final CompositeRequestInterceptor interceptor;
 
 
-	private AuthRestAdapter(RestAdapter adapter) {
+	private AuthRestAdapter(RestAdapter adapter, CompositeRequestInterceptor interceptor) {
 		this.adapter = adapter;
+		this.interceptor = interceptor;
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T create(Context context, Class<T> serviceClass) {
-		Pair<Integer, Integer> authTypeCache = getAuthTypeCache(serviceClass);
-		String accountType = (null != authTypeCache) ? context.getString(authTypeCache.first) : null;
-		String tokenType = (null != authTypeCache) ? context.getString(authTypeCache.second) : null;
+	public <T> T create(Context context, TokenInterceptor tokenInterceptor, Class<T> serviceClass) {
+		interceptor.addRequestIntercetor(tokenInterceptor);
 		return (T) Proxy.newProxyInstance(serviceClass.getClassLoader(), new Class<?>[]{serviceClass},
-				new AuthRestHandler<>(adapter.create(serviceClass), context, new ServiceInfo(getMethodInfoCache(serviceClass), accountType, tokenType)));
+				new AuthRestHandler<>(adapter.create(serviceClass), context, getServiceInfo(context, serviceClass, tokenInterceptor)));
 
 	}
 
-	private Map<Method, AuthRestMethodInfo> getMethodInfoCache(Class<?> serviceClass) {
-		synchronized (serviceMethodInfoCache) {
-			Map<Method, AuthRestMethodInfo> methodInfoMap = serviceMethodInfoCache.get(serviceClass);
-			if (null == methodInfoMap) {
-				methodInfoMap = scanServiceMethods(serviceClass);
-				serviceMethodInfoCache.put(serviceClass, methodInfoMap);
+	private <T> ServiceInfo getServiceInfo(Context context, Class<T> serviceClass, TokenInterceptor interceptor) {
+		synchronized (serviceInfoCache) {
+			ServiceInfo info = serviceInfoCache.get(serviceClass);
+			if (null == info) {
+				Authentication annotation = serviceClass.getAnnotation(Authentication.class);
+				String accountType = null;
+				String tokenType = null;
+				if (null != annotation) {
+					accountType = context.getString(annotation.accountType());
+					tokenType = context.getString(annotation.tokenType());
+				}
+				Map<Method, AuthRestMethodInfo> methodInfoCache = scanServiceMethods(serviceClass, (null != accountType));
+				info = new ServiceInfo(methodInfoCache, accountType, tokenType, interceptor);
+				serviceInfoCache.put(serviceClass, info);
 			}
-			return methodInfoMap;
+			return info;
 		}
 	}
 
-	private Pair<Integer, Integer> getAuthTypeCache(Class<?> serviceClass) {
-		synchronized (serviceAuthTypes) {
-			Pair<Integer, Integer> authTypes = serviceAuthTypes.get(serviceClass);
-			if (null == authTypes) {
-				authTypes = scanAuthTypes(serviceClass);
-				serviceAuthTypes.put(serviceClass, authTypes);
-			}
-			return authTypes;
-		}
-	}
-
-	private Pair<Integer, Integer> scanAuthTypes(Class<?> serviceClass) {
-		Authentication annotation = serviceClass.getAnnotation(Authentication.class);
-		if (null != annotation) {
-			return new Pair<>(annotation.accountType(), annotation.tokenType());
-		}
-		return null;
-	}
-
-	private Map<Method, AuthRestMethodInfo> scanServiceMethods(Class<?> serviceClass) {
+	private Map<Method, AuthRestMethodInfo> scanServiceMethods(Class<?> serviceClass, boolean containsAuthenticationData) {
 		Map<Method, AuthRestMethodInfo> map = new LinkedHashMap<>();
 		for (Method method : serviceClass.getMethods()) {
-			AuthRestMethodInfo methodInfo = scanServiceMethod(serviceClass, method);
+			AuthRestMethodInfo methodInfo = scanServiceMethod(containsAuthenticationData, method);
 			map.put(method, methodInfo);
 		}
 		return map;
 	}
 
-	private AuthRestMethodInfo scanServiceMethod(Class<?> serviceClass, Method method) {
+	private AuthRestMethodInfo scanServiceMethod(boolean containsAuthenticationData, Method method) {
 		AuthRestMethodInfo info = new AuthRestMethodInfo();
 		if (method.isAnnotationPresent(Authenticated.class)) {
 			if (method.getReturnType().equals(Observable.class)) {
-				if (null != getAuthTypeCache(serviceClass)) {
+				if (containsAuthenticationData) {
 					info.isAuthenticated = true;
 				} else {
 					throw methodError(method, "The Method %s contains the %s Annotation, but the interface does not implement the %s Annotation", method.getName(), Authenticated.class.getSimpleName(), Authentication.class.getSimpleName());
@@ -117,12 +106,12 @@ public class AuthRestAdapter {
 		}
 
 		public AuthRestAdapter build() {
-//			List<RequestInterceptor> interceptorList = new ArrayList<>();
-//			interceptorList.add(interceptor);
-//			// TODO add the token interceptor
-//			CompositeRequestInterceptor interceptor = new CompositeRequestInterceptor(interceptorList);
-//			builder.setRequestInterceptor(interceptor);
-			return new AuthRestAdapter(builder.build());
+			CompositeRequestInterceptor compositeRequestInterceptor = new CompositeRequestInterceptor();
+			if (null != interceptor) {
+				compositeRequestInterceptor.addRequestIntercetor(interceptor);
+			}
+			builder.setRequestInterceptor(compositeRequestInterceptor);
+			return new AuthRestAdapter(builder.build(), compositeRequestInterceptor);
 		}
 
 		public Builder setEndpoint(String endpoint) {

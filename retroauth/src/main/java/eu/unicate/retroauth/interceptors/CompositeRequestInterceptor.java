@@ -20,6 +20,10 @@ public class CompositeRequestInterceptor implements RequestInterceptor {
 		interceptors.add(interceptor);
 	}
 
+	public void removeRequestIntercetor(@NonNull RequestInterceptor interceptor) {
+		interceptors.remove(interceptor);
+	}
+
 	@Override
 	public void intercept(RequestFacade request) {
 		for (RequestInterceptor interceptor : interceptors) {

@@ -9,6 +9,7 @@ import android.os.Bundle;
 
 import java.lang.reflect.Method;
 
+import eu.unicate.retroauth.interceptors.TokenInterceptor;
 import retrofit.RetrofitError;
 import rx.Observable;
 import rx.Observable.OnSubscribe;
@@ -27,7 +28,7 @@ public class RxAuthInvoker {
 						.flatMap(new Func1<String, Observable<Object>>() {
 							@Override
 							public Observable<Object> call(String token) {
-								return authenticationSetup(token);
+								return authenticationSetup(token, serviceInfo.tokenInterceptor);
 							}
 						})
 						.flatMap(new Func1<Object, Observable<?>>() {
@@ -83,7 +84,7 @@ public class RxAuthInvoker {
 				AccountManager accountManager = AccountManager.get(context);
 				Account[] accounts = accountManager.getAccountsByType(accountType);
 				AccountManagerFuture<Bundle> future;
-				Activity activity = (context instanceof Activity)?(Activity)context:null;
+				Activity activity = (context instanceof Activity) ? (Activity) context : null;
 				if (accounts.length == 0) {
 					future = accountManager.addAccount(accountType, tokenType, null, null, activity, null, null);
 				} else if (accounts.length == 1) {
@@ -104,11 +105,13 @@ public class RxAuthInvoker {
 		}).subscribeOn(Schedulers.computation());
 	}
 
-	private static Observable<Object> authenticationSetup(String token) {
+	private static Observable<Object> authenticationSetup(final String token, final TokenInterceptor interceptor) {
 		return Observable.create(new OnSubscribe<Object>() {
 			@Override
 			public void call(Subscriber<? super Object> subscriber) {
-
+				interceptor.setToken(token);
+				subscriber.onNext(null);
+				subscriber.onCompleted();
 			}
 		});
 	}
