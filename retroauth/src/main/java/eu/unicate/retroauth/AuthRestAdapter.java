@@ -11,7 +11,7 @@ import java.util.concurrent.Executor;
 import eu.unicate.retroauth.annotations.Authenticated;
 import eu.unicate.retroauth.annotations.Authentication;
 import eu.unicate.retroauth.interceptors.TokenInterceptor;
-import eu.unicate.retroauth.interceptors.CompositeRequestInterceptor;
+import eu.unicate.retroauth.interceptors.AuthenticationRequestInterceptor;
 import retrofit.Callback;
 import retrofit.Endpoint;
 import retrofit.ErrorHandler;
@@ -24,21 +24,33 @@ import retrofit.client.Client;
 import retrofit.converter.Converter;
 import rx.Observable;
 
+/**
+ * This is a wrapper of the Retrofit {@link RestAdapter} it adds the Annotation handling for
+ * authenticated requests
+ */
 public final class AuthRestAdapter {
 
 	private final Map<Class<?>, ServiceInfo> serviceInfoCache = new LinkedHashMap<>();
 	private final RestAdapter adapter;
-	private final CompositeRequestInterceptor interceptor;
+	private final AuthenticationRequestInterceptor interceptor;
 
 
-	private AuthRestAdapter(RestAdapter adapter, CompositeRequestInterceptor interceptor) {
+	private AuthRestAdapter(RestAdapter adapter, AuthenticationRequestInterceptor interceptor) {
 		this.adapter = adapter;
 		this.interceptor = interceptor;
 	}
 
+	/**
+	 * This method creates the actual service
+	 *
+	 * @param context a context to use. You should prefer using an activity as Context, since it is needed to open the activity to login
+	 * @param tokenInterceptor The implementation of your {@link TokenInterceptor} to add the Token to the Request Header
+	 * @param serviceClass The Class of the interface of the service which you want to create
+	 * @return Your Service that also handles the Authentication logic
+	 */
 	@SuppressWarnings("unchecked")
 	public <T> T create(Context context, TokenInterceptor tokenInterceptor, Class<T> serviceClass) {
-		interceptor.addRequestIntercetor(tokenInterceptor);
+		interceptor.setAuthenticationInterceptor(tokenInterceptor);
 		return (T) Proxy.newProxyInstance(serviceClass.getClassLoader(), new Class<?>[]{serviceClass},
 				new AuthRestHandler<>(adapter.create(serviceClass), context, getServiceInfo(context, serviceClass, tokenInterceptor)));
 
@@ -97,6 +109,11 @@ public final class AuthRestAdapter {
 				method.getDeclaringClass().getSimpleName() + "." + method.getName() + ": " + message);
 	}
 
+	/**
+	 * This Builder is, as the {@link AuthRestAdapter} as well, a wrapper to the original
+	 * retrofit builder. It adds some logic to handle the authenticated requests
+	 * You can use it the same way as you would've use the Retrofit {@link retrofit.RestAdapter.Builder}
+	 */
 	public static class Builder {
 		RestAdapter.Builder builder;
 		RequestInterceptor interceptor;
@@ -106,14 +123,15 @@ public final class AuthRestAdapter {
 		}
 
 		public AuthRestAdapter build() {
-			CompositeRequestInterceptor compositeRequestInterceptor = new CompositeRequestInterceptor();
-			if (null != interceptor) {
-				compositeRequestInterceptor.addRequestIntercetor(interceptor);
-			}
-			builder.setRequestInterceptor(compositeRequestInterceptor);
-			return new AuthRestAdapter(builder.build(), compositeRequestInterceptor);
+			AuthenticationRequestInterceptor authenticationRequestInterceptor = new AuthenticationRequestInterceptor(interceptor);
+			builder.setRequestInterceptor(authenticationRequestInterceptor);
+			return new AuthRestAdapter(builder.build(), authenticationRequestInterceptor);
 		}
 
+		/**
+		 * API endpoint.
+		 */
+		@SuppressWarnings("unused")
 		public Builder setEndpoint(String endpoint) {
 			builder.setEndpoint(endpoint);
 			return this;

@@ -10,6 +10,9 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
 
+/**
+ * You have to extend from this activity in order to use the library
+ */
 public abstract class AuthenticationActivity extends AppCompatActivity {
 
 	private String accountType;

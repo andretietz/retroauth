@@ -18,6 +18,11 @@ import rx.functions.Func1;
 import rx.functions.Func2;
 import rx.schedulers.Schedulers;
 
+/**
+ * This is being used when a request is authenticated and it returns an Observable.
+ * I separated the code since I would like to be able to use the {@link eu.unicate.retroauth.annotations.Authenticated}
+ * Annotation later on, without using necessarily rxjava
+ */
 public class RxAuthInvoker {
 
 	private static final int HTTP_UNAUTHORIZED = 401;
@@ -28,7 +33,7 @@ public class RxAuthInvoker {
 						.flatMap(new Func1<String, Observable<Object>>() {
 							@Override
 							public Observable<Object> call(String token) {
-								return authenticationSetup(token, serviceInfo.tokenInterceptor);
+								return authenticationSetup(token, serviceInfo.authenticationInterceptor);
 							}
 						})
 						.flatMap(new Func1<Object, Observable<?>>() {

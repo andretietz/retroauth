@@ -21,10 +21,14 @@ public class AuthRestHandler<T> implements InvocationHandler {
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		AuthRestMethodInfo methodInfo = serviceInfo.methodInfoCache.get(method);
-		if (!methodInfo.isAuthenticated) {
-			return method.invoke(retrofitService, args);
+		if (methodInfo.isAuthenticated) {
+			// activate the TokenInterceptor
+			serviceInfo.authenticationInterceptor.setIgnore(false);
+			return RxAuthInvoker.invoke(retrofitService, context, serviceInfo, method, args);
 		}
-		return RxAuthInvoker.invoke(retrofitService, context, serviceInfo, method, args);
+		// ignore the TokenInterceptor
+		serviceInfo.authenticationInterceptor.setIgnore(true);
+		return method.invoke(retrofitService, args);
 	}
 
 

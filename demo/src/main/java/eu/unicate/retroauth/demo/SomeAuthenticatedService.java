@@ -16,4 +16,7 @@ public interface SomeAuthenticatedService {
 	@GET("/users/{user}/repos")
 	Observable<List<JsonElement>> listRepos(@Path("user") String user);
 
+	@GET("/users/{user}/repos")
+	Observable<List<JsonElement>> listRep(@Path("user") String user);
+
 }

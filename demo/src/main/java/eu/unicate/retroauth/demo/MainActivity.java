@@ -23,14 +23,14 @@ public class MainActivity extends AppCompatActivity {
 		service = restAdapter.create(this, new TokenInterceptor() {
 			@Override
 			public void injectToken(RequestFacade facade, String token) {
-				facade.addHeader("Authentication", "Token " + token);
+				facade.addHeader("Authorization", "Bearer " + token);
 			}
 		}, SomeAuthenticatedService.class);
 //
 		findViewById(R.id.buttonRequest).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				service.listRepos("Unic8")
+				service.listRep("Unic8")
 						.subscribe();
 			}
 		});
