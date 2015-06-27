@@ -47,7 +47,6 @@ public class LoginActivity extends AuthenticationActivity {
 		findViewById(R.id.buttonLogin).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-
 				// do the login
 				service.login(textUser.getText().toString(), textPass.getText().toString())
 						// get some additional userdata
@@ -57,12 +56,13 @@ public class LoginActivity extends AuthenticationActivity {
 								token = result.key;
 								return service.getProfile("Token " + token);
 							}
-						}).subscribeOn(Schedulers.io())
+						})
+						.subscribeOn(Schedulers.io())
 						.observeOn(AndroidSchedulers.mainThread())
 						.subscribe(new Action1<User>() {
 									   @Override
 									   public void call(User user) {
-										   finalizeAuthentication(user.name, token, null);
+										   finalizeAuthentication(user.name, getString(R.string.auth_token_type), token, null);
 									   }
 								   },
 								new Action1<Throwable>() {
@@ -79,6 +79,7 @@ public class LoginActivity extends AuthenticationActivity {
 
 		String username = getAccountName();
 		if (null != username) {
+			textUser.setEnabled(false);
 			textUser.setText(username);
 		}
 
@@ -86,22 +87,12 @@ public class LoginActivity extends AuthenticationActivity {
 
 	public interface AuthenticationService {
 		@FormUrlEncoded
-		@POST("/registration/")
-		User register(@Field("username") String username, @Field("password1") String password1, @Field("password2") String password2, @Field("email") String email);
-
-
-		@FormUrlEncoded
 		@POST("/login/")
 		@Headers("Accept: application/json")
 		Observable<Token> login(@Field("username") String username, @Field("password") String password);
-
-		@POST("/logout/")
-		Void logout();
 
 		@GET("/user/")
 		@Headers("Accept: application/json")
 		Observable<User> getProfile(@Header("Authorization") String token);
 	}
-
-
 }

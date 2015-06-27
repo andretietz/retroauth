@@ -9,13 +9,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
-import eu.unicate.retroauth.AccountAuthenticator;
 
 public abstract class AuthenticationActivity extends AppCompatActivity {
 
 	private String accountType;
 	private String accountName;
-	private String tokenType;
 	private AccountAuthenticatorResponse mAccountAuthenticatorResponse = null;
 	private Bundle mResultBundle = null;
 
@@ -35,7 +33,6 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 		}
 		accountType = intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE);
 		accountName = intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
-		tokenType = intent.getStringExtra(AccountAuthenticator.KEY_TOKEN_TYPE);
 	}
 
 	/**
@@ -46,7 +43,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 	 * @param token       Token to store
 	 * @param userData    Additional Userdata to store
 	 */
-	protected void finalizeAuthentication(@NonNull String accountName, @NonNull String token, @Nullable Bundle userData) {
+	protected void finalizeAuthentication(@NonNull String accountName, @NonNull String tokenType, @NonNull String token, @Nullable Bundle userData) {
 		mResultBundle = new Bundle();
 		mResultBundle.putString(AccountManager.KEY_ACCOUNT_NAME, accountName);
 		mResultBundle.putString(AccountManager.KEY_ACCOUNT_TYPE, accountType);
