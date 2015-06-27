@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
 		findViewById(R.id.buttonRequest).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				service.listRep("Unic8")
+				service.listRepos("Unic8")
 						.subscribe();
 			}
 		});
