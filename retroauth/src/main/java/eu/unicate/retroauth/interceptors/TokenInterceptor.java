@@ -22,4 +22,11 @@ public abstract class TokenInterceptor implements RequestInterceptor {
 	}
 
 	public abstract void injectToken(RequestFacade facade, String token);
+
+	public static final TokenInterceptor BEARER_TOKENINTERCEPTOR = new TokenInterceptor() {
+		@Override
+		public void injectToken(RequestFacade facade, String token) {
+			facade.addHeader("Authorization", "Bearer " + token);
+		}
+	};
 }

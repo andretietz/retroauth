@@ -20,13 +20,8 @@ public class MainActivity extends AppCompatActivity {
 				.setEndpoint("https://api.github.com")
 				.setLogLevel(RestAdapter.LogLevel.FULL)
 				.build();
-		service = restAdapter.create(this, new TokenInterceptor() {
-			@Override
-			public void injectToken(RequestFacade facade, String token) {
-				facade.addHeader("Authorization", "Bearer " + token);
-			}
-		}, SomeAuthenticatedService.class);
-//
+		service = restAdapter.create(this, TokenInterceptor.BEARER_TOKENINTERCEPTOR, SomeAuthenticatedService.class);
+
 		findViewById(R.id.buttonRequest).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
