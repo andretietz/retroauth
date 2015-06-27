@@ -59,11 +59,10 @@ public class LoginActivity extends AuthenticationActivity {
 						})
 						.subscribeOn(Schedulers.io())
 						.observeOn(AndroidSchedulers.mainThread())
-						.subscribe(new Action1<User>() {
+						.subscribe(
+								new Action1<User>() {
 									   @Override
-									   public void call(User user) {
-										   finalizeAuthentication(user.name, getString(R.string.auth_token_type), token, null);
-									   }
+									   public void call(User user) { finalizeAuthentication(user.name, getString(R.string.auth_token_type), token, null);  }
 								   },
 								new Action1<Throwable>() {
 									@Override

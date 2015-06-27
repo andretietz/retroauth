@@ -40,6 +40,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 	 * the {@link AccountManager}
 	 *
 	 * @param accountName Name of the account owner
+	 * @param tokenType   Type of the auth token provided by this login
 	 * @param token       Token to store
 	 * @param userData    Additional Userdata to store
 	 */
@@ -47,6 +48,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 		mResultBundle = new Bundle();
 		mResultBundle.putString(AccountManager.KEY_ACCOUNT_NAME, accountName);
 		mResultBundle.putString(AccountManager.KEY_ACCOUNT_TYPE, accountType);
+		mResultBundle.putString(AccountManager.KEY_AUTHTOKEN, token);
 		mResultBundle.putParcelable(AccountManager.KEY_USERDATA, userData);
 		AccountManager accountManager = AccountManager.get(this);
 		Account account = new Account(accountName, accountType);

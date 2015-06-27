@@ -3,13 +3,10 @@ package eu.unicate.retroauth;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerFuture;
-import android.accounts.AuthenticatorException;
-import android.accounts.OperationCanceledException;
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 
 import retrofit.RetrofitError;
@@ -24,18 +21,18 @@ public class RxAuthInvoker {
 
 	private static final int HTTP_UNAUTHORIZED = 401;
 
-	public static Observable invoke(final Object service, final Activity activity, final ServiceInfo serviceInfo, final Method method, final Object[] args) {
+	public static Observable invoke(final Object service, final Context context, final ServiceInfo serviceInfo, final Method method, final Object[] args) {
 		return
-				getAccount(activity, serviceInfo.accountType, serviceInfo.tokenType).flatMap(new Func1<Account, Observable<?>>() {
-					@Override
-					public Observable<?> call(Account account) {
-						return getAuthToken(account, activity, serviceInfo.tokenType);
-					}
-				})
-
+				getAuthToken(context, serviceInfo.accountType, serviceInfo.tokenType)
+						.flatMap(new Func1<String, Observable<Object>>() {
+							@Override
+							public Observable<Object> call(String token) {
+								return authenticationSetup(token);
+							}
+						})
 						.flatMap(new Func1<Object, Observable<?>>() {
 							@Override
-							public Observable<?> call(Object account) {
+							public Observable<?> call(Object o) {
 								return request(service, method, args);
 							}
 						})
@@ -45,30 +42,22 @@ public class RxAuthInvoker {
 								if (error instanceof RetrofitError) {
 									int status = ((RetrofitError) error).getResponse().getStatus();
 									if (HTTP_UNAUTHORIZED == status) {
-										AccountManager.get(activity);
-										// TODO: some re-authentication work
+										AccountManager accountManager = AccountManager.get(context);
+										Account[] accounts = accountManager.getAccountsByType(serviceInfo.accountType);
+										if (accounts.length == 1) {
+											String authToken = accountManager.peekAuthToken(accounts[0], serviceInfo.tokenType);
+											accountManager.invalidateAuthToken(accounts[0].type, authToken);
+										} else {
+											// TODO
+											throw new RuntimeException("Not implemented for more than one account");
+										}
+
 										return true;
 									}
 								}
 								return false;
 							}
 						});
-	}
-
-
-	private static Observable<String> getAuthToken(final Account account, final Activity activity, final String tokenType) {
-		return Observable.create(new OnSubscribe<String>() {
-			@Override
-			public void call(Subscriber<? super String> subscriber) {
-				AccountManager accountManager = AccountManager.get(activity);
-				try {
-					subscriber.onNext(accountManager.blockingGetAuthToken(account, tokenType, true));
-					subscriber.onCompleted();
-				} catch (OperationCanceledException | IOException | AuthenticatorException e) {
-					subscriber.onError(e);
-				}
-			}
-		});
 	}
 
 
@@ -87,32 +76,40 @@ public class RxAuthInvoker {
 		}
 	}
 
-	private static Observable<Account> getAccount(final Activity activity, final String accountType, final String tokenType) {
-		return Observable.create(new OnSubscribe<Account>() {
+	private static Observable<String> getAuthToken(final Context context, final String accountType, final String tokenType) {
+		return Observable.create(new OnSubscribe<String>() {
 			@Override
-			public void call(Subscriber<? super Account> subscriber) {
-				AccountManager accountManager = AccountManager.get(activity);
+			public void call(Subscriber<? super String> subscriber) {
+				AccountManager accountManager = AccountManager.get(context);
 				Account[] accounts = accountManager.getAccountsByType(accountType);
+				AccountManagerFuture<Bundle> future;
+				Activity activity = (context instanceof Activity)?(Activity)context:null;
 				if (accounts.length == 0) {
-					AccountManagerFuture<Bundle> future = accountManager.addAccount(accountType, tokenType, null, null, activity, null, null);
-					try {
-						Bundle result = future.getResult();
-						Log.e("", result.toString());
-					} catch (OperationCanceledException e) {
-						e.printStackTrace();
-					} catch (IOException e) {
-						e.printStackTrace();
-					} catch (AuthenticatorException e) {
-						e.printStackTrace();
-					}
+					future = accountManager.addAccount(accountType, tokenType, null, null, activity, null, null);
 				} else if (accounts.length == 1) {
-					subscriber.onNext(accounts[0]);
-					subscriber.onCompleted();
+					future = accountManager.getAuthToken(accounts[0], tokenType, null, activity, null, null);
 				} else {
-					// TODO: choose from multiple accounts
+					// TODO
+					throw new RuntimeException("Not implemented for more than one account");
 				}
+				try {
+					Bundle result = future.getResult();
+					subscriber.onNext(result.getString(AccountManager.KEY_AUTHTOKEN));
+				} catch (Exception e) {
+					subscriber.onError(e);
+				}
+				subscriber.onCompleted();
 
 			}
 		}).subscribeOn(Schedulers.computation());
+	}
+
+	private static Observable<Object> authenticationSetup(String token) {
+		return Observable.create(new OnSubscribe<Object>() {
+			@Override
+			public void call(Subscriber<? super Object> subscriber) {
+
+			}
+		});
 	}
 }
