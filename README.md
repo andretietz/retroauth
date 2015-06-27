@@ -115,6 +115,13 @@ If you now call an authenticated Method of your Service it'll:
 * RxJava 1.0.12
 * appcompat-v7: 22.2.0
 
+## What's left todo?
+* It can handle max. one Account. This is not very bad I am thinking about it (please give me your impressions as well)
+* Only rxjava methods can be used to be authenticated. This is not that nice, better would be if it supports all of the. Right now there should be an exception thrown
+* Tests. Right now there are no tests whatsoever. Not only this is a reason to NOT USE THIS LIBRARY IN PRODUCTION YET
+* Multiple tokentypes in one class is not possible right now. If you really need that, just create 2 different service interfaces, this should work (as well untested ;) )
+
+
 ## Pull requests are Welcome
 Since I am the only one working on that, I would like to know your opinion and or your Suggestions
 Please feel free to create Pull requests!
