@@ -13,14 +13,10 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
 
 	private final String action;
 
-	private AccountManager manager;
-
 	public AccountAuthenticator(Context context, String action) {
 		super(context);
-		manager = AccountManager.get(context);
 		this.action = action;
 	}
-
 
 	@Override
 	public Bundle addAccount(AccountAuthenticatorResponse response, String accountType, String authTokenType, String[] requiredFeatures, Bundle options) throws NetworkErrorException {
@@ -36,10 +32,9 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
 		Intent intent = new Intent(action);
 		intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
 		intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, accountType);
-		if(null != accountName) {
+		if (null != accountName) {
 			intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, accountName);
 		}
-
 		final Bundle bundle = new Bundle();
 		bundle.putParcelable(AccountManager.KEY_INTENT, intent);
 		return bundle;
