@@ -1,4 +1,4 @@
-# The Simple way of calling authenticated Requests in retrofit style
+# The simple way of calling authenticated requests in retrofit style
 ### This is a library in beta! Not recommended for production right now!
 ## Dependencies
 * Retrofit 1.9.0
@@ -15,15 +15,15 @@ public interface SomeService {
 }
 ```
 ## What does it do?
-If you call an authenticated Method of this Service it'll do the following things under the hood:
-* Check if there is an Account in the Android AccountManager already. If not, it'll open the LoginActivity (starts the request after successful login again). If there is an account already go on with step 2
-* Get the authentication token from the account (AccountManager) and adds it to the request header. If there is no valid token, the LoginActivity could open with the Accounts username prefilled
-* Send the actual request
-* If that request fails with an 401 (the only one right now) it invalidates the used Token and continues with step 1.
+If you call an authenticated method of this service, it'll do the following things under the hood:
+* Step 1: Checks if there already is an account in the Android AccountManager. If not, it'll open the LoginActivity. If there already is an account, go on with step 2
+* Step 2: Gets the authentication token from the account (AccountManager) and adds it to the request header. If there is no valid token, the LoginActivity could open with the pre-filled accounts username
+* Step 3: Sends the actual request
+* Step 4: If that request fails with an 401 (the only one right now) it invalidates the used token and continues with step 1.
 
 ## How to use it?
 
-### 1. Create 3 Strings in your strings.xml
+### 1. Create 3 strings in your strings.xml
 i.e.
 ``` xml
 <resources>
@@ -37,7 +37,7 @@ i.e.
 	...
 </resources>
 ```
-### 2. Create an Activity (or use one you have already) where the user can login. This Activity must extend from AuthenticationActivity and call finalizeAuthentication when the authentication finished
+### 2. Create an Activity (or use one you already have) where the user can login. This Activity must extend from AuthenticationActivity and call finalizeAuthentication when the authentication finished
 i.e. (see Demo for an example)
 
 ```java
@@ -107,8 +107,8 @@ Add the Service to the Manifest:
     </application>
 </manifest>
 ```
-### 4. Create your Rest Interface (as you are used to do with retrofit)
-* Add Authentication Information to it:
+### 4. Create your REST interface (as you are used to do with retrofit)
+* Add authentication information to it:
 
 ```java
 @Authentication(accountType = R.string.auth_account_type, tokenType = R.string.auth_token_type)
@@ -150,14 +150,14 @@ service = restAdapter.create(context, new SomeTokenInterceptor(), SomeAuthentica
 
 Have fun trying!
 
-## What's left todo?
-* It can handle max. one Account. This is not very bad I am thinking about it (please give me your impressions as well)
-* Only rxjava methods can be used to be authenticated. This is not that nice, better would be if it supports all of the. Right now there should be an exception thrown
+## What's left to do?
+* It can handle max. one account. This is not very bad. I'll think about it (please give me your impressions as well).
+* Only rxjava methods can be used to be authenticated. This is not that nice, it would be better if it supports all of the retrofit request types (blocking, async and rx). Right now there should be an Exception thrown.
 * Tests. Right now there are no tests whatsoever. Not only this is a reason to NOT USE THIS LIBRARY IN PRODUCTION YET
-* Multiple tokentypes in one class is not possible right now. If you really need that, just create 2 different service interfaces, this should work (as well untested ;) )
-* Anyone has a good idea how to get rid of the small service implementation? (without an ids.xml!, since the developer is not forced to create it)
+* Multiple token types in one class are not possible right now. If you really need that, just create 2 different service interfaces, this should work (as well untested ;) )
+* Does anyone has a good idea how to get rid of the small service implementation? (without an ids.xml!, since the developer is not forced to create it)
 
 
-## Pull requests are Welcome
-Since I am the only one working on that, I would like to know your opinion and or your Suggestions
+## Pull requests are welcome
+Since I am the only one working on that, I would like to know your opinion and/or your suggestions.
 Please feel free to create Pull requests!
