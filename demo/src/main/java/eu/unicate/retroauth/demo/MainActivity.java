@@ -3,11 +3,19 @@ package eu.unicate.retroauth.demo;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Toast;
+
+import com.google.gson.JsonElement;
+
+import java.util.List;
 
 import eu.unicate.retroauth.AuthRestAdapter;
 import eu.unicate.retroauth.interceptors.TokenInterceptor;
 import retrofit.RequestInterceptor;
 import retrofit.RestAdapter;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,7 +35,21 @@ public class MainActivity extends AppCompatActivity {
 			@Override
 			public void onClick(View v) {
 				service.listRepos("Unic8")
-						.subscribe();
+						.observeOn(AndroidSchedulers.mainThread())
+						.subscribe(
+								new Action1<List<JsonElement>>() {
+									@Override
+									public void call(List<JsonElement> jsonElements) {
+										Toast.makeText(MainActivity.this, jsonElements.toString(), Toast.LENGTH_SHORT).show();
+									}
+								},
+								new Action1<Throwable>() {
+									@Override
+									public void call(Throwable throwable) {
+										Toast.makeText(MainActivity.this, "An error occured: " + throwable.getClass().getName(), Toast.LENGTH_SHORT).show();
+									}
+								}
+						);
 			}
 		});
 	}

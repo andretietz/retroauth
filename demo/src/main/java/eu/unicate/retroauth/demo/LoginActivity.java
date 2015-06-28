@@ -26,6 +26,7 @@ public class LoginActivity extends AuthenticationActivity {
 				// do the login
 				String token = demoLogin(textUser.getText().toString(), textPass.getText().toString());
 				if(null == token) {
+					textPass.setError("Wrong credentials");
 					textUser.setError("Wrong credentials");
 				} else {
 					finalizeAuthentication(textUser.getText().toString(), getString(R.string.auth_token_type), token, null);
@@ -42,7 +43,7 @@ public class LoginActivity extends AuthenticationActivity {
 
 	private String demoLogin(String username, String password) {
 		if("testuser".equals(username) && "testpassword".equals(password))
-			return "This is a demo token";
+			return "this-is-a-demo-token";
 		return null;
 	}
 }
