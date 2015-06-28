@@ -16,11 +16,13 @@ public interface SomeService {
 ```
 ## What does it do?
 If you call an authenticated Method of this Service it'll do the following things under the hood:
-1. Check if there is an Account in the Android AccountManager already. If not, it'll open the LoginActivity (starts the request after successful login again). If there is an account already go on with step 2
-2. Get the authentication token from the account (AccountManager) and adds it to the request header. If there is no valid token, the LoginActivity could open with the Accounts username prefilled
-3. Send the actual request
-4. If that request fails with an 401 (the only one right now) it invalidates the used Token and continues with step 1.
+* Check if there is an Account in the Android AccountManager already. If not, it'll open the LoginActivity (starts the request after successful login again). If there is an account already go on with step 2
+* Get the authentication token from the account (AccountManager) and adds it to the request header. If there is no valid token, the LoginActivity could open with the Accounts username prefilled
+* Send the actual request
+* If that request fails with an 401 (the only one right now) it invalidates the used Token and continues with step 1.
+
 ## How to use it?
+
 ### 1. Create 3 Strings in your strings.xml
 i.e.
 ``` xml
