@@ -1,0 +1,101 @@
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+
+group = 'eu.unicate.android'
+version = '0.1.0-beta'
+
+// Before deploying your project to maven central the first time, you have to create a jira ticket for the project
+// https://issues.sonatype.org/secure/CreateIssue.jspa?issuetype=21&pid=10134
+
+def siteUrl = 'https://github.com/Unic8/retroauth'
+def codeRepositoryUrl = 'https://github.com/Unic8/retroauth.git'
+def issuesUrl = 'https://github.com/Unic8/retroauth/issues'
+
+def libraryDescription = "This Android Library should make it easier to handle Authenticated Requests within the app"
+
+def mavenPackageType = 'aar'
+def mavenDeveloperId = 'unicate'
+def mavenDeveloperName = 'Andre'
+def mavenDeveloperEmail = 'andre.tietz@gmail.com'
+def mavenArtifaceName = 'Library for an easy handling of Authenticated Requests within the app'
+
+def bintrayRepository = 'java'
+def bintrayLabels = ['aar', 'android', 'retrofit', 'accountmanager', 'rxjava', 'authentification']
+def bintrayLicenses = ['Apache-2.0']
+
+
+
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+bintray {
+	user = properties.getProperty("bintray.user")
+	key = properties.getProperty("bintray.apikey")
+
+	configurations = ['archives'] //When uploading configuration files
+	pkg {
+		repo = bintrayRepository
+		name = project.name
+		desc = libraryDescription
+		websiteUrl = siteUrl
+		issueTrackerUrl = issuesUrl
+		vcsUrl = codeRepositoryUrl
+		licenses = bintrayLicenses
+		labels = bintrayLabels
+	}
+}
+
+install {
+	repositories.mavenInstaller {
+		pom {
+			project {
+				packaging mavenPackageType
+				name mavenArtifaceName
+				url siteUrl
+				licenses {
+					license {
+						name 'The Apache Software License, Version 2.0'
+						url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+					}
+				}
+				developers {
+					developer {
+						id mavenDeveloperId
+						name mavenDeveloperName
+						email mavenDeveloperEmail
+					}
+				}
+				scm {
+					connection codeRepositoryUrl
+					developerConnection codeRepositoryUrl
+					url siteUrl
+
+				}
+			}
+		}
+	}
+}
+
+task sourcesJar(type: Jar) {
+	from android.sourceSets.main.java.srcDirs
+	classifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+	source = android.sourceSets.main.java.srcDirs
+	classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+	classifier = 'javadoc'
+	from javadoc.destinationDir
+}
+artifacts {
+	archives javadocJar
+	archives sourcesJar
+}
+
+task findConventions << {
+	println project.getConvention()
+}
