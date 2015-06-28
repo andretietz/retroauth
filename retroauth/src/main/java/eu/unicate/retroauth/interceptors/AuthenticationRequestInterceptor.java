@@ -3,7 +3,7 @@ package eu.unicate.retroauth.interceptors;
 import retrofit.RequestInterceptor;
 
 /**
- * This {@link RequestInterceptor} is used to be able to add userspecific headers and
+ * This RequestInterceptor is used to be able to add userspecific headers and
  * the token headers for the authenticated requests
  */
 public final class AuthenticationRequestInterceptor implements RequestInterceptor {

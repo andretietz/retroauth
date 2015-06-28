@@ -25,7 +25,7 @@ import retrofit.converter.Converter;
 import rx.Observable;
 
 /**
- * This is a wrapper of the Retrofit {@link RestAdapter} it adds the Annotation handling for
+ * This is a wrapper of the Retrofit RestAdapter it adds the Annotation handling for
  * authenticated requests
  */
 public final class AuthRestAdapter {
@@ -112,7 +112,7 @@ public final class AuthRestAdapter {
 	/**
 	 * This Builder is, as the {@link AuthRestAdapter} as well, a wrapper to the original
 	 * retrofit builder. It adds some logic to handle the authenticated requests
-	 * You can use it the same way as you would've use the Retrofit {@link retrofit.RestAdapter.Builder}
+	 * You can use it the same way as you would've use the Retrofit retrofit.RestAdapter.Builder
 	 */
 	public static class Builder {
 		RestAdapter.Builder builder;
@@ -168,7 +168,7 @@ public final class AuthRestAdapter {
 		 * Executors used for asynchronous HTTP client downloads and callbacks.
 		 *
 		 * @param httpExecutor     Executor on which HTTP client calls will be made.
-		 * @param callbackExecutor Executor on which any {@link Callback} methods will be invoked. If
+		 * @param callbackExecutor Executor on which any Callback methods will be invoked. If
 		 *                         this argument is {@code null} then callback methods will be run on the same thread as the
 		 *                         HTTP client.
 		 */

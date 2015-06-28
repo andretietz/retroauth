@@ -8,7 +8,7 @@ android {
 		minSdkVersion 15
 		targetSdkVersion 22
 		versionCode 1
-		versionName "1.0"
+		versionName "0.1.0-beta"
 	}
 	buildTypes {
 		release {
@@ -25,4 +25,4 @@ dependencies {
 	compile 'io.reactivex:rxjava:1.0.12'
 }
 
-//apply from: 'bintray-publish.gradle'
+apply from: 'bintray-publish.gradle'
