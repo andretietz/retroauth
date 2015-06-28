@@ -22,6 +22,10 @@ If you call an authenticated method of this service, it'll do the following thin
 * Step 4: If that request fails with an 401 (the only one right now) it invalidates the used token and continues with step 1.
 
 ## How to use it?
+Add it as dependency:
+```groovy
+compile 'com.unicate.android:retroauth:0.1.0-beta'
+```
 
 ### 1. Create 3 strings in your strings.xml
 i.e.
