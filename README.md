@@ -24,7 +24,7 @@ If you call an authenticated method of this service, it'll do the following thin
 ## How to use it?
 Add it as dependency:
 ```groovy
-compile 'com.unicate.android:retroauth:0.1.0-beta'
+compile 'eu.unicate.android:retroauth:0.1.0-beta'
 ```
 
 ### 1. Create 3 strings in your strings.xml
