@@ -6,6 +6,7 @@ import android.view.View;
 
 import eu.unicate.retroauth.AuthRestAdapter;
 import eu.unicate.retroauth.interceptors.TokenInterceptor;
+import retrofit.RequestInterceptor;
 import retrofit.RestAdapter;
 
 public class MainActivity extends AppCompatActivity {
@@ -20,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
 				.setEndpoint("https://api.github.com")
 				.setLogLevel(RestAdapter.LogLevel.FULL)
 				.build();
-		service = restAdapter.create(this, TokenInterceptor.BEARER_TOKENINTERCEPTOR, SomeAuthenticatedService.class);
+		service = restAdapter.create(this, new SomeFakeAuthenticationToken(), SomeAuthenticatedService.class);
 
 		findViewById(R.id.buttonRequest).setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -29,8 +30,14 @@ public class MainActivity extends AppCompatActivity {
 						.subscribe();
 			}
 		});
+	}
 
+	public static class SomeFakeAuthenticationToken extends TokenInterceptor {
 
+		@Override
+		public void injectToken(RequestFacade facade, String token) {
+			facade.addHeader("Token", token);
+		}
 	}
 
 }
