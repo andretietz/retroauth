@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
 			@Override
 			public void onClick(View v) {
 				service.listRepos("Unic8")
+						.subscribeOn(Schedulers.computation())
 						.observeOn(AndroidSchedulers.mainThread())
 						.subscribe(
 								new Action1<List<JsonElement>>() {
@@ -47,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
 									@Override
 									public void call(Throwable throwable) {
 										Toast.makeText(MainActivity.this, "An error occured: " + throwable.getClass().getName(), Toast.LENGTH_SHORT).show();
+										throwable.printStackTrace();
 									}
 								}
 						);

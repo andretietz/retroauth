@@ -11,11 +11,13 @@ public class AuthRestHandler<T> implements InvocationHandler {
 	private final ServiceInfo serviceInfo;
 	private final T retrofitService;
 	private final Context context;
+	private final AuthInvoker<T> authInvoker;
 
 	public AuthRestHandler(T retrofitService, Context context, ServiceInfo serviceInfo) {
 		this.context = context;
 		this.retrofitService = retrofitService;
 		this.serviceInfo = serviceInfo;
+		authInvoker = new AuthInvoker<>(context, retrofitService, serviceInfo);
 	}
 
 	@Override
@@ -24,7 +26,8 @@ public class AuthRestHandler<T> implements InvocationHandler {
 		if (methodInfo.isAuthenticated) {
 			// activate the TokenInterceptor
 			serviceInfo.authenticationInterceptor.setIgnore(false);
-			return RxAuthInvoker.invoke(retrofitService, context, serviceInfo, method, args);
+			RxAuthInvoker<T> rxinvoker = new RxAuthInvoker<>(authInvoker.init(method, args));
+			return rxinvoker.invoke();
 		}
 		// ignore the TokenInterceptor
 		serviceInfo.authenticationInterceptor.setIgnore(true);

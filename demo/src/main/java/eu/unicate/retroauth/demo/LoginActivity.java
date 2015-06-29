@@ -42,7 +42,8 @@ public class LoginActivity extends AuthenticationActivity {
 	}
 
 	private String demoLogin(String username, String password) {
-		if("testuser".equals(username) && "testpassword".equals(password))
+		if("testuser".equalsIgnoreCase(username) && "testpassword".equalsIgnoreCase(password) ||
+				"testuser2".equalsIgnoreCase(username) && "test".equalsIgnoreCase(password))
 			return "this-is-a-demo-token";
 		return null;
 	}
