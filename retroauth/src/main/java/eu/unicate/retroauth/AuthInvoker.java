@@ -5,7 +5,6 @@ import android.accounts.AccountManager;
 import android.accounts.AccountManagerFuture;
 import android.accounts.OperationCanceledException;
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -24,6 +23,8 @@ import rx.android.schedulers.AndroidSchedulers;
 public class AuthInvoker<T> {
 
 	private static final int HTTP_UNAUTHORIZED = 401;
+	public static final String RETROAUTH_SHARED_PREFERENCES = "eu.unicate.retroauth.account";
+	public static final String RETROAUTH_ACCOUNTNAME_KEY = "current";
 	private final Context context;
 	private final T retrofitService;
 	private final ServiceInfo serviceInfo;
@@ -31,17 +32,14 @@ public class AuthInvoker<T> {
 	private Method method;
 	private Object[] args;
 
+	private int choosenAccount = 0;
+
 	public AuthInvoker(Context context, T retrofitService, ServiceInfo serviceInfo) {
 		this.context = context;
 		this.retrofitService = retrofitService;
 		this.serviceInfo = serviceInfo;
 		this.accountManager = AccountManager.get(context);
 	}
-
-//	public String getAccountName(Context context) {
-//		AccountManager accountManager = AccountManager.get(context);
-//		Account[] accounts = accountManager.getAccountsByType(accountType);
-//	}
 
 	public Object request() throws InvocationTargetException, IllegalAccessException {
 		return method.invoke(retrofitService, args);
@@ -56,16 +54,9 @@ public class AuthInvoker<T> {
 		if (error instanceof RetrofitError) {
 			int status = ((RetrofitError) error).getResponse().getStatus();
 			if (HTTP_UNAUTHORIZED == status) {
-				AccountManager accountManager = AccountManager.get(context);
-				Account[] accounts = accountManager.getAccountsByType(serviceInfo.accountType);
-				if (accounts.length == 1) {
-					String authToken = accountManager.peekAuthToken(accounts[0], serviceInfo.tokenType);
-					accountManager.invalidateAuthToken(accounts[0].type, authToken);
-				} else {
-					// TODO
-					throw new RuntimeException("Not implemented for more than one account");
-				}
-				// token has been invalidated, retry to fetch new token
+				Account account = getAccount(getAccountName());
+				String authToken = accountManager.peekAuthToken(account, serviceInfo.tokenType);
+				accountManager.invalidateAuthToken(account.type, authToken);
 				return true;
 			}
 		}
@@ -78,8 +69,8 @@ public class AuthInvoker<T> {
 			return null;
 		} else if(accounts.length > 1) {
 			// check if there is an account setup as current
-			SharedPreferences preferences = context.getSharedPreferences("eu.unicate.retroauth.account", Context.MODE_PRIVATE);
-			String accountName = preferences.getString("current", null);
+			SharedPreferences preferences = context.getSharedPreferences(RETROAUTH_SHARED_PREFERENCES, Context.MODE_PRIVATE);
+			String accountName = preferences.getString(RETROAUTH_ACCOUNTNAME_KEY, null);
 			if (accountName != null) {
 				for (Account account : accounts) {
 					if (accountName.equals(account.name)) return account.name;
@@ -88,8 +79,7 @@ public class AuthInvoker<T> {
 		} else {
 			return accounts[0].name;
 		}
-		return showPicker(context, accounts).subscribeOn(AndroidSchedulers.mainThread()).toBlocking().first();
-//		return getAccountName();
+		return showPicker().subscribeOn(AndroidSchedulers.mainThread()).toBlocking().first();
 	}
 
 	public Account getAccount(String accountName) {
@@ -118,71 +108,52 @@ public class AuthInvoker<T> {
 		Bundle result = future.getResult();
 		return result.getString(AccountManager.KEY_AUTHTOKEN);
 	}
-
-	public Observable<String> showPicker(final Context context, final Account[] accounts) {
-
-		return
-				Observable.create(new Observable.OnSubscribe<String>() {
+	public Observable<String> showPicker() {
+		final Account[] accounts = accountManager.getAccountsByType(serviceInfo.accountType);
+		return Observable.create(new Observable.OnSubscribe<String>() {
+			@Override
+			public void call(final Subscriber<? super String> subscriber) {
+				AlertDialog.Builder builder = new AlertDialog.Builder(context);
+				final ArrayList<String> accountList = new ArrayList<>();
+				for (Account account : accounts) {
+					accountList.add(account.name);
+				}
+				// TODO: translate
+				accountList.add("Add Account");
+				builder.setTitle("Choose your Account");
+				builder.setSingleChoiceItems(accountList.toArray(new String[accountList.size()]), 0, new DialogInterface.OnClickListener() {
 					@Override
-					public void call(final Subscriber<? super String> subscriber) {
-						AlertDialog.Builder builder = new AlertDialog.Builder(context);
-						final ArrayList<String> accountList = new ArrayList<>();
-						for (Account account : accounts) {
-							accountList.add(account.name);
-						}
-						accountList.add("Add Account");
-						builder.setTitle("Choose your Account");
-						builder.setSingleChoiceItems(accountList.toArray(new String[accountList.size()]), 0, new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog, int which) {
-							}
-						});
-		builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss();
-				subscriber.onNext("test");
-//				if(null == choosenAccount) {
-//					final AccountManager accountManager = AccountManager.get(context);
-//					AccountManagerFuture<Bundle> future = accountManager.addAccount(accountType, null, null, null, (context instanceof Activity) ? ((Activity) context) : null, null, null);
-//					try {
-//						future.getResult();
-//					} catch (OperationCanceledException e) {
-//						e.printStackTrace();
-//					} catch (IOException e) {
-//						e.printStackTrace();
-//					} catch (AuthenticatorException e) {
-//						e.printStackTrace();
-//					}
-//				} else {
-//					Log.e("TAG", "account choosen:" + choosenAccount.name);
-//				}
-
-			}
-		});
-		builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.cancel();
-				subscriber.onError(new OperationCanceledException());
-			}
-		});
-						builder.show();
-//		dialog.setOnCancelListener(new OnCancelListener() {
-//			@Override
-//			public void onCancel(DialogInterface dialog) {
-//				Log.e("TAG", "cancel");
-//			}
-//		});
-//		dialog.setOnDismissListener(new OnDismissListener() {
-//			@Override
-//			public void onDismiss(DialogInterface dialog) {
-//				Log.e("TAG", "dismiss");
-//			}
-//		});
-//						dialog.show();
+					public void onClick(DialogInterface dialog, int which) {
+						choosenAccount = which;
 					}
-				}).subscribeOn(AndroidSchedulers.mainThread());
+				});
+				builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+						if (choosenAccount >= accounts.length) {
+							subscriber.onNext(null);
+						} else {
+							SharedPreferences preferences = context.getSharedPreferences(RETROAUTH_SHARED_PREFERENCES, Context.MODE_PRIVATE);
+							preferences.edit().putString(RETROAUTH_ACCOUNTNAME_KEY, accounts[choosenAccount].name).apply();
+							subscriber.onNext(accounts[choosenAccount].name);
+						}
+						subscriber.onCompleted();
+					}
+				});
+				builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.cancel();
+						subscriber.onError(new OperationCanceledException());
+					}
+				});
+				builder.show();
+			}
+		})
+				// dialogs have to run on the main thread
+				// TODO extract the Scheduler from rxandroid to get rid of the dependency
+				.subscribeOn(AndroidSchedulers.mainThread());
 
 	}
 
