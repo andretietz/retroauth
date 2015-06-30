@@ -12,13 +12,20 @@ import rx.internal.schedulers.ScheduledAction;
 import rx.subscriptions.CompositeSubscription;
 import rx.subscriptions.Subscriptions;
 
+/**
+ * This is a Scheduler how it is implemented in rxandroid 0.24.0
+ * since I did not want to have the whole library as dependency
+ *
+ * The original rxandroid project can be found <a href="https://github.com/ReactiveX/RxAndroid">here</a>.
+ *
+ */
 public final class AndroidScheduler extends Scheduler {
 
 	private static final Scheduler MAIN_THREAD_SCHEDULER =
 			new AndroidScheduler(new Handler(Looper.getMainLooper()));
 
 	/**
-	 * {@link Scheduler} which will execute actions on the Android UI thread.
+	 * Scheduler which will execute actions on the Android UI thread.
 	 */
 	public static Scheduler mainThread() {
 		return MAIN_THREAD_SCHEDULER;

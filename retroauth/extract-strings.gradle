@@ -1,7 +1,9 @@
 import groovy.xml.MarkupBuilder
 
 task(copyStrings) << {
+	// string I want to extract
 	def grapStrings = ["choose_account_label", "add_account_button_label"]
+	// folder I want the new resources to appear
 	File targetAppfolder = new File('retroauth/src/main/res/')
 	Properties properties = new Properties()
 	properties.load(project.rootProject.file('local.properties').newDataInputStream())
