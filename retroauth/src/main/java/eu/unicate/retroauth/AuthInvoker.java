@@ -50,7 +50,7 @@ public class AuthInvoker<T> {
 		return true;
 	}
 
-	public boolean retry(int count, Throwable error) {
+	public boolean retry(@SuppressWarnings("UnusedParameters") int count, Throwable error) {
 		if (error instanceof RetrofitError) {
 			int status = ((RetrofitError) error).getResponse().getStatus();
 			if (HTTP_UNAUTHORIZED == status) {
@@ -108,46 +108,53 @@ public class AuthInvoker<T> {
 		Bundle result = future.getResult();
 		return result.getString(AccountManager.KEY_AUTHTOKEN);
 	}
+
 	public Observable<String> showPicker() {
 		final Account[] accounts = accountManager.getAccountsByType(serviceInfo.accountType);
 		return Observable.create(new Observable.OnSubscribe<String>() {
 			@Override
 			public void call(final Subscriber<? super String> subscriber) {
-				AlertDialog.Builder builder = new AlertDialog.Builder(context);
-				final ArrayList<String> accountList = new ArrayList<>();
-				for (Account account : accounts) {
-					accountList.add(account.name);
-				}
-				accountList.add(context.getString(R.string.add_account_button_label));
-				builder.setTitle(context.getString(R.string.choose_account_label));
-				builder.setSingleChoiceItems(accountList.toArray(new String[accountList.size()]), 0, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						choosenAccount = which;
+				// make sure the context is an activity. in case of a service
+				// this can and should not work
+				if(context instanceof Activity) {
+					AlertDialog.Builder builder = new AlertDialog.Builder(context);
+					final ArrayList<String> accountList = new ArrayList<>();
+					for (Account account : accounts) {
+						accountList.add(account.name);
 					}
-				});
-				builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.dismiss();
-						if (choosenAccount >= accounts.length) {
-							subscriber.onNext(null);
-						} else {
-							SharedPreferences preferences = context.getSharedPreferences(RETROAUTH_SHARED_PREFERENCES, Context.MODE_PRIVATE);
-							preferences.edit().putString(RETROAUTH_ACCOUNTNAME_KEY, accounts[choosenAccount].name).apply();
-							subscriber.onNext(accounts[choosenAccount].name);
+					accountList.add(context.getString(R.string.add_account_button_label));
+					builder.setTitle(context.getString(R.string.choose_account_label));
+					builder.setSingleChoiceItems(accountList.toArray(new String[accountList.size()]), 0, new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							choosenAccount = which;
 						}
-						subscriber.onCompleted();
-					}
-				});
-				builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.cancel();
-						subscriber.onError(new OperationCanceledException());
-					}
-				});
-				builder.show();
+					});
+					builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							dialog.dismiss();
+							if (choosenAccount >= accounts.length) {
+								subscriber.onNext(null);
+							} else {
+								SharedPreferences preferences = context.getSharedPreferences(RETROAUTH_SHARED_PREFERENCES, Context.MODE_PRIVATE);
+								preferences.edit().putString(RETROAUTH_ACCOUNTNAME_KEY, accounts[choosenAccount].name).apply();
+								subscriber.onNext(accounts[choosenAccount].name);
+							}
+							subscriber.onCompleted();
+						}
+					});
+					builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							dialog.cancel();
+							subscriber.onError(new OperationCanceledException());
+						}
+					});
+					builder.show();
+				} else {
+					subscriber.onNext(null);
+				}
 			}
 		})
 				// dialogs have to run on the main thread
