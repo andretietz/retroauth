@@ -32,8 +32,6 @@ public class AuthInvoker<T> {
 	private Method method;
 	private Object[] args;
 
-	private int choosenAccount = 0;
-
 	public AuthInvoker(Context context, T retrofitService, ServiceInfo serviceInfo) {
 		this.context = context;
 		this.retrofitService = retrofitService;
@@ -112,6 +110,7 @@ public class AuthInvoker<T> {
 	public Observable<String> showPicker() {
 		final Account[] accounts = accountManager.getAccountsByType(serviceInfo.accountType);
 		return Observable.create(new Observable.OnSubscribe<String>() {
+			int choosenAccount = 0;
 			@Override
 			public void call(final Subscriber<? super String> subscriber) {
 				// make sure the context is an activity. in case of a service
