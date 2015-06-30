@@ -1,0 +1,4 @@
+<resources>
+  <string name='choose_account_label'>"계정 선택"</string>
+  <string name='add_account_button_label'>"계정 추가"</string>
+</resources>

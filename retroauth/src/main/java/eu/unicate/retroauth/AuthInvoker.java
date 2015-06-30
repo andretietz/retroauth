@@ -118,9 +118,8 @@ public class AuthInvoker<T> {
 				for (Account account : accounts) {
 					accountList.add(account.name);
 				}
-				// TODO: translate
-				accountList.add("Add Account");
-				builder.setTitle("Choose your Account");
+				accountList.add(context.getString(R.string.add_account_button_label));
+				builder.setTitle(context.getString(R.string.choose_account_label));
 				builder.setSingleChoiceItems(accountList.toArray(new String[accountList.size()]), 0, new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {

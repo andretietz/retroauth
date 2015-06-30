@@ -1,0 +1,4 @@
+<resources>
+  <string name='choose_account_label'>"Veldu reikning"</string>
+  <string name='add_account_button_label'>"Bæta reikningi við"</string>
+</resources>

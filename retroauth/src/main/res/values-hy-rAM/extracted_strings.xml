@@ -1,0 +1,4 @@
+<resources>
+  <string name='choose_account_label'>"Ընտրել հաշիվը"</string>
+  <string name='add_account_button_label'>"Ավելացնել հաշիվ"</string>
+</resources>

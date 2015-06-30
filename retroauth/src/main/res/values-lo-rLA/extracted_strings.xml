@@ -1,0 +1,4 @@
+<resources>
+  <string name='choose_account_label'>"ເລືອກບັນຊີ"</string>
+  <string name='add_account_button_label'>"ເພີ່ມບັນຊີ"</string>
+</resources>

@@ -1,0 +1,4 @@
+<resources>
+  <string name='choose_account_label'>"Избери сметка"</string>
+  <string name='add_account_button_label'>"Додај сметка"</string>
+</resources>

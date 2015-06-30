@@ -1,0 +1,4 @@
+<resources>
+  <string name='choose_account_label'>"Válasszon fiókot"</string>
+  <string name='add_account_button_label'>"Fiók hozzáadása"</string>
+</resources>

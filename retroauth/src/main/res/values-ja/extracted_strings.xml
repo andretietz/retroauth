@@ -1,0 +1,4 @@
+<resources>
+  <string name='choose_account_label'>"アカウントの選択"</string>
+  <string name='add_account_button_label'>"アカウントを追加"</string>
+</resources>

@@ -1,0 +1,4 @@
+<resources>
+  <string name='choose_account_label'>"कोई खाता चुनें"</string>
+  <string name='add_account_button_label'>"खाता जोड़ें"</string>
+</resources>
