@@ -18,13 +18,12 @@ import java.util.ArrayList;
 import retrofit.RetrofitError;
 import rx.Observable;
 import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
 
 public class AuthInvoker<T> {
 
-	private static final int HTTP_UNAUTHORIZED = 401;
 	public static final String RETROAUTH_SHARED_PREFERENCES = "eu.unicate.retroauth.account";
 	public static final String RETROAUTH_ACCOUNTNAME_KEY = "current";
+	private static final int HTTP_UNAUTHORIZED = 401;
 	private final Context context;
 	private final T retrofitService;
 	private final ServiceInfo serviceInfo;
@@ -63,9 +62,9 @@ public class AuthInvoker<T> {
 
 	public String getAccountName() {
 		Account[] accounts = accountManager.getAccountsByType(serviceInfo.accountType);
-		if(accounts.length < 1) {
+		if (accounts.length < 1) {
 			return null;
-		} else if(accounts.length > 1) {
+		} else if (accounts.length > 1) {
 			// check if there is an account setup as current
 			SharedPreferences preferences = context.getSharedPreferences(RETROAUTH_SHARED_PREFERENCES, Context.MODE_PRIVATE);
 			String accountName = preferences.getString(RETROAUTH_ACCOUNTNAME_KEY, null);
@@ -77,12 +76,12 @@ public class AuthInvoker<T> {
 		} else {
 			return accounts[0].name;
 		}
-		return showPicker().subscribeOn(AndroidSchedulers.mainThread()).toBlocking().first();
+		return showPicker().toBlocking().first();
 	}
 
 	public Account getAccount(String accountName) {
 		// if there's no name, there's no account
-		if(accountName == null) return null;
+		if (accountName == null) return null;
 		Account[] accounts = accountManager.getAccountsByType(serviceInfo.accountType);
 		if (accounts.length > 1) {
 			for (Account account : accounts) {
@@ -111,11 +110,12 @@ public class AuthInvoker<T> {
 		final Account[] accounts = accountManager.getAccountsByType(serviceInfo.accountType);
 		return Observable.create(new Observable.OnSubscribe<String>() {
 			int choosenAccount = 0;
+
 			@Override
 			public void call(final Subscriber<? super String> subscriber) {
 				// make sure the context is an activity. in case of a service
 				// this can and should not work
-				if(context instanceof Activity) {
+				if (context instanceof Activity) {
 					AlertDialog.Builder builder = new AlertDialog.Builder(context);
 					final ArrayList<String> accountList = new ArrayList<>();
 					for (Account account : accounts) {
@@ -157,8 +157,7 @@ public class AuthInvoker<T> {
 			}
 		})
 				// dialogs have to run on the main thread
-				// TODO extract the Scheduler from rxandroid to get rid of the dependency
-				.subscribeOn(AndroidSchedulers.mainThread());
+				.subscribeOn(AndroidScheduler.mainThread());
 
 	}
 

@@ -1,14 +1,10 @@
 package eu.unicate.retroauth;
 
 import android.accounts.Account;
-import android.os.Handler;
-import android.os.Looper;
 
 import rx.Observable;
 import rx.Observable.OnSubscribe;
-import rx.Scheduler;
 import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.functions.Func2;
 
