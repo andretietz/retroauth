@@ -1,0 +1,4 @@
+<resources>
+  <string name='choose_account_label'>"Zvoliť účet"</string>
+  <string name='add_account_button_label'>"Pridať účet"</string>
+</resources>

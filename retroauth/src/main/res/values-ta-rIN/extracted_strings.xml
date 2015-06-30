@@ -1,0 +1,4 @@
+<resources>
+  <string name='choose_account_label'>"கணக்கைத் தேர்வுசெய்யவும்"</string>
+  <string name='add_account_button_label'>"கணக்கைச் சேர்"</string>
+</resources>

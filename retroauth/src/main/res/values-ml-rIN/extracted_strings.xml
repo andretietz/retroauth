@@ -1,0 +1,4 @@
+<resources>
+  <string name='choose_account_label'>"ഒരു അക്കൗണ്ട് തിരഞ്ഞെടുക്കുക"</string>
+  <string name='add_account_button_label'>"അക്കൗണ്ട് ചേർക്കുക"</string>
+</resources>

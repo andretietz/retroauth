@@ -24,7 +24,7 @@ If you call an authenticated method of this service, it'll do the following thin
 ## How to use it?
 Add it as dependency:
 ```groovy
-compile 'eu.unicate.android:retroauth:0.1.0-beta'
+compile 'eu.unicate.android:retroauth:0.1.1-beta'
 ```
 
 ### 1. Create 3 strings in your strings.xml
@@ -155,7 +155,7 @@ service = restAdapter.create(context, new SomeTokenInterceptor(), SomeAuthentica
 Have fun trying!
 
 ## What's left to do?
-* It can handle max. one account. This is not very bad. I'll think about it (please give me your impressions as well).
+* It can handle max. one account. This is bad. I'll think about it (please give me your impressions as well).
 * Only rxjava methods can be used to be authenticated. This is not that nice, it would be better if it supports all of the retrofit request types (blocking, async and rx). Right now there should be an Exception thrown.
 * Tests. Right now there are no tests whatsoever. Not only this is a reason to NOT USE THIS LIBRARY IN PRODUCTION YET
 * Multiple token types in one class are not possible right now. If you really need that, just create 2 different service interfaces, this should work (as well untested ;) )
@@ -165,3 +165,17 @@ Have fun trying!
 ## Pull requests are welcome
 Since I am the only one working on that, I would like to know your opinion and/or your suggestions.
 Please feel free to create Pull requests!
+
+## LICENSE
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+<http://www.apache.org/licenses/LICENSE-2.0>
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.

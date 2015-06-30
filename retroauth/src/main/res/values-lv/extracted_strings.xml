@@ -1,0 +1,4 @@
+<resources>
+  <string name='choose_account_label'>"Izvēlēties kontu"</string>
+  <string name='add_account_button_label'>"Pievienot kontu"</string>
+</resources>

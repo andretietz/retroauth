@@ -1,0 +1,4 @@
+<resources>
+  <string name='choose_account_label'>"Pumili ng isang account"</string>
+  <string name='add_account_button_label'>"Magdagdag ng account"</string>
+</resources>
