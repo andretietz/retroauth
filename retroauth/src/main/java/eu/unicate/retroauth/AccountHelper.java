@@ -34,7 +34,6 @@ public class AccountHelper {
 			for (Account account : accounts) {
 				if (accountName.equals(account.name)) return account;
 			}
-			// this should not happen
 			throw new RuntimeException("Could not find account with name: " + accountName);
 		}
 		return accounts[0];

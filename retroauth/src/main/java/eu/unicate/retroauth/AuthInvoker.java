@@ -115,6 +115,7 @@ public class AuthInvoker<T> {
 	}
 
 	public void invokeAsyncCall(final Method method, final Object[] args) {
+		// store original callback
 		@SuppressWarnings("unchecked") final
 		Callback<Object> originalCallback = (Callback<Object>) args[args.length - 1];
 		getAccountName()
@@ -166,7 +167,6 @@ public class AuthInvoker<T> {
 								}
 							}
 						});
-
 	}
 
 	private Observable<?> request(Method method, Object[] args) {
@@ -231,10 +231,10 @@ public class AuthInvoker<T> {
 			public void call(Subscriber<? super String> subscriber) {
 				try {
 					subscriber.onNext(getAuthTokenBlocking(account));
+					subscriber.onCompleted();
 				} catch (Exception e) {
 					subscriber.onError(e);
 				}
-				subscriber.onCompleted();
 			}
 		});
 	}
