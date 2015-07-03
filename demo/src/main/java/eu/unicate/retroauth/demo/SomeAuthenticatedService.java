@@ -16,13 +16,13 @@ public interface SomeAuthenticatedService {
 
 	@Authenticated
 	@GET("/users/{user}/repos")
-	Observable<List<JsonElement>> listReposRxJava(@Path("user") String user);
+	Observable<JsonElement> listReposRxJava(@Path("user") String user);
 
 	@Authenticated
 	@GET("/users/{user}/repos")
-	List<JsonElement> listReposBlocking(@Path("user") String user);
+	JsonElement listReposBlocking(@Path("user") String user);
 
 	@Authenticated
 	@GET("/users/{user}/repos")
-	void listReposAsync(@Path("user") String user, Callback<List<JsonElement>> result);
+	void listReposAsync(@Path("user") String user, Callback<JsonElement> result);
 }

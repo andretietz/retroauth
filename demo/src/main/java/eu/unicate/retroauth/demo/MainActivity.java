@@ -1,5 +1,6 @@
 package eu.unicate.retroauth.demo;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -8,18 +9,13 @@ import android.widget.Toast;
 
 import com.google.gson.JsonElement;
 
-import java.util.List;
-
-import eu.unicate.retroauth.AndroidScheduler;
 import eu.unicate.retroauth.AuthRestAdapter;
 import eu.unicate.retroauth.interceptors.TokenInterceptor;
 import retrofit.Callback;
-import retrofit.RequestInterceptor;
 import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 import rx.Observable;
-import rx.Scheduler;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -33,97 +29,98 @@ public class MainActivity extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		// create the restadapter like you would do it with retrofit
 		AuthRestAdapter restAdapter = new AuthRestAdapter.Builder()
 				.setEndpoint("https://api.github.com")
 				.setLogLevel(RestAdapter.LogLevel.FULL)
 				.build();
+
+		// create the service with an activity, a token interceptor and the service interface you want to create
 		service = restAdapter.create(this, new SomeFakeAuthenticationToken(), SomeAuthenticatedService.class);
 
+		// this is an example for the call of an rxjava method
 		findViewById(R.id.buttonRxJavaRequest).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				service.listReposRxJava("Unic8")
-						.subscribeOn(Schedulers.computation())
+						.subscribeOn(Schedulers.io())
 						.observeOn(AndroidSchedulers.mainThread())
 						.subscribe(
-								new Action1<List<JsonElement>>() {
+								new Action1<JsonElement>() {
 									@Override
-									public void call(List<JsonElement> jsonElements) {
-										Toast.makeText(MainActivity.this, jsonElements.toString(), Toast.LENGTH_SHORT).show();
+									public void call(JsonElement jsonElements) {
+										showResult(jsonElements);
 									}
 								},
 								new Action1<Throwable>() {
 									@Override
 									public void call(Throwable throwable) {
-										Toast.makeText(MainActivity.this, "An error occured: " + throwable.getClass().getName(), Toast.LENGTH_SHORT).show();
-										throwable.printStackTrace();
+										showError(throwable);
 									}
 								}
 						);
 			}
 		});
 
-
-
+		// this is an example of a blocking call
 		findViewById(R.id.buttonBlockingRequest).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// wrapping the blocking call with an rxjava construct
-				// (since you cannot do network requests in the main thread)
-				// you could use an async task as well
-				Observable.create(new Observable.OnSubscribe<List<JsonElement>>() {
+				// I had to wrap this into an async task
+				// cause its a network request
+				new AsyncTask<Object, Object, JsonElement>() {
+					private Throwable error;
 					@Override
-					public void call(Subscriber<? super List<JsonElement>> subscriber) {
+					protected JsonElement doInBackground(Object... params) {
 						try {
-							subscriber.onNext(service.listReposBlocking("Unic8"));
-							subscriber.onCompleted();
-						} catch (Exception e) {
-							subscriber.onError(e);
+							return service.listReposBlocking("Unic8");
+						} catch (Throwable e) {
+							error = e;
+						}
+						return null;
+					}
+
+					@Override
+					protected void onPostExecute(JsonElement o) {
+						if(o == null) {
+							showError(error);
+						} else {
+							showResult(o);
 						}
 					}
-				})
-						.subscribeOn(Schedulers.computation())
-						.observeOn(AndroidSchedulers.mainThread())
-						.subscribe(
-								new Action1<List<JsonElement>>() {
-									@Override
-									public void call(List<JsonElement> jsonElements) {
-										Toast.makeText(MainActivity.this, jsonElements.toString(), Toast.LENGTH_SHORT).show();
-									}
-								},
-								new Action1<Throwable>() {
-									@Override
-									public void call(Throwable throwable) {
-										Log.e("TAG", "Error", throwable);
-										Toast.makeText(MainActivity.this, throwable.toString(), Toast.LENGTH_SHORT).show();
-									}
-								}
-						);
+				}.execute();
 			}
 		});
 
+		// this is an example of a async request using the Callable Interface from retrofit
 		findViewById(R.id.buttonAsyncRequest).setOnClickListener(new View.OnClickListener() {
-
 			@Override
 			public void onClick(View v) {
-				service.listReposAsync("Unic8", new Callback<List<JsonElement>>() {
+				service.listReposAsync("Unic8", new Callback<JsonElement>() {
 					@Override
-					public void success(List<JsonElement> jsonElements, Response response) {
-						Toast.makeText(MainActivity.this, jsonElements.toString(), Toast.LENGTH_SHORT).show();
+					public void success(JsonElement jsonElements, Response response) {
+						showResult(jsonElements);
 					}
 
 					@Override
 					public void failure(RetrofitError error) {
-						Log.e("TAG", "Error", error);
-						Toast.makeText(MainActivity.this, error.toString(), Toast.LENGTH_SHORT).show();
+						showError(error);
 					}
 				});
 			}
 		});
 	}
 
-	public static class SomeFakeAuthenticationToken extends TokenInterceptor {
+	private void showResult(JsonElement jsonElement) {
+		Toast.makeText(MainActivity.this, jsonElement.toString(), Toast.LENGTH_SHORT).show();
+	}
 
+	private void showError(Throwable error) {
+		Log.e("TAG", "Error", error);
+		Toast.makeText(MainActivity.this, error.toString(), Toast.LENGTH_SHORT).show();
+	}
+
+	public static class SomeFakeAuthenticationToken extends TokenInterceptor {
 		@Override
 		public void injectToken(RequestFacade facade, String token) {
 			facade.addHeader("Token", token);
