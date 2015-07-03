@@ -31,3 +31,9 @@ task(copyStrings) << {
 		}
 	}
 }
+
+tasks.whenTaskAdded { task ->
+	if(task.name.matches("generate[a-zA-Z]*Resources")) {
+		task.dependsOn copyStrings
+	}
+}

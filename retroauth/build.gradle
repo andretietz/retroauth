@@ -8,7 +8,7 @@ android {
 		minSdkVersion 15
 		targetSdkVersion 22
 		versionCode 1
-		versionName "0.1.1-beta"
+		versionName "0.1.2-beta"
 	}
 	buildTypes {
 		release {
