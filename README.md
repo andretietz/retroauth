@@ -155,7 +155,6 @@ service = restAdapter.create(context, new SomeTokenInterceptor(), SomeAuthentica
 Have fun trying!
 
 ## What's left to do?
-* It can handle max. one account. This is bad. I'll think about it (please give me your impressions as well).
 * Only rxjava methods can be used to be authenticated. This is not that nice, it would be better if it supports all of the retrofit request types (blocking, async and rx). Right now there should be an Exception thrown.
 * Tests. Right now there are no tests whatsoever. Not only this is a reason to NOT USE THIS LIBRARY IN PRODUCTION YET
 * Multiple token types in one class are not possible right now. If you really need that, just create 2 different service interfaces, this should work (as well untested ;) )
