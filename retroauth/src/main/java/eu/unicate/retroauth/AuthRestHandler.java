@@ -11,13 +11,13 @@ public class AuthRestHandler<T> implements InvocationHandler {
 	private final ServiceInfo serviceInfo;
 	private final T retrofitService;
 	private final Context context;
-	private final AuthInvoker<T> authInvoker;
+	private final RxAuthInvoker<T> authInvoker;
 
 	public AuthRestHandler(T retrofitService, Context context, ServiceInfo serviceInfo) {
 		this.context = context;
 		this.retrofitService = retrofitService;
 		this.serviceInfo = serviceInfo;
-		authInvoker = new AuthInvoker<>(context, retrofitService, serviceInfo);
+		authInvoker = new RxAuthInvoker<>(context, retrofitService, serviceInfo);
 	}
 
 	@Override
@@ -26,9 +26,12 @@ public class AuthRestHandler<T> implements InvocationHandler {
 		serviceInfo.authenticationInterceptor.setIgnore(false);
 		switch (methodInfo) {
 			case RXJAVA:
-				RxAuthInvoker<T> rxinvoker = new RxAuthInvoker<>(authInvoker.init(method, args));
-				return rxinvoker.invoke();
-
+				return authInvoker.invokeRxJavaCall(method, args);
+			case SYNC:
+				return authInvoker.invokeBlockingCall(method, args);
+			case ASYNC:
+				authInvoker.invokeAsyncCall(method, args);
+				return null;
 			case NONE:
 			default:
 				serviceInfo.authenticationInterceptor.setIgnore(true);

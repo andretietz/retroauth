@@ -1,17 +1,30 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:paddingBottom="@dimen/activity_vertical_margin"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
-                android:paddingTop="@dimen/activity_vertical_margin"
-                tools:activity=".MainActivity">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:paddingBottom="@dimen/activity_vertical_margin"
+              android:paddingLeft="@dimen/activity_horizontal_margin"
+              android:paddingRight="@dimen/activity_horizontal_margin"
+              android:paddingTop="@dimen/activity_vertical_margin"
+              tools:activity=".MainActivity">
 
     <android.support.v7.widget.AppCompatButton
-        android:id="@+id/buttonRequest"
-        android:text="Call Authenticated Request"
+        android:id="@+id/buttonRxJavaRequest"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:text="RxJava Call"/>
 
-</RelativeLayout>
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/buttonBlockingRequest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Blocking Call"/>
+
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/buttonAsyncRequest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Async Request"/>
+
+</LinearLayout>
