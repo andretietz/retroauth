@@ -1,5 +1,7 @@
 package eu.unicate.retroauth.demo;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -9,6 +11,7 @@ import android.widget.Toast;
 
 import com.google.gson.JsonElement;
 
+import eu.unicate.retroauth.AccountHelper;
 import eu.unicate.retroauth.AuthRestAdapter;
 import eu.unicate.retroauth.interceptors.TokenInterceptor;
 import retrofit.Callback;
@@ -107,6 +110,25 @@ public class MainActivity extends AppCompatActivity {
 						showError(error);
 					}
 				});
+			}
+		});
+
+
+		findViewById(R.id.buttonInvalidateToken).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Account account = AccountHelper.getActiveAccount(MainActivity.this, getString(R.string.auth_account_type));
+				AccountManager accountManager = AccountManager.get(MainActivity.this);
+				String authToken = accountManager.peekAuthToken(account, getString(R.string.auth_token_type));
+				accountManager.invalidateAuthToken(getString(R.string.auth_account_type), authToken);
+			}
+		});
+
+		findViewById(R.id.buttonInvalidateToken).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				AccountManager accountManager = AccountManager.get(MainActivity.this);
+				accountManager.addAccount(getString(R.string.auth_account_type), getString(R.string.auth_token_type), null, null, MainActivity.this, null, null);
 			}
 		});
 	}

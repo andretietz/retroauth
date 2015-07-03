@@ -1,15 +1,16 @@
 package eu.unicate.retroauth;
 
 /**
- * This is a small class of method information, so that
- * reflection is used only while creating the service, not each time
- * it is called
- *
- * Right now it's pretty small, but it may grow
+ * This enum defines the different request types
+ * handeled by retroauth
  */
 public enum AuthRequestType {
+	// rxjava calls
 	RXJAVA,
+	// asynchronous calls using the retrofit Callback interface
 	ASYNC,
+	// synchronous calls returning the result object
 	SYNC,
+	// non, means that the original retrofit request will be executed
 	NONE
 }

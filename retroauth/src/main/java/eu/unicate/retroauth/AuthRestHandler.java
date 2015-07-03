@@ -11,13 +11,13 @@ public class AuthRestHandler<T> implements InvocationHandler {
 	private final ServiceInfo serviceInfo;
 	private final T retrofitService;
 	private final Context context;
-	private final RxAuthInvoker<T> authInvoker;
+	private final AuthInvoker<T> authInvoker;
 
 	public AuthRestHandler(T retrofitService, Context context, ServiceInfo serviceInfo) {
 		this.context = context;
 		this.retrofitService = retrofitService;
 		this.serviceInfo = serviceInfo;
-		authInvoker = new RxAuthInvoker<>(context, retrofitService, serviceInfo);
+		authInvoker = new AuthInvoker<>(context, retrofitService, serviceInfo);
 	}
 
 	@Override

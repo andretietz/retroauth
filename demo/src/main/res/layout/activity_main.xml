@@ -27,4 +27,16 @@
         android:layout_height="wrap_content"
         android:text="Async Request"/>
 
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/buttonInvalidateToken"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Invalidate Token"/>
+
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/buttonAddAccount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add a new Account"/>
+
 </LinearLayout>
