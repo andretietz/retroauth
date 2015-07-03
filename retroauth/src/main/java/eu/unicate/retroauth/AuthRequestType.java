@@ -7,6 +7,9 @@ package eu.unicate.retroauth;
  *
  * Right now it's pretty small, but it may grow
  */
-public class AuthRestMethodInfo {
-	public boolean isAuthenticated = false;
+public enum AuthRequestType {
+	RXJAVA,
+	ASYNC,
+	SYNC,
+	NONE
 }
