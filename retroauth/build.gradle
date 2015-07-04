@@ -24,6 +24,11 @@ dependencies {
 	compile 'com.squareup.retrofit:retrofit:1.9.0'
 	compile 'io.reactivex:rxjava:1.0.12'
 
+	testCompile 'junit:junit:4.12'
+	testCompile 'org.mockito:mockito-core:2.0.26-beta'
+	androidTestCompile 'com.android.support.test:runner:0.2'
+	androidTestCompile 'com.android.support.test:rules:0.2'
+
 }
 
 apply from: 'bintray-publish.gradle'

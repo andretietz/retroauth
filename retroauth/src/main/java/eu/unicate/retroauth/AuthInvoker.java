@@ -56,7 +56,7 @@ public class AuthInvoker<T> {
 						.flatMap(new Func1<Account, Observable<String>>() {
 							@Override
 							public Observable<String> call(Account account) {
-								return getAuthToken(account);
+								return getAuthToken(account, AccountManager.get(context));
 							}
 						})
 						.flatMap(new Func1<String, Observable<?>>() {
@@ -90,7 +90,7 @@ public class AuthInvoker<T> {
 				.flatMap(new Func1<Account, Observable<String>>() {
 					@Override
 					public Observable<String> call(Account account) {
-						return getAuthToken(account);
+						return getAuthToken(account, AccountManager.get(context));
 					}
 				})
 				.flatMap(new Func1<String, Observable<?>>() {
@@ -128,7 +128,7 @@ public class AuthInvoker<T> {
 				.flatMap(new Func1<Account, Observable<String>>() {
 					@Override
 					public Observable<String> call(Account account) {
-						return getAuthToken(account);
+						return getAuthToken(account, AccountManager.get(context));
 					}
 				})
 				.flatMap(new Func1<String, Observable<?>>() {
@@ -225,12 +225,12 @@ public class AuthInvoker<T> {
 		});
 	}
 
-	private Observable<String> getAuthToken(final Account account) {
+	private Observable<String> getAuthToken(final Account account, final AccountManager accountManager) {
 		return Observable.create(new OnSubscribe<String>() {
 			@Override
 			public void call(Subscriber<? super String> subscriber) {
 				try {
-					subscriber.onNext(getAuthTokenBlocking(account));
+					subscriber.onNext(getAuthTokenBlocking(account, accountManager));
 					subscriber.onCompleted();
 				} catch (Exception e) {
 					subscriber.onError(e);
@@ -255,7 +255,7 @@ public class AuthInvoker<T> {
 		return Observable.create(new OnSubscribe<String>() {
 			@Override
 			public void call(Subscriber<? super String> subscriber) {
-				subscriber.onNext(AccountHelper.getActiveAccountName(context, serviceInfo.accountType));
+				subscriber.onNext(AccountHelper.getActiveAccountName(context, AccountManager.get(context), serviceInfo.accountType));
 				subscriber.onCompleted();
 			}
 		});
@@ -265,7 +265,7 @@ public class AuthInvoker<T> {
 		if (error instanceof RetrofitError) {
 			int status = ((RetrofitError) error).getResponse().getStatus();
 			if (HTTP_UNAUTHORIZED == status) {
-				Account account = AccountHelper.getActiveAccount(context, serviceInfo.accountType);
+				Account account = AccountHelper.getActiveAccount(context, AccountManager.get(context), serviceInfo.accountType);
 				String authToken = accountManager.peekAuthToken(account, serviceInfo.tokenType);
 				accountManager.invalidateAuthToken(account.type, authToken);
 				return true;
@@ -274,9 +274,8 @@ public class AuthInvoker<T> {
 		return false;
 	}
 
-	private String getAuthTokenBlocking(Account account) throws Exception {
+	private String getAuthTokenBlocking(Account account, AccountManager accountManager) throws Exception {
 		AccountManagerFuture<Bundle> future;
-		AccountManager accountManager = AccountManager.get(context);
 		Activity activity = (context instanceof Activity) ? (Activity) context : null;
 		if (account == null) {
 			future = accountManager.addAccount(serviceInfo.accountType, serviceInfo.tokenType, null, null, activity, null, null);

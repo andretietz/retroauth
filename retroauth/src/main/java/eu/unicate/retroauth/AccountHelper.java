@@ -15,16 +15,21 @@ import rx.Observable;
 import rx.Subscriber;
 
 /**
- * Created by andre on 04.07.2015.
+ * TODO
  */
 public class AccountHelper {
 
 	private static final String RETROAUTH_ACCOUNTNAME_KEY = "current";
 
-
-	public static Account getActiveAccount(Context context, String accountType) {
-		return getActiveAccount(context, accountType, getActiveAccountName(context, accountType));
+	/**
+	 * TODO
+	 */
+	public static Account getActiveAccount(Context context, AccountManager accountManager, String accountType) {
+		return getActiveAccount(context, accountType, getActiveAccountName(context, accountManager, accountType));
 	}
+	/**
+	 * TODO
+	 */
 	public static Account getActiveAccount(Context context, String accountType, String accountName) {
 		AccountManager accountManager = AccountManager.get(context);
 		// if there's no name, there's no account
@@ -39,9 +44,10 @@ public class AccountHelper {
 		return accounts[0];
 	}
 
-
-	public static String getActiveAccountName(Context context, String accountType) {
-		AccountManager accountManager = AccountManager.get(context);
+	/**
+	 * TODO
+	 */
+	public static String getActiveAccountName(Context context, AccountManager accountManager, String accountType) {
 		Account[] accounts = accountManager.getAccountsByType(accountType);
 		if (accounts.length < 1) {
 			return null;
