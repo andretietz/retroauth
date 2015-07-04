@@ -91,8 +91,9 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 			mAccountAuthenticatorResponse = null;
 		} else {
 			if (mResultBundle != null) {
-				// TODO: send back the bundle
-				setResult(RESULT_OK, null);
+				Intent intent = new Intent();
+				intent.putExtras(mResultBundle);
+				setResult(RESULT_OK, intent);
 			} else {
 				setResult(RESULT_CANCELED);
 			}
