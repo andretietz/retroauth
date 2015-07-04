@@ -34,13 +34,13 @@ public class AuthInvoker<T> {
 	private final Context context;
 	private final T retrofitService;
 	private final ServiceInfo serviceInfo;
-	private final AccountManager accountManager;
+	private final AccountHelper accountHelper;
 
 	public AuthInvoker(Context context, T retrofitService, ServiceInfo serviceInfo) {
 		this.context = context;
 		this.retrofitService = retrofitService;
 		this.serviceInfo = serviceInfo;
-		this.accountManager = AccountManager.get(context);
+		this.accountHelper = AccountHelper.get(context);
 	}
 
 
@@ -244,7 +244,7 @@ public class AuthInvoker<T> {
 		return Observable.create(new OnSubscribe<Account>() {
 			@Override
 			public void call(Subscriber<? super Account> subscriber) {
-				subscriber.onNext(AccountHelper.getActiveAccount(context, serviceInfo.accountType, name));
+				subscriber.onNext(accountHelper.getActiveAccount(serviceInfo.accountType, name));
 				subscriber.onCompleted();
 			}
 		});
@@ -255,7 +255,7 @@ public class AuthInvoker<T> {
 		return Observable.create(new OnSubscribe<String>() {
 			@Override
 			public void call(Subscriber<? super String> subscriber) {
-				subscriber.onNext(AccountHelper.getActiveAccountName(context, AccountManager.get(context), serviceInfo.accountType));
+				subscriber.onNext(accountHelper.getActiveAccountName(serviceInfo.accountType, true));
 				subscriber.onCompleted();
 			}
 		});
@@ -265,9 +265,7 @@ public class AuthInvoker<T> {
 		if (error instanceof RetrofitError) {
 			int status = ((RetrofitError) error).getResponse().getStatus();
 			if (HTTP_UNAUTHORIZED == status) {
-				Account account = AccountHelper.getActiveAccount(context, AccountManager.get(context), serviceInfo.accountType);
-				String authToken = accountManager.peekAuthToken(account, serviceInfo.tokenType);
-				accountManager.invalidateAuthToken(account.type, authToken);
+				accountHelper.invalidateTokenFromActiveUser(serviceInfo.accountType);
 				return true;
 			}
 		}

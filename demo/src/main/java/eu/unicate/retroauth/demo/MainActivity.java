@@ -25,11 +25,15 @@ import rx.schedulers.Schedulers;
 public class MainActivity extends AppCompatActivity {
 
 	private SomeAuthenticatedService service;
+	private AccountHelper accountHelper;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+
+		accountHelper = AccountHelper.get(this);
+
 		// create the restadapter like you would do it with retrofit
 		AuthRestAdapter restAdapter = new AuthRestAdapter.Builder()
 				.setEndpoint("https://api.github.com")
@@ -116,7 +120,8 @@ public class MainActivity extends AppCompatActivity {
 		findViewById(R.id.buttonInvalidateToken).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Account account = AccountHelper.getActiveAccount(MainActivity.this, AccountManager.get(MainActivity.this), getString(R.string.auth_account_type));
+				Account account = accountHelper.getActiveAccount(getString(R.string.auth_account_type), false);
+				if(account == null) return;
 				AccountManager accountManager = AccountManager.get(MainActivity.this);
 				String authToken = accountManager.peekAuthToken(account, getString(R.string.auth_token_type));
 				accountManager.invalidateAuthToken(getString(R.string.auth_account_type), authToken);

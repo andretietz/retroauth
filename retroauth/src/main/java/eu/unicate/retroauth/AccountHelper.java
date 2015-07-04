@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 
 import java.util.ArrayList;
@@ -20,18 +21,39 @@ import rx.Subscriber;
 public class AccountHelper {
 
 	private static final String RETROAUTH_ACCOUNTNAME_KEY = "current";
+	private static AccountHelper instance;
+	private Context context;
+	private AccountManager accountManager;
+
+	private AccountHelper() {
+	}
+
+	public static AccountHelper get(Context context) {
+		if (instance == null) {
+			instance = new AccountHelper();
+		}
+		instance.init(context);
+		return instance;
+	}
+
+	private void init(Context context) {
+		this.context = context;
+		accountManager = AccountManager.get(context);
+	}
 
 	/**
 	 * TODO
 	 */
-	public static Account getActiveAccount(Context context, AccountManager accountManager, String accountType) {
-		return getActiveAccount(context, accountType, getActiveAccountName(context, accountManager, accountType));
+	@Nullable
+	public Account getActiveAccount(String accountType, boolean showDialog) {
+		return getActiveAccount(accountType, getActiveAccountName(accountType, showDialog));
 	}
+
 	/**
 	 * TODO
 	 */
-	public static Account getActiveAccount(Context context, String accountType, String accountName) {
-		AccountManager accountManager = AccountManager.get(context);
+	@Nullable
+	public Account getActiveAccount(String accountType, String accountName) {
 		// if there's no name, there's no account
 		if (accountName == null) return null;
 		Account[] accounts = accountManager.getAccountsByType(accountType);
@@ -47,7 +69,8 @@ public class AccountHelper {
 	/**
 	 * TODO
 	 */
-	public static String getActiveAccountName(Context context, AccountManager accountManager, String accountType) {
+	@Nullable
+	public String getActiveAccountName(String accountType, boolean showDialog) {
 		Account[] accounts = accountManager.getAccountsByType(accountType);
 		if (accounts.length < 1) {
 			return null;
@@ -63,15 +86,28 @@ public class AccountHelper {
 		} else {
 			return accounts[0].name;
 		}
-		return showAccountPicker(context, accountType).toBlocking().first();
+		return showDialog ? showAccountPicker(accountType).toBlocking().first() : null;
 	}
 
-	private static Observable<String> showAccountPicker(final Context context, final String accountTypeParam) {
-		AccountManager accountManager = AccountManager.get(context);
+	@Nullable
+	public String getTokenFromActiveUser(String accountType) {
+		Account activeAccount = getActiveAccount(accountType, false);
+		if(activeAccount == null) return null;
+		return accountManager.peekAuthToken(activeAccount, accountType);
+	}
+
+	public void invalidateTokenFromActiveUser(String accountType) {
+		String token = getTokenFromActiveUser(accountType);
+		if(token == null) return;
+		accountManager.invalidateAuthToken(accountType, token);
+	}
+
+	private Observable<String> showAccountPicker(final String accountTypeParam) {
 		final Account[] accounts = accountManager.getAccountsByType(accountTypeParam);
 		return Observable.create(new Observable.OnSubscribe<String>() {
 			int choosenAccount = 0;
 			String accountType;
+
 			@Override
 			public void call(final Subscriber<? super String> subscriber) {
 				// make sure the context is an activity. in case of a service
