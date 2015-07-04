@@ -11,7 +11,7 @@ import android.widget.Toast;
 
 import com.google.gson.JsonElement;
 
-import eu.unicate.retroauth.AccountHelper;
+import eu.unicate.retroauth.AuthAccountManager;
 import eu.unicate.retroauth.AuthRestAdapter;
 import eu.unicate.retroauth.interceptors.TokenInterceptor;
 import retrofit.Callback;
@@ -25,14 +25,14 @@ import rx.schedulers.Schedulers;
 public class MainActivity extends AppCompatActivity {
 
 	private SomeAuthenticatedService service;
-	private AccountHelper accountHelper;
+	private AuthAccountManager authAccountManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		accountHelper = AccountHelper.get(this);
+		authAccountManager = AuthAccountManager.get(this);
 
 		// create the restadapter like you would do it with retrofit
 		AuthRestAdapter restAdapter = new AuthRestAdapter.Builder()
@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
 		findViewById(R.id.buttonInvalidateToken).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Account account = accountHelper.getActiveAccount(getString(R.string.auth_account_type), false);
+				Account account = authAccountManager.getActiveAccount(getString(R.string.auth_account_type), false);
 				if(account == null) return;
 				AccountManager accountManager = AccountManager.get(MainActivity.this);
 				String authToken = accountManager.peekAuthToken(account, getString(R.string.auth_token_type));

@@ -18,19 +18,23 @@ import rx.Subscriber;
 /**
  * TODO
  */
-public class AccountHelper {
+public final class AuthAccountManager {
 
 	private static final String RETROAUTH_ACCOUNTNAME_KEY = "current";
-	private static AccountHelper instance;
+	private static AuthAccountManager instance;
 	private Context context;
 	private AccountManager accountManager;
 
-	private AccountHelper() {
+	private AuthAccountManager() {
 	}
 
-	public static AccountHelper get(Context context) {
+	/**
+	 * @param context Android Context
+	 * @return singleton instance of the AuthAccountManager
+	 */
+	public static AuthAccountManager get(Context context) {
 		if (instance == null) {
-			instance = new AccountHelper();
+			instance = new AuthAccountManager();
 		}
 		instance.init(context);
 		return instance;
