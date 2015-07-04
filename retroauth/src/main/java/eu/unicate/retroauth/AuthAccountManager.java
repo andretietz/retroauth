@@ -98,13 +98,13 @@ public final class AuthAccountManager {
 	@Nullable
 	public String getTokenFromActiveUser(String accountType, String tokenType) {
 		Account activeAccount = getActiveAccount(accountType, false);
-		if(activeAccount == null) return null;
+		if (activeAccount == null) return null;
 		return accountManager.peekAuthToken(activeAccount, tokenType);
 	}
 
 	public void invalidateTokenFromActiveUser(String accountType, String tokenType) {
 		String token = getTokenFromActiveUser(accountType, tokenType);
-		if(token == null) return;
+		if (token == null) return;
 		accountManager.invalidateAuthToken(accountType, token);
 	}
 

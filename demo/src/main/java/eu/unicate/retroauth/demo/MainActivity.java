@@ -1,7 +1,5 @@
 package eu.unicate.retroauth.demo;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;

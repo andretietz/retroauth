@@ -10,8 +10,8 @@ import java.util.concurrent.Executor;
 
 import eu.unicate.retroauth.annotations.Authenticated;
 import eu.unicate.retroauth.annotations.Authentication;
-import eu.unicate.retroauth.interceptors.TokenInterceptor;
 import eu.unicate.retroauth.interceptors.AuthenticationRequestInterceptor;
+import eu.unicate.retroauth.interceptors.TokenInterceptor;
 import retrofit.Endpoint;
 import retrofit.ErrorHandler;
 import retrofit.Profiler;
@@ -42,9 +42,9 @@ public final class AuthRestAdapter {
 	/**
 	 * This method creates the actual service
 	 *
-	 * @param context a context to use. You should prefer using an activity as Context, since it is needed to open the activity to login
+	 * @param context          a context to use. You should prefer using an activity as Context, since it is needed to open the activity to login
 	 * @param tokenInterceptor The implementation of your {@link TokenInterceptor} to add the Token to the Request Header
-	 * @param serviceClass The Class of the interface of the service which you want to create
+	 * @param serviceClass     The Class of the interface of the service which you want to create
 	 * @return Your Service that also handles the Authentication logic
 	 */
 	@SuppressWarnings("unchecked")
@@ -86,11 +86,11 @@ public final class AuthRestAdapter {
 	private AuthRequestType scanServiceMethod(boolean containsAuthenticationData, Method method) {
 		if (!method.isAnnotationPresent(Authenticated.class))
 			return AuthRequestType.NONE;
-		if(!containsAuthenticationData)
+		if (!containsAuthenticationData)
 			throw methodError(method, "The Method %s contains the %s Annotation, but the interface does not implement the %s Annotation", method.getName(), Authenticated.class.getSimpleName(), Authentication.class.getSimpleName());
 		if (Observable.class.equals(method.getReturnType())) {
 			return AuthRequestType.RXJAVA;
-		} else if(Void.TYPE.equals(method.getReturnType())) {
+		} else if (Void.TYPE.equals(method.getReturnType())) {
 			return AuthRequestType.ASYNC;
 		} else {
 			return AuthRequestType.SYNC;

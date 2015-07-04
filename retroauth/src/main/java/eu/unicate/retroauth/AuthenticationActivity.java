@@ -54,7 +54,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 		mResultBundle.putString(AccountManager.KEY_AUTHTOKEN, token);
 		mResultBundle.putString(AccountManager.KEY_ACCOUNT_NAME, accountName);
 		mResultBundle.putString(AccountManager.KEY_ACCOUNT_TYPE, accountType);
-		if(null == account) {
+		if (null == account) {
 			mResultBundle.putParcelable(AccountManager.KEY_USERDATA, userData);
 			account = new Account(accountName, accountType);
 			accountManager.addAccountExplicitly(account, null, userData);
@@ -65,10 +65,10 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 
 	private Account getAccount(AccountManager accountManager) {
 		// if this is a relogin
-		if(null != accountName) {
+		if (null != accountName) {
 			Account[] accountList = accountManager.getAccountsByType(accountType);
 			for (Account account : accountList) {
-				if(account.name.equals(accountName))
+				if (account.name.equals(accountName))
 					return account;
 			}
 

@@ -25,7 +25,7 @@ public class LoginActivity extends AuthenticationActivity {
 			public void onClick(View v) {
 				// do the login
 				String token = demoLogin(textUser.getText().toString(), textPass.getText().toString());
-				if(null == token) {
+				if (null == token) {
 					textPass.setError("Use user1-user4 with password: test");
 					textUser.setError("Use user1-user4 with password: test");
 					textPass.requestFocus();
@@ -43,7 +43,7 @@ public class LoginActivity extends AuthenticationActivity {
 	}
 
 	private String demoLogin(String username, String password) {
-		if("user1".equalsIgnoreCase(username) && "test".equalsIgnoreCase(password) ||
+		if ("user1".equalsIgnoreCase(username) && "test".equalsIgnoreCase(password) ||
 				"user2".equalsIgnoreCase(username) && "test".equalsIgnoreCase(password) ||
 				"user3".equalsIgnoreCase(username) && "test".equalsIgnoreCase(password) ||
 				"user4".equalsIgnoreCase(username) && "test".equalsIgnoreCase(password))
