@@ -1,5 +1,6 @@
 package eu.unicate.retroauth.demo;
 
+import android.accounts.Account;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -31,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
 		setContentView(R.layout.activity_main);
 
 		authAccountManager = AuthAccountManager.get(this);
-
+		showCurrentAccount();
 		// create the restadapter like you would do it with retrofit
 		AuthRestAdapter restAdapter = new AuthRestAdapter.Builder()
 				.setEndpoint("https://api.github.com")
@@ -125,6 +126,7 @@ public class MainActivity extends AppCompatActivity {
 			@Override
 			public void onClick(View v) {
 				authAccountManager.resetActiveUser(getString(R.string.auth_account_type));
+				showCurrentAccount();
 			}
 		});
 
@@ -136,7 +138,16 @@ public class MainActivity extends AppCompatActivity {
 		});
 	}
 
+	private void showCurrentAccount() {
+		Account activeAccount = authAccountManager.getActiveAccount(getString(R.string.auth_account_type), false);
+		if (activeAccount != null)
+			setTitle("Active Account: " + activeAccount.name);
+		else
+			setTitle("No active Account!");
+	}
+
 	private void showResult(JsonElement jsonElement) {
+		showCurrentAccount();
 		Toast.makeText(MainActivity.this, jsonElement.toString(), Toast.LENGTH_SHORT).show();
 	}
 
