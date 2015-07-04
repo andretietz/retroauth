@@ -1,8 +1,8 @@
 # The simple way of calling authenticated requests in retrofit style
-### This is a library in beta! Not recommended for production right now!
+### This is a library in beta!
 ## Dependencies
-* Retrofit 1.9.0
-* RxJava 1.0.12
+* [Retrofit](https://github.com/square/retrofit) 1.9.0
+* [RxJava](https://github.com/ReactiveX/RxJava) 1.0.12
 * appcompat-v7: 22.2.0
 
 ## Example:
@@ -10,13 +10,18 @@
 @Authentication(accountType = R.string.auth_account_type, tokenType = R.string.auth_token_type)
 public interface SomeService {
     @Authenticated
-	@GET("/some/{user}/path")
-	Observable<JsonElement> someCall();
-	// or
-	@Authenticated
-	@GET("/some/{user}/path")
-	JsonElement someOtherCall();
+    @GET("/some/path")
+    Observable<ResultObject> someAuthenticatedRxJavaCall();
 
+    // or
+    @Authenticated
+    @GET("/some/path")
+    JsonElement someAuthenticatedBlockingCall();
+
+    // or
+    @Authenticated
+    @GET("/some/path")
+    void someAuthenticatedAsyncCall(Callback<JsonElement> callback);
 }
 ```
 ## What does it do?
@@ -169,8 +174,8 @@ service = restAdapter.create(context, new SomeTokenInterceptor(), SomeAuthentica
 Have fun trying!
 
 ## What's left to do?
-* Tests. Right now there are no tests whatsoever. Not only this is a reason to NOT USE THIS LIBRARY IN PRODUCTION YET
-* Does anyone has a good idea how to get rid of the small service implementation? (without an ids.xml!, since the developer is not forced to create it)
+* Some helper methods of the AuthAccountManager
+* Tests. Right now there are no tests whatsoever.
 
 
 ## Pull requests are welcome
