@@ -10,12 +10,12 @@ import eu.unicate.retroauth.interceptors.TokenInterceptor;
  * needed to handle the authenticated requests
  */
 public class ServiceInfo {
-	public final Map<Method, AuthRestMethodInfo> methodInfoCache;
+	public final Map<Method, AuthRequestType> methodInfoCache;
 	public final String accountType;
 	public final String tokenType;
 	public final TokenInterceptor authenticationInterceptor;
 
-	public ServiceInfo(Map<Method, AuthRestMethodInfo> methodInfoCache, String accountType, String tokenType, TokenInterceptor requestInterceptor) {
+	public ServiceInfo(Map<Method, AuthRequestType> methodInfoCache, String accountType, String tokenType, TokenInterceptor requestInterceptor) {
 		this.methodInfoCache = methodInfoCache;
 		this.accountType = accountType;
 		this.tokenType = tokenType;

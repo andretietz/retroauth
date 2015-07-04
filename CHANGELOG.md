@@ -1,3 +1,11 @@
+## 0.1.2-beta (2015-07-04)
+
+ - All retrofit request types are supported
+  - rxjava
+  - blocking
+  - async
+ - Added AuthAccountManager to simplify the Account handling with retroauth
+
 ## 0.1.1-beta (2015-06-30)
 
   - Multiple Accounts possible

@@ -1,8 +1,8 @@
 # The simple way of calling authenticated requests in retrofit style
-### This is a library in beta! Not recommended for production right now!
+### This is a library in beta!
 ## Dependencies
-* Retrofit 1.9.0
-* RxJava 1.0.12
+* [Retrofit](https://github.com/square/retrofit) 1.9.0
+* [RxJava](https://github.com/ReactiveX/RxJava) 1.0.12
 * appcompat-v7: 22.2.0
 
 ## Example:
@@ -10,21 +10,31 @@
 @Authentication(accountType = R.string.auth_account_type, tokenType = R.string.auth_token_type)
 public interface SomeService {
     @Authenticated
-	@GET("/some/{user}/path")
-	Observable<List<JsonElement>> someCall();
+    @GET("/some/path")
+    Observable<ResultObject> someAuthenticatedRxJavaCall();
+
+    // or
+    @Authenticated
+    @GET("/some/path")
+    JsonElement someAuthenticatedBlockingCall();
+
+    // or
+    @Authenticated
+    @GET("/some/path")
+    void someAuthenticatedAsyncCall(Callback<JsonElement> callback);
 }
 ```
 ## What does it do?
-If you call an authenticated method of this service, it'll do the following things under the hood:
-* Step 1: Checks if there already is an account in the Android AccountManager. If not, it'll open the LoginActivity. If there already is an account, go on with step 2
-* Step 2: Gets the authentication token from the account (AccountManager) and adds it to the request header. If there is no valid token, the LoginActivity could open with the pre-filled accounts username
+If you call an authenticated method of this service, it'll do the following things inside the library:
+* Step 1: Checks if there already is an account in the Android AccountManager. If not, it'll open the LoginActivity. If there already is an account, go on with step 2, If there's more than one account open an Dialog to pick an account.
+* Step 2: Gets the authentication token from the (choosen) account and adds it to the request header. If there is no valid token, the LoginActivity could open with the pre-filled accounts username
 * Step 3: Sends the actual request
 * Step 4: If that request fails with an 401 (the only one right now) it invalidates the used token and continues with step 1.
 
 ## How to use it?
 Add it as dependency:
 ```groovy
-compile 'eu.unicate.android:retroauth:0.1.1-beta'
+compile 'eu.unicate.android:retroauth:0.1.2-beta'
 ```
 
 ### 1. Create 3 strings in your strings.xml
@@ -118,14 +128,23 @@ Add the Service to the Manifest:
 @Authentication(accountType = R.string.auth_account_type, tokenType = R.string.auth_token_type)
 public interface SomeService {
     @GET("/some/path")
-    Observable<List<JsonElement>> someUnauthenticatedCall();
+    Observable<ResultObject> someUnauthenticatedCall();
 
     @Authenticated
     @GET("/some/path")
-    Observable<List<JsonElement>> someAuthenticatedCall();
+    Observable<ResultObject> someAuthenticatedRxJavaCall();
+
+    // or
+    @Authenticated
+    @GET("/some/path")
+    JsonElement someAuthenticatedBlockingCall();
+
+    // or
+    @Authenticated
+    @GET("/some/path")
+    void someAuthenticatedAsyncCall(Callback<JsonElement> callback);
 }
 ```
-#### WARNING: it will only work with calls that return an observable (for now)
 ### 5. Create your Service
 ```java
 // create your RestAdapter as you would do it with retrofit as well
@@ -155,11 +174,9 @@ service = restAdapter.create(context, new SomeTokenInterceptor(), SomeAuthentica
 Have fun trying!
 
 ## What's left to do?
-* It can handle max. one account. This is bad. I'll think about it (please give me your impressions as well).
-* Only rxjava methods can be used to be authenticated. This is not that nice, it would be better if it supports all of the retrofit request types (blocking, async and rx). Right now there should be an Exception thrown.
-* Tests. Right now there are no tests whatsoever. Not only this is a reason to NOT USE THIS LIBRARY IN PRODUCTION YET
-* Multiple token types in one class are not possible right now. If you really need that, just create 2 different service interfaces, this should work (as well untested ;) )
-* Does anyone has a good idea how to get rid of the small service implementation? (without an ids.xml!, since the developer is not forced to create it)
+* Some helper methods of the AuthAccountManager
+* Tests. Right now there are no tests whatsoever.
+* Proper Exceptions
 
 
 ## Pull requests are welcome
