@@ -176,6 +176,7 @@ Have fun trying!
 ## What's left to do?
 * Some helper methods of the AuthAccountManager
 * Tests. Right now there are no tests whatsoever.
+* Proper Exceptions
 
 
 ## Pull requests are welcome
