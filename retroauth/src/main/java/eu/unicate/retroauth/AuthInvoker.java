@@ -26,7 +26,7 @@ import rx.schedulers.Schedulers;
  * I separated the code since I would like to be able to use the {@link eu.unicate.retroauth.annotations.Authenticated}
  * Annotation later on, without using necessarily rxjava
  */
-public class AuthInvoker<T> {
+final class AuthInvoker<T> {
 
 	private static final int HTTP_UNAUTHORIZED = 401;
 
@@ -89,8 +89,7 @@ public class AuthInvoker<T> {
 				})
 				.flatMap(new Func1<Account, Observable<String>>() {
 					@Override
-					public Observable<String> call(Account account) {
-						return getAuthToken(account, AccountManager.get(context));
+					public Observable<String> call(Account account) { return getAuthToken(account, AccountManager.get(context));
 					}
 				})
 				.flatMap(new Func1<String, Observable<?>>() {
@@ -127,8 +126,7 @@ public class AuthInvoker<T> {
 				})
 				.flatMap(new Func1<Account, Observable<String>>() {
 					@Override
-					public Observable<String> call(Account account) {
-						return getAuthToken(account, AccountManager.get(context));
+					public Observable<String> call(Account account) { return getAuthToken(account, AccountManager.get(context));
 					}
 				})
 				.flatMap(new Func1<String, Observable<?>>() {
@@ -153,8 +151,7 @@ public class AuthInvoker<T> {
 				.observeOn(AndroidScheduler.mainThread())
 				.subscribe(new Action1<Pair<Object, Response>>() {
 							   @Override
-							   public void call(Pair<Object, Response> result) {
-								   originalCallback.success(result.first, result.second);
+							   public void call(Pair<Object, Response> result) { originalCallback.success(result.first, result.second);
 							   }
 						   },
 						new Action1<Throwable>() {
@@ -265,7 +262,7 @@ public class AuthInvoker<T> {
 		if (error instanceof RetrofitError) {
 			int status = ((RetrofitError) error).getResponse().getStatus();
 			if (HTTP_UNAUTHORIZED == status) {
-				authAccountManager.invalidateTokenFromActiveUser(serviceInfo.accountType);
+				authAccountManager.invalidateTokenFromActiveUser(serviceInfo.accountType, serviceInfo.tokenType);
 				return true;
 			}
 		}

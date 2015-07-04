@@ -3,10 +3,12 @@ package eu.unicate.retroauth;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.OperationCanceledException;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 
@@ -94,16 +96,37 @@ public final class AuthAccountManager {
 	}
 
 	@Nullable
-	public String getTokenFromActiveUser(String accountType) {
+	public String getTokenFromActiveUser(String accountType, String tokenType) {
 		Account activeAccount = getActiveAccount(accountType, false);
-		if(activeAccount == null) return null;
-		return accountManager.peekAuthToken(activeAccount, accountType);
+		if (activeAccount == null) return null;
+		return accountManager.peekAuthToken(activeAccount, tokenType);
 	}
 
-	public void invalidateTokenFromActiveUser(String accountType) {
-		String token = getTokenFromActiveUser(accountType);
-		if(token == null) return;
+	public void getUserData(String accountType, String key) {
+		accountManager.getUserData(getActiveAccount(accountType, false), key);
+	}
+
+	public void invalidateTokenFromActiveUser(String accountType, String tokenType) {
+		String token = getTokenFromActiveUser(accountType, tokenType);
+		if (token == null) return;
 		accountManager.invalidateAuthToken(accountType, token);
+	}
+
+	@SuppressLint("CommitPrefEdits")
+	public Account setActiveUser(String accountType, String accountName) {
+		SharedPreferences preferences = context.getSharedPreferences(accountType, Context.MODE_PRIVATE);
+		preferences.edit().putString(RETROAUTH_ACCOUNTNAME_KEY, accountName).commit();
+		return getActiveAccount(accountType, accountName);
+	}
+
+	@SuppressLint("CommitPrefEdits")
+	public void resetActiveUser(String accountType) {
+		SharedPreferences preferences = context.getSharedPreferences(accountType, Context.MODE_PRIVATE);
+		preferences.edit().remove(RETROAUTH_ACCOUNTNAME_KEY).commit();
+	}
+
+	public void addAccount(@NonNull Activity activity, @NonNull String accountType, String tokenType) {
+		accountManager.addAccount(accountType, tokenType, null, null, activity, null, null);
 	}
 
 	private Observable<String> showAccountPicker(final String accountTypeParam) {
@@ -138,6 +161,7 @@ public final class AuthAccountManager {
 							if (choosenAccount >= accounts.length) {
 								subscriber.onNext(null);
 							} else {
+								setActiveUser(accountType, accounts[choosenAccount].name);
 								SharedPreferences preferences = context.getSharedPreferences(accountType, Context.MODE_PRIVATE);
 								preferences.edit().putString(RETROAUTH_ACCOUNTNAME_KEY, accounts[choosenAccount].name).apply();
 								subscriber.onNext(accounts[choosenAccount].name);

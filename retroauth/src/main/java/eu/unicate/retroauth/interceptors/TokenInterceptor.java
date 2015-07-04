@@ -4,8 +4,13 @@ import retrofit.RequestInterceptor;
 
 public abstract class TokenInterceptor implements RequestInterceptor {
 
+	public static final TokenInterceptor BEARER_TOKENINTERCEPTOR = new TokenInterceptor() {
+		@Override
+		public void injectToken(RequestFacade facade, String token) {
+			facade.addHeader("Authorization", "Bearer " + token);
+		}
+	};
 	private String token;
-
 	private boolean ignore;
 
 	public void setToken(String token) {
@@ -18,15 +23,8 @@ public abstract class TokenInterceptor implements RequestInterceptor {
 
 	@Override
 	public void intercept(RequestFacade request) {
-		if(!ignore) injectToken(request, token);
+		if (!ignore) injectToken(request, token);
 	}
 
 	public abstract void injectToken(RequestFacade facade, String token);
-
-	public static final TokenInterceptor BEARER_TOKENINTERCEPTOR = new TokenInterceptor() {
-		@Override
-		public void injectToken(RequestFacade facade, String token) {
-			facade.addHeader("Authorization", "Bearer " + token);
-		}
-	};
 }

@@ -1,7 +1,6 @@
 package eu.unicate.retroauth.demo;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -33,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
 		setContentView(R.layout.activity_main);
 
 		authAccountManager = AuthAccountManager.get(this);
-
+		showCurrentAccount();
 		// create the restadapter like you would do it with retrofit
 		AuthRestAdapter restAdapter = new AuthRestAdapter.Builder()
 				.setEndpoint("https://api.github.com")
@@ -120,24 +119,35 @@ public class MainActivity extends AppCompatActivity {
 		findViewById(R.id.buttonInvalidateToken).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Account account = authAccountManager.getActiveAccount(getString(R.string.auth_account_type), false);
-				if(account == null) return;
-				AccountManager accountManager = AccountManager.get(MainActivity.this);
-				String authToken = accountManager.peekAuthToken(account, getString(R.string.auth_token_type));
-				accountManager.invalidateAuthToken(getString(R.string.auth_account_type), authToken);
+				authAccountManager.invalidateTokenFromActiveUser(getString(R.string.auth_account_type), getString(R.string.auth_token_type));
+			}
+		});
+		findViewById(R.id.buttonResetPrefAccount).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				authAccountManager.resetActiveUser(getString(R.string.auth_account_type));
+				showCurrentAccount();
 			}
 		});
 
 		findViewById(R.id.buttonAddAccount).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				AccountManager accountManager = AccountManager.get(MainActivity.this);
-				accountManager.addAccount(getString(R.string.auth_account_type), getString(R.string.auth_token_type), null, null, MainActivity.this, null, null);
+				authAccountManager.addAccount(MainActivity.this, getString(R.string.auth_account_type), getString(R.string.auth_token_type));
 			}
 		});
 	}
 
+	private void showCurrentAccount() {
+		Account activeAccount = authAccountManager.getActiveAccount(getString(R.string.auth_account_type), false);
+		if (activeAccount != null)
+			setTitle("Active Account: " + activeAccount.name);
+		else
+			setTitle("No active Account!");
+	}
+
 	private void showResult(JsonElement jsonElement) {
+		showCurrentAccount();
 		Toast.makeText(MainActivity.this, jsonElement.toString(), Toast.LENGTH_SHORT).show();
 	}
 

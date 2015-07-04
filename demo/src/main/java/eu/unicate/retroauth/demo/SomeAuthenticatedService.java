@@ -2,8 +2,6 @@ package eu.unicate.retroauth.demo;
 
 import com.google.gson.JsonElement;
 
-import java.util.List;
-
 import eu.unicate.retroauth.annotations.Authenticated;
 import eu.unicate.retroauth.annotations.Authentication;
 import retrofit.Callback;

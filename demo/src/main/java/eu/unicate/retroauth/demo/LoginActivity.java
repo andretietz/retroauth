@@ -1,6 +1,7 @@
 package eu.unicate.retroauth.demo;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 
@@ -25,11 +26,7 @@ public class LoginActivity extends AuthenticationActivity {
 			public void onClick(View v) {
 				// do the login
 				String token = demoLogin(textUser.getText().toString(), textPass.getText().toString());
-				if(null == token) {
-					textPass.setError("Use user1-user4 with password: test");
-					textUser.setError("Use user1-user4 with password: test");
-					textPass.requestFocus();
-				} else {
+				if (null != token) {
 					finalizeAuthentication(textUser.getText().toString(), getString(R.string.auth_token_type), token, null);
 				}
 			}
@@ -43,11 +40,19 @@ public class LoginActivity extends AuthenticationActivity {
 	}
 
 	private String demoLogin(String username, String password) {
-		if("user1".equalsIgnoreCase(username) && "test".equalsIgnoreCase(password) ||
-				"user2".equalsIgnoreCase(username) && "test".equalsIgnoreCase(password) ||
-				"user3".equalsIgnoreCase(username) && "test".equalsIgnoreCase(password) ||
-				"user4".equalsIgnoreCase(username) && "test".equalsIgnoreCase(password))
+		if (errorCheck(username, textUser, "Don't leave the username empty!"))
+			return null;
+		if (errorCheck(password, textPass, "Don't leave the password empty!"))
+			return null;
+		if ("test".equalsIgnoreCase(password))
 			return "this-is-a-demo-token-from-user: " + username;
 		return null;
+	}
+
+	private boolean errorCheck(String s, TextView tv, String message) {
+		boolean error = TextUtils.isEmpty(s);
+		tv.setError(error ? message : null);
+		tv.requestFocus();
+		return error;
 	}
 }

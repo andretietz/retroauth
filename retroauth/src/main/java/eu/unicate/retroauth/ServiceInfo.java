@@ -9,7 +9,7 @@ import eu.unicate.retroauth.interceptors.TokenInterceptor;
  * This is a pojo, containing all the usefull information and classes, that are
  * needed to handle the authenticated requests
  */
-public class ServiceInfo {
+final class ServiceInfo {
 	public final Map<Method, AuthRequestType> methodInfoCache;
 	public final String accountType;
 	public final String tokenType;

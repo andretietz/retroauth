@@ -5,30 +5,29 @@
               android:orientation="vertical">
 
     <TextView
-        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-        android:text="Demo Login"
-        android:gravity="center_horizontal"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_width="match_parent" />
+        android:gravity="center_horizontal"
+        android:text="Demo Login"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"/>
 
     <android.support.v7.widget.AppCompatEditText
         android:id="@+id/textUser"
-        android:text="user1"
-        android:hint="username (user1(-4) for demo)"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:hint="username"/>
 
     <android.support.v7.widget.AppCompatEditText
         android:id="@+id/textPassword"
-        android:text="test"
-        android:hint="password (test for demo)"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textPassword"/>
+        android:hint="password (test for demo)"
+        android:inputType="textPassword"
+        android:text="test"/>
 
     <android.support.v7.widget.AppCompatButton
-        android:text="Login"
         android:id="@+id/buttonLogin"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:text="Login"/>
 </LinearLayout>

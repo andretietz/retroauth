@@ -4,7 +4,7 @@ package eu.unicate.retroauth;
  * This enum defines the different request types
  * handeled by retroauth
  */
-public enum AuthRequestType {
+enum AuthRequestType {
 	// rxjava calls
 	RXJAVA,
 	// asynchronous calls using the retrofit Callback interface

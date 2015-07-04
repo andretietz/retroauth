@@ -18,8 +18,9 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
 
 	/**
 	 * This creates the AccountAuthenticator
+	 *
 	 * @param context The context (needed by the {@link AbstractAccountAuthenticator}
-	 * @param action The Action String to open the Activity to login
+	 * @param action  The Action String to open the Activity to login
 	 */
 	public AccountAuthenticator(Context context, String action) {
 		super(context);
@@ -39,7 +40,7 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
 	/**
 	 * Creates an Intent to open the Activity to login
 	 *
-	 * @param response needed parameter
+	 * @param response    needed parameter
 	 * @param accountType The account Type
 	 * @param accountName The name of the account
 	 * @return a bundle to open the activity

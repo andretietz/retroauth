@@ -34,7 +34,7 @@ If you call an authenticated method of this service, it'll do the following thin
 ## How to use it?
 Add it as dependency:
 ```groovy
-compile 'eu.unicate.android:retroauth:0.1.2-beta'
+compile 'eu.unicate.android:retroauth:0.1.3-beta'
 ```
 
 ### 1. Create 3 strings in your strings.xml
@@ -174,7 +174,6 @@ service = restAdapter.create(context, new SomeTokenInterceptor(), SomeAuthentica
 Have fun trying!
 
 ## What's left to do?
-* Some helper methods of the AuthAccountManager
 * Tests. Right now there are no tests whatsoever.
 * Proper Exceptions
 

@@ -1,14 +1,25 @@
+## 0.1.3-beta (2015-07-04)
+
+* Demo App:
+ * can have unlimited amount of users (using any username and the password "test"
+ * shows the active account in the title
+
+* Bugfix:
+
+    The Token didn't invalidate on `AuthAccountManager#invalidateTokenFromActiveUser`
+* Added `AuthAccountManager#getUserData` to get the userdata of an active account, which were setup in `AuthenticationActivity#finalizeAuthentication`
+
 ## 0.1.2-beta (2015-07-04)
 
- - All retrofit request types are supported
-  - rxjava
-  - blocking
-  - async
- - Added AuthAccountManager to simplify the Account handling with retroauth
+ * All retrofit request types are supported
+  * rxjava
+  * blocking
+  * async
+ * Added AuthAccountManager to simplify the Account handling with retroauth
 
 ## 0.1.1-beta (2015-06-30)
 
-  - Multiple Accounts possible
+  * Multiple Accounts possible
 
     If the User has multiple accounts setup and an authenticated request is called, the user
     will see an account picker to choose between the accounts or create a new one
