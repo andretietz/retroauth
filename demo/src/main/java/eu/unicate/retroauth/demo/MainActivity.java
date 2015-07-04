@@ -120,19 +120,20 @@ public class MainActivity extends AppCompatActivity {
 		findViewById(R.id.buttonInvalidateToken).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Account account = authAccountManager.getActiveAccount(getString(R.string.auth_account_type), false);
-				if(account == null) return;
-				AccountManager accountManager = AccountManager.get(MainActivity.this);
-				String authToken = accountManager.peekAuthToken(account, getString(R.string.auth_token_type));
-				accountManager.invalidateAuthToken(getString(R.string.auth_account_type), authToken);
+				authAccountManager.invalidateTokenFromActiveUser(getString(R.string.auth_account_type), getString(R.string.auth_token_type));
+			}
+		});
+		findViewById(R.id.buttonResetPrefAccount).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				authAccountManager.resetActiveUser(getString(R.string.auth_account_type));
 			}
 		});
 
 		findViewById(R.id.buttonAddAccount).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				AccountManager accountManager = AccountManager.get(MainActivity.this);
-				accountManager.addAccount(getString(R.string.auth_account_type), getString(R.string.auth_token_type), null, null, MainActivity.this, null, null);
+				authAccountManager.addAccount(MainActivity.this, getString(R.string.auth_account_type), getString(R.string.auth_token_type));
 			}
 		});
 	}

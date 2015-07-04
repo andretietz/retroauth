@@ -265,7 +265,7 @@ final class AuthInvoker<T> {
 		if (error instanceof RetrofitError) {
 			int status = ((RetrofitError) error).getResponse().getStatus();
 			if (HTTP_UNAUTHORIZED == status) {
-				authAccountManager.invalidateTokenFromActiveUser(serviceInfo.accountType);
+				authAccountManager.invalidateTokenFromActiveUser(serviceInfo.accountType, serviceInfo.tokenType);
 				return true;
 			}
 		}
@@ -281,7 +281,9 @@ final class AuthInvoker<T> {
 			future = accountManager.getAuthToken(account, serviceInfo.tokenType, null, activity, null, null);
 		}
 		Bundle result = future.getResult();
-		return result.getString(AccountManager.KEY_AUTHTOKEN);
+		String token = result.getString(AccountManager.KEY_AUTHTOKEN);
+		String authToken = accountManager.peekAuthToken(account, serviceInfo.tokenType);
+		return authToken;
 	}
 
 }
