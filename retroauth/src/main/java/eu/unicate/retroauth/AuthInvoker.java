@@ -26,7 +26,7 @@ import rx.schedulers.Schedulers;
  * I separated the code since I would like to be able to use the {@link eu.unicate.retroauth.annotations.Authenticated}
  * Annotation later on, without using necessarily rxjava
  */
-public class AuthInvoker<T> {
+final class AuthInvoker<T> {
 
 	private static final int HTTP_UNAUTHORIZED = 401;
 

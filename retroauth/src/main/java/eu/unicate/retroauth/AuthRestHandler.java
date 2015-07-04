@@ -5,7 +5,7 @@ import android.content.Context;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
-public class AuthRestHandler<T> implements InvocationHandler {
+final class AuthRestHandler<T> implements InvocationHandler {
 
 
 	private final ServiceInfo serviceInfo;

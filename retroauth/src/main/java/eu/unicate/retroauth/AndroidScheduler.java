@@ -19,7 +19,7 @@ import rx.subscriptions.Subscriptions;
  * The original rxandroid project can be found <a href="https://github.com/ReactiveX/RxAndroid">here</a>.
  *
  */
-public final class AndroidScheduler extends Scheduler {
+final class AndroidScheduler extends Scheduler {
 
 	private static final Scheduler MAIN_THREAD_SCHEDULER =
 			new AndroidScheduler(new Handler(Looper.getMainLooper()));
