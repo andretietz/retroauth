@@ -13,15 +13,15 @@
 
     <android.support.v7.widget.AppCompatEditText
         android:id="@+id/textUser"
-        android:text="testuser"
-        android:hint="username (testuser for demo)"
+        android:text="user1"
+        android:hint="username (user1(-4) for demo)"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
     <android.support.v7.widget.AppCompatEditText
         android:id="@+id/textPassword"
-        android:text="testpassword"
-        android:hint="password (testpassword for demo)"
+        android:text="test"
+        android:hint="password (test for demo)"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="textPassword"/>

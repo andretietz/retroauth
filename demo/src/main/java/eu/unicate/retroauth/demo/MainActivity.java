@@ -18,8 +18,6 @@ import retrofit.Callback;
 import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
-import rx.Observable;
-import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
@@ -73,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
 				// cause its a network request
 				new AsyncTask<Object, Object, JsonElement>() {
 					private Throwable error;
+
 					@Override
 					protected JsonElement doInBackground(Object... params) {
 						try {
@@ -85,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
 
 					@Override
 					protected void onPostExecute(JsonElement o) {
-						if(o == null) {
+						if (o == null) {
 							showError(error);
 						} else {
 							showResult(o);
@@ -117,14 +116,14 @@ public class MainActivity extends AppCompatActivity {
 		findViewById(R.id.buttonInvalidateToken).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Account account = AccountHelper.getActiveAccount(MainActivity.this, getString(R.string.auth_account_type));
+				Account account = AccountHelper.getActiveAccount(MainActivity.this, AccountManager.get(MainActivity.this), getString(R.string.auth_account_type));
 				AccountManager accountManager = AccountManager.get(MainActivity.this);
 				String authToken = accountManager.peekAuthToken(account, getString(R.string.auth_token_type));
 				accountManager.invalidateAuthToken(getString(R.string.auth_account_type), authToken);
 			}
 		});
 
-		findViewById(R.id.buttonInvalidateToken).setOnClickListener(new View.OnClickListener() {
+		findViewById(R.id.buttonAddAccount).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				AccountManager accountManager = AccountManager.get(MainActivity.this);
