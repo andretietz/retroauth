@@ -1,6 +1,9 @@
 ## 0.1.3-beta (2015-07-04)
 
-* Demo App can have unlimited amount of users (using any username and the password "test"
+* Demo App:
+ * can have unlimited amount of users (using any username and the password "test"
+ * shows the active account in the title
+
 * Bugfix:
 
     The Token didn't invalidate on `AuthAccountManager#invalidateTokenFromActiveUser`
