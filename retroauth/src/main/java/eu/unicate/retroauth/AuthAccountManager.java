@@ -102,6 +102,10 @@ public final class AuthAccountManager {
 		return accountManager.peekAuthToken(activeAccount, tokenType);
 	}
 
+	public void getUserData(String accountType, String key) {
+		accountManager.getUserData(getActiveAccount(accountType, false), key);
+	}
+
 	public void invalidateTokenFromActiveUser(String accountType, String tokenType) {
 		String token = getTokenFromActiveUser(accountType, tokenType);
 		if (token == null) return;
