@@ -44,7 +44,7 @@ public class AuthenticationService extends Service {
 		Intent actionIntent;
 		// check if there is an action setup
 		if(action == null) {
-			throw new RuntimeException("You have to add the \"retroauth:authenticationActivity\" attribute to your authenticator.xml! It's value should be the full package path of the activity to login");
+			throw new RuntimeException("You have to add the \"retroauth:authenticationAction\" attribute to your authenticator.xml! It's value should be the full package path of the activity to login");
 		}
 		actionIntent = buildIntent(action);
 		// check if there is an intentfilter set for the action
@@ -52,7 +52,7 @@ public class AuthenticationService extends Service {
 		// check if there's an activity that can handle this action
 		if(componentName == null) {
 			throw new RuntimeException("Could not find Activity to handle your Action: " + action + ".\n" +
-					"Please either pass the full canonial activity name to the attribute  \"retroauth:authenticationActivity\" in the authenticator.xml\n" +
+					"Please either pass the full canonial activity name to the attribute  \"retroauth:authenticationAction\" in the authenticator.xml\n" +
 					"or create an intent filter for your activity\n" +
 					"<intent-filter>\n" +
 					"<action android:name=\"" + action + "\"/>\n" +
@@ -103,7 +103,7 @@ public class AuthenticationService extends Service {
 					if(resourceParser.getName().equals("account-authenticator")) {
 						for(int i=0;i<resourceParser.getAttributeCount();i++) {
 							if("http://schemas.android.com/apk/res-auto".equals(resourceParser.getAttributeNamespace(i)) &&
-									resourceParser.getAttributeName(i).equals("authenticationActivity")) {
+									resourceParser.getAttributeName(i).equals("authenticationAction")) {
 								int actionRes = resourceParser.getAttributeResourceValue(i, 0);
 								if(actionRes != 0) {
 									action = getString(actionRes);
