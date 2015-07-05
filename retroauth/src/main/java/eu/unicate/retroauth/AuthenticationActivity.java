@@ -27,7 +27,7 @@ import android.support.v7.app.AppCompatActivity;
 
 
 /**
- * You have to extend from this activity in order to use the library
+ * Activity that creates the Account
  */
 public abstract class AuthenticationActivity extends AppCompatActivity {
 

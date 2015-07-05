@@ -26,10 +26,15 @@ import android.content.Intent;
 import android.os.Bundle;
 
 /**
- * This is a the AccountAuthenticator
+ * This AccountAuthenticator is a very basic implementation of Android's {@link android.accounts.AbstractAccountAuthenticator}
+ *
  */
 public class AccountAuthenticator extends AbstractAccountAuthenticator {
 
+	/**
+	 * The Action string to open the implementation of the {@link AuthenticationActivity}
+	 * TODO: improve, maybe remove
+	 */
 	private final String action;
 
 	/**
