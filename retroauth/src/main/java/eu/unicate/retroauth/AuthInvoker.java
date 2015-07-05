@@ -71,8 +71,7 @@ final class AuthInvoker<T> {
 						})
 						.flatMap(new Func1<Account, Observable<String>>() {
 							@Override
-							public Observable<String> call(Account account) {
-								return getAuthToken(account, AccountManager.get(context));
+							public Observable<String> call(Account account) { return getAuthToken(account, AccountManager.get(context));
 							}
 						})
 						.flatMap(new Func1<String, Observable<?>>() {
@@ -105,7 +104,8 @@ final class AuthInvoker<T> {
 				})
 				.flatMap(new Func1<Account, Observable<String>>() {
 					@Override
-					public Observable<String> call(Account account) { return getAuthToken(account, AccountManager.get(context));
+					public Observable<String> call(Account account) {
+						return getAuthToken(account, AccountManager.get(context));
 					}
 				})
 				.flatMap(new Func1<String, Observable<?>>() {
@@ -142,7 +142,8 @@ final class AuthInvoker<T> {
 				})
 				.flatMap(new Func1<Account, Observable<String>>() {
 					@Override
-					public Observable<String> call(Account account) { return getAuthToken(account, AccountManager.get(context));
+					public Observable<String> call(Account account) {
+						return getAuthToken(account, AccountManager.get(context));
 					}
 				})
 				.flatMap(new Func1<String, Observable<?>>() {
@@ -167,7 +168,8 @@ final class AuthInvoker<T> {
 				.observeOn(AndroidScheduler.mainThread())
 				.subscribe(new Action1<Pair<Object, Response>>() {
 							   @Override
-							   public void call(Pair<Object, Response> result) { originalCallback.success(result.first, result.second);
+							   public void call(Pair<Object, Response> result) {
+								   originalCallback.success(result.first, result.second);
 							   }
 						   },
 						new Action1<Throwable>() {
