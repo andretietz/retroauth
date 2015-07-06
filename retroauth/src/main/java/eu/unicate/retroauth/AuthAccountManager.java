@@ -267,7 +267,6 @@ public final class AuthAccountManager {
 		final Account[] accounts = accountManager.getAccountsByType(accountType);
 		return Observable.create(new Observable.OnSubscribe<String>() {
 			int choosenAccount = 0;
-			String accountType;
 
 			@Override
 			public void call(final Subscriber<? super String> subscriber) {
