@@ -27,9 +27,10 @@ import android.os.Bundle;
 
 /**
  * This AccountAuthenticator is a very basic implementation of Android's {@link android.accounts.AbstractAccountAuthenticator}
- *
  */
 public class AccountAuthenticator extends AbstractAccountAuthenticator {
+
+	public static final String KEY_TOKEN_TYPE = "account_token_type";
 
 	/**
 	 * The Action string to open the implementation of the {@link AuthenticationActivity}
@@ -50,12 +51,12 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
 
 	@Override
 	public Bundle addAccount(AccountAuthenticatorResponse response, String accountType, String authTokenType, String[] requiredFeatures, Bundle options) throws NetworkErrorException {
-		return createAuthBundle(response, accountType, null);
+		return createAuthBundle(response, accountType, authTokenType, null);
 	}
 
 	@Override
 	public Bundle getAuthToken(AccountAuthenticatorResponse response, Account account, String authTokenType, Bundle options) throws NetworkErrorException {
-		return createAuthBundle(response, account.type, account.name);
+		return createAuthBundle(response, account.type, authTokenType, account.name);
 	}
 
 	/**
@@ -63,13 +64,15 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
 	 *
 	 * @param response    needed parameter
 	 * @param accountType The account Type
+	 * @param tokenType   The requested token type
 	 * @param accountName The name of the account
 	 * @return a bundle to open the activity
 	 */
-	private Bundle createAuthBundle(AccountAuthenticatorResponse response, String accountType, String accountName) {
+	private Bundle createAuthBundle(AccountAuthenticatorResponse response, String accountType, String tokenType, String accountName) {
 		Intent intent = new Intent(action);
 		intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
 		intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, accountType);
+		intent.putExtra(KEY_TOKEN_TYPE, tokenType);
 		if (null != accountName) {
 			intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, accountName);
 		}

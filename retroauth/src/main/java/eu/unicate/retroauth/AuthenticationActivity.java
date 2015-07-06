@@ -32,6 +32,7 @@ import android.support.v7.app.AppCompatActivity;
 public abstract class AuthenticationActivity extends AppCompatActivity {
 
 	private String accountType;
+	private String tokenType;
 	private String accountName;
 	private AccountAuthenticatorResponse mAccountAuthenticatorResponse = null;
 	private Bundle mResultBundle = null;
@@ -52,6 +53,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 		}
 		accountType = intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE);
 		accountName = intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+		tokenType = intent.getStringExtra(AccountAuthenticator.KEY_TOKEN_TYPE);
 	}
 
 	/**
@@ -127,4 +129,22 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 	protected String getAccountName() {
 		return accountName;
 	}
+
+	/**
+	 * @return The requested account type if available. otherwise <code>null</code>
+	 */
+	@Nullable
+	protected String getRequestedAccountType() {
+		return accountType;
+	}
+
+	/**
+	 * @return The requested token type if available. otherwise <code>null</code>
+	 */
+	@Nullable
+	protected String getRequestedTokenType() {
+		return tokenType;
+	}
+
+
 }

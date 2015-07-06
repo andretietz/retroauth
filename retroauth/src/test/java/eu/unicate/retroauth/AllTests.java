@@ -7,6 +7,6 @@ import org.junit.runners.Suite;
  * TODO
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({AccountHelperTests.class})
+@Suite.SuiteClasses({AuthAccountManagerTests.class})
 public class AllTests {
 }

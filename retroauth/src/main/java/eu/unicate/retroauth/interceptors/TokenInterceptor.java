@@ -50,6 +50,7 @@ public abstract class TokenInterceptor implements RequestInterceptor {
 
 	/**
 	 * Sets the Token to use
+	 *
 	 * @param token Token you want to use
 	 */
 	public void setToken(String token) {
@@ -58,6 +59,7 @@ public abstract class TokenInterceptor implements RequestInterceptor {
 
 	/**
 	 * Sets if the TokenInterceptor will be used within the next call or not
+	 *
 	 * @param ignore <code>false</code> if you don't want to ignore this TokenInterceptor
 	 */
 	public void setIgnore(boolean ignore) {
@@ -71,8 +73,9 @@ public abstract class TokenInterceptor implements RequestInterceptor {
 
 	/**
 	 * Sets up the Token into the request
+	 *
 	 * @param facade The facade to manipulate the request
-	 * @param token the Token to set up
+	 * @param token  the Token to set up
 	 */
 	public abstract void injectToken(RequestFacade facade, String token);
 }
