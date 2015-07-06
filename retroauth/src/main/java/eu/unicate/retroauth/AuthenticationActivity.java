@@ -67,6 +67,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 	 */
 	protected void finalizeAuthentication(@NonNull String accountName, @NonNull String tokenType, @NonNull String token, @Nullable Bundle userData) {
 		AccountManager accountManager = AccountManager.get(this);
+		AuthAccountManager aam = AuthAccountManager.get(this);
 		Account account = getAccount(accountManager);
 		mResultBundle = new Bundle();
 		mResultBundle.putString(AccountManager.KEY_AUTHTOKEN, token);
@@ -78,6 +79,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 			accountManager.addAccountExplicitly(account, null, userData);
 		}
 		accountManager.setAuthToken(account, tokenType, token);
+		aam.setActiveUser(accountName, accountType);
 		finish();
 	}
 

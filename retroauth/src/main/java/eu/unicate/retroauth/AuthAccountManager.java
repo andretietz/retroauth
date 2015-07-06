@@ -18,6 +18,7 @@ package eu.unicate.retroauth;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.accounts.AccountManagerFuture;
 import android.accounts.OperationCanceledException;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -97,7 +98,7 @@ public final class AuthAccountManager {
 	 */
 	@Nullable
 	public Account getActiveAccount(String accountType, boolean showDialog) {
-		return getAccountByName(accountType, getActiveAccountName(accountType, showDialog));
+		return getAccountByName(getActiveAccountName(accountType, showDialog), accountType);
 	}
 
 	/**
@@ -195,15 +196,15 @@ public final class AuthAccountManager {
 	 * Sets an active user. If you handle with multiple accounts you can setup an active user.
 	 * The token of the active user will be taken for all future requests
 	 *
-	 * @param accountType Account type of the active user
 	 * @param accountName name of the account
+	 * @param accountType Account type of the active user
 	 * @return the active account or <code>null</code> if the account could not be found
 	 */
 	@SuppressLint("CommitPrefEdits")
-	public Account setActiveUser(String accountType, String accountName) {
+	public Account setActiveUser(String accountName, String accountType) {
 		SharedPreferences preferences = context.getSharedPreferences(accountType, Context.MODE_PRIVATE);
 		preferences.edit().putString(RETROAUTH_ACCOUNTNAME_KEY, accountName).commit();
-		return getAccountByName(accountType, accountName);
+		return getAccountByName(accountName, accountType);
 	}
 
 	/**
@@ -286,7 +287,7 @@ public final class AuthAccountManager {
 									if (choosenAccount >= accounts.length) {
 										subscriber.onNext(null);
 									} else {
-										setActiveUser(accountType, accounts[choosenAccount].name);
+										setActiveUser(accounts[choosenAccount].name, accountType);
 										SharedPreferences preferences = context.getSharedPreferences(accountType, Context.MODE_PRIVATE);
 										preferences.edit().putString(RETROAUTH_ACCOUNTNAME_KEY, accounts[choosenAccount].name).apply();
 										subscriber.onNext(accounts[choosenAccount].name);
