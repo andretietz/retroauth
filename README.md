@@ -50,10 +50,11 @@ i.e.
 </resources>
 ```
 ### 2. Add Service to manifest
+To do so, we need an authenticator.xml provided as meta-data in the manifest
 ```xml
         ...
         <service
-            android:name="eu.unicate.retroauth.AuthenticationService"
+            android:name=".SomeAuthenticationService"
             android:process=":auth"
             android:exported="false">
             <intent-filter>
@@ -67,8 +68,6 @@ i.e.
     </application>
 </manifest>
 ```
-We need an authenticator.xml provided as meta-data in the manifest. This tells the Android System
-which Activity to call when an Account of the given accountType is requested.
 
 Make sure, that your authenticator.xml provides the activity action to open the login
 ```xml

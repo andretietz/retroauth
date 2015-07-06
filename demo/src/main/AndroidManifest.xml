@@ -22,7 +22,6 @@
 
         <service
             android:name="eu.unicate.retroauth.AuthenticationService"
-            android:process=":auth"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator"/>
