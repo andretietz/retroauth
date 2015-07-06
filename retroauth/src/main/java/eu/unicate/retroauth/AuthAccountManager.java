@@ -75,7 +75,7 @@ public final class AuthAccountManager {
 	 * TODO
 	 */
 	@Nullable
-	public Account getActiveAccount(String accountType, String accountName) {
+	public Account getAccountByName(String accountName, String accountType) {
 		// if there's no name, there's no account
 		if (accountName == null) return null;
 		Account[] accounts = accountManager.getAccountsByType(accountType);

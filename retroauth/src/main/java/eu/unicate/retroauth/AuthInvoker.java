@@ -257,7 +257,7 @@ final class AuthInvoker<T> {
 		return Observable.create(new OnSubscribe<Account>() {
 			@Override
 			public void call(Subscriber<? super Account> subscriber) {
-				subscriber.onNext(authAccountManager.getActiveAccount(serviceInfo.accountType, name));
+				subscriber.onNext(authAccountManager.getAccountByName(serviceInfo.accountType, name));
 				subscriber.onCompleted();
 			}
 		});
