@@ -37,7 +37,7 @@ Add it as dependency:
 compile 'eu.unicate.android:retroauth:0.1.3-beta'
 ```
 
-### 1. Create AccountType and TokenType(s)
+### 1. Create 3 strings in your strings.xml
 i.e.
 ``` xml
 <resources>
@@ -46,11 +46,64 @@ i.e.
 	<string name="auth_account_type">eu.unicate.retroauth.demo.account</string>
 	<!-- String for the type of token you're using. -->
 	<string name="auth_token_type">eu.unicate.retroauth.demo.token</string>
+	<!-- String for the Action to open the activity to login if necessary -->
+	<string name="authentication_action">eu.unicate.auth.action.AUTH</string>
 	...
 </resources>
 ```
-### 2. Add Service to manifest
-To do so, we need an authenticator.xml provided as meta-data in the manifest
+### 2. Create an Activity (or use one you already have) where the user can login. This Activity must extend from AuthenticationActivity and call finalizeAuthentication when the authentication finished
+i.e. (see Demo for an example)
+
+```java
+public class LoginActivity extends AuthenticationActivity {
+   ...
+   private void someLoginMethod() {
+       String user;
+       String token;
+       Bundle additionalUserData; // nullable
+       ... // do login work here and make sure, that you provide at least a user and a token String
+       // the Token type is the one you defined in Step 1
+       finalizeAuthentication(user, getString(R.string.auth_token_type), token, additionalUserData);
+   }
+   ...
+}
+```
+Make sure your LoginActivity has the intent filter in the manifest:
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<manifest>
+...
+       <activity android:name=".LoginActivity">
+           <intent-filter>
+               <!-- THIS MUST BE THE SAME STRING AS DEFINED IN STEP 1 (sadly the resource string cannot be used for that) -->
+               <action android:name="eu.unicate.auth.action.AUTH"/>
+               <category android:name="android.intent.category.DEFAULT"/>
+           </intent-filter>
+       </activity>
+...
+</manifest>
+```
+### 3. Implement a very basic AuthenticationService
+```java
+public class SomeAuthenticationService extends AuthenticationService {
+	@Override
+	public String getLoginAction(Context context) {
+	    // this is used only to provide the action for the LoginActivity to open
+		return context.getString(R.string.authentication_action); // <=  This is the String provided in Step 1
+	}
+}
+```
+Provide a authenticator.xml:
+```xml
+<account-authenticator xmlns:android="http://schemas.android.com/apk/res/android"
+					   android:accountType="@string/auth_account_type"  <= This is the String provided in Step 1
+					   android:icon="@mipmap/ic_launcher"
+					   android:smallIcon="@mipmap/ic_launcher"
+					   android:label="@string/app_name" />
+```
+
+Add the Service to the Manifest:
+
 ```xml
         ...
         <service
@@ -68,60 +121,7 @@ To do so, we need an authenticator.xml provided as meta-data in the manifest
     </application>
 </manifest>
 ```
-
-Make sure, that your authenticator.xml provides the activity action to open the login
-```xml
-<account-authenticator xmlns:android="http://schemas.android.com/apk/res/android"
-                       xmlns:retroauth="http://schemas.android.com/apk/res-auto"
-                       retroauth:authenticationAction="some.path.to.LoginActivity"
-					   android:accountType="@string/auth_account_type"  <= This is the String provided in Step 1
-					   android:icon="@mipmap/ic_launcher"
-					   android:smallIcon="@mipmap/ic_launcher"
-					   android:label="@string/app_name" />
-```
-The authenticationAction can be:
-* Full canonial path of the login activity
-* Custom Action
-
-### 2. Create an Activity (or use one you already have) where the user can login.
-i.e. (see Demo for an example)
-
-```java
-public class LoginActivity extends AuthenticationActivity {
-   ...
-   private void someLoginMethod() {
-       String user;
-       String token;
-       Bundle additionalUserData; // nullable
-       ... // do login work here and make sure, that you provide at least a user and a token String
-       // the Token type is the one you defined in Step 1
-       finalizeAuthentication(user, getString(R.string.auth_token_type), token, additionalUserData);
-   }
-   ...
-}
-```
-
-
-Make sure your LoginActivity is in the manifest:
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<manifest>
-...
-       <!-- if the fullpath is setup as retroauth:authenticationAction in the authenticator.xml -->
-       <activity android:name=".LoginActivity" />
-
-       <!-- OR if a custom action is setup as retroauth:authenticationAction in the authenticator.xml -->
-       <activity android:name=".LoginActivity" >
-           <intent-filter>
-               <action android:name="my.custom.action"/>
-               <category android:name="android.intent.category.DEFAULT"/>
-           </intent-filter>
-       </activity>
-...
-</manifest>
-```
-
-### 3. Create your REST interface
+### 4. Create your REST interface (as you are used to do with retrofit)
 * Add authentication information to it:
 
 ```java
@@ -145,8 +145,7 @@ public interface SomeService {
     void someAuthenticatedAsyncCall(Callback<JsonElement> callback);
 }
 ```
-
-### 4. Create your Service
+### 5. Create your Service
 ```java
 // create your RestAdapter as you would do it with retrofit as well
 // just use AuthRestAdapter instead of RestAdapter
@@ -175,7 +174,6 @@ service = restAdapter.create(context, new SomeTokenInterceptor(), SomeAuthentica
 Have fun trying!
 
 ## What's left to do?
-* JavaDoc
 * Tests. Right now there are no tests whatsoever.
 * Proper Exceptions
 

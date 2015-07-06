@@ -1,6 +1,9 @@
 # Demo project
 As you'll see, the Demo Project contains only 4 small classes.
 
+## DemoLoginService
+This is a 12 line file, which just forwardes the auth action string into the AccountAuthenticator
+
 ## MainActivity
 This is an activity as you will have it probably as well. In this I create the AuthRestAdapter and the api service.
 it will call the githup api for my repositories. Take a look to the console output here. It should
