@@ -40,7 +40,7 @@ import rx.Subscriber;
  */
 public final class AuthAccountManager {
 
-	private static final String RETROAUTH_ACCOUNTNAME_KEY = "current";
+	private static final String RETROAUTH_ACCOUNTNAME_KEY = "retroauthActiveAccount";
 	private static AuthAccountManager instance;
 	private Context context;
 	private AccountManager accountManager;
