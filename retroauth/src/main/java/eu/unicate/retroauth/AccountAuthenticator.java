@@ -33,18 +33,19 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
 
 	/**
 	 * The Action string to open the implementation of the {@link AuthenticationActivity}
+	 * TODO: improve, maybe remove
 	 */
-	private final Intent actionIntent;
+	private final String action;
 
 	/**
 	 * This creates the AccountAuthenticator
 	 *
 	 * @param context The context (needed by the {@link AbstractAccountAuthenticator}
-	 * @param actionIntent  The Action String to open the Activity to login
+	 * @param action  The Action String to open the Activity to login
 	 */
-	public AccountAuthenticator(Context context, Intent actionIntent) {
+	public AccountAuthenticator(Context context, String action) {
 		super(context);
-		this.actionIntent = actionIntent;
+		this.action = action;
 	}
 
 	@Override
@@ -66,15 +67,14 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
 	 * @return a bundle to open the activity
 	 */
 	private Bundle createAuthBundle(AccountAuthenticatorResponse response, String accountType, String accountName) {
-		actionIntent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
-		actionIntent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, accountType);
+		Intent intent = new Intent(action);
+		intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
+		intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, accountType);
 		if (null != accountName) {
-			actionIntent.putExtra(AccountManager.KEY_ACCOUNT_NAME, accountName);
-		} else {
-			actionIntent.removeExtra(AccountManager.KEY_ACCOUNT_NAME);
+			intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, accountName);
 		}
 		final Bundle bundle = new Bundle();
-		bundle.putParcelable(AccountManager.KEY_INTENT, actionIntent);
+		bundle.putParcelable(AccountManager.KEY_INTENT, intent);
 		return bundle;
 	}
 
