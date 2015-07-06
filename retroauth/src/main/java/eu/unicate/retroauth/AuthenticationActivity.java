@@ -70,7 +70,6 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 		AuthAccountManager aam = AuthAccountManager.get(this);
 		Account account = getAccount(accountManager);
 		mResultBundle = new Bundle();
-		mResultBundle.putString(AccountManager.KEY_AUTHTOKEN, token);
 		mResultBundle.putString(AccountManager.KEY_ACCOUNT_NAME, accountName);
 		mResultBundle.putString(AccountManager.KEY_ACCOUNT_TYPE, accountType);
 		if (null == account) {

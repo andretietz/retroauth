@@ -294,7 +294,12 @@ final class AuthInvoker<T> {
 			future = accountManager.getAuthToken(account, serviceInfo.tokenType, null, activity, null, null);
 		}
 		Bundle result = future.getResult();
-		return result.getString(AccountManager.KEY_AUTHTOKEN);
+		String token = result.getString(AccountManager.KEY_AUTHTOKEN);
+		// even if the AuthenticationActivity set the KEY_AUTHTOKEN in the result bundle,
+		// it does not appear here anymore, so peek the token
+		if(token == null)
+			token = accountManager.peekAuthToken(account, serviceInfo.tokenType);
+		return token;
 	}
 
 }
