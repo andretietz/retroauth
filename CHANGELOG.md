@@ -1,3 +1,9 @@
+## 0.1.4-beta (2015-07-10)
+
+* Bugfix:
+ * Right after the first login, the Token was not correctly appended to the TokenInterceptor
+* Lots of documentation
+
 ## 0.1.3-beta (2015-07-04)
 
 * Demo App:
