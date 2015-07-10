@@ -34,15 +34,12 @@ public class AuthAccountManagerTests {
 		authAccountManager = AuthAccountManager.get(context, accountManager);
 	}
 
-
 	@Test
 	public void getActiveAccountName() {
 		SharedPreferences sharedPreferences = Mockito.mock(SharedPreferences.class);
 		when(context.getSharedPreferences(anyString(), anyInt())).thenReturn(sharedPreferences);
 
-		when(accountManager.getAccountsByType(anyString()))
-				.thenReturn(new Account[]{}); // no account stored
-
+		when(accountManager.getAccountsByType(anyString())).thenReturn(new Account[]{}); // no account stored
 
 		// No account in the account manager, should return null
 		String accountName = authAccountManager.getActiveAccountName("testAccountType", false);
@@ -54,13 +51,11 @@ public class AuthAccountManagerTests {
 		Assert.assertNotNull(accountName);
 		Assert.assertEquals("testAccountName", accountName);
 
-
 		// if there's no active account expect null
 		when(accountManager.getAccountsByType(anyString())).thenReturn(new Account[]{new Account("testAccountName", "testAccountType"), new Account("testAccountName2", "testAccountType")}); // multiple accounts
 		when(sharedPreferences.getString(anyString(), (String) any())).thenReturn(null); // no account active
 		accountName = authAccountManager.getActiveAccountName("testAccountType", false);
 		Assert.assertNull(accountName);
-
 
 		// if there's an active account expect it's name
 		when(accountManager.getAccountsByType(anyString())).thenReturn(new Account[]{new Account("testAccountName", "testAccountType"), new Account("testAccountName2", "testAccountType")}); // multiple accounts
@@ -74,8 +69,6 @@ public class AuthAccountManagerTests {
 		when(sharedPreferences.getString(anyString(), (String) any())).thenReturn("some-unknown-account-name"); // one account active
 		accountName = authAccountManager.getActiveAccountName("testAccountType", false);
 		Assert.assertNull(accountName);
-
-
 	}
 
 	@Test
@@ -103,5 +96,4 @@ public class AuthAccountManagerTests {
 		activeAccount = authAccountManager.getAccountByName("nonexistingAccountName", "testAccountType");
 		Assert.assertNull(activeAccount);
 	}
-
 }
