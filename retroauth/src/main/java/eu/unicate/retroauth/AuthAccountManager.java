@@ -1,13 +1,31 @@
+/*
+ * Copyright (c) 2015 Andre Tietz
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package eu.unicate.retroauth;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.accounts.AccountManagerFuture;
 import android.accounts.OperationCanceledException;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -22,7 +40,7 @@ import rx.Subscriber;
  */
 public final class AuthAccountManager {
 
-	private static final String RETROAUTH_ACCOUNTNAME_KEY = "current";
+	private static final String RETROAUTH_ACCOUNTNAME_KEY = "retroauthActiveAccount";
 	private static AuthAccountManager instance;
 	private Context context;
 	private AccountManager accountManager;
@@ -31,49 +49,90 @@ public final class AuthAccountManager {
 	}
 
 	/**
-	 * @param context Android Context
+	 * @param context the Android Context
 	 * @return singleton instance of the AuthAccountManager
 	 */
 	public static AuthAccountManager get(Context context) {
 		if (instance == null) {
 			instance = new AuthAccountManager();
 		}
-		instance.init(context);
+		instance.init(context, AccountManager.get(context));
 		return instance;
 	}
 
-	private void init(Context context) {
-		this.context = context;
-		accountManager = AccountManager.get(context);
+	/**
+	 * This method will be mainly used for testing. Please use {@link AuthAccountManager#get(Context)} instead.
+	 *
+	 * @param context        the Android Context
+	 * @param accountManager an AccountManager to use
+	 * @return singleton instance of the AuthAccountManager
+	 */
+	public static AuthAccountManager get(Context context, AccountManager accountManager) {
+		if (instance == null) {
+			instance = new AuthAccountManager();
+		}
+		instance.init(context, accountManager);
+		return instance;
 	}
 
 	/**
-	 * TODO
+	 * initializes the class with a context and an AccountManager
+	 * @param context
+	 * @param accountManager
+	 */
+	private void init(Context context, AccountManager accountManager) {
+		this.context = context;
+		this.accountManager = accountManager;
+	}
+
+	/**
+	 * Gets the currently active account by the account type. The active account name is determined
+	 * by the method {@link AuthAccountManager#getActiveAccountName(String, boolean)}
+	 *
+	 * @param accountType Account Type you want to retreive
+	 * @param showDialog  If there is more than one account and there is no
+	 *                    current active account you can show an AlertDialog to
+	 *                    let the user choose one. If you want to do so, set this to <code>true</code>
+	 *                    else to <code>false</code>.
+	 * @return the Active account or <code>null</code>
 	 */
 	@Nullable
 	public Account getActiveAccount(String accountType, boolean showDialog) {
-		return getActiveAccount(accountType, getActiveAccountName(accountType, showDialog));
+		return getAccountByName(getActiveAccountName(accountType, showDialog), accountType);
 	}
 
 	/**
-	 * TODO
+	 * Gets an account by the name of the account and it's type
+	 *
+	 * @param accountName Name of the Account you want to get
+	 * @param accountType Account Type of which your account is
+	 * @return The Account by Name or <code>null</code>
 	 */
 	@Nullable
-	public Account getActiveAccount(String accountType, String accountName) {
+	public Account getAccountByName(String accountName, String accountType) {
 		// if there's no name, there's no account
 		if (accountName == null) return null;
 		Account[] accounts = accountManager.getAccountsByType(accountType);
+		if (accounts.length == 0) return null;
 		if (accounts.length > 1) {
 			for (Account account : accounts) {
 				if (accountName.equals(account.name)) return account;
 			}
-			throw new RuntimeException("Could not find account with name: " + accountName);
+			return null;
 		}
 		return accounts[0];
 	}
 
 	/**
-	 * TODO
+	 * Get the currently active account name
+	 *
+	 * @param accountType Type of the Account you want the usernames from <code>null</code> for
+	 *                    all types
+	 * @param showDialog  If there is more than one account and there is no
+	 *                    current active account you can show an AlertDialog to
+	 *                    let the user choose one. If you want to do so, set this to <code>true</code>
+	 *                    else to <code>false</code>.
+	 * @return The currently active account name or <code>null</code>
 	 */
 	@Nullable
 	public String getActiveAccountName(String accountType, boolean showDialog) {
@@ -92,9 +151,16 @@ public final class AuthAccountManager {
 		} else {
 			return accounts[0].name;
 		}
-		return showDialog ? showAccountPicker(accountType).toBlocking().first() : null;
+		return showDialog ? showAccountPickerDialog(accountType).toBlocking().first() : null;
 	}
 
+	/**
+	 * Returns the Token of the currently active user
+	 *
+	 * @param accountType Account type of the user you want the token from
+	 * @param tokenType   Token type of the token you want to retrieve
+	 * @return The Token or <code>null</code>
+	 */
 	@Nullable
 	public String getTokenFromActiveUser(String accountType, String tokenType) {
 		Account activeAccount = getActiveAccount(accountType, false);
@@ -102,87 +168,143 @@ public final class AuthAccountManager {
 		return accountManager.peekAuthToken(activeAccount, tokenType);
 	}
 
-	public void getUserData(String accountType, String key) {
-		accountManager.getUserData(getActiveAccount(accountType, false), key);
+	/**
+	 * Returns userdata which has to be setup while calling {@link AuthenticationActivity#finalizeAuthentication(String, String, String, Bundle)}
+	 *
+	 * @param accountType Account type to get the active account
+	 * @param key         Key wiht which you want to request the value
+	 * @return The Value or <code>null</code> if the account or the key does not exist
+	 */
+	@SuppressWarnings("unused")
+	public String getUserData(String accountType, String key) {
+		return accountManager.getUserData(getActiveAccount(accountType, false), key);
 	}
 
+	/**
+	 * Invalidates the Token of the given type for the active user
+	 *
+	 * @param accountType Account type of the active user
+	 * @param tokenType   Token type you want to invalidate
+	 */
 	public void invalidateTokenFromActiveUser(String accountType, String tokenType) {
 		String token = getTokenFromActiveUser(accountType, tokenType);
 		if (token == null) return;
 		accountManager.invalidateAuthToken(accountType, token);
 	}
 
+	/**
+	 * Sets an active user. If you handle with multiple accounts you can setup an active user.
+	 * The token of the active user will be taken for all future requests
+	 *
+	 * @param accountName name of the account
+	 * @param accountType Account type of the active user
+	 * @return the active account or <code>null</code> if the account could not be found
+	 */
 	@SuppressLint("CommitPrefEdits")
-	public Account setActiveUser(String accountType, String accountName) {
+	public Account setActiveUser(String accountName, String accountType) {
 		SharedPreferences preferences = context.getSharedPreferences(accountType, Context.MODE_PRIVATE);
 		preferences.edit().putString(RETROAUTH_ACCOUNTNAME_KEY, accountName).commit();
-		return getActiveAccount(accountType, accountName);
+		return getAccountByName(accountName, accountType);
 	}
 
+	/**
+	 * Unset the active user.
+	 *
+	 * @param accountType The account type where you want to unset it's current
+	 */
 	@SuppressLint("CommitPrefEdits")
 	public void resetActiveUser(String accountType) {
 		SharedPreferences preferences = context.getSharedPreferences(accountType, Context.MODE_PRIVATE);
 		preferences.edit().remove(RETROAUTH_ACCOUNTNAME_KEY).commit();
 	}
 
-	public void addAccount(@NonNull Activity activity, @NonNull String accountType, String tokenType) {
+	/**
+	 * Starts the Activity to start the login process which adds the account.
+	 *
+	 * @param activity    The current active activity
+	 * @param accountType The account type you want to create (this account type will be available on {@link AuthenticationActivity#getRequestedAccountType()} then
+	 * @param tokenType   The tokentype you want to request. This is an optional parameter and can be <code>null</code> (this token type will be available on {@link AuthenticationActivity#getRequestedTokenType()} then
+	 */
+	public void addAccount(@NonNull Activity activity, @NonNull String accountType, @Nullable String tokenType) {
 		accountManager.addAccount(accountType, tokenType, null, null, activity, null, null);
 	}
 
-	private Observable<String> showAccountPicker(final String accountTypeParam) {
-		final Account[] accounts = accountManager.getAccountsByType(accountTypeParam);
+
+	/**
+	 * Shows an account picker for the user to choose an account
+	 *
+	 * @param accountType     Account type of the accounts the user can choose
+	 * @param onItemSelected  a listener to get a callback when the user selects on item
+	 * @param onOkClicked     a listener for the click on the ok button
+	 * @param onCancelClicked a listener for the click on the cancel button
+	 * @param canAddAccount   if <code>true</code> the user has the option to add an account
+	 * @return the accounts the user chooses from
+	 */
+	public Account[] showAccountPickerDialog(String accountType, DialogInterface.OnClickListener onItemSelected, DialogInterface.OnClickListener onOkClicked, DialogInterface.OnClickListener onCancelClicked, boolean canAddAccount) {
+		final Account[] accounts = accountManager.getAccountsByType(accountType);
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		final ArrayList<String> accountList = new ArrayList<>();
+		for (Account account : accounts) {
+			accountList.add(account.name);
+		}
+		if (canAddAccount)
+			accountList.add(context.getString(R.string.add_account_button_label));
+		builder.setTitle(context.getString(R.string.choose_account_label));
+		builder.setSingleChoiceItems(accountList.toArray(new String[accountList.size()]), 0, onItemSelected);
+		builder.setPositiveButton(android.R.string.ok, onOkClicked);
+		builder.setNegativeButton(android.R.string.cancel, onCancelClicked);
+		builder.show();
+		return accounts;
+	}
+
+	/**
+	 * Shows an account picker dialog to let the user choose an account
+	 *
+	 * @param accountType Account type of the accounts the user can choose
+	 * @return an observable that emmits a string with the name of the account, the user chose or
+	 * <code>null</code> if the current context was not an activity
+	 */
+	private Observable<String> showAccountPickerDialog(final String accountType) {
+		final Account[] accounts = accountManager.getAccountsByType(accountType);
 		return Observable.create(new Observable.OnSubscribe<String>() {
 			int choosenAccount = 0;
-			String accountType;
 
 			@Override
 			public void call(final Subscriber<? super String> subscriber) {
 				// make sure the context is an activity. in case of a service
 				// this can and should not work
 				if (context instanceof Activity) {
-					this.accountType = accountTypeParam;
-					AlertDialog.Builder builder = new AlertDialog.Builder(context);
-					final ArrayList<String> accountList = new ArrayList<>();
-					for (Account account : accounts) {
-						accountList.add(account.name);
-					}
-					accountList.add(context.getString(R.string.add_account_button_label));
-					builder.setTitle(context.getString(R.string.choose_account_label));
-					builder.setSingleChoiceItems(accountList.toArray(new String[accountList.size()]), 0, new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							choosenAccount = which;
-						}
-					});
-					builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							dialog.dismiss();
-							if (choosenAccount >= accounts.length) {
-								subscriber.onNext(null);
-							} else {
-								setActiveUser(accountType, accounts[choosenAccount].name);
-								SharedPreferences preferences = context.getSharedPreferences(accountType, Context.MODE_PRIVATE);
-								preferences.edit().putString(RETROAUTH_ACCOUNTNAME_KEY, accounts[choosenAccount].name).apply();
-								subscriber.onNext(accounts[choosenAccount].name);
-							}
-							subscriber.onCompleted();
-						}
-					});
-					builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							dialog.cancel();
-							subscriber.onError(new OperationCanceledException());
-						}
-					});
-					builder.show();
+					showAccountPickerDialog(accountType,
+							new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									choosenAccount = which;
+								}
+							},
+							new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									if (choosenAccount >= accounts.length) {
+										subscriber.onNext(null);
+									} else {
+										setActiveUser(accounts[choosenAccount].name, accountType);
+										SharedPreferences preferences = context.getSharedPreferences(accountType, Context.MODE_PRIVATE);
+										preferences.edit().putString(RETROAUTH_ACCOUNTNAME_KEY, accounts[choosenAccount].name).apply();
+										subscriber.onNext(accounts[choosenAccount].name);
+									}
+									subscriber.onCompleted();
+								}
+							},
+							new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									subscriber.onError(new OperationCanceledException());
+								}
+							}, true);
 				} else {
 					subscriber.onNext(null);
 				}
 			}
-		})
-				// dialogs have to run on the main thread
-				.subscribeOn(AndroidScheduler.mainThread());
+		}).subscribeOn(AndroidScheduler.mainThread()); // dialogs have to run on the main thread
 	}
 }

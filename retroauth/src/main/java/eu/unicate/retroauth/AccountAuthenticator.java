@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2015 Andre Tietz
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package eu.unicate.retroauth;
 
 import android.accounts.AbstractAccountAuthenticator;
@@ -10,10 +26,16 @@ import android.content.Intent;
 import android.os.Bundle;
 
 /**
- * This is a the AccountAuthenticator
+ * This AccountAuthenticator is a very basic implementation of Android's {@link android.accounts.AbstractAccountAuthenticator}
  */
 public class AccountAuthenticator extends AbstractAccountAuthenticator {
 
+	public static final String KEY_TOKEN_TYPE = "account_token_type";
+
+	/**
+	 * The Action string to open the implementation of the {@link AuthenticationActivity}
+	 * TODO: improve, maybe remove
+	 */
 	private final String action;
 
 	/**
@@ -29,12 +51,12 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
 
 	@Override
 	public Bundle addAccount(AccountAuthenticatorResponse response, String accountType, String authTokenType, String[] requiredFeatures, Bundle options) throws NetworkErrorException {
-		return createAuthBundle(response, accountType, null);
+		return createAuthBundle(response, accountType, authTokenType, null);
 	}
 
 	@Override
 	public Bundle getAuthToken(AccountAuthenticatorResponse response, Account account, String authTokenType, Bundle options) throws NetworkErrorException {
-		return createAuthBundle(response, account.type, account.name);
+		return createAuthBundle(response, account.type, authTokenType, account.name);
 	}
 
 	/**
@@ -42,13 +64,15 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
 	 *
 	 * @param response    needed parameter
 	 * @param accountType The account Type
+	 * @param tokenType   The requested token type
 	 * @param accountName The name of the account
 	 * @return a bundle to open the activity
 	 */
-	private Bundle createAuthBundle(AccountAuthenticatorResponse response, String accountType, String accountName) {
+	private Bundle createAuthBundle(AccountAuthenticatorResponse response, String accountType, String tokenType, String accountName) {
 		Intent intent = new Intent(action);
 		intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
 		intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, accountType);
+		intent.putExtra(KEY_TOKEN_TYPE, tokenType);
 		if (null != accountName) {
 			intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, accountName);
 		}

@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2015 Andre Tietz
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package eu.unicate.retroauth;
 
 import android.accounts.Account;
@@ -241,7 +257,7 @@ final class AuthInvoker<T> {
 		return Observable.create(new OnSubscribe<Account>() {
 			@Override
 			public void call(Subscriber<? super Account> subscriber) {
-				subscriber.onNext(authAccountManager.getActiveAccount(serviceInfo.accountType, name));
+				subscriber.onNext(authAccountManager.getAccountByName(name, serviceInfo.accountType));
 				subscriber.onCompleted();
 			}
 		});
@@ -277,8 +293,16 @@ final class AuthInvoker<T> {
 		} else {
 			future = accountManager.getAuthToken(account, serviceInfo.tokenType, null, activity, null, null);
 		}
+
 		Bundle result = future.getResult();
-		return result.getString(AccountManager.KEY_AUTHTOKEN);
+		String token = result.getString(AccountManager.KEY_AUTHTOKEN);
+		// even if the AuthenticationActivity set the KEY_AUTHTOKEN in the result bundle,
+		// it got stripped out by the AccountManager
+		if(token == null) {
+			// try using the newly created account to peek the token
+			token = accountManager.peekAuthToken(new Account(result.getString(AccountManager.KEY_ACCOUNT_NAME), result.getString(AccountManager.KEY_ACCOUNT_TYPE)), serviceInfo.tokenType);
+		}
+		return token;
 	}
 
 }

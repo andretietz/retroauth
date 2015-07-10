@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2015 Andre Tietz
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package eu.unicate.retroauth;
 
 import android.accounts.Account;
@@ -11,11 +27,12 @@ import android.support.v7.app.AppCompatActivity;
 
 
 /**
- * You have to extend from this activity in order to use the library
+ * Activity that creates the Account
  */
 public abstract class AuthenticationActivity extends AppCompatActivity {
 
 	private String accountType;
+	private String tokenType;
 	private String accountName;
 	private AccountAuthenticatorResponse mAccountAuthenticatorResponse = null;
 	private Bundle mResultBundle = null;
@@ -36,6 +53,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 		}
 		accountType = intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE);
 		accountName = intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+		tokenType = intent.getStringExtra(AccountAuthenticator.KEY_TOKEN_TYPE);
 	}
 
 	/**
@@ -49,9 +67,9 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 	 */
 	protected void finalizeAuthentication(@NonNull String accountName, @NonNull String tokenType, @NonNull String token, @Nullable Bundle userData) {
 		AccountManager accountManager = AccountManager.get(this);
+		AuthAccountManager aam = AuthAccountManager.get(this);
 		Account account = getAccount(accountManager);
 		mResultBundle = new Bundle();
-		mResultBundle.putString(AccountManager.KEY_AUTHTOKEN, token);
 		mResultBundle.putString(AccountManager.KEY_ACCOUNT_NAME, accountName);
 		mResultBundle.putString(AccountManager.KEY_ACCOUNT_TYPE, accountType);
 		if (null == account) {
@@ -60,6 +78,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 			accountManager.addAccountExplicitly(account, null, userData);
 		}
 		accountManager.setAuthToken(account, tokenType, token);
+		aam.setActiveUser(accountName, accountType);
 		finish();
 	}
 
@@ -111,4 +130,22 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 	protected String getAccountName() {
 		return accountName;
 	}
+
+	/**
+	 * @return The requested account type if available. otherwise <code>null</code>
+	 */
+	@Nullable
+	protected String getRequestedAccountType() {
+		return accountType;
+	}
+
+	/**
+	 * @return The requested token type if available. otherwise <code>null</code>
+	 */
+	@Nullable
+	protected String getRequestedTokenType() {
+		return tokenType;
+	}
+
+
 }

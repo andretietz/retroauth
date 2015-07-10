@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-package eu.unicate.retroauth.annotations;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+package android.accounts;
 
 /**
- * This Annotation determins that the request which is annotated is an authenticated one
+ * Created by andre on 06.07.2015.
  */
-@Documented
-@Target(METHOD)
-@Retention(RUNTIME)
-public @interface Authenticated {
+public class Account {
+	public final String name;
+	public final String type;
+
+	public Account(String name, String type) {
+		this.name = name;
+		this.type = type;
+	}
 }
