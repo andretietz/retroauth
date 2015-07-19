@@ -7,4 +7,4 @@ android:
     - extra-android-m2repository
 
 script:
-  - ./gradlew clean test build
+  - ./gradlew clean :retroauth:test build
