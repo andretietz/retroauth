@@ -71,7 +71,7 @@ public class AuthInvokerTests {
 	@Test
 	public void invokeHappyCaseTest() throws Exception {
 		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
-		// the following methods are tested already by the RetroauthAccountManagerTests
+		// the following methods are tested already by the AuthAccountManagerTests
 		when(authAccountManager.getActiveAccountName(anyString(), anyBoolean())).thenReturn("testAccountName");
 		when(authAccountManager.getAccountByName(anyString(), anyString())).thenReturn(new Account("testAccountName", "testAccountType"));
 		when(authAccountManager.getAuthToken((Account) anyObject(), anyString(), anyString())).thenReturn("auth-token");
@@ -94,7 +94,7 @@ public class AuthInvokerTests {
 	@Test
 	public void invokeFailingRequestTest() throws Exception {
 		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
-		// the following methods are tested already by the RetroauthAccountManagerTests
+		// the following methods are tested already by the AuthAccountManagerTests
 		when(authAccountManager.getActiveAccountName(anyString(), anyBoolean())).thenReturn("testAccountName").thenReturn("testAccountName");
 		when(authAccountManager.getAccountByName(anyString(), anyString())).thenReturn(new Account("testAccountName", "testAccountType")).thenReturn(new Account("testAccountName", "testAccountType"));
 		when(authAccountManager.getAuthToken((Account) anyObject(), anyString(), anyString())).thenReturn("auth-token").thenReturn("auth-token");
@@ -117,7 +117,7 @@ public class AuthInvokerTests {
 	@Test
 	public void invokeFailingRetryTest() throws Exception {
 		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
-		// the following methods are tested already by the RetroauthAccountManagerTests
+		// the following methods are tested already by the AuthAccountManagerTests
 		when(authAccountManager.getActiveAccountName(anyString(), anyBoolean())).thenReturn("testAccountName").thenReturn("testAccountName");
 		when(authAccountManager.getAccountByName(anyString(), anyString())).thenReturn(new Account("testAccountName", "testAccountType")).thenReturn(new Account("testAccountName", "testAccountType"));
 		when(authAccountManager.getAuthToken((Account) anyObject(), anyString(), anyString())).thenReturn("auth-token").thenReturn("auth-token");
@@ -141,7 +141,7 @@ public class AuthInvokerTests {
 	@Test
 	public void invokeFailingTest() throws Exception {
 		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
-		// the following methods are tested already by the RetroauthAccountManagerTests
+		// the following methods are tested already by the AuthAccountManagerTests
 		when(authAccountManager.getActiveAccountName(anyString(), anyBoolean())).thenReturn("testAccountName");
 		when(authAccountManager.getAccountByName(anyString(), anyString())).thenReturn(new Account("testAccountName", "testAccountType"));
 		when(authAccountManager.getAuthToken((Account) anyObject(), anyString(), anyString())).thenReturn("auth-token");

@@ -19,7 +19,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RetroauthAccountManagerTests {
+public class AuthAccountManagerTests {
 
 	@Mock
 	AccountManager accountManager;
