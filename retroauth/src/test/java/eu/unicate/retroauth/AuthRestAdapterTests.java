@@ -27,7 +27,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Map;
 
 import eu.unicate.retroauth.annotations.Authenticated;
 import eu.unicate.retroauth.annotations.Authentication;
@@ -61,7 +60,8 @@ public class AuthRestAdapterTests {
 		builder.setEndpoint("http://localhost");
 		builder.setRequestInterceptor(new RequestInterceptor() {
 			@Override
-			public void intercept(RequestFacade request) {}
+			public void intercept(RequestFacade request) {
+			}
 		});
 		AuthRestAdapter build = builder.build();
 		AuthenticationRequestInterceptor authInterceptor = (AuthenticationRequestInterceptor) authRequestInterceptor.get(build);
@@ -69,11 +69,6 @@ public class AuthRestAdapterTests {
 		RequestInterceptor interceptor = (RequestInterceptor) requestInterceptor.get(authInterceptor);
 		Assert.assertNotNull(interceptor);
 	}
-
-	interface NoAnnotationService {
-		void someMethodWithoutAuthentication();
-	}
-
 
 	@Test
 	public void testServiceWithoutAnyAnnotationsTest() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
@@ -83,14 +78,9 @@ public class AuthRestAdapterTests {
 		AuthRestAdapter authRestAdapter = builder.build();
 		Method method = AuthRestAdapter.class.getDeclaredMethod("getServiceInfo", Context.class, Class.class, TokenInterceptor.class);
 		method.setAccessible(true);
-		method.invoke(authRestAdapter, context, NoAnnotationService.class , TokenInterceptor.BEARER_TOKENINTERCEPTOR);
-
-	}
-
-	// @Authentication is missing
-	interface MissingAnnotationService {
-		@Authenticated
-		void authenticated();
+		// calling getService info with the context, the service and some TokenInterceptor
+		ServiceInfo serviceInfo = (ServiceInfo) method.invoke(authRestAdapter, context, NoAnnotationService.class, TokenInterceptor.BEARER_TOKENINTERCEPTOR);
+		Assert.assertNotNull(serviceInfo);
 	}
 
 	@Test
@@ -102,29 +92,14 @@ public class AuthRestAdapterTests {
 		Method method = AuthRestAdapter.class.getDeclaredMethod("getServiceInfo", Context.class, Class.class, TokenInterceptor.class);
 		method.setAccessible(true);
 		try {
-			method.invoke(authRestAdapter, context, MissingAnnotationService.class , TokenInterceptor.BEARER_TOKENINTERCEPTOR);
+			// calling getService info with the context, the service and some TokenInterceptor
+			method.invoke(authRestAdapter, context, MissingAnnotationService.class, TokenInterceptor.BEARER_TOKENINTERCEPTOR);
 		} catch (InvocationTargetException e) {
 			Assert.assertEquals("MissingAnnotationService.authenticated: The Method authenticated contains the Authenticated " +
 							"Annotation, but the interface does not implement the Authentication Annotation",
 					e.getCause().getMessage());
 		}
 
-	}
-
-	@SuppressWarnings("ResourceType")
-	@Authentication(accountType = 0x71, tokenType = 0x72)
-	interface AnnotationService {
-
-		Observable<Object> unAuthenticated();
-
-		@Authenticated
-		void authenticatedAsync(Callback<Object> cb);
-
-		@Authenticated
-		Observable<Object> authenticatedRx();
-
-		@Authenticated
-		Object authenticatedBlocking();
 	}
 
 	@Test
@@ -145,18 +120,44 @@ public class AuthRestAdapterTests {
 		Assert.assertNotNull(serviceInfo.methodInfoCache);
 
 		for (Method method : serviceInfo.methodInfoCache.keySet()) {
-			if("unAuthenticated".equals(method.getName())) {
+			if ("unAuthenticated".equals(method.getName())) {
 				Assert.assertEquals(ServiceInfo.AuthRequestType.NONE, serviceInfo.methodInfoCache.get(method));
-			} else if("authenticatedAsync".equals(method.getName())) {
+			} else if ("authenticatedAsync".equals(method.getName())) {
 				Assert.assertEquals(ServiceInfo.AuthRequestType.ASYNC, serviceInfo.methodInfoCache.get(method));
-			} else if("authenticatedRx".equals(method.getName())) {
+			} else if ("authenticatedRx".equals(method.getName())) {
 				Assert.assertEquals(ServiceInfo.AuthRequestType.RXJAVA, serviceInfo.methodInfoCache.get(method));
-			} else if("authenticatedBlocking".equals(method.getName())) {
+			} else if ("authenticatedBlocking".equals(method.getName())) {
 				Assert.assertEquals(ServiceInfo.AuthRequestType.BLOCKING, serviceInfo.methodInfoCache.get(method));
 			} else {
 				Assert.fail();
 			}
 		}
+	}
+
+	interface NoAnnotationService {
+		void someMethodWithoutAuthentication();
+	}
+
+	// @Authentication is missing
+	interface MissingAnnotationService {
+		@Authenticated
+		void authenticated();
+	}
+
+	@SuppressWarnings("ResourceType")
+	@Authentication(accountType = 0x71, tokenType = 0x72)
+	interface AnnotationService {
+
+		Observable<Object> unAuthenticated();
+
+		@Authenticated
+		void authenticatedAsync(Callback<Object> cb);
+
+		@Authenticated
+		Observable<Object> authenticatedRx();
+
+		@Authenticated
+		Object authenticatedBlocking();
 	}
 
 }

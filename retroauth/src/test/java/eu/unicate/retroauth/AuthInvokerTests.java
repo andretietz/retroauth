@@ -65,7 +65,7 @@ public class AuthInvokerTests {
 
 	/**
 	 * This test covers the happy case.
-	 *
+	 * <p/>
 	 * request gets a usual response
 	 */
 	@Test
@@ -88,7 +88,7 @@ public class AuthInvokerTests {
 	 * This tests covers the case that if there is an unauthorized error
 	 * it retries the whole authorization stuff
 	 * The second try returns with a usual response
-	 *
+	 * <p/>
 	 * request gets an unauthorized exception, retries and gets a usual response
 	 */
 	@Test
@@ -111,7 +111,7 @@ public class AuthInvokerTests {
 	/**
 	 * This test covers the case that, if there are more than one unauthorized exceptions, that
 	 * it does not try to retry a second time
-	 *
+	 * <p/>
 	 * request gets an unauthorized exception twice in a row
 	 */
 	@Test
@@ -132,10 +132,11 @@ public class AuthInvokerTests {
 		testSubscriber.assertError(Exception.class);
 		testSubscriber.assertNotCompleted();
 	}
+
 	/**
 	 * This test covers the case that, if some other exception than unauthorized appears, it does
 	 * not try to retry a second time
-	 *
+	 * <p/>
 	 * request gets any exception
 	 */
 	@Test
