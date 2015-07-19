@@ -13,13 +13,15 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import eu.unicate.retroauth.RetroauthAccountManager;
+
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AuthAccountManagerTests {
+public class RetroauthAccountManagerTests {
 
 	@Mock
 	AccountManager accountManager;

@@ -17,11 +17,6 @@
 package eu.unicate.retroauth;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
-import android.accounts.AccountManagerFuture;
-import android.app.Activity;
-import android.content.Context;
-import android.os.Bundle;
 
 import retrofit.RetrofitError;
 import rx.Observable;
@@ -37,20 +32,17 @@ import rx.functions.Func2;
  */
 final class AuthInvoker {
 
-	private static final int HTTP_UNAUTHORIZED = 401;
-
-
-	private final Context context;
 	private final ServiceInfo serviceInfo;
 	private final AuthAccountManager authAccountManager;
+	private final RetryRule retryRule;
 
-	public AuthInvoker(Context context, ServiceInfo serviceInfo, AuthAccountManager authAccountManager) {
-		this.context = context;
+	public AuthInvoker(ServiceInfo serviceInfo, AuthAccountManager authAccountManager, RetryRule retryRule) {
 		this.serviceInfo = serviceInfo;
 		this.authAccountManager = authAccountManager;
+		this.retryRule = retryRule;
 	}
 
-	public <S> Observable<S> invoke(final Observable<S> request) {
+	public <T> Observable<T> invoke(final Observable<T> request) {
 		return getAccountName()
 				.flatMap(new Func1<String, Observable<Account>>() {
 					@Override
@@ -61,7 +53,7 @@ final class AuthInvoker {
 				.flatMap(new Func1<Account, Observable<String>>() {
 					@Override
 					public Observable<String> call(Account account) {
-						return getAuthToken(account, AccountManager.get(context));
+						return getAuthToken(account);
 					}
 				})
 				.flatMap(new Func1<String, Observable<?>>() {
@@ -70,16 +62,16 @@ final class AuthInvoker {
 						return authenticate(token);
 					}
 				})
-				.flatMap(new Func1<Object, Observable<S>>() {
+				.flatMap(new Func1<Object, Observable<T>>() {
 					@Override
-					public Observable<S> call(Object o) {
+					public Observable<T> call(Object o) {
 						return request;
 					}
 				})
 				.retry(new Func2<Integer, Throwable, Boolean>() {
 					@Override
 					public Boolean call(Integer count, Throwable error) {
-						return retry(count, error);
+						return retryRule.retry(count, error);
 					}
 				});
 	}
@@ -95,12 +87,12 @@ final class AuthInvoker {
 		});
 	}
 
-	private Observable<String> getAuthToken(final Account account, final AccountManager accountManager) {
+	private Observable<String> getAuthToken(final Account account) {
 		return Observable.create(new OnSubscribe<String>() {
 			@Override
 			public void call(Subscriber<? super String> subscriber) {
 				try {
-					subscriber.onNext(getAuthTokenBlocking(account, accountManager));
+					subscriber.onNext(authAccountManager.getAuthToken(account, serviceInfo.accountType, serviceInfo.tokenType));
 					subscriber.onCompleted();
 				} catch (Exception e) {
 					subscriber.onError(e);
@@ -131,35 +123,5 @@ final class AuthInvoker {
 		});
 	}
 
-	private boolean retry(@SuppressWarnings("UnusedParameters") int count, Throwable error) {
-		if (error instanceof RetrofitError) {
-			int status = ((RetrofitError) error).getResponse().getStatus();
-			if (HTTP_UNAUTHORIZED == status) {
-				authAccountManager.invalidateTokenFromActiveUser(serviceInfo.accountType, serviceInfo.tokenType);
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private String getAuthTokenBlocking(Account account, AccountManager accountManager) throws Exception {
-		AccountManagerFuture<Bundle> future;
-		Activity activity = (context instanceof Activity) ? (Activity) context : null;
-		if (account == null) {
-			future = accountManager.addAccount(serviceInfo.accountType, serviceInfo.tokenType, null, null, activity, null, null);
-		} else {
-			future = accountManager.getAuthToken(account, serviceInfo.tokenType, null, activity, null, null);
-		}
-
-		Bundle result = future.getResult();
-		String token = result.getString(AccountManager.KEY_AUTHTOKEN);
-		// even if the AuthenticationActivity set the KEY_AUTHTOKEN in the result bundle,
-		// it got stripped out by the AccountManager
-		if (token == null) {
-			// try using the newly created account to peek the token
-			token = accountManager.peekAuthToken(new Account(result.getString(AccountManager.KEY_ACCOUNT_NAME), result.getString(AccountManager.KEY_ACCOUNT_TYPE)), serviceInfo.tokenType);
-		}
-		return token;
-	}
 
 }

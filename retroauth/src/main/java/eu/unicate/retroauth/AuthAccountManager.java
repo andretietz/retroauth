@@ -24,13 +24,24 @@ import android.support.annotation.Nullable;
 
 public interface AuthAccountManager {
 	Account getActiveAccount(String accountType, boolean showDialog);
+
 	Account getAccountByName(String accountName, String accountType);
+
 	String getActiveAccountName(String accountType, boolean showDialog);
+
 	String getTokenFromActiveUser(String accountType, String tokenType);
+
 	String getUserData(String accountType, String key);
+
 	void invalidateTokenFromActiveUser(String accountType, String tokenType);
+
 	Account setActiveUser(String accountName, String accountType);
+
 	void resetActiveUser(String accountType);
+
 	void addAccount(@NonNull Activity activity, @NonNull String accountType, @Nullable String tokenType);
+
+	String getAuthToken(Account account, String accountType, String tokenType) throws Exception;
+
 	Account[] showAccountPickerDialog(String accountType, DialogInterface.OnClickListener onItemSelected, DialogInterface.OnClickListener onOkClicked, DialogInterface.OnClickListener onCancelClicked, boolean canAddAccount);
 }

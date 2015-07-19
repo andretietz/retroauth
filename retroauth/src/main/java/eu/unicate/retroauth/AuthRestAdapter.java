@@ -65,10 +65,23 @@ public final class AuthRestAdapter {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T create(Context context, TokenInterceptor tokenInterceptor, Class<T> serviceClass) {
+		return create(context, tokenInterceptor, serviceClass, RetroauthAccountManager.get(context));
+	}
+
+	/**
+	 * This method creates the actual service
+	 *
+	 * @param context            a context to use. You should prefer using an activity as Context, since it is needed to open the activity to login
+	 * @param tokenInterceptor   The implementation of your {@link TokenInterceptor} to add the Token to the Request Header
+	 * @param serviceClass       The Class of the interface of the service which you want to create
+	 * @param authAccountManager the authAccountManager
+	 * @return Your Service that also handles the Authentication logic
+	 */
+	@SuppressWarnings("unchecked")
+	private <T> T create(Context context, TokenInterceptor tokenInterceptor, Class<T> serviceClass, AuthAccountManager authAccountManager) {
 		interceptor.setAuthenticationInterceptor(tokenInterceptor);
 		return (T) Proxy.newProxyInstance(serviceClass.getClassLoader(), new Class<?>[]{serviceClass},
-				new AuthRestHandler<>(adapter.create(serviceClass), context, getServiceInfo(context, serviceClass, tokenInterceptor)));
-
+				new AuthRestHandler<>(adapter.create(serviceClass), getServiceInfo(context, serviceClass, tokenInterceptor), authAccountManager));
 	}
 
 	private <T> ServiceInfo getServiceInfo(Context context, Class<T> serviceClass, TokenInterceptor interceptor) {
@@ -128,8 +141,8 @@ public final class AuthRestAdapter {
 	 * You can use it the same way as you would've use the Retrofit retrofit.RestAdapter.Builder
 	 */
 	public static class Builder {
-		RestAdapter.Builder builder;
-		RequestInterceptor interceptor;
+		private RestAdapter.Builder builder;
+		private RequestInterceptor interceptor;
 
 		public Builder() {
 			builder = new RestAdapter.Builder();

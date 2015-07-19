@@ -18,6 +18,7 @@ package eu.unicate.retroauth;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.accounts.AccountManagerFuture;
 import android.accounts.OperationCanceledException;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -325,5 +326,26 @@ public final class RetroauthAccountManager implements AuthAccountManager {
 				}
 			}
 		}).subscribeOn(AndroidScheduler.mainThread()); // dialogs have to run on the main thread
+	}
+
+	@Override
+	public String getAuthToken(Account account, String accountType, String tokenType) throws Exception {
+		AccountManagerFuture<Bundle> future;
+		Activity activity = (context instanceof Activity) ? (Activity) context : null;
+		if (account == null) {
+			future = accountManager.addAccount(accountType, tokenType, null, null, activity, null, null);
+		} else {
+			future = accountManager.getAuthToken(account, tokenType, null, activity, null, null);
+		}
+
+		Bundle result = future.getResult();
+		String token = result.getString(AccountManager.KEY_AUTHTOKEN);
+		// even if the AuthenticationActivity set the KEY_AUTHTOKEN in the result bundle,
+		// it got stripped out by the AccountManager
+		if (token == null) {
+			// try using the newly created account to peek the token
+			token = accountManager.peekAuthToken(new Account(result.getString(AccountManager.KEY_ACCOUNT_NAME), result.getString(AccountManager.KEY_ACCOUNT_TYPE)), tokenType);
+		}
+		return token;
 	}
 }

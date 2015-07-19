@@ -16,7 +16,6 @@
 
 package eu.unicate.retroauth;
 
-import android.content.Context;
 import android.support.v4.util.Pair;
 
 import java.lang.reflect.InvocationHandler;
@@ -33,15 +32,28 @@ import rx.schedulers.Schedulers;
 
 final class AuthRestHandler<T> implements InvocationHandler {
 
-
+	private static final int HTTP_UNAUTHORIZED = 401;
 	private final ServiceInfo serviceInfo;
 	private final T retrofitService;
 	private final AuthInvoker authInvoker;
+	private static final RetryRule retryMechanism = new RetryRule() {
+		@Override
+		public boolean retry(int count, Throwable error) {
+			if(count <= 1) {
+				if (error instanceof RetrofitError) {
+					if (HTTP_UNAUTHORIZED == ((RetrofitError) error).getResponse().getStatus()) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+	};
 
-	public AuthRestHandler(T retrofitService, Context context, ServiceInfo serviceInfo) {
+	public AuthRestHandler(T retrofitService, ServiceInfo serviceInfo, AuthAccountManager authAccountManager) {
 		this.retrofitService = retrofitService;
 		this.serviceInfo = serviceInfo;
-		authInvoker = new AuthInvoker(context, serviceInfo, RetroauthAccountManager.get(context));
+		authInvoker = new AuthInvoker(serviceInfo, authAccountManager, retryMechanism);
 	}
 
 	@Override
