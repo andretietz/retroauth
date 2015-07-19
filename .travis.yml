@@ -2,11 +2,9 @@ language: android
 
 android:
   components:
-    - build-tools-23.0.0-rc3
-    - extra-android-m2repository
+    - build-tools-22.0.1
     - android-22
-  licenses:
-    - android-sdk-license-.+
+    - extra-android-m2repository
 
 script:
 ./gradlew clean test build
