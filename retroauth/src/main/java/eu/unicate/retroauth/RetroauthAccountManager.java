@@ -32,6 +32,7 @@ import android.support.v7.app.AlertDialog;
 
 import java.util.ArrayList;
 
+import eu.unicate.retroauth.interfaces.AuthAccountManager;
 import rx.Observable;
 import rx.Subscriber;
 

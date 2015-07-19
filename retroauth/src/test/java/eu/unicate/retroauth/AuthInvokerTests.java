@@ -28,6 +28,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 
 import eu.unicate.retroauth.interceptors.TokenInterceptor;
+import eu.unicate.retroauth.interfaces.AuthAccountManager;
+import eu.unicate.retroauth.interfaces.RetryRule;
 import rx.Observable;
 import rx.functions.Func0;
 import rx.observers.TestSubscriber;
@@ -50,7 +52,7 @@ public class AuthInvokerTests {
 
 	@Before
 	public void setupTest() {
-		HashMap<Method, AuthRequestType> map = new HashMap<>();
+		HashMap<Method, ServiceInfo.AuthRequestType> map = new HashMap<>();
 		ServiceInfo info = new ServiceInfo(map, "testAccountType", "testTokenType", TokenInterceptor.BEARER_TOKENINTERCEPTOR);
 		invoker = new AuthInvoker(info, authAccountManager, new RetryRule() {
 			@Override

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.unicate.retroauth;
+package eu.unicate.retroauth.interfaces;
 
 public interface RetryRule {
 	boolean retry(int count, Throwable error);

@@ -18,7 +18,8 @@ package eu.unicate.retroauth;
 
 import android.accounts.Account;
 
-import retrofit.RetrofitError;
+import eu.unicate.retroauth.interfaces.AuthAccountManager;
+import eu.unicate.retroauth.interfaces.RetryRule;
 import rx.Observable;
 import rx.Observable.OnSubscribe;
 import rx.Subscriber;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.unicate.retroauth;
+package eu.unicate.retroauth.interfaces;
 
 import android.accounts.Account;
 import android.app.Activity;

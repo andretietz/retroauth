@@ -28,6 +28,7 @@ import eu.unicate.retroauth.annotations.Authenticated;
 import eu.unicate.retroauth.annotations.Authentication;
 import eu.unicate.retroauth.interceptors.AuthenticationRequestInterceptor;
 import eu.unicate.retroauth.interceptors.TokenInterceptor;
+import eu.unicate.retroauth.interfaces.AuthAccountManager;
 import retrofit.Endpoint;
 import retrofit.ErrorHandler;
 import retrofit.Profiler;
@@ -95,7 +96,7 @@ public final class AuthRestAdapter {
 					accountType = context.getString(annotation.accountType());
 					tokenType = context.getString(annotation.tokenType());
 				}
-				Map<Method, AuthRequestType> methodInfoCache = scanServiceMethods(serviceClass, (null != accountType));
+				Map<Method, ServiceInfo.AuthRequestType> methodInfoCache = scanServiceMethods(serviceClass, (null != accountType));
 				info = new ServiceInfo(methodInfoCache, accountType, tokenType, interceptor);
 				serviceInfoCache.put(serviceClass, info);
 			}
@@ -103,26 +104,26 @@ public final class AuthRestAdapter {
 		}
 	}
 
-	private Map<Method, AuthRequestType> scanServiceMethods(Class<?> serviceClass, boolean containsAuthenticationData) {
-		Map<Method, AuthRequestType> map = new LinkedHashMap<>();
+	private Map<Method, ServiceInfo.AuthRequestType> scanServiceMethods(Class<?> serviceClass, boolean containsAuthenticationData) {
+		Map<Method, ServiceInfo.AuthRequestType> map = new LinkedHashMap<>();
 		for (Method method : serviceClass.getMethods()) {
-			AuthRequestType methodInfo = scanServiceMethod(containsAuthenticationData, method);
+			ServiceInfo.AuthRequestType methodInfo = scanServiceMethod(containsAuthenticationData, method);
 			map.put(method, methodInfo);
 		}
 		return map;
 	}
 
-	private AuthRequestType scanServiceMethod(boolean containsAuthenticationData, Method method) {
+	private ServiceInfo.AuthRequestType scanServiceMethod(boolean containsAuthenticationData, Method method) {
 		if (!method.isAnnotationPresent(Authenticated.class))
-			return AuthRequestType.NONE;
+			return ServiceInfo.AuthRequestType.NONE;
 		if (!containsAuthenticationData)
 			throw methodError(method, "The Method %s contains the %s Annotation, but the interface does not implement the %s Annotation", method.getName(), Authenticated.class.getSimpleName(), Authentication.class.getSimpleName());
 		if (Observable.class.equals(method.getReturnType())) {
-			return AuthRequestType.RXJAVA;
+			return ServiceInfo.AuthRequestType.RXJAVA;
 		} else if (Void.TYPE.equals(method.getReturnType())) {
-			return AuthRequestType.ASYNC;
+			return ServiceInfo.AuthRequestType.ASYNC;
 		} else {
-			return AuthRequestType.SYNC;
+			return ServiceInfo.AuthRequestType.SYNC;
 		}
 	}
 
