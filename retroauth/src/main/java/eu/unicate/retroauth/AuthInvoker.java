@@ -22,80 +22,35 @@ import android.accounts.AccountManagerFuture;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.util.Pair;
 
-import java.lang.reflect.Method;
-
-import retrofit.Callback;
 import retrofit.RetrofitError;
-import retrofit.client.Response;
 import rx.Observable;
 import rx.Observable.OnSubscribe;
 import rx.Subscriber;
-import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.functions.Func2;
-import rx.schedulers.Schedulers;
 
 /**
  * This is being used when a request is authenticated and it returns an Observable.
  * I separated the code since I would like to be able to use the {@link eu.unicate.retroauth.annotations.Authenticated}
  * Annotation later on, without using necessarily rxjava
  */
-final class AuthInvoker<T> {
+final class AuthInvoker {
 
 	private static final int HTTP_UNAUTHORIZED = 401;
 
 
 	private final Context context;
-	private final T retrofitService;
 	private final ServiceInfo serviceInfo;
 	private final AuthAccountManager authAccountManager;
 
-	public AuthInvoker(Context context, T retrofitService, ServiceInfo serviceInfo) {
+	public AuthInvoker(Context context, ServiceInfo serviceInfo) {
 		this.context = context;
-		this.retrofitService = retrofitService;
 		this.serviceInfo = serviceInfo;
 		this.authAccountManager = AuthAccountManager.get(context);
 	}
 
-
-	public Observable invokeRxJavaCall(final Method method, final Object[] args) {
-		return
-				getAccountName()
-						.flatMap(new Func1<String, Observable<Account>>() {
-							@Override
-							public Observable<Account> call(String name) {
-								return getAccount(name);
-							}
-						})
-						.flatMap(new Func1<Account, Observable<String>>() {
-							@Override
-							public Observable<String> call(Account account) {
-								return getAuthToken(account, AccountManager.get(context));
-							}
-						})
-						.flatMap(new Func1<String, Observable<?>>() {
-							@Override
-							public Observable<?> call(String token) {
-								return authenticate(token);
-							}
-						})
-						.flatMap(new Func1<Object, Observable<?>>() {
-							@Override
-							public Observable<?> call(Object o) {
-								return request(method, args);
-							}
-						})
-						.retry(new Func2<Integer, Throwable, Boolean>() {
-							@Override
-							public Boolean call(Integer count, Throwable error) {
-								return retry(count, error);
-							}
-						});
-	}
-
-	public Object invokeBlockingCall(final Method method, final Object[] args) {
+	public <S> Observable<S> invoke(final Observable<S> request) {
 		return getAccountName()
 				.flatMap(new Func1<String, Observable<Account>>() {
 					@Override
@@ -105,7 +60,8 @@ final class AuthInvoker<T> {
 				})
 				.flatMap(new Func1<Account, Observable<String>>() {
 					@Override
-					public Observable<String> call(Account account) { return getAuthToken(account, AccountManager.get(context));
+					public Observable<String> call(Account account) {
+						return getAuthToken(account, AccountManager.get(context));
 					}
 				})
 				.flatMap(new Func1<String, Observable<?>>() {
@@ -114,10 +70,10 @@ final class AuthInvoker<T> {
 						return authenticate(token);
 					}
 				})
-				.flatMap(new Func1<Object, Observable<Object>>() {
+				.flatMap(new Func1<Object, Observable<S>>() {
 					@Override
-					public Observable<Object> call(Object o) {
-						return requestAsRxJava(method, args);
+					public Observable<S> call(Object o) {
+						return request;
 					}
 				})
 				.retry(new Func2<Integer, Throwable, Boolean>() {
@@ -125,106 +81,7 @@ final class AuthInvoker<T> {
 					public Boolean call(Integer count, Throwable error) {
 						return retry(count, error);
 					}
-				})
-				.toBlocking().first();
-	}
-
-	public void invokeAsyncCall(final Method method, final Object[] args) {
-		// store original callback
-		@SuppressWarnings("unchecked") final
-		Callback<Object> originalCallback = (Callback<Object>) args[args.length - 1];
-		getAccountName()
-				.flatMap(new Func1<String, Observable<Account>>() {
-					@Override
-					public Observable<Account> call(String name) {
-						return getAccount(name);
-					}
-				})
-				.flatMap(new Func1<Account, Observable<String>>() {
-					@Override
-					public Observable<String> call(Account account) { return getAuthToken(account, AccountManager.get(context));
-					}
-				})
-				.flatMap(new Func1<String, Observable<?>>() {
-					@Override
-					public Observable<?> call(String token) {
-						return authenticate(token);
-					}
-				})
-				.flatMap(new Func1<Object, Observable<Pair<Object, Response>>>() {
-					@Override
-					public Observable<Pair<Object, Response>> call(Object o) {
-						return requestAsAsync(method, args);
-					}
-				})
-				.retry(new Func2<Integer, Throwable, Boolean>() {
-					@Override
-					public Boolean call(Integer count, Throwable error) {
-						return retry(count, error);
-					}
-				})
-				.subscribeOn(Schedulers.computation())
-				.observeOn(AndroidScheduler.mainThread())
-				.subscribe(new Action1<Pair<Object, Response>>() {
-							   @Override
-							   public void call(Pair<Object, Response> result) { originalCallback.success(result.first, result.second);
-							   }
-						   },
-						new Action1<Throwable>() {
-							@Override
-							public void call(Throwable throwable) {
-								if (throwable instanceof RetrofitError) {
-									originalCallback.failure((RetrofitError) throwable);
-								} else {
-									originalCallback.failure(RetrofitError.unexpectedError(null, throwable));
-								}
-							}
-						});
-	}
-
-	private Observable<?> request(Method method, Object[] args) {
-		try {
-			return (Observable<?>) method.invoke(retrofitService, args);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-
-	private Observable<Object> requestAsRxJava(final Method method, final Object[] args) {
-		return Observable.create(new OnSubscribe<Object>() {
-			@Override
-			public void call(Subscriber<? super Object> subscriber) {
-				try {
-					subscriber.onNext(method.invoke(retrofitService, args));
-					subscriber.onCompleted();
-				} catch (Throwable e) {
-					subscriber.onError(e);
-				}
-			}
-		});
-	}
-
-	private Observable<Pair<Object, Response>> requestAsAsync(final Method method, final Object[] args) {
-		return Observable.create(new OnSubscribe<Pair<Object, Response>>() {
-			@Override
-			public void call(final Subscriber<? super Pair<Object, Response>> subscriber) {
-				// override the callback which was here before
-				args[args.length - 1] = new Callback<Object>() {
-					@Override
-					public void success(Object o, Response response) {
-						subscriber.onNext(new Pair<>(o, response));
-						subscriber.onCompleted();
-					}
-
-					@Override
-					public void failure(RetrofitError error) {
-						subscriber.onError(error);
-					}
-				};
-				request(method, args);
-			}
-		});
+				});
 	}
 
 	private Observable<Boolean> authenticate(final String token) {
@@ -298,7 +155,7 @@ final class AuthInvoker<T> {
 		String token = result.getString(AccountManager.KEY_AUTHTOKEN);
 		// even if the AuthenticationActivity set the KEY_AUTHTOKEN in the result bundle,
 		// it got stripped out by the AccountManager
-		if(token == null) {
+		if (token == null) {
 			// try using the newly created account to peek the token
 			token = accountManager.peekAuthToken(new Account(result.getString(AccountManager.KEY_ACCOUNT_NAME), result.getString(AccountManager.KEY_ACCOUNT_TYPE)), serviceInfo.tokenType);
 		}
