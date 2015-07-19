@@ -1,5 +1,6 @@
 # The simple way of calling authenticated requests in retrofit style
 ### This is a library in beta!
+[![Build Status](https://travis-ci.org/Unic8/retroauth.svg?branch=master)](https://travis-ci.org/Unic8/retroauth)
 ## Dependencies
 * [Retrofit](https://github.com/square/retrofit) 1.9.0
 * [RxJava](https://github.com/ReactiveX/RxJava) 1.0.12
