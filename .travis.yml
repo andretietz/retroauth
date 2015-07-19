@@ -12,4 +12,4 @@ android:
 
     # The SDK version used to compile your project
     - android-22
-./gradlew clean test build
+# ./gradlew clean test build
