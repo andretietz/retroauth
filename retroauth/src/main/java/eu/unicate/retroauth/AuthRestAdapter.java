@@ -17,6 +17,7 @@
 package eu.unicate.retroauth;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -85,7 +86,17 @@ public final class AuthRestAdapter {
 				new AuthRestHandler<>(adapter.create(serviceClass), getServiceInfo(context, serviceClass, tokenInterceptor), authAccountManager));
 	}
 
-	private <T> ServiceInfo getServiceInfo(Context context, Class<T> serviceClass, TokenInterceptor interceptor) {
+	/**
+	 * Creates an Information object about the requested service
+	 *
+	 * @param context      Android Context
+	 * @param serviceClass The service class you want information of
+	 * @param interceptor  the {@link TokenInterceptor} this service should use
+	 * @param <T>          The type of the service
+	 * @return a {@link ServiceInfo} object
+	 */
+	@NonNull
+	private <T> ServiceInfo getServiceInfo(@NonNull Context context, @NonNull Class<T> serviceClass, @NonNull TokenInterceptor interceptor) {
 		synchronized (serviceInfoCache) {
 			ServiceInfo info = serviceInfoCache.get(serviceClass);
 			if (null == info) {
@@ -104,6 +115,13 @@ public final class AuthRestAdapter {
 		}
 	}
 
+	/**
+	 * Scans all methods of a service using reflection
+	 *
+	 * @param serviceClass               The Service class to scan
+	 * @param containsAuthenticationData a boolean reached throw from {@link #getServiceInfo(Context, Class, TokenInterceptor)}
+	 * @return a map with all methods of the service and which request type they are
+	 */
 	private Map<Method, ServiceInfo.AuthRequestType> scanServiceMethods(Class<?> serviceClass, boolean containsAuthenticationData) {
 		Map<Method, ServiceInfo.AuthRequestType> map = new LinkedHashMap<>();
 		for (Method method : serviceClass.getMethods()) {
@@ -113,6 +131,15 @@ public final class AuthRestAdapter {
 		return map;
 	}
 
+	/**
+	 * Scans a single method
+	 *
+	 * @param containsAuthenticationData if this is <code>false</code> and the Service still contains
+	 *                                   some authenticated methods an exception will be thrown
+	 * @param method                     the method to scan
+	 * @return request the Type of the method {@link eu.unicate.retroauth.ServiceInfo.AuthRequestType#NONE}
+	 * means that it is not an authorized request and will be handled by retrofit only
+	 */
 	private ServiceInfo.AuthRequestType scanServiceMethod(boolean containsAuthenticationData, Method method) {
 		if (!method.isAnnotationPresent(Authenticated.class))
 			return ServiceInfo.AuthRequestType.NONE;
@@ -128,6 +155,12 @@ public final class AuthRestAdapter {
 	}
 
 
+	/**
+	 * @param method  the method that cause this error
+	 * @param message the message to show
+	 * @param args    the arguments for formating the message
+	 * @return an Exception for the given method and with the given message
+	 */
 	private RuntimeException methodError(Method method, String message, Object... args) {
 		if (args.length > 0) {
 			message = String.format(message, args);

@@ -27,9 +27,7 @@ import rx.functions.Func1;
 import rx.functions.Func2;
 
 /**
- * This is being used when a request is authenticated and it returns an Observable.
- * I separated the code since I would like to be able to use the {@link eu.unicate.retroauth.annotations.Authenticated}
- * Annotation later on, without using necessarily rxjava
+ * This class invokes authenticated requests
  */
 final class AuthInvoker {
 
@@ -37,12 +35,26 @@ final class AuthInvoker {
 	private final AuthAccountManager authAccountManager;
 	private final RetryRule retryRule;
 
+	/**
+	 * Creates an instance of this class
+	 *
+	 * @param serviceInfo        contains the information for all the methods of this class
+	 * @param authAccountManager the authAccountManager to invoke some of it's methods
+	 * @param retryRule          a rule interface for retrying on request failure
+	 */
 	public AuthInvoker(ServiceInfo serviceInfo, AuthAccountManager authAccountManager, RetryRule retryRule) {
 		this.serviceInfo = serviceInfo;
 		this.authAccountManager = authAccountManager;
 		this.retryRule = retryRule;
 	}
 
+	/**
+	 * Invokes the actual request
+	 *
+	 * @param request request to execute after checking for account data
+	 * @param <T>     type which you expect the observable to emit
+	 * @return an observable that wraps the actual request and does account handling before
+	 */
 	public <T> Observable<T> invoke(final Observable<T> request) {
 		return getAccountName()
 				.flatMap(new Func1<String, Observable<Account>>() {
@@ -77,6 +89,12 @@ final class AuthInvoker {
 				});
 	}
 
+	/**
+	 * Authenticates a request
+	 *
+	 * @param token Token to authenticate with
+	 * @return an Observable that emits one boolean true after the token was added to the request
+	 */
 	private Observable<Boolean> authenticate(final String token) {
 		return Observable.create(new OnSubscribe<Boolean>() {
 			@Override
@@ -88,6 +106,12 @@ final class AuthInvoker {
 		});
 	}
 
+	/**
+	 * gets the token from the given account
+	 *
+	 * @param account you want the token from
+	 * @return Observable that emits the token as String if successful
+	 */
 	private Observable<String> getAuthToken(final Account account) {
 		return Observable.create(new OnSubscribe<String>() {
 			@Override
@@ -103,6 +127,11 @@ final class AuthInvoker {
 	}
 
 
+	/**
+	 * Gets the account by the given name
+	 * @param name Name of the account you're searching for
+	 * @return An Observable that emits the account if it could be found
+	 */
 	private Observable<Account> getAccount(final String name) {
 		return Observable.create(new OnSubscribe<Account>() {
 			@Override
@@ -113,7 +142,10 @@ final class AuthInvoker {
 		});
 	}
 
-
+	/**
+	 * Gets the name of the currently active account
+	 * @return an Observable that emits the accountName as String if available
+	 */
 	private Observable<String> getAccountName() {
 		return Observable.create(new OnSubscribe<String>() {
 			@Override
