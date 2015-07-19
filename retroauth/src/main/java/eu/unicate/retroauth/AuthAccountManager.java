@@ -18,7 +18,6 @@ package eu.unicate.retroauth;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.accounts.AccountManagerFuture;
 import android.accounts.OperationCanceledException;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -36,7 +35,18 @@ import rx.Observable;
 import rx.Subscriber;
 
 /**
- * TODO
+ * This class wraps the Android AccountManager and adds some retroauth specific
+ * functionality. This is the main helper class, when working with retroauth.
+ * <p/>
+ * <ul>
+ *     <li>Creating an instance of this class:<br />
+ *     Do it as with the Android AccountManager using {@link #get(Context)}. This is returning
+ *     a singleton instance of this class, but using the given context
+ *     </li>
+ *     <li>Adding a users account:<br />
+ *     Call {@link #addAccount(Activity, String, String)}
+ *     </li>
+ * </ul>
  */
 public final class AuthAccountManager {
 
@@ -77,8 +87,8 @@ public final class AuthAccountManager {
 
 	/**
 	 * initializes the class with a context and an AccountManager
-	 * @param context
-	 * @param accountManager
+	 * @param context        the Android Context
+	 * @param accountManager an AccountManager to use
 	 */
 	private void init(Context context, AccountManager accountManager) {
 		this.context = context;
