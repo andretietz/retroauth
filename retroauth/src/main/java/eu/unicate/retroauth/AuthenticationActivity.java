@@ -67,7 +67,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 	 */
 	protected void finalizeAuthentication(@NonNull String accountName, @NonNull String tokenType, @NonNull String token, @Nullable Bundle userData) {
 		AccountManager accountManager = AccountManager.get(this);
-		AuthAccountManager aam = AuthAccountManager.get(this);
+		RetroauthAccountManager aam = RetroauthAccountManager.get(this);
 		Account account = getAccount(accountManager);
 		mResultBundle = new Bundle();
 		mResultBundle.putString(AccountManager.KEY_ACCOUNT_NAME, accountName);

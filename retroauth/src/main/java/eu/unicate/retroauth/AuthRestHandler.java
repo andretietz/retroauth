@@ -41,7 +41,7 @@ final class AuthRestHandler<T> implements InvocationHandler {
 	public AuthRestHandler(T retrofitService, Context context, ServiceInfo serviceInfo) {
 		this.retrofitService = retrofitService;
 		this.serviceInfo = serviceInfo;
-		authInvoker = new AuthInvoker(context, serviceInfo);
+		authInvoker = new AuthInvoker(context, serviceInfo, RetroauthAccountManager.get(context));
 	}
 
 	@Override

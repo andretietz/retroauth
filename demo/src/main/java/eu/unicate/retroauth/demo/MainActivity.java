@@ -11,6 +11,7 @@ import android.widget.Toast;
 import com.google.gson.JsonElement;
 
 import eu.unicate.retroauth.AuthAccountManager;
+import eu.unicate.retroauth.RetroauthAccountManager;
 import eu.unicate.retroauth.AuthRestAdapter;
 import eu.unicate.retroauth.interceptors.TokenInterceptor;
 import retrofit.Callback;
@@ -31,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		authAccountManager = AuthAccountManager.get(this);
+		authAccountManager = RetroauthAccountManager.get(this);
 		showCurrentAccount();
 		// create the restadapter like you would do it with retrofit
 		AuthRestAdapter restAdapter = new AuthRestAdapter.Builder()

@@ -44,10 +44,10 @@ final class AuthInvoker {
 	private final ServiceInfo serviceInfo;
 	private final AuthAccountManager authAccountManager;
 
-	public AuthInvoker(Context context, ServiceInfo serviceInfo) {
+	public AuthInvoker(Context context, ServiceInfo serviceInfo, AuthAccountManager authAccountManager) {
 		this.context = context;
 		this.serviceInfo = serviceInfo;
-		this.authAccountManager = AuthAccountManager.get(context);
+		this.authAccountManager = authAccountManager;
 	}
 
 	public <S> Observable<S> invoke(final Observable<S> request) {
