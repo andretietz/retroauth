@@ -48,7 +48,7 @@ final class ServiceInfo {
 		// asynchronous calls using the retrofit Callback interface
 		ASYNC,
 		// synchronous calls returning the result object
-		SYNC,
+		BLOCKING,
 		// non, means that the original retrofit request will be executed
 		NONE
 	}

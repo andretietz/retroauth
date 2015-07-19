@@ -34,28 +34,14 @@ import rx.schedulers.Schedulers;
 
 final class AuthRestHandler<T> implements InvocationHandler {
 
-	private static final int HTTP_UNAUTHORIZED = 401;
 	private final ServiceInfo serviceInfo;
 	private final T retrofitService;
 	private final AuthInvoker authInvoker;
-	private static final RetryRule retryMechanism = new RetryRule() {
-		@Override
-		public boolean retry(int count, Throwable error) {
-			if(count <= 1) {
-				if (error instanceof RetrofitError) {
-					if (HTTP_UNAUTHORIZED == ((RetrofitError) error).getResponse().getStatus()) {
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-	};
 
-	public AuthRestHandler(T retrofitService, ServiceInfo serviceInfo, AuthAccountManager authAccountManager) {
+	public AuthRestHandler(T retrofitService, ServiceInfo serviceInfo, AuthAccountManager authAccountManager, RetryRule retryRule) {
 		this.retrofitService = retrofitService;
 		this.serviceInfo = serviceInfo;
-		authInvoker = new AuthInvoker(serviceInfo, authAccountManager, retryMechanism);
+		authInvoker = new AuthInvoker(serviceInfo, authAccountManager, retryRule);
 	}
 
 	@Override
@@ -65,7 +51,7 @@ final class AuthRestHandler<T> implements InvocationHandler {
 		switch (methodInfo) {
 			case RXJAVA:
 				return authInvoker.invoke(observableRequest(method, args));
-			case SYNC:
+			case BLOCKING:
 				return authInvoker.invoke(blockingRequest(method, args))
 						.toBlocking().single();
 			case ASYNC:

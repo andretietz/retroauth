@@ -30,6 +30,7 @@ import eu.unicate.retroauth.annotations.Authentication;
 import eu.unicate.retroauth.interceptors.AuthenticationRequestInterceptor;
 import eu.unicate.retroauth.interceptors.TokenInterceptor;
 import eu.unicate.retroauth.interfaces.AuthAccountManager;
+import eu.unicate.retroauth.interfaces.RetryRule;
 import retrofit.Endpoint;
 import retrofit.ErrorHandler;
 import retrofit.Profiler;
@@ -37,6 +38,7 @@ import retrofit.RequestInterceptor;
 import retrofit.RestAdapter;
 import retrofit.RestAdapter.Log;
 import retrofit.RestAdapter.LogLevel;
+import retrofit.RetrofitError;
 import retrofit.client.Client;
 import retrofit.converter.Converter;
 import rx.Observable;
@@ -47,6 +49,20 @@ import rx.Observable;
  */
 public final class AuthRestAdapter {
 
+	private static final int HTTP_UNAUTHORIZED = 401;
+	private static final RetryRule DEFAULT_RETRY_RULE = new RetryRule() {
+		@Override
+		public boolean retry(int count, Throwable error) {
+			if (count <= 1) {
+				if (error instanceof RetrofitError) {
+					if (HTTP_UNAUTHORIZED == ((RetrofitError) error).getResponse().getStatus()) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+	};
 	private final Map<Class<?>, ServiceInfo> serviceInfoCache = new LinkedHashMap<>();
 	private final RestAdapter adapter;
 	private final AuthenticationRequestInterceptor interceptor;
@@ -65,9 +81,21 @@ public final class AuthRestAdapter {
 	 * @param serviceClass     The Class of the interface of the service which you want to create
 	 * @return Your Service that also handles the Authentication logic
 	 */
-	@SuppressWarnings("unchecked")
 	public <T> T create(Context context, TokenInterceptor tokenInterceptor, Class<T> serviceClass) {
-		return create(context, tokenInterceptor, serviceClass, AuthAccountManagerImpl.get(context));
+		return create(context, tokenInterceptor, serviceClass, DEFAULT_RETRY_RULE);
+	}
+
+	/**
+	 * This method creates the actual service
+	 *
+	 * @param context          a context to use. You should prefer using an activity as Context, since it is needed to open the activity to login
+	 * @param tokenInterceptor The implementation of your {@link TokenInterceptor} to add the Token to the Request Header
+	 * @param serviceClass     The Class of the interface of the service which you want to create
+	 * @param retryRule        Rules to retry the request including authentication check
+	 * @return Your Service that also handles the Authentication logic
+	 */
+	public <T> T create(Context context, TokenInterceptor tokenInterceptor, Class<T> serviceClass, RetryRule retryRule) {
+		return create(context, tokenInterceptor, serviceClass, AuthAccountManagerImpl.get(context), retryRule);
 	}
 
 	/**
@@ -77,13 +105,14 @@ public final class AuthRestAdapter {
 	 * @param tokenInterceptor   The implementation of your {@link TokenInterceptor} to add the Token to the Request Header
 	 * @param serviceClass       The Class of the interface of the service which you want to create
 	 * @param authAccountManager the authAccountManager
+	 * @param retryRule          Rules to retry the request including authentication check
 	 * @return Your Service that also handles the Authentication logic
 	 */
 	@SuppressWarnings("unchecked")
-	private <T> T create(Context context, TokenInterceptor tokenInterceptor, Class<T> serviceClass, AuthAccountManager authAccountManager) {
+	private <T> T create(Context context, TokenInterceptor tokenInterceptor, Class<T> serviceClass, AuthAccountManager authAccountManager, RetryRule retryRule) {
 		interceptor.setAuthenticationInterceptor(tokenInterceptor);
 		return (T) Proxy.newProxyInstance(serviceClass.getClassLoader(), new Class<?>[]{serviceClass},
-				new AuthRestHandler<>(adapter.create(serviceClass), getServiceInfo(context, serviceClass, tokenInterceptor), authAccountManager));
+				new AuthRestHandler<>(adapter.create(serviceClass), getServiceInfo(context, serviceClass, tokenInterceptor), authAccountManager, retryRule));
 	}
 
 	/**
@@ -150,7 +179,7 @@ public final class AuthRestAdapter {
 		} else if (Void.TYPE.equals(method.getReturnType())) {
 			return ServiceInfo.AuthRequestType.ASYNC;
 		} else {
-			return ServiceInfo.AuthRequestType.SYNC;
+			return ServiceInfo.AuthRequestType.BLOCKING;
 		}
 	}
 
