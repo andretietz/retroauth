@@ -50,38 +50,38 @@ import rx.Subscriber;
  *     </li>
  * </ul>
  */
-public final class RetroauthAccountManager implements AuthAccountManager {
+public final class AuthAccountManagerImpl implements AuthAccountManager {
 
 	private static final String RETROAUTH_ACCOUNTNAME_KEY = "retroauthActiveAccount";
-	private static RetroauthAccountManager instance;
+	private static AuthAccountManagerImpl instance;
 	private Context context;
 	private AccountManager accountManager;
 
-	private RetroauthAccountManager() {
+	private AuthAccountManagerImpl() {
 	}
 
 	/**
 	 * @param context the Android Context
-	 * @return singleton instance of the RetroauthAccountManager
+	 * @return singleton instance of the AuthAccountManagerImpl
 	 */
-	public static RetroauthAccountManager get(Context context) {
+	public static AuthAccountManagerImpl get(Context context) {
 		if (instance == null) {
-			instance = new RetroauthAccountManager();
+			instance = new AuthAccountManagerImpl();
 		}
 		instance.init(context, AccountManager.get(context));
 		return instance;
 	}
 
 	/**
-	 * This method will be mainly used for testing. Please use {@link RetroauthAccountManager#get(Context)} instead.
+	 * This method will be mainly used for testing. Please use {@link AuthAccountManagerImpl#get(Context)} instead.
 	 *
 	 * @param context        the Android Context
 	 * @param accountManager an AccountManager to use
-	 * @return singleton instance of the RetroauthAccountManager
+	 * @return singleton instance of the AuthAccountManagerImpl
 	 */
-	public static RetroauthAccountManager get(Context context, AccountManager accountManager) {
+	public static AuthAccountManagerImpl get(Context context, AccountManager accountManager) {
 		if (instance == null) {
-			instance = new RetroauthAccountManager();
+			instance = new AuthAccountManagerImpl();
 		}
 		instance.init(context, accountManager);
 		return instance;
@@ -99,7 +99,7 @@ public final class RetroauthAccountManager implements AuthAccountManager {
 
 	/**
 	 * Gets the currently active account by the account type. The active account name is determined
-	 * by the method {@link RetroauthAccountManager#getActiveAccountName(String, boolean)}
+	 * by the method {@link AuthAccountManagerImpl#getActiveAccountName(String, boolean)}
 	 *
 	 * @param accountType Account Type you want to retreive
 	 * @param showDialog  If there is more than one account and there is no

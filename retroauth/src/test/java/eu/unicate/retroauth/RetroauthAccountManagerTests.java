@@ -13,8 +13,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import eu.unicate.retroauth.RetroauthAccountManager;
-
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -29,11 +27,11 @@ public class RetroauthAccountManagerTests {
 	@Mock
 	Context context;
 
-	private RetroauthAccountManager retroauthAccountManager;
+	private AuthAccountManagerImpl retroauthAccountManager;
 
 	@Before
 	public void setupTest() {
-		retroauthAccountManager = RetroauthAccountManager.get(context, accountManager);
+		retroauthAccountManager = AuthAccountManagerImpl.get(context, accountManager);
 	}
 
 	@Test

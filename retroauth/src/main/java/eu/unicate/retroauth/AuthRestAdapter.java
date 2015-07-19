@@ -66,7 +66,7 @@ public final class AuthRestAdapter {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T create(Context context, TokenInterceptor tokenInterceptor, Class<T> serviceClass) {
-		return create(context, tokenInterceptor, serviceClass, RetroauthAccountManager.get(context));
+		return create(context, tokenInterceptor, serviceClass, AuthAccountManagerImpl.get(context));
 	}
 
 	/**
