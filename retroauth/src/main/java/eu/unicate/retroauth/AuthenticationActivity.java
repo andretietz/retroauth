@@ -25,8 +25,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
-import eu.unicate.retroauth.interfaces.AuthAccountManager;
-
 
 /**
  * Activity that creates the Account
@@ -88,6 +86,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 	/**
 	 * Tries to find an existing account with the given name, that could be reached into
 	 * this activity, when the token was invalid
+	 *
 	 * @return The account if found, or <code>null</code>
 	 */
 	@Nullable

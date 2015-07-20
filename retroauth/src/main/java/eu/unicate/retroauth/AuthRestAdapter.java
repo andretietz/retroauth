@@ -50,7 +50,12 @@ import rx.Observable;
 public final class AuthRestAdapter {
 
 	private static final int HTTP_UNAUTHORIZED = 401;
-	private static final RetryRule DEFAULT_RETRY_RULE = new RetryRule() {
+
+	/**
+	 * Retries the call, when there is an HTTP 401 returning and this
+	 * is the first retry
+	 */
+	public static final RetryRule DEFAULT_RETRY_RULE = new RetryRule() {
 		@Override
 		public boolean retry(int count, Throwable error) {
 			if (count <= 1) {
@@ -74,7 +79,7 @@ public final class AuthRestAdapter {
 	}
 
 	/**
-	 * This method creates the actual service
+	 * This method creates your Service using {@link #DEFAULT_RETRY_RULE} as retry logic
 	 *
 	 * @param context          a context to use. You should prefer using an activity as Context, since it is needed to open the activity to login
 	 * @param tokenInterceptor The implementation of your {@link TokenInterceptor} to add the Token to the Request Header
@@ -91,7 +96,7 @@ public final class AuthRestAdapter {
 	 * @param context          a context to use. You should prefer using an activity as Context, since it is needed to open the activity to login
 	 * @param tokenInterceptor The implementation of your {@link TokenInterceptor} to add the Token to the Request Header
 	 * @param serviceClass     The Class of the interface of the service which you want to create
-	 * @param retryRule        Rules to retry the request including authentication check
+	 * @param retryRule        Rules to retry the request including the authentication check
 	 * @return Your Service that also handles the Authentication logic
 	 */
 	public <T> T create(Context context, TokenInterceptor tokenInterceptor, Class<T> serviceClass, RetryRule retryRule) {

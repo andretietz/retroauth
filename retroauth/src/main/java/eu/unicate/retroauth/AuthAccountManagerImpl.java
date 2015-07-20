@@ -41,13 +41,13 @@ import rx.Subscriber;
  * functionality. This is the main helper class, when working with retroauth.
  * <p/>
  * <ul>
- *     <li>Creating an instance of this class:<br />
- *     Do it as with the Android AccountManager using {@link #get(Context)}. This is returning
- *     a singleton instance of this class, but using the given context
- *     </li>
- *     <li>Adding a users account:<br />
- *     Call {@link #addAccount(Activity, String, String)}
- *     </li>
+ * <li>Creating an instance of this class:<br />
+ * Do it as with the Android AccountManager using {@link #get(Context)}. This is returning
+ * a singleton instance of this class, but using the given context
+ * </li>
+ * <li>Adding a users account:<br />
+ * Call {@link #addAccount(Activity, String, String)}
+ * </li>
  * </ul>
  */
 public final class AuthAccountManagerImpl implements AuthAccountManager {
@@ -89,6 +89,7 @@ public final class AuthAccountManagerImpl implements AuthAccountManager {
 
 	/**
 	 * initializes the class with a context and an AccountManager
+	 *
 	 * @param context        the Android Context
 	 * @param accountManager an AccountManager to use
 	 */

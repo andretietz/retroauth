@@ -129,6 +129,7 @@ final class AuthInvoker {
 
 	/**
 	 * Gets the account by the given name
+	 *
 	 * @param name Name of the account you're searching for
 	 * @return An Observable that emits the account if it could be found
 	 */
@@ -144,6 +145,7 @@ final class AuthInvoker {
 
 	/**
 	 * Gets the name of the currently active account
+	 *
 	 * @return an Observable that emits the accountName as String if available
 	 */
 	private Observable<String> getAccountName() {

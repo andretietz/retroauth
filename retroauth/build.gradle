@@ -9,7 +9,6 @@ android {
 		targetSdkVersion 22
 		versionCode 1
 		versionName "0.1.4-beta"
-		testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 	}
 	buildTypes {
 		release {
@@ -29,5 +28,5 @@ dependencies {
 	testCompile 'org.mockito:mockito-core:2.0.26-beta'
 }
 
+// uncommented for travis-ci
 //apply from: 'bintray-publish.gradle'
-apply from: 'extract-strings.gradle'

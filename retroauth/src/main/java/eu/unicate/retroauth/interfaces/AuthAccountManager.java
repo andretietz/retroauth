@@ -122,9 +122,9 @@ public interface AuthAccountManager {
 	 * Returns a Token of the given tokentype from the currently active user. If there is no user,
 	 * the user has to create one. This method is blocking until the user created or updated the account
 	 *
-	 * @param account Account to get the token from
+	 * @param account     Account to get the token from
 	 * @param accountType the accountType to create if there's no account
-	 * @param tokenType token type you need the token to be
+	 * @param tokenType   token type you need the token to be
 	 * @return the token
 	 * @throws Exception thrown when the account creation is canceled
 	 */
