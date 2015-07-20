@@ -52,8 +52,7 @@ final class AuthRestHandler<T> implements InvocationHandler {
 			case RXJAVA:
 				return authInvoker.invoke(observableRequest(method, args));
 			case BLOCKING:
-				return authInvoker.invoke(blockingRequest(method, args))
-						.toBlocking().single();
+				return authInvoker.invoke(blockingRequest(method, args)).toBlocking().single();
 			case ASYNC:
 				// store original callback
 				@SuppressWarnings("unchecked")

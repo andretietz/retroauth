@@ -42,6 +42,18 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class AuthInvokerTests {
 
+	/**
+	 * This is a slightly different retry rule than the one which is actually used
+	 * as default ({@link AuthRestAdapter#DEFAULT_RETRY_RULE})
+	 * Since I cannot mock retrofit error responses, I used this one instead
+	 */
+	private static final RetryRule RETRY_RULE = new RetryRule() {
+		@Override
+		public boolean retry(int count, Throwable error) {
+			return count <= 1 && "unauthorized".equals(error.getMessage());
+		}
+	};
+
 	@Mock
 	AuthAccountManager authAccountManager;
 
@@ -54,12 +66,7 @@ public class AuthInvokerTests {
 	public void setupTest() {
 		HashMap<Method, ServiceInfo.AuthRequestType> map = new HashMap<>();
 		ServiceInfo info = new ServiceInfo(map, "testAccountType", "testTokenType", TokenInterceptor.BEARER_TOKENINTERCEPTOR);
-		invoker = new AuthInvoker(info, authAccountManager, new RetryRule() {
-			@Override
-			public boolean retry(int count, Throwable error) {
-				return count <= 1 && "unauthorized".equals(error.getMessage());
-			}
-		});
+		invoker = new AuthInvoker(info, authAccountManager, RETRY_RULE);
 
 	}
 
