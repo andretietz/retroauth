@@ -172,12 +172,7 @@ service = restAdapter.create(context, new SomeTokenInterceptor(), SomeAuthentica
 
 ## That's it.
 
-Have fun trying!
-
-## What's left to do?
-* Tests. Right now there are no tests whatsoever.
-* Proper Exceptions
-
+Have fun!
 
 ## Pull requests are welcome
 Since I am the only one working on that, I would like to know your opinion and/or your suggestions.
