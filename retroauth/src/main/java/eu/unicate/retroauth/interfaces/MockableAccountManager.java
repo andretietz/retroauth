@@ -24,7 +24,7 @@ import android.support.annotation.Nullable;
 
 import eu.unicate.retroauth.AuthenticationActivity;
 
-public interface AuthAccountManager {
+public interface MockableAccountManager {
 	/**
 	 * Gets the currently active account by the account type. The active account name is determined
 	 * by the method {@link #getActiveAccountName(String, boolean)}

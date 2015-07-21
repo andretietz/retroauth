@@ -32,7 +32,7 @@ import android.support.v7.app.AlertDialog;
 
 import java.util.ArrayList;
 
-import eu.unicate.retroauth.interfaces.AuthAccountManager;
+import eu.unicate.retroauth.interfaces.MockableAccountManager;
 import rx.Observable;
 import rx.Subscriber;
 
@@ -40,7 +40,7 @@ import rx.Subscriber;
  * This class wraps the Android AccountManager and adds some retroauth specific
  * functionality. This is the main helper class, when working with retroauth.
  */
-public final class AuthAccountManagerImpl implements AuthAccountManager {
+public final class AuthAccountManager implements MockableAccountManager {
 
 	static final String RETROAUTH_ACCOUNTNAME_KEY = "retroauthActiveAccount";
 	private Context context;
@@ -50,12 +50,21 @@ public final class AuthAccountManagerImpl implements AuthAccountManager {
 	 * initializes the class with a context and an AccountManager
 	 *
 	 * @param context        the Android Context
+	 */
+	public AuthAccountManager(Context context) {
+		this.context = context;
+		this.accountManager = AccountManager.get(context);
+	}
+	/**
+	 * initializes the class with a context and an AccountManager
+	 *
+	 * @param context        the Android Context
 	 * @param accountManager an AccountManager to use
 	 */
-	public AuthAccountManagerImpl(Context context, AccountManager accountManager) {
-		this.context = context;
-		this.accountManager = accountManager;
-	}
+//	public AuthAccountManager(Context context, AccountManager accountManager) {
+//		this.context = context;
+//		this.accountManager = accountManager;
+//	}
 
 	/**
 	 * {@inheritDoc}

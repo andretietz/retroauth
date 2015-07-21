@@ -82,7 +82,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 		}
 		accountManager.setAuthToken(account, tokenType, token);
 		SharedPreferences preferences = getSharedPreferences(accountType, Context.MODE_PRIVATE);
-		preferences.edit().putString(AuthAccountManagerImpl.RETROAUTH_ACCOUNTNAME_KEY, accountName).apply();
+		preferences.edit().putString(AuthAccountManager.RETROAUTH_ACCOUNTNAME_KEY, accountName).apply();
 		finish();
 	}
 

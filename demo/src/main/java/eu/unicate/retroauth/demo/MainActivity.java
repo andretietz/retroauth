@@ -1,7 +1,6 @@
 package eu.unicate.retroauth.demo;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -11,8 +10,7 @@ import android.widget.Toast;
 
 import com.google.gson.JsonElement;
 
-import eu.unicate.retroauth.AuthAccountManagerImpl;
-import eu.unicate.retroauth.interfaces.AuthAccountManager;
+import eu.unicate.retroauth.AuthAccountManager;
 import eu.unicate.retroauth.AuthRestAdapter;
 import eu.unicate.retroauth.interceptors.TokenInterceptor;
 import retrofit.Callback;
@@ -26,14 +24,14 @@ import rx.schedulers.Schedulers;
 public class MainActivity extends AppCompatActivity {
 
 	private SomeAuthenticatedService service;
-	private AuthAccountManagerImpl authAccountManager;
+	private AuthAccountManager authAccountManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		authAccountManager = new AuthAccountManagerImpl(this, AccountManager.get(this));
+		authAccountManager = new AuthAccountManager(this);
 		showCurrentAccount();
 		// create the restadapter like you would do it with retrofit
 		AuthRestAdapter restAdapter = new AuthRestAdapter.Builder()

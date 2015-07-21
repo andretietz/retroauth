@@ -18,7 +18,7 @@ package eu.unicate.retroauth;
 
 import android.accounts.Account;
 
-import eu.unicate.retroauth.interfaces.AuthAccountManager;
+import eu.unicate.retroauth.interfaces.MockableAccountManager;
 import eu.unicate.retroauth.interfaces.RetryRule;
 import rx.Observable;
 import rx.Observable.OnSubscribe;
@@ -32,7 +32,7 @@ import rx.functions.Func2;
 final class AuthInvoker {
 
 	private final ServiceInfo serviceInfo;
-	private final AuthAccountManager authAccountManager;
+	private final MockableAccountManager authAccountManager;
 	private final RetryRule retryRule;
 
 	/**
@@ -42,7 +42,7 @@ final class AuthInvoker {
 	 * @param authAccountManager the authAccountManager to invoke some of it's methods
 	 * @param retryRule          a rule interface for retrying on request failure
 	 */
-	public AuthInvoker(ServiceInfo serviceInfo, AuthAccountManager authAccountManager, RetryRule retryRule) {
+	public AuthInvoker(ServiceInfo serviceInfo, MockableAccountManager authAccountManager, RetryRule retryRule) {
 		this.serviceInfo = serviceInfo;
 		this.authAccountManager = authAccountManager;
 		this.retryRule = retryRule;

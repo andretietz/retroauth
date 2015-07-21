@@ -22,7 +22,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import eu.unicate.retroauth.interfaces.AuthAccountManager;
+import eu.unicate.retroauth.interfaces.MockableAccountManager;
 import eu.unicate.retroauth.interfaces.RetryRule;
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -38,7 +38,7 @@ final class AuthRestHandler<T> implements InvocationHandler {
 	private final T retrofitService;
 	private final AuthInvoker authInvoker;
 
-	public AuthRestHandler(T retrofitService, ServiceInfo serviceInfo, AuthAccountManager authAccountManager, RetryRule retryRule) {
+	public AuthRestHandler(T retrofitService, ServiceInfo serviceInfo, MockableAccountManager authAccountManager, RetryRule retryRule) {
 		this.retrofitService = retrofitService;
 		this.serviceInfo = serviceInfo;
 		authInvoker = new AuthInvoker(serviceInfo, authAccountManager, retryRule);

@@ -27,11 +27,11 @@ public class AuthAccountManagerTests {
 	@Mock
 	Context context;
 
-	private AuthAccountManagerImpl retroauthAccountManager;
+	private AuthAccountManager retroauthAccountManager;
 
 	@Before
 	public void setupTest() {
-		retroauthAccountManager = new AuthAccountManagerImpl(context, accountManager);
+		retroauthAccountManager = new AuthAccountManager(context, accountManager);
 	}
 
 	@Test
