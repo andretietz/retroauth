@@ -19,7 +19,9 @@ package eu.unicate.retroauth;
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -79,7 +81,8 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 			accountManager.addAccountExplicitly(account, null, userData);
 		}
 		accountManager.setAuthToken(account, tokenType, token);
-		AuthAccountManagerImpl.get(this).setActiveUser(accountName, accountType);
+		SharedPreferences preferences = getSharedPreferences(accountType, Context.MODE_PRIVATE);
+		preferences.edit().putString(AuthAccountManagerImpl.RETROAUTH_ACCOUNTNAME_KEY, accountName).apply();
 		finish();
 	}
 

@@ -16,6 +16,7 @@
 
 package eu.unicate.retroauth;
 
+import android.accounts.AccountManager;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
@@ -100,7 +101,7 @@ public final class AuthRestAdapter {
 	 * @return Your Service that also handles the Authentication logic
 	 */
 	public <T> T create(Context context, TokenInterceptor tokenInterceptor, Class<T> serviceClass, RetryRule retryRule) {
-		return create(context, tokenInterceptor, serviceClass, AuthAccountManagerImpl.get(context), retryRule);
+		return create(context, tokenInterceptor, serviceClass, new AuthAccountManagerImpl(context, AccountManager.get(context)), retryRule);
 	}
 
 	/**

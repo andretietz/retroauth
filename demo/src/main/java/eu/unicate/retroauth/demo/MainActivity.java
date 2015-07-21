@@ -1,6 +1,7 @@
 package eu.unicate.retroauth.demo;
 
 import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -25,14 +26,14 @@ import rx.schedulers.Schedulers;
 public class MainActivity extends AppCompatActivity {
 
 	private SomeAuthenticatedService service;
-	private AuthAccountManager authAccountManager;
+	private AuthAccountManagerImpl authAccountManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		authAccountManager = AuthAccountManagerImpl.get(this);
+		authAccountManager = new AuthAccountManagerImpl(this, AccountManager.get(this));
 		showCurrentAccount();
 		// create the restadapter like you would do it with retrofit
 		AuthRestAdapter restAdapter = new AuthRestAdapter.Builder()
@@ -128,6 +129,7 @@ public class MainActivity extends AppCompatActivity {
 			public void onClick(View v) {
 				authAccountManager.resetActiveUser(getString(R.string.auth_account_type));
 				showCurrentAccount();
+				authAccountManager.showAccountPickerDialog(getString(R.string.auth_account_type), null, null, null, false);
 			}
 		});
 

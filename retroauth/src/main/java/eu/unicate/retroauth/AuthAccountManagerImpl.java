@@ -39,53 +39,12 @@ import rx.Subscriber;
 /**
  * This class wraps the Android AccountManager and adds some retroauth specific
  * functionality. This is the main helper class, when working with retroauth.
- * <p/>
- * <ul>
- * <li>Creating an instance of this class:<br />
- * Do it as with the Android AccountManager using {@link #get(Context)}. This is returning
- * a singleton instance of this class, but using the given context
- * </li>
- * <li>Adding a users account:<br />
- * Call {@link #addAccount(Activity, String, String)}
- * </li>
- * </ul>
  */
 public final class AuthAccountManagerImpl implements AuthAccountManager {
 
-	private static final String RETROAUTH_ACCOUNTNAME_KEY = "retroauthActiveAccount";
-	private static AuthAccountManagerImpl instance;
+	static final String RETROAUTH_ACCOUNTNAME_KEY = "retroauthActiveAccount";
 	private Context context;
 	private AccountManager accountManager;
-
-	private AuthAccountManagerImpl() {
-	}
-
-	/**
-	 * @param context the Android Context
-	 * @return singleton instance of the AuthAccountManagerImpl
-	 */
-	public static AuthAccountManagerImpl get(Context context) {
-		if (instance == null) {
-			instance = new AuthAccountManagerImpl();
-		}
-		instance.init(context, AccountManager.get(context));
-		return instance;
-	}
-
-	/**
-	 * This method will be mainly used for testing. Please use {@link AuthAccountManagerImpl#get(Context)} instead.
-	 *
-	 * @param context        the Android Context
-	 * @param accountManager an AccountManager to use
-	 * @return singleton instance of the AuthAccountManagerImpl
-	 */
-	public static AuthAccountManagerImpl get(Context context, AccountManager accountManager) {
-		if (instance == null) {
-			instance = new AuthAccountManagerImpl();
-		}
-		instance.init(context, accountManager);
-		return instance;
-	}
 
 	/**
 	 * initializes the class with a context and an AccountManager
@@ -93,7 +52,7 @@ public final class AuthAccountManagerImpl implements AuthAccountManager {
 	 * @param context        the Android Context
 	 * @param accountManager an AccountManager to use
 	 */
-	private void init(Context context, AccountManager accountManager) {
+	public AuthAccountManagerImpl(Context context, AccountManager accountManager) {
 		this.context = context;
 		this.accountManager = accountManager;
 	}

@@ -31,7 +31,7 @@ public class AuthAccountManagerTests {
 
 	@Before
 	public void setupTest() {
-		retroauthAccountManager = AuthAccountManagerImpl.get(context, accountManager);
+		retroauthAccountManager = new AuthAccountManagerImpl(context, accountManager);
 	}
 
 	@Test
