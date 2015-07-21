@@ -1,0 +1,10 @@
+language: android
+
+android:
+  components:
+    - build-tools-22.0.1
+    - android-22
+    - extra-android-m2repository
+
+script:
+  - ./gradlew :retroauth:clean :retroauth:lint :retroauth:build

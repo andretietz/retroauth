@@ -19,7 +19,9 @@ package eu.unicate.retroauth;
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -36,6 +38,8 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 	private String accountName;
 	private AccountAuthenticatorResponse mAccountAuthenticatorResponse = null;
 	private Bundle mResultBundle = null;
+
+	private AccountManager accountManager;
 
 	/**
 	 * Retrieves the AccountAuthenticatorResponse from either the intent of the icicle, if the
@@ -54,6 +58,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 		accountType = intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE);
 		accountName = intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
 		tokenType = intent.getStringExtra(AccountAuthenticator.KEY_TOKEN_TYPE);
+		accountManager = AccountManager.get(this);
 	}
 
 	/**
@@ -66,23 +71,29 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 	 * @param userData    Additional Userdata to store
 	 */
 	protected void finalizeAuthentication(@NonNull String accountName, @NonNull String tokenType, @NonNull String token, @Nullable Bundle userData) {
-		AccountManager accountManager = AccountManager.get(this);
-		AuthAccountManager aam = AuthAccountManager.get(this);
-		Account account = getAccount(accountManager);
 		mResultBundle = new Bundle();
 		mResultBundle.putString(AccountManager.KEY_ACCOUNT_NAME, accountName);
 		mResultBundle.putString(AccountManager.KEY_ACCOUNT_TYPE, accountType);
+		Account account = getAccount();
 		if (null == account) {
 			mResultBundle.putParcelable(AccountManager.KEY_USERDATA, userData);
 			account = new Account(accountName, accountType);
 			accountManager.addAccountExplicitly(account, null, userData);
 		}
 		accountManager.setAuthToken(account, tokenType, token);
-		aam.setActiveUser(accountName, accountType);
+		SharedPreferences preferences = getSharedPreferences(accountType, Context.MODE_PRIVATE);
+		preferences.edit().putString(AuthAccountManager.RETROAUTH_ACCOUNTNAME_KEY, accountName).apply();
 		finish();
 	}
 
-	private Account getAccount(AccountManager accountManager) {
+	/**
+	 * Tries to find an existing account with the given name, that could be reached into
+	 * this activity, when the token was invalid
+	 *
+	 * @return The account if found, or <code>null</code>
+	 */
+	@Nullable
+	private Account getAccount() {
 		// if this is a relogin
 		if (null != accountName) {
 			Account[] accountList = accountManager.getAccountsByType(accountType);

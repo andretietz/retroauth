@@ -2,13 +2,13 @@ apply plugin: 'com.android.library'
 
 android {
 	compileSdkVersion 22
-	buildToolsVersion "23.0.0 rc2"
+	buildToolsVersion "22.0.1"
 
 	defaultConfig {
-		minSdkVersion 15
+		minSdkVersion 9
 		targetSdkVersion 22
 		versionCode 1
-		versionName "0.1.4-beta"
+		versionName "1.0.0"
 	}
 	buildTypes {
 		release {
@@ -20,16 +20,13 @@ android {
 
 dependencies {
 	compile fileTree(dir: 'libs', include: ['*.jar'])
-	compile 'com.android.support:appcompat-v7:22.2.0'
+	compile 'com.android.support:appcompat-v7:22.2.1'
 	compile 'com.squareup.retrofit:retrofit:1.9.0'
 	compile 'io.reactivex:rxjava:1.0.12'
 
 	testCompile 'junit:junit:4.12'
 	testCompile 'org.mockito:mockito-core:2.0.26-beta'
-	androidTestCompile 'com.android.support.test:runner:0.2'
-	androidTestCompile 'com.android.support.test:rules:0.2'
-
 }
 
-apply from: 'bintray-publish.gradle'
-apply from: 'extract-strings.gradle'
+// uncommented for travis-ci
+//apply from: 'bintray-publish.gradle'

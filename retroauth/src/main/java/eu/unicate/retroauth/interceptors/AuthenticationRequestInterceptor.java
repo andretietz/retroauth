@@ -49,7 +49,6 @@ public final class AuthenticationRequestInterceptor implements RequestIntercepto
 	}
 
 	/**
-	 * TODO: link source
 	 * Calls the RequestInterceptor#intercept(RequestFacade) on both
 	 * Interceptors
 	 *

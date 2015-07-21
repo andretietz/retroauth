@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		authAccountManager = AuthAccountManager.get(this);
+		authAccountManager = new AuthAccountManager(this);
 		showCurrentAccount();
 		// create the restadapter like you would do it with retrofit
 		AuthRestAdapter restAdapter = new AuthRestAdapter.Builder()
@@ -127,6 +127,7 @@ public class MainActivity extends AppCompatActivity {
 			public void onClick(View v) {
 				authAccountManager.resetActiveUser(getString(R.string.auth_account_type));
 				showCurrentAccount();
+				authAccountManager.showAccountPickerDialog(getString(R.string.auth_account_type), null, null, null, false);
 			}
 		});
 

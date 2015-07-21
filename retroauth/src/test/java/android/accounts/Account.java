@@ -17,7 +17,7 @@
 package android.accounts;
 
 /**
- * Created by andre on 06.07.2015.
+ * Mocked Account Object
  */
 public class Account {
 	public final String name;

@@ -32,84 +32,55 @@ import android.support.v7.app.AlertDialog;
 
 import java.util.ArrayList;
 
+import eu.unicate.retroauth.interfaces.MockableAccountManager;
 import rx.Observable;
 import rx.Subscriber;
 
 /**
- * TODO
+ * This class wraps the Android AccountManager and adds some retroauth specific
+ * functionality. This is the main helper class, when working with retroauth.
  */
-public final class AuthAccountManager {
+public final class AuthAccountManager implements MockableAccountManager {
 
-	private static final String RETROAUTH_ACCOUNTNAME_KEY = "retroauthActiveAccount";
-	private static AuthAccountManager instance;
+	static final String RETROAUTH_ACCOUNTNAME_KEY = "retroauthActiveAccount";
 	private Context context;
 	private AccountManager accountManager;
 
-	private AuthAccountManager() {
-	}
-
 	/**
-	 * @param context the Android Context
-	 * @return singleton instance of the AuthAccountManager
+	 * initializes the class with a context and an AccountManager
+	 *
+	 * @param context        the Android Context
 	 */
-	public static AuthAccountManager get(Context context) {
-		if (instance == null) {
-			instance = new AuthAccountManager();
-		}
-		instance.init(context, AccountManager.get(context));
-		return instance;
+	public AuthAccountManager(Context context) {
+		this.context = context;
+		this.accountManager = AccountManager.get(context);
 	}
-
 	/**
-	 * This method will be mainly used for testing. Please use {@link AuthAccountManager#get(Context)} instead.
+	 * initializes the class with a context and an AccountManager
 	 *
 	 * @param context        the Android Context
 	 * @param accountManager an AccountManager to use
-	 * @return singleton instance of the AuthAccountManager
 	 */
-	public static AuthAccountManager get(Context context, AccountManager accountManager) {
-		if (instance == null) {
-			instance = new AuthAccountManager();
-		}
-		instance.init(context, accountManager);
-		return instance;
-	}
-
-	/**
-	 * initializes the class with a context and an AccountManager
-	 * @param context
-	 * @param accountManager
-	 */
-	private void init(Context context, AccountManager accountManager) {
+	public AuthAccountManager(Context context, AccountManager accountManager) {
 		this.context = context;
 		this.accountManager = accountManager;
 	}
 
 	/**
-	 * Gets the currently active account by the account type. The active account name is determined
-	 * by the method {@link AuthAccountManager#getActiveAccountName(String, boolean)}
-	 *
-	 * @param accountType Account Type you want to retreive
-	 * @param showDialog  If there is more than one account and there is no
-	 *                    current active account you can show an AlertDialog to
-	 *                    let the user choose one. If you want to do so, set this to <code>true</code>
-	 *                    else to <code>false</code>.
-	 * @return the Active account or <code>null</code>
+	 * {@inheritDoc}
 	 */
 	@Nullable
-	public Account getActiveAccount(String accountType, boolean showDialog) {
+	@Override
+	public Account getActiveAccount(@NonNull String accountType, boolean showDialog) {
 		return getAccountByName(getActiveAccountName(accountType, showDialog), accountType);
 	}
 
 	/**
-	 * Gets an account by the name of the account and it's type
-	 *
-	 * @param accountName Name of the Account you want to get
-	 * @param accountType Account Type of which your account is
-	 * @return The Account by Name or <code>null</code>
+	 * {@inheritDoc}
 	 */
 	@Nullable
-	public Account getAccountByName(String accountName, String accountType) {
+	@Override
+	public Account getAccountByName(@Nullable String accountName, @NonNull String accountType) {
 		// if there's no name, there's no account
 		if (accountName == null) return null;
 		Account[] accounts = accountManager.getAccountsByType(accountType);
@@ -124,18 +95,11 @@ public final class AuthAccountManager {
 	}
 
 	/**
-	 * Get the currently active account name
-	 *
-	 * @param accountType Type of the Account you want the usernames from <code>null</code> for
-	 *                    all types
-	 * @param showDialog  If there is more than one account and there is no
-	 *                    current active account you can show an AlertDialog to
-	 *                    let the user choose one. If you want to do so, set this to <code>true</code>
-	 *                    else to <code>false</code>.
-	 * @return The currently active account name or <code>null</code>
+	 * {@inheritDoc}
 	 */
 	@Nullable
-	public String getActiveAccountName(String accountType, boolean showDialog) {
+	@Override
+	public String getActiveAccountName(@NonNull String accountType, boolean showDialog) {
 		Account[] accounts = accountManager.getAccountsByType(accountType);
 		if (accounts.length < 1) {
 			return null;
@@ -155,76 +119,61 @@ public final class AuthAccountManager {
 	}
 
 	/**
-	 * Returns the Token of the currently active user
-	 *
-	 * @param accountType Account type of the user you want the token from
-	 * @param tokenType   Token type of the token you want to retrieve
-	 * @return The Token or <code>null</code>
+	 * {@inheritDoc}
 	 */
 	@Nullable
-	public String getTokenFromActiveUser(String accountType, String tokenType) {
+	@Override
+	public String getTokenFromActiveUser(@NonNull String accountType, @NonNull String tokenType) {
 		Account activeAccount = getActiveAccount(accountType, false);
 		if (activeAccount == null) return null;
 		return accountManager.peekAuthToken(activeAccount, tokenType);
 	}
 
 	/**
-	 * Returns userdata which has to be setup while calling {@link AuthenticationActivity#finalizeAuthentication(String, String, String, Bundle)}
-	 *
-	 * @param accountType Account type to get the active account
-	 * @param key         Key wiht which you want to request the value
-	 * @return The Value or <code>null</code> if the account or the key does not exist
+	 * {@inheritDoc}
 	 */
-	@SuppressWarnings("unused")
-	public String getUserData(String accountType, String key) {
+	@Nullable
+	@Override
+	public String getUserData(@NonNull String accountType, @NonNull String key) {
 		return accountManager.getUserData(getActiveAccount(accountType, false), key);
 	}
 
 	/**
-	 * Invalidates the Token of the given type for the active user
-	 *
-	 * @param accountType Account type of the active user
-	 * @param tokenType   Token type you want to invalidate
+	 * {@inheritDoc}
 	 */
-	public void invalidateTokenFromActiveUser(String accountType, String tokenType) {
+	@Override
+	public void invalidateTokenFromActiveUser(@NonNull String accountType, @NonNull String tokenType) {
 		String token = getTokenFromActiveUser(accountType, tokenType);
 		if (token == null) return;
 		accountManager.invalidateAuthToken(accountType, token);
 	}
 
 	/**
-	 * Sets an active user. If you handle with multiple accounts you can setup an active user.
-	 * The token of the active user will be taken for all future requests
-	 *
-	 * @param accountName name of the account
-	 * @param accountType Account type of the active user
-	 * @return the active account or <code>null</code> if the account could not be found
+	 * {@inheritDoc}
 	 */
 	@SuppressLint("CommitPrefEdits")
-	public Account setActiveUser(String accountName, String accountType) {
+	@Nullable
+	@Override
+	public Account setActiveUser(@NonNull String accountName, @NonNull String accountType) {
 		SharedPreferences preferences = context.getSharedPreferences(accountType, Context.MODE_PRIVATE);
 		preferences.edit().putString(RETROAUTH_ACCOUNTNAME_KEY, accountName).commit();
 		return getAccountByName(accountName, accountType);
 	}
 
 	/**
-	 * Unset the active user.
-	 *
-	 * @param accountType The account type where you want to unset it's current
+	 * {@inheritDoc}
 	 */
 	@SuppressLint("CommitPrefEdits")
-	public void resetActiveUser(String accountType) {
+	@Override
+	public void resetActiveUser(@NonNull String accountType) {
 		SharedPreferences preferences = context.getSharedPreferences(accountType, Context.MODE_PRIVATE);
 		preferences.edit().remove(RETROAUTH_ACCOUNTNAME_KEY).commit();
 	}
 
 	/**
-	 * Starts the Activity to start the login process which adds the account.
-	 *
-	 * @param activity    The current active activity
-	 * @param accountType The account type you want to create (this account type will be available on {@link AuthenticationActivity#getRequestedAccountType()} then
-	 * @param tokenType   The tokentype you want to request. This is an optional parameter and can be <code>null</code> (this token type will be available on {@link AuthenticationActivity#getRequestedTokenType()} then
+	 * {@inheritDoc}
 	 */
+	@Override
 	public void addAccount(@NonNull Activity activity, @NonNull String accountType, @Nullable String tokenType) {
 		accountManager.addAccount(accountType, tokenType, null, null, activity, null, null);
 	}
@@ -306,5 +255,29 @@ public final class AuthAccountManager {
 				}
 			}
 		}).subscribeOn(AndroidScheduler.mainThread()); // dialogs have to run on the main thread
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getAuthToken(@Nullable Account account, @NonNull String accountType, @NonNull String tokenType) throws Exception {
+		AccountManagerFuture<Bundle> future;
+		Activity activity = (context instanceof Activity) ? (Activity) context : null;
+		if (account == null) {
+			future = accountManager.addAccount(accountType, tokenType, null, null, activity, null, null);
+		} else {
+			future = accountManager.getAuthToken(account, tokenType, null, activity, null, null);
+		}
+
+		Bundle result = future.getResult();
+		String token = result.getString(AccountManager.KEY_AUTHTOKEN);
+		// even if the AuthenticationActivity set the KEY_AUTHTOKEN in the result bundle,
+		// it got stripped out by the AccountManager
+		if (token == null) {
+			// try using the newly created account to peek the token
+			token = accountManager.peekAuthToken(new Account(result.getString(AccountManager.KEY_ACCOUNT_NAME), result.getString(AccountManager.KEY_ACCOUNT_TYPE)), tokenType);
+		}
+		return token;
 	}
 }

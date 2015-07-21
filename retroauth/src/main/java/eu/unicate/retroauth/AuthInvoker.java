@@ -17,85 +17,45 @@
 package eu.unicate.retroauth;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
-import android.accounts.AccountManagerFuture;
-import android.app.Activity;
-import android.content.Context;
-import android.os.Bundle;
-import android.support.v4.util.Pair;
 
-import java.lang.reflect.Method;
-
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
+import eu.unicate.retroauth.interfaces.MockableAccountManager;
+import eu.unicate.retroauth.interfaces.RetryRule;
 import rx.Observable;
 import rx.Observable.OnSubscribe;
 import rx.Subscriber;
-import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.functions.Func2;
-import rx.schedulers.Schedulers;
 
 /**
- * This is being used when a request is authenticated and it returns an Observable.
- * I separated the code since I would like to be able to use the {@link eu.unicate.retroauth.annotations.Authenticated}
- * Annotation later on, without using necessarily rxjava
+ * This class invokes authenticated requests
  */
-final class AuthInvoker<T> {
+final class AuthInvoker {
 
-	private static final int HTTP_UNAUTHORIZED = 401;
-
-
-	private final Context context;
-	private final T retrofitService;
 	private final ServiceInfo serviceInfo;
-	private final AuthAccountManager authAccountManager;
+	private final MockableAccountManager authAccountManager;
+	private final RetryRule retryRule;
 
-	public AuthInvoker(Context context, T retrofitService, ServiceInfo serviceInfo) {
-		this.context = context;
-		this.retrofitService = retrofitService;
+	/**
+	 * Creates an instance of this class
+	 *
+	 * @param serviceInfo        contains the information for all the methods of this class
+	 * @param authAccountManager the authAccountManager to invoke some of it's methods
+	 * @param retryRule          a rule interface for retrying on request failure
+	 */
+	public AuthInvoker(ServiceInfo serviceInfo, MockableAccountManager authAccountManager, RetryRule retryRule) {
 		this.serviceInfo = serviceInfo;
-		this.authAccountManager = AuthAccountManager.get(context);
+		this.authAccountManager = authAccountManager;
+		this.retryRule = retryRule;
 	}
 
-
-	public Observable invokeRxJavaCall(final Method method, final Object[] args) {
-		return
-				getAccountName()
-						.flatMap(new Func1<String, Observable<Account>>() {
-							@Override
-							public Observable<Account> call(String name) {
-								return getAccount(name);
-							}
-						})
-						.flatMap(new Func1<Account, Observable<String>>() {
-							@Override
-							public Observable<String> call(Account account) {
-								return getAuthToken(account, AccountManager.get(context));
-							}
-						})
-						.flatMap(new Func1<String, Observable<?>>() {
-							@Override
-							public Observable<?> call(String token) {
-								return authenticate(token);
-							}
-						})
-						.flatMap(new Func1<Object, Observable<?>>() {
-							@Override
-							public Observable<?> call(Object o) {
-								return request(method, args);
-							}
-						})
-						.retry(new Func2<Integer, Throwable, Boolean>() {
-							@Override
-							public Boolean call(Integer count, Throwable error) {
-								return retry(count, error);
-							}
-						});
-	}
-
-	public Object invokeBlockingCall(final Method method, final Object[] args) {
+	/**
+	 * Invokes the actual request
+	 *
+	 * @param request request to execute after checking for account data
+	 * @param <T>     type which you expect the observable to emit
+	 * @return an observable that wraps the actual request and does account handling before
+	 */
+	public <T> Observable<T> invoke(final Observable<T> request) {
 		return getAccountName()
 				.flatMap(new Func1<String, Observable<Account>>() {
 					@Override
@@ -105,7 +65,8 @@ final class AuthInvoker<T> {
 				})
 				.flatMap(new Func1<Account, Observable<String>>() {
 					@Override
-					public Observable<String> call(Account account) { return getAuthToken(account, AccountManager.get(context));
+					public Observable<String> call(Account account) {
+						return getAuthToken(account);
 					}
 				})
 				.flatMap(new Func1<String, Observable<?>>() {
@@ -114,119 +75,26 @@ final class AuthInvoker<T> {
 						return authenticate(token);
 					}
 				})
-				.flatMap(new Func1<Object, Observable<Object>>() {
+				.flatMap(new Func1<Object, Observable<T>>() {
 					@Override
-					public Observable<Object> call(Object o) {
-						return requestAsRxJava(method, args);
+					public Observable<T> call(Object o) {
+						return request;
 					}
 				})
 				.retry(new Func2<Integer, Throwable, Boolean>() {
 					@Override
 					public Boolean call(Integer count, Throwable error) {
-						return retry(count, error);
+						return retryRule.retry(count, error);
 					}
-				})
-				.toBlocking().first();
+				});
 	}
 
-	public void invokeAsyncCall(final Method method, final Object[] args) {
-		// store original callback
-		@SuppressWarnings("unchecked") final
-		Callback<Object> originalCallback = (Callback<Object>) args[args.length - 1];
-		getAccountName()
-				.flatMap(new Func1<String, Observable<Account>>() {
-					@Override
-					public Observable<Account> call(String name) {
-						return getAccount(name);
-					}
-				})
-				.flatMap(new Func1<Account, Observable<String>>() {
-					@Override
-					public Observable<String> call(Account account) { return getAuthToken(account, AccountManager.get(context));
-					}
-				})
-				.flatMap(new Func1<String, Observable<?>>() {
-					@Override
-					public Observable<?> call(String token) {
-						return authenticate(token);
-					}
-				})
-				.flatMap(new Func1<Object, Observable<Pair<Object, Response>>>() {
-					@Override
-					public Observable<Pair<Object, Response>> call(Object o) {
-						return requestAsAsync(method, args);
-					}
-				})
-				.retry(new Func2<Integer, Throwable, Boolean>() {
-					@Override
-					public Boolean call(Integer count, Throwable error) {
-						return retry(count, error);
-					}
-				})
-				.subscribeOn(Schedulers.computation())
-				.observeOn(AndroidScheduler.mainThread())
-				.subscribe(new Action1<Pair<Object, Response>>() {
-							   @Override
-							   public void call(Pair<Object, Response> result) { originalCallback.success(result.first, result.second);
-							   }
-						   },
-						new Action1<Throwable>() {
-							@Override
-							public void call(Throwable throwable) {
-								if (throwable instanceof RetrofitError) {
-									originalCallback.failure((RetrofitError) throwable);
-								} else {
-									originalCallback.failure(RetrofitError.unexpectedError(null, throwable));
-								}
-							}
-						});
-	}
-
-	private Observable<?> request(Method method, Object[] args) {
-		try {
-			return (Observable<?>) method.invoke(retrofitService, args);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-
-	private Observable<Object> requestAsRxJava(final Method method, final Object[] args) {
-		return Observable.create(new OnSubscribe<Object>() {
-			@Override
-			public void call(Subscriber<? super Object> subscriber) {
-				try {
-					subscriber.onNext(method.invoke(retrofitService, args));
-					subscriber.onCompleted();
-				} catch (Throwable e) {
-					subscriber.onError(e);
-				}
-			}
-		});
-	}
-
-	private Observable<Pair<Object, Response>> requestAsAsync(final Method method, final Object[] args) {
-		return Observable.create(new OnSubscribe<Pair<Object, Response>>() {
-			@Override
-			public void call(final Subscriber<? super Pair<Object, Response>> subscriber) {
-				// override the callback which was here before
-				args[args.length - 1] = new Callback<Object>() {
-					@Override
-					public void success(Object o, Response response) {
-						subscriber.onNext(new Pair<>(o, response));
-						subscriber.onCompleted();
-					}
-
-					@Override
-					public void failure(RetrofitError error) {
-						subscriber.onError(error);
-					}
-				};
-				request(method, args);
-			}
-		});
-	}
-
+	/**
+	 * Authenticates a request
+	 *
+	 * @param token Token to authenticate with
+	 * @return an Observable that emits one boolean true after the token was added to the request
+	 */
 	private Observable<Boolean> authenticate(final String token) {
 		return Observable.create(new OnSubscribe<Boolean>() {
 			@Override
@@ -238,12 +106,18 @@ final class AuthInvoker<T> {
 		});
 	}
 
-	private Observable<String> getAuthToken(final Account account, final AccountManager accountManager) {
+	/**
+	 * gets the token from the given account
+	 *
+	 * @param account you want the token from
+	 * @return Observable that emits the token as String if successful
+	 */
+	private Observable<String> getAuthToken(final Account account) {
 		return Observable.create(new OnSubscribe<String>() {
 			@Override
 			public void call(Subscriber<? super String> subscriber) {
 				try {
-					subscriber.onNext(getAuthTokenBlocking(account, accountManager));
+					subscriber.onNext(authAccountManager.getAuthToken(account, serviceInfo.accountType, serviceInfo.tokenType));
 					subscriber.onCompleted();
 				} catch (Exception e) {
 					subscriber.onError(e);
@@ -253,6 +127,12 @@ final class AuthInvoker<T> {
 	}
 
 
+	/**
+	 * Gets the account by the given name
+	 *
+	 * @param name Name of the account you're searching for
+	 * @return An Observable that emits the account if it could be found
+	 */
 	private Observable<Account> getAccount(final String name) {
 		return Observable.create(new OnSubscribe<Account>() {
 			@Override
@@ -263,7 +143,11 @@ final class AuthInvoker<T> {
 		});
 	}
 
-
+	/**
+	 * Gets the name of the currently active account
+	 *
+	 * @return an Observable that emits the accountName as String if available
+	 */
 	private Observable<String> getAccountName() {
 		return Observable.create(new OnSubscribe<String>() {
 			@Override
@@ -274,35 +158,5 @@ final class AuthInvoker<T> {
 		});
 	}
 
-	private boolean retry(@SuppressWarnings("UnusedParameters") int count, Throwable error) {
-		if (error instanceof RetrofitError) {
-			int status = ((RetrofitError) error).getResponse().getStatus();
-			if (HTTP_UNAUTHORIZED == status) {
-				authAccountManager.invalidateTokenFromActiveUser(serviceInfo.accountType, serviceInfo.tokenType);
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private String getAuthTokenBlocking(Account account, AccountManager accountManager) throws Exception {
-		AccountManagerFuture<Bundle> future;
-		Activity activity = (context instanceof Activity) ? (Activity) context : null;
-		if (account == null) {
-			future = accountManager.addAccount(serviceInfo.accountType, serviceInfo.tokenType, null, null, activity, null, null);
-		} else {
-			future = accountManager.getAuthToken(account, serviceInfo.tokenType, null, activity, null, null);
-		}
-
-		Bundle result = future.getResult();
-		String token = result.getString(AccountManager.KEY_AUTHTOKEN);
-		// even if the AuthenticationActivity set the KEY_AUTHTOKEN in the result bundle,
-		// it got stripped out by the AccountManager
-		if(token == null) {
-			// try using the newly created account to peek the token
-			token = accountManager.peekAuthToken(new Account(result.getString(AccountManager.KEY_ACCOUNT_NAME), result.getString(AccountManager.KEY_ACCOUNT_TYPE)), serviceInfo.tokenType);
-		}
-		return token;
-	}
 
 }

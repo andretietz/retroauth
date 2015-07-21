@@ -17,6 +17,7 @@
 package eu.unicate.retroauth;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -28,6 +29,7 @@ import eu.unicate.retroauth.annotations.Authenticated;
 import eu.unicate.retroauth.annotations.Authentication;
 import eu.unicate.retroauth.interceptors.AuthenticationRequestInterceptor;
 import eu.unicate.retroauth.interceptors.TokenInterceptor;
+import eu.unicate.retroauth.interfaces.RetryRule;
 import retrofit.Endpoint;
 import retrofit.ErrorHandler;
 import retrofit.Profiler;
@@ -35,6 +37,7 @@ import retrofit.RequestInterceptor;
 import retrofit.RestAdapter;
 import retrofit.RestAdapter.Log;
 import retrofit.RestAdapter.LogLevel;
+import retrofit.RetrofitError;
 import retrofit.client.Client;
 import retrofit.converter.Converter;
 import rx.Observable;
@@ -45,6 +48,25 @@ import rx.Observable;
  */
 public final class AuthRestAdapter {
 
+	private static final int HTTP_UNAUTHORIZED = 401;
+
+	/**
+	 * Retries the call, when there is an HTTP 401 returning and this
+	 * is the first retry
+	 */
+	public static final RetryRule DEFAULT_RETRY_RULE = new RetryRule() {
+		@Override
+		public boolean retry(int count, Throwable error) {
+			if (count <= 1) {
+				if (error instanceof RetrofitError) {
+					if (HTTP_UNAUTHORIZED == ((RetrofitError) error).getResponse().getStatus()) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+	};
 	private final Map<Class<?>, ServiceInfo> serviceInfoCache = new LinkedHashMap<>();
 	private final RestAdapter adapter;
 	private final AuthenticationRequestInterceptor interceptor;
@@ -56,22 +78,44 @@ public final class AuthRestAdapter {
 	}
 
 	/**
-	 * This method creates the actual service
+	 * This method creates your Service using {@link #DEFAULT_RETRY_RULE} as retry logic
 	 *
 	 * @param context          a context to use. You should prefer using an activity as Context, since it is needed to open the activity to login
 	 * @param tokenInterceptor The implementation of your {@link TokenInterceptor} to add the Token to the Request Header
 	 * @param serviceClass     The Class of the interface of the service which you want to create
 	 * @return Your Service that also handles the Authentication logic
 	 */
-	@SuppressWarnings("unchecked")
 	public <T> T create(Context context, TokenInterceptor tokenInterceptor, Class<T> serviceClass) {
-		interceptor.setAuthenticationInterceptor(tokenInterceptor);
-		return (T) Proxy.newProxyInstance(serviceClass.getClassLoader(), new Class<?>[]{serviceClass},
-				new AuthRestHandler<>(adapter.create(serviceClass), context, getServiceInfo(context, serviceClass, tokenInterceptor)));
-
+		return create(context, tokenInterceptor, serviceClass, DEFAULT_RETRY_RULE);
 	}
 
-	private <T> ServiceInfo getServiceInfo(Context context, Class<T> serviceClass, TokenInterceptor interceptor) {
+	/**
+	 * This method creates the actual service
+	 *
+	 * @param context          a context to use. You should prefer using an activity as Context, since it is needed to open the activity to login
+	 * @param tokenInterceptor The implementation of your {@link TokenInterceptor} to add the Token to the Request Header
+	 * @param serviceClass     The Class of the interface of the service which you want to create
+	 * @param retryRule        Rules to retry the request including the authentication check
+	 * @return Your Service that also handles the Authentication logic
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T create(Context context, TokenInterceptor tokenInterceptor, Class<T> serviceClass, RetryRule retryRule) {
+		interceptor.setAuthenticationInterceptor(tokenInterceptor);
+		return (T) Proxy.newProxyInstance(serviceClass.getClassLoader(), new Class<?>[]{serviceClass},
+				new AuthRestHandler<>(adapter.create(serviceClass), getServiceInfo(context, serviceClass, tokenInterceptor), new AuthAccountManager(context), retryRule));
+	}
+
+	/**
+	 * Creates an Information object about the requested service
+	 *
+	 * @param context      Android Context
+	 * @param serviceClass The service class you want information of
+	 * @param interceptor  the {@link TokenInterceptor} this service should use
+	 * @param <T>          The type of the service
+	 * @return a {@link ServiceInfo} object
+	 */
+	@NonNull
+	private <T> ServiceInfo getServiceInfo(@NonNull Context context, @NonNull Class<T> serviceClass, @NonNull TokenInterceptor interceptor) {
 		synchronized (serviceInfoCache) {
 			ServiceInfo info = serviceInfoCache.get(serviceClass);
 			if (null == info) {
@@ -82,7 +126,7 @@ public final class AuthRestAdapter {
 					accountType = context.getString(annotation.accountType());
 					tokenType = context.getString(annotation.tokenType());
 				}
-				Map<Method, AuthRequestType> methodInfoCache = scanServiceMethods(serviceClass, (null != accountType));
+				Map<Method, ServiceInfo.AuthRequestType> methodInfoCache = scanServiceMethods(serviceClass, (null != accountType));
 				info = new ServiceInfo(methodInfoCache, accountType, tokenType, interceptor);
 				serviceInfoCache.put(serviceClass, info);
 			}
@@ -90,30 +134,52 @@ public final class AuthRestAdapter {
 		}
 	}
 
-	private Map<Method, AuthRequestType> scanServiceMethods(Class<?> serviceClass, boolean containsAuthenticationData) {
-		Map<Method, AuthRequestType> map = new LinkedHashMap<>();
+	/**
+	 * Scans all methods of a service using reflection
+	 *
+	 * @param serviceClass               The Service class to scan
+	 * @param containsAuthenticationData a boolean reached throw from {@link #getServiceInfo(Context, Class, TokenInterceptor)}
+	 * @return a map with all methods of the service and which request type they are
+	 */
+	private Map<Method, ServiceInfo.AuthRequestType> scanServiceMethods(Class<?> serviceClass, boolean containsAuthenticationData) {
+		Map<Method, ServiceInfo.AuthRequestType> map = new LinkedHashMap<>();
 		for (Method method : serviceClass.getMethods()) {
-			AuthRequestType methodInfo = scanServiceMethod(containsAuthenticationData, method);
+			ServiceInfo.AuthRequestType methodInfo = scanServiceMethod(containsAuthenticationData, method);
 			map.put(method, methodInfo);
 		}
 		return map;
 	}
 
-	private AuthRequestType scanServiceMethod(boolean containsAuthenticationData, Method method) {
+	/**
+	 * Scans a single method
+	 *
+	 * @param containsAuthenticationData if this is <code>false</code> and the Service still contains
+	 *                                   some authenticated methods an exception will be thrown
+	 * @param method                     the method to scan
+	 * @return request the Type of the method {@link eu.unicate.retroauth.ServiceInfo.AuthRequestType#NONE}
+	 * means that it is not an authorized request and will be handled by retrofit only
+	 */
+	private ServiceInfo.AuthRequestType scanServiceMethod(boolean containsAuthenticationData, Method method) {
 		if (!method.isAnnotationPresent(Authenticated.class))
-			return AuthRequestType.NONE;
+			return ServiceInfo.AuthRequestType.NONE;
 		if (!containsAuthenticationData)
 			throw methodError(method, "The Method %s contains the %s Annotation, but the interface does not implement the %s Annotation", method.getName(), Authenticated.class.getSimpleName(), Authentication.class.getSimpleName());
 		if (Observable.class.equals(method.getReturnType())) {
-			return AuthRequestType.RXJAVA;
+			return ServiceInfo.AuthRequestType.RXJAVA;
 		} else if (Void.TYPE.equals(method.getReturnType())) {
-			return AuthRequestType.ASYNC;
+			return ServiceInfo.AuthRequestType.ASYNC;
 		} else {
-			return AuthRequestType.SYNC;
+			return ServiceInfo.AuthRequestType.BLOCKING;
 		}
 	}
 
 
+	/**
+	 * @param method  the method that cause this error
+	 * @param message the message to show
+	 * @param args    the arguments for formating the message
+	 * @return an Exception for the given method and with the given message
+	 */
 	private RuntimeException methodError(Method method, String message, Object... args) {
 		if (args.length > 0) {
 			message = String.format(message, args);
@@ -128,8 +194,8 @@ public final class AuthRestAdapter {
 	 * You can use it the same way as you would've use the Retrofit retrofit.RestAdapter.Builder
 	 */
 	public static class Builder {
-		RestAdapter.Builder builder;
-		RequestInterceptor interceptor;
+		private RestAdapter.Builder builder;
+		private RequestInterceptor interceptor;
 
 		public Builder() {
 			builder = new RestAdapter.Builder();
