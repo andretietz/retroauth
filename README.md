@@ -12,7 +12,7 @@ Your services using retrofit:
 ``` java
 public interface SomeService {
     @GET("/some/path")
-    Observable<ResultObject> someAuthenticatedRxJavaCall();
+    Observable<ResultObject> someRxJavaCall();
 }
 ```
 Your services using retroauth:
@@ -122,12 +122,12 @@ Add the Service to the Manifest:
     </application>
 </manifest>
 ```
-### 4. Create your REST interface (as you are used to do with retrofit)
+### 4. Create your REST interface
 * Add authentication information to it:
 
 ```java
 @Authentication(accountType = R.string.auth_account_type, tokenType = R.string.auth_token_type)
-public interface SomeService {
+public interface SomeAuthenticatedService {
     @GET("/some/path")
     Observable<ResultObject> someUnauthenticatedCall();
 
@@ -148,19 +148,12 @@ public interface SomeService {
 ```
 ### 5. Create your Service
 ```java
-// create your RestAdapter as you would do it with retrofit as well
-// just use AuthRestAdapter instead of RestAdapter
+// create your RestAdapter just use AuthRestAdapter instead of RestAdapter
+// it provides all functionality as the original one
 AuthRestAdapter restAdapter = new AuthRestAdapter.Builder()
    .setEndpoint("http://some.api.endpoint")
    .setLogLevel(RestAdapter.LogLevel.FULL)
    .build();
-...
-public class SomeTokenInterceptor extends TokenInterceptor {
-    @Override
-    public void injectToken(RequestFacade facade, String token) {
-        facade.addHeader("Authorization", "Bearer " + token);
-    }
-}
 ...
 service = restAdapter.create(context, TokenInterceptor.BEARER_TOKENINTERCEPTOR, SomeAuthenticatedService.class);
 // If you want the Login to open, make sure your context is an activity. If you're calling this
