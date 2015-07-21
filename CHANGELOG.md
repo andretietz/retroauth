@@ -1,3 +1,10 @@
+## 1.0.0 (2015-07-21)
+
+* Bugfixes:
+  * There was a major issue causing a crash, when trying to show the account chooser, after creating a new account
+  * Unit Tests for the main functionalities
+  * Javadocs for all classes
+
 ## 0.1.4-beta (2015-07-10)
 
 * Bugfix:
