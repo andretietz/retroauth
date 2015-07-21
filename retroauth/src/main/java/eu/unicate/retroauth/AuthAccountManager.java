@@ -61,10 +61,10 @@ public final class AuthAccountManager implements MockableAccountManager {
 	 * @param context        the Android Context
 	 * @param accountManager an AccountManager to use
 	 */
-//	public AuthAccountManager(Context context, AccountManager accountManager) {
-//		this.context = context;
-//		this.accountManager = accountManager;
-//	}
+	public AuthAccountManager(Context context, AccountManager accountManager) {
+		this.context = context;
+		this.accountManager = accountManager;
+	}
 
 	/**
 	 * {@inheritDoc}
