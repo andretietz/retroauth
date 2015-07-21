@@ -11,7 +11,6 @@ Min SDK Version: 9
 Your services using retrofit:
 ``` java
 public interface SomeService {
-    @Authenticated
     @GET("/some/path")
     Observable<ResultObject> someAuthenticatedRxJavaCall();
 }
