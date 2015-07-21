@@ -1,41 +1,42 @@
 # The simple way of calling authenticated requests in retrofit style
-### This is a library in beta!
 [![Build Status](https://travis-ci.org/Unic8/retroauth.svg?branch=master)](https://travis-ci.org/Unic8/retroauth)
 ## Dependencies
 * [Retrofit](https://github.com/square/retrofit) 1.9.0
 * [RxJava](https://github.com/ReactiveX/RxJava) 1.0.12
-* appcompat-v7: 22.2.0
+* appcompat-v7: 22.2.1
+
+Min SDK Version: 9
 
 ## Example:
+Your services using retrofit:
+``` java
+public interface SomeService {
+    @Authenticated
+    @GET("/some/path")
+    Observable<ResultObject> someAuthenticatedRxJavaCall();
+}
+```
+Your services using retroauth:
 ``` java
 @Authentication(accountType = R.string.auth_account_type, tokenType = R.string.auth_token_type)
 public interface SomeService {
     @Authenticated
     @GET("/some/path")
     Observable<ResultObject> someAuthenticatedRxJavaCall();
-
-    // or
-    @Authenticated
-    @GET("/some/path")
-    JsonElement someAuthenticatedBlockingCall();
-
-    // or
-    @Authenticated
-    @GET("/some/path")
-    void someAuthenticatedAsyncCall(Callback<JsonElement> callback);
 }
+
 ```
 ## What does it do?
-If you call an authenticated method of this service, it'll do the following things inside the library:
-* Step 1: Checks if there already is an account in the Android AccountManager. If not, it'll open the LoginActivity. If there already is an account, go on with step 2, If there's more than one account open an Dialog to pick an account.
-* Step 2: Gets the authentication token from the (choosen) account and adds it to the request header. If there is no valid token, the LoginActivity could open with the pre-filled accounts username
+If you call a request method, annotated with the authenticated annotation, it'll do the following steps:
+* Step 1: Checks if there already is an account in the Android AccountManager. If not, it'll open a LoginActivity (you choose which). If there already is an account, go on with step 2, If there's more than one account open an Dialog to pick an account.
+* Step 2: Tries to get the authentication token from the (choosen) account to add it to the request header. If there is no valid token, your LoginActivity could open with the pre-filled accounts username. After login go to Step 1.
 * Step 3: Sends the actual request
-* Step 4: If that request fails with an 401 (the only one right now) it invalidates the used token and continues with step 1.
+* Step 4: If the request fails with an 401 (by default, but changeable) it invalidates the used token in the Android AccountManager and continues with step 1.
 
 ## How to use it?
 Add it as dependency:
 ```groovy
-compile 'eu.unicate.android:retroauth:0.1.4-beta'
+compile 'eu.unicate.android:retroauth:1.0.0'
 ```
 
 ### 1. Create 3 strings in your strings.xml
@@ -161,24 +162,24 @@ public class SomeTokenInterceptor extends TokenInterceptor {
         facade.addHeader("Authorization", "Bearer " + token);
     }
 }
-// (For the Bearertoken, there is also a predefined one TokenInterceptor.BEARER_TOKENINTERCEPTOR)
-// more predefined will follow
 ...
-service = restAdapter.create(context, new SomeTokenInterceptor(), SomeAuthenticatedService.class);
+service = restAdapter.create(context, TokenInterceptor.BEARER_TOKENINTERCEPTOR, SomeAuthenticatedService.class);
 // If you want the Login to open, make sure your context is an activity. If you're calling this
-// from a service with a Servicecontext the login won't open. This is because the addAccount Method
-// requires an Activity to be able to open the (Login)Activity
+// from a service with a Service-context or even with the application context, the login won't open.
+// This is because the addAccount Method requires an Activity to be able to open the (Login)Activity
 ```
 
 ## That's it.
 
-Have fun!
+Have fun with it!
 
 ## Pull requests are welcome
 Since I am the only one working on that, I would like to know your opinion and/or your suggestions.
 Please feel free to create Pull requests!
 
 ## LICENSE
+```
+Copyrights 2015 André Tietz
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -191,3 +192,4 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+```
