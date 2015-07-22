@@ -151,23 +151,21 @@ public final class AuthAccountManager implements MockableAccountManager {
 	/**
 	 * {@inheritDoc}
 	 */
-	@SuppressLint("CommitPrefEdits")
 	@Nullable
 	@Override
 	public Account setActiveUser(@NonNull String accountName, @NonNull String accountType) {
 		SharedPreferences preferences = context.getSharedPreferences(accountType, Context.MODE_PRIVATE);
-		preferences.edit().putString(RETROAUTH_ACCOUNTNAME_KEY, accountName).commit();
+		preferences.edit().putString(RETROAUTH_ACCOUNTNAME_KEY, accountName).apply();
 		return getAccountByName(accountName, accountType);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	@SuppressLint("CommitPrefEdits")
 	@Override
 	public void resetActiveUser(@NonNull String accountType) {
 		SharedPreferences preferences = context.getSharedPreferences(accountType, Context.MODE_PRIVATE);
-		preferences.edit().remove(RETROAUTH_ACCOUNTNAME_KEY).commit();
+		preferences.edit().remove(RETROAUTH_ACCOUNTNAME_KEY).apply();
 	}
 
 	/**
