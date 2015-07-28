@@ -1,3 +1,10 @@
+## 1.0.1 (2015-07-28)
+
+* Bugfix
+  * When multiple authenticated requests were called at the same time, and the provided token was invalid at this time, multiple 401's were returned and multiple login activities were opened.
+    * when you do multiple authenticated requests, there will be only one executed at one time. This is to avoid multiple 401's and multiple activities to open.
+    * when a request has to wait for another one, it'll be executed as soon as the previous one returns.
+
 ## 1.0.0 (2015-07-21)
 
 * Bugfixes:
