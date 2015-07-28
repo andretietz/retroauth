@@ -127,7 +127,6 @@ public class MainActivity extends AppCompatActivity {
 			public void onClick(View v) {
 				authAccountManager.resetActiveUser(getString(R.string.auth_account_type));
 				showCurrentAccount();
-				authAccountManager.showAccountPickerDialog(getString(R.string.auth_account_type), null, null, null, false);
 			}
 		});
 
