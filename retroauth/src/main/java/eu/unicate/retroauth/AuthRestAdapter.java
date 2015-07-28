@@ -39,6 +39,7 @@ import retrofit.RestAdapter.Log;
 import retrofit.RestAdapter.LogLevel;
 import retrofit.RetrofitError;
 import retrofit.client.Client;
+import retrofit.client.Response;
 import retrofit.converter.Converter;
 import rx.Observable;
 
@@ -59,7 +60,8 @@ public final class AuthRestAdapter {
 		public boolean retry(int count, Throwable error) {
 			if (count <= 1) {
 				if (error instanceof RetrofitError) {
-					if (HTTP_UNAUTHORIZED == ((RetrofitError) error).getResponse().getStatus()) {
+					Response response = ((RetrofitError) error).getResponse();
+					if (response != null && HTTP_UNAUTHORIZED == response.getStatus()) {
 						return true;
 					}
 				}
