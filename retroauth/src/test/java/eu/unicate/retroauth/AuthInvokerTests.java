@@ -29,7 +29,6 @@ import java.util.HashMap;
 
 import eu.unicate.retroauth.interceptors.TokenInterceptor;
 import eu.unicate.retroauth.interfaces.MockableAccountManager;
-import eu.unicate.retroauth.interfaces.RetryStrategy;
 import rx.Observable;
 import rx.functions.Func0;
 import rx.observers.TestSubscriber;

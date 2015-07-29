@@ -18,49 +18,38 @@ package eu.unicate.retroauth;
 
 import android.accounts.Account;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Semaphore;
-
 import eu.unicate.retroauth.interfaces.MockableAccountManager;
-import eu.unicate.retroauth.interfaces.RetryStrategy;
+import eu.unicate.retroauth.interfaces.RequestStrategy;
+import eu.unicate.retroauth.strategies.LockingStrategy;
 import rx.Observable;
 import rx.Observable.OnSubscribe;
 import rx.Subscriber;
-import rx.functions.Action1;
 import rx.functions.Func1;
-import rx.functions.Func2;
 
 /**
  * This class invokes authenticated requests
  */
 final class AuthInvoker {
 
-	private static final Map<String, Semaphore> TOKEN_TYPE_SEMAPHORES = new HashMap<>();
 	private final ServiceInfo serviceInfo;
 	private final MockableAccountManager authAccountManager;
-	private final RetryStrategy retryStrategy;
-	private final Semaphore semaphore;
+	private final RequestStrategy strategy;
 
 	/**
 	 * Creates an instance of this class
 	 *
 	 * @param serviceInfo        contains the information for all the methods of this class
 	 * @param authAccountManager the authAccountManager to invoke some of it's methods
-	 * @param retryStrategy          a rule interface for retrying on request failure
+	 * @param strategy           request strategy you want to use
 	 */
-	public AuthInvoker(ServiceInfo serviceInfo, MockableAccountManager authAccountManager, RetryStrategy retryStrategy) {
+	public AuthInvoker(ServiceInfo serviceInfo, MockableAccountManager authAccountManager, RequestStrategy strategy) {
 		this.serviceInfo = serviceInfo;
 		this.authAccountManager = authAccountManager;
-		this.retryStrategy = retryStrategy;
-		synchronized (TOKEN_TYPE_SEMAPHORES) {
-			Semaphore semaphore = TOKEN_TYPE_SEMAPHORES.get(serviceInfo.tokenType);
-			if (semaphore == null) {
-				semaphore = new Semaphore(1);
-				TOKEN_TYPE_SEMAPHORES.put(serviceInfo.tokenType, semaphore);
-			}
-			this.semaphore = semaphore;
+		if(strategy == null) {
+			strategy = new LockingStrategy(serviceInfo.tokenType);
 		}
+		this.strategy = strategy;
+
 	}
 
 	/**
@@ -71,76 +60,32 @@ final class AuthInvoker {
 	 * @return an observable that wraps the actual request and does account handling before
 	 */
 	public <T> Observable<T> invoke(final Observable<T> request) {
-		return lockRequest()
-				.flatMap(new Func1<Object, Observable<String>>() {
-					@Override
-					public Observable<String> call(Object o) {
-						return getAccountName();
-					}
-				})
-				.flatMap(new Func1<String, Observable<Account>>() {
-					@Override
-					public Observable<Account> call(String name) {
-						return getAccount(name);
-					}
-				})
-				.flatMap(new Func1<Account, Observable<String>>() {
-					@Override
-					public Observable<String> call(Account account) {
-						return getAuthToken(account);
-					}
-				})
-				.flatMap(new Func1<String, Observable<?>>() {
-					@Override
-					public Observable<?> call(String token) {
-						return authenticate(token);
-					}
-				})
-				.flatMap(new Func1<Object, Observable<T>>() {
-					@Override
-					public Observable<T> call(Object o) {
-						// executes the request
-						return request
-								// on success release the semaphore
-								.doOnNext(new Action1<T>() {
-									@Override
-									public void call(T t) {
-										semaphore.release();
-									}
-								});
-					}
-				})
-				.retry(new Func2<Integer, Throwable, Boolean>() {
-					@Override
-					public Boolean call(Integer count, Throwable error) {
-						boolean retry = retryStrategy.retry(count, error);
-						// in any error case release the semaphore
-						semaphore.release();
-						return retry;
-					}
-				});
-	}
-
-	/**
-	 * This method is locking our semaphore to avoid other request for this tokentype
-	 * to be executed until this one finishes.
-	 *
-	 * @return an observable that emits one null item.
-	 */
-	private Observable<Object> lockRequest() {
-		return Observable.create(new OnSubscribe<Object>() {
-			@Override
-			public void call(Subscriber<? super Object> subscriber) {
-				try {
-					semaphore.acquire();
-					// just emit something, that the chain continues
-					subscriber.onNext(null);
-					subscriber.onCompleted();
-				} catch (InterruptedException e) {
-					subscriber.onError(e);
-				}
-			}
-		});
+		return strategy.execute(
+				getAccountName()
+						.flatMap(new Func1<String, Observable<Account>>() {
+							@Override
+							public Observable<Account> call(String name) {
+								return getAccount(name);
+							}
+						})
+						.flatMap(new Func1<Account, Observable<String>>() {
+							@Override
+							public Observable<String> call(Account account) {
+								return getAuthToken(account);
+							}
+						})
+						.flatMap(new Func1<String, Observable<?>>() {
+							@Override
+							public Observable<?> call(String token) {
+								return authenticate(token);
+							}
+						})
+						.flatMap(new Func1<Object, Observable<T>>() {
+							@Override
+							public Observable<T> call(Object o) {
+								return request;
+							}
+						}));
 	}
 
 	/**
