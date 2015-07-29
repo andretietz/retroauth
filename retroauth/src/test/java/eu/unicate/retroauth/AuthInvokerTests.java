@@ -29,6 +29,8 @@ import java.util.HashMap;
 
 import eu.unicate.retroauth.interceptors.TokenInterceptor;
 import eu.unicate.retroauth.interfaces.MockableAccountManager;
+import eu.unicate.retroauth.interfaces.RequestStrategy;
+import eu.unicate.retroauth.strategies.LockingStrategy;
 import rx.Observable;
 import rx.functions.Func0;
 import rx.observers.TestSubscriber;
@@ -42,13 +44,13 @@ import static org.mockito.Mockito.when;
 public class AuthInvokerTests {
 
 	/**
-	 * This is a slightly different retry rule than the one which is actually used
-	 * as default ({@link AuthRestAdapter#DEFAULT_RETRY_RULE})
-	 * Since I cannot mock retrofit error responses, I used this one instead
+	 * This is a slightly different request than the one which is actually used by default
+	 * ({@link LockingStrategy})
+	 * Since we cannot mock retrofit error response-bodies, we use this one instead
 	 */
-	private static final RetryStrategy RETRY_RULE = new RetryStrategy() {
+	private static final RequestStrategy STRATEGY = new LockingStrategy("sometoken") {
 		@Override
-		public boolean retry(int count, Throwable error) {
+		protected boolean retry(int count, Throwable error) {
 			return count <= 1 && "unauthorized".equals(error.getMessage());
 		}
 	};
@@ -65,7 +67,7 @@ public class AuthInvokerTests {
 	public void setupTest() {
 		HashMap<Method, ServiceInfo.AuthRequestType> map = new HashMap<>();
 		ServiceInfo info = new ServiceInfo(map, "testAccountType", "testTokenType", TokenInterceptor.BEARER_TOKENINTERCEPTOR);
-		invoker = new AuthInvoker(info, authAccountManager, RETRY_RULE);
+		invoker = new AuthInvoker(info, authAccountManager, STRATEGY);
 
 	}
 
