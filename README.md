@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/Unic8/retroauth.svg?branch=master)](https://travis-ci.org/Unic8/retroauth)
 ## Dependencies
 * [Retrofit](https://github.com/square/retrofit) 1.9.0
-* [RxJava](https://github.com/ReactiveX/RxJava) 1.0.12
+* [RxJava](https://github.com/ReactiveX/RxJava) 1.0.13
 * appcompat-v7: 22.2.1
 
 Min SDK Version: 9

@@ -22,10 +22,10 @@ dependencies {
 	compile fileTree(dir: 'libs', include: ['*.jar'])
 	compile 'com.android.support:appcompat-v7:22.2.1'
 	compile 'com.squareup.retrofit:retrofit:1.9.0'
-	compile 'io.reactivex:rxjava:1.0.12'
+	compile 'io.reactivex:rxjava:1.0.13'
 
 	testCompile 'junit:junit:4.12'
-	testCompile 'org.mockito:mockito-core:2.0.26-beta'
+	testCompile 'org.mockito:mockito-core:2.0.31-beta'
 }
 
 // uncommented for travis-ci
