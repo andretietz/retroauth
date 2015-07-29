@@ -44,9 +44,30 @@ public class LockingStrategy extends BasicRetryStrategy {
 	private static final AtomicBoolean hasBeenCanceled = new AtomicBoolean(false);
 
 	private final Semaphore semaphore;
+	private final boolean cancelPending;
 
-	public LockingStrategy(String type) {
+	/**
+	 * Creating a locking request strategy object
+	 *
+	 * @param type          name of the semaphore to use
+	 * @param cancelPending if this is set to {@code true}, all pending requests will be canceled
+	 *                      when the user cancels the login
+	 */
+	public LockingStrategy(String type, boolean cancelPending) {
 		this.semaphore = getSemaphore(type);
+		this.cancelPending = cancelPending;
+	}
+
+	/**
+	 * Creating a locking request strategy object
+	 * <p/>
+	 * {@code cancelPending} is {@code true} by default. this means, that all pending requests
+	 * will be canceled, when the user cancels the login
+	 *
+	 * @param type name of the semaphore to use
+	 */
+	public LockingStrategy(String type) {
+		this(type, true);
 	}
 
 	/**
@@ -77,7 +98,7 @@ public class LockingStrategy extends BasicRetryStrategy {
 								return cancelIfRequired(wasWaiting);
 							}
 						})
-						// execute the request
+								// execute the request
 						.flatMap(new Func1<Object, Observable<T>>() {
 							@Override
 							public Observable<T> call(Object o) {
@@ -96,7 +117,7 @@ public class LockingStrategy extends BasicRetryStrategy {
 							@Override
 							public Boolean call(Integer count, Throwable error) {
 								try {
-									if(error instanceof OperationCanceledException) {
+									if (error instanceof OperationCanceledException) {
 										hasBeenCanceled.set(true);
 									}
 									return retry(count, error);
@@ -146,10 +167,10 @@ public class LockingStrategy extends BasicRetryStrategy {
 		return Observable.create(new Observable.OnSubscribe<Object>() {
 			@Override
 			public void call(Subscriber<? super Object> subscriber) {
-				if(wasWaiting) {
+				if (wasWaiting && cancelPending) {
 					boolean cancel = hasBeenCanceled.get();
-					if(cancel) {
-						if(0 == waitCounter.decrementAndGet())
+					if (cancel) {
+						if (0 == waitCounter.decrementAndGet())
 							hasBeenCanceled.set(false);
 						subscriber.onError(new IllegalStateException("The Request has been canceled"));
 						return;
