@@ -19,7 +19,7 @@ package eu.unicate.retroauth.interfaces;
 /**
  * This interface can be used to define a rule to retry a request
  */
-public interface RetryRule {
+public interface RetryStrategy {
 	/**
 	 * @param count The amount of failures
 	 * @param error The error that occured

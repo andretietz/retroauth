@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.concurrent.Semaphore;
 
 import eu.unicate.retroauth.interfaces.MockableAccountManager;
-import eu.unicate.retroauth.interfaces.RetryRule;
+import eu.unicate.retroauth.interfaces.RetryStrategy;
 import rx.Observable;
 import rx.Observable.OnSubscribe;
 import rx.Subscriber;
@@ -39,7 +39,7 @@ final class AuthInvoker {
 	private static final Map<String, Semaphore> TOKEN_TYPE_SEMAPHORES = new HashMap<>();
 	private final ServiceInfo serviceInfo;
 	private final MockableAccountManager authAccountManager;
-	private final RetryRule retryRule;
+	private final RetryStrategy retryStrategy;
 	private final Semaphore semaphore;
 
 	/**
@@ -47,12 +47,12 @@ final class AuthInvoker {
 	 *
 	 * @param serviceInfo        contains the information for all the methods of this class
 	 * @param authAccountManager the authAccountManager to invoke some of it's methods
-	 * @param retryRule          a rule interface for retrying on request failure
+	 * @param retryStrategy          a rule interface for retrying on request failure
 	 */
-	public AuthInvoker(ServiceInfo serviceInfo, MockableAccountManager authAccountManager, RetryRule retryRule) {
+	public AuthInvoker(ServiceInfo serviceInfo, MockableAccountManager authAccountManager, RetryStrategy retryStrategy) {
 		this.serviceInfo = serviceInfo;
 		this.authAccountManager = authAccountManager;
-		this.retryRule = retryRule;
+		this.retryStrategy = retryStrategy;
 		synchronized (TOKEN_TYPE_SEMAPHORES) {
 			Semaphore semaphore = TOKEN_TYPE_SEMAPHORES.get(serviceInfo.tokenType);
 			if (semaphore == null) {
@@ -113,7 +113,7 @@ final class AuthInvoker {
 				.retry(new Func2<Integer, Throwable, Boolean>() {
 					@Override
 					public Boolean call(Integer count, Throwable error) {
-						boolean retry = retryRule.retry(count, error);
+						boolean retry = retryStrategy.retry(count, error);
 						// in any error case release the semaphore
 						semaphore.release();
 						return retry;

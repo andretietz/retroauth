@@ -29,7 +29,7 @@ import eu.unicate.retroauth.annotations.Authenticated;
 import eu.unicate.retroauth.annotations.Authentication;
 import eu.unicate.retroauth.interceptors.AuthenticationRequestInterceptor;
 import eu.unicate.retroauth.interceptors.TokenInterceptor;
-import eu.unicate.retroauth.interfaces.RetryRule;
+import eu.unicate.retroauth.interfaces.RetryStrategy;
 import retrofit.Endpoint;
 import retrofit.ErrorHandler;
 import retrofit.Profiler;
@@ -55,7 +55,7 @@ public final class AuthRestAdapter {
 	 * Retries the call, when there is an HTTP 401 returning and this
 	 * is the first retry
 	 */
-	public static final RetryRule DEFAULT_RETRY_RULE = new RetryRule() {
+	public static final RetryStrategy DEFAULT_RETRY_RULE = new RetryStrategy() {
 		@Override
 		public boolean retry(int count, Throwable error) {
 			if (count <= 1) {
@@ -97,14 +97,14 @@ public final class AuthRestAdapter {
 	 * @param context          a context to use. You should prefer using an activity as Context, since it is needed to open the activity to login
 	 * @param tokenInterceptor The implementation of your {@link TokenInterceptor} to add the Token to the Request Header
 	 * @param serviceClass     The Class of the interface of the service which you want to create
-	 * @param retryRule        Rules to retry the request including the authentication check
+	 * @param retryStrategy        Rules to retry the request including the authentication check
 	 * @return Your Service that also handles the Authentication logic
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> T create(Context context, TokenInterceptor tokenInterceptor, Class<T> serviceClass, RetryRule retryRule) {
+	public <T> T create(Context context, TokenInterceptor tokenInterceptor, Class<T> serviceClass, RetryStrategy retryStrategy) {
 		interceptor.setAuthenticationInterceptor(tokenInterceptor);
 		return (T) Proxy.newProxyInstance(serviceClass.getClassLoader(), new Class<?>[]{serviceClass},
-				new AuthRestHandler<>(adapter.create(serviceClass), getServiceInfo(context, serviceClass, tokenInterceptor), new AuthAccountManager(context), retryRule));
+				new AuthRestHandler<>(adapter.create(serviceClass), getServiceInfo(context, serviceClass, tokenInterceptor), new AuthAccountManager(context), retryStrategy));
 	}
 
 	/**
