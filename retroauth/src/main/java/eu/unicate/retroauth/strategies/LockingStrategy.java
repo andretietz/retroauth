@@ -103,10 +103,8 @@ public class LockingStrategy extends BasicRetryStrategy {
 			@Override
 			public void call(Subscriber<? super Boolean> subscriber) {
 				try {
-					boolean waiting = false;
-					if (!semaphore.tryAcquire()) {
-						// if the semaphore could could be aquired, set local wait to true
-						waiting = true;
+					boolean waiting = !semaphore.tryAcquire();
+					if (waiting) {
 						// and increment a waiting queue counter
 						waitCounter.incrementAndGet();
 						// wait for the next slot
