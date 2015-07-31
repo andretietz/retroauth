@@ -16,7 +16,6 @@
 
 package eu.unicate.retroauth.strategies;
 
-import android.accounts.OperationCanceledException;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -25,6 +24,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import eu.unicate.retroauth.interfaces.BaseAccountManager;
 import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Action1;
@@ -118,8 +118,9 @@ public class LockingStrategy extends BasicRetryStrategy {
 							@Override
 							public Boolean call(Integer count, Throwable error) {
 								try {
-									if (error instanceof OperationCanceledException) {
-										canceledWithError.set(error);
+									if (error instanceof BaseAccountManager.UserCancelException) {
+										canceledWithError.set(error.getCause());
+										error = error.getCause();
 									}
 									return retry(count, error);
 								} finally {

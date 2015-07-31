@@ -28,7 +28,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 
 import eu.unicate.retroauth.interceptors.TokenInterceptor;
-import eu.unicate.retroauth.interfaces.MockableAccountManager;
+import eu.unicate.retroauth.interfaces.BaseAccountManager;
 import eu.unicate.retroauth.interfaces.RequestStrategy;
 import eu.unicate.retroauth.strategies.LockingStrategy;
 import rx.Observable;
@@ -56,7 +56,7 @@ public class AuthInvokerTests {
 	};
 
 	@Mock
-	MockableAccountManager authAccountManager;
+	BaseAccountManager authAccountManager;
 
 	@Mock
 	TestService service;

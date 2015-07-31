@@ -24,7 +24,7 @@ import android.support.annotation.Nullable;
 
 import eu.unicate.retroauth.AuthenticationActivity;
 
-public interface MockableAccountManager {
+public interface BaseAccountManager {
 	/**
 	 * Gets the currently active account by the account type. The active account name is determined
 	 * by the method {@link #getActiveAccountName(String, boolean)}
@@ -80,6 +80,7 @@ public interface MockableAccountManager {
 	 * @param key         Key wiht which you want to request the value
 	 * @return The Value or <code>null</code> if the account or the key does not exist
 	 */
+	@SuppressWarnings("unused")
 	@Nullable
 	String getUserData(@NonNull String accountType, @NonNull String key);
 
@@ -126,9 +127,19 @@ public interface MockableAccountManager {
 	 * @param accountType the accountType to create if there's no account
 	 * @param tokenType   token type you need the token to be
 	 * @return the token
-	 * @throws Exception thrown when the account creation is canceled
+	 * @throws UserCancelException thrown when the account creation is canceled
 	 */
 	@Nullable
-	String getAuthToken(@Nullable Account account, @NonNull String accountType, @NonNull String tokenType) throws Exception;
+	String getAuthToken(@Nullable Account account, @NonNull String accountType, @NonNull String tokenType) throws UserCancelException;
+
+	/**
+	 * This internal used only exception is thrown, when the user cancels the login process
+	 * It contains as "cause" the exception which was thrown by the android accountManager.getAuthToken
+	 */
+	final class UserCancelException extends RuntimeException {
+		public UserCancelException(Throwable e) {
+			super(e);
+		}
+	}
 
 }

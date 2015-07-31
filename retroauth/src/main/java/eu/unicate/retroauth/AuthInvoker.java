@@ -18,7 +18,7 @@ package eu.unicate.retroauth;
 
 import android.accounts.Account;
 
-import eu.unicate.retroauth.interfaces.MockableAccountManager;
+import eu.unicate.retroauth.interfaces.BaseAccountManager;
 import eu.unicate.retroauth.interfaces.RequestStrategy;
 import eu.unicate.retroauth.strategies.LockingStrategy;
 import rx.Observable;
@@ -32,7 +32,7 @@ import rx.functions.Func1;
 final class AuthInvoker {
 
 	private final ServiceInfo serviceInfo;
-	private final MockableAccountManager authAccountManager;
+	private final BaseAccountManager authAccountManager;
 	private final RequestStrategy strategy;
 
 	/**
@@ -42,7 +42,7 @@ final class AuthInvoker {
 	 * @param authAccountManager the authAccountManager to invoke some of it's methods
 	 * @param strategy           request strategy you want to use
 	 */
-	public AuthInvoker(ServiceInfo serviceInfo, MockableAccountManager authAccountManager, RequestStrategy strategy) {
+	public AuthInvoker(ServiceInfo serviceInfo, BaseAccountManager authAccountManager, RequestStrategy strategy) {
 		this.serviceInfo = serviceInfo;
 		this.authAccountManager = authAccountManager;
 		if(strategy == null) {
@@ -118,7 +118,7 @@ final class AuthInvoker {
 				try {
 					subscriber.onNext(authAccountManager.getAuthToken(account, serviceInfo.accountType, serviceInfo.tokenType));
 					subscriber.onCompleted();
-				} catch (Exception e) {
+				} catch (BaseAccountManager.UserCancelException e) {
 					subscriber.onError(e);
 				}
 			}
@@ -156,6 +156,5 @@ final class AuthInvoker {
 			}
 		});
 	}
-
 
 }
