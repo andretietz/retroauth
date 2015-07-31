@@ -22,8 +22,8 @@ import android.util.Log;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import rx.Observable;
 import rx.Subscriber;
@@ -42,7 +42,7 @@ public class LockingStrategy extends BasicRetryStrategy {
 
 	private static final Map<String, Semaphore> TOKEN_TYPE_SEMAPHORES = new HashMap<>();
 	private static final AtomicInteger waitCounter = new AtomicInteger(0);
-	private static final AtomicBoolean hasBeenCanceled = new AtomicBoolean(false);
+	private static final AtomicReference<Throwable> canceledWithError = new AtomicReference<>(null);
 
 	private final Semaphore semaphore;
 	private final boolean cancelPending;
@@ -119,7 +119,7 @@ public class LockingStrategy extends BasicRetryStrategy {
 							public Boolean call(Integer count, Throwable error) {
 								try {
 									if (error instanceof OperationCanceledException) {
-										hasBeenCanceled.set(true);
+										canceledWithError.set(error);
 									}
 									return retry(count, error);
 								} finally {
@@ -170,13 +170,13 @@ public class LockingStrategy extends BasicRetryStrategy {
 			@Override
 			public void call(Subscriber<? super Object> subscriber) {
 				if (wasWaiting && cancelPending) {
-					boolean cancel = hasBeenCanceled.get();
+					Throwable error = canceledWithError.get();
 					int stillWaiting = waitCounter.decrementAndGet();
-					if (cancel) {
+					if (error != null) {
 						Log.e("LOCK", "still waiting: " + stillWaiting);
 						if (0 == stillWaiting)
-							hasBeenCanceled.set(false);
-						subscriber.onError(new IllegalStateException("The Request has been canceled"));
+							canceledWithError.set(null);
+						subscriber.onError(error);
 						return;
 					}
 				}
