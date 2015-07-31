@@ -17,6 +17,7 @@
 package eu.unicate.retroauth.strategies;
 
 import android.accounts.OperationCanceledException;
+import android.util.Log;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -143,7 +144,8 @@ public class LockingStrategy extends BasicRetryStrategy {
 					boolean waiting = !semaphore.tryAcquire();
 					if (waiting) {
 						// and increment a waiting queue counter
-						waitCounter.incrementAndGet();
+						int w = waitCounter.incrementAndGet();
+						Log.e("LOCK", "waiting: " + w);
 						// wait for the next slot
 						semaphore.acquire();
 					}
@@ -169,8 +171,10 @@ public class LockingStrategy extends BasicRetryStrategy {
 			public void call(Subscriber<? super Object> subscriber) {
 				if (wasWaiting && cancelPending) {
 					boolean cancel = hasBeenCanceled.get();
+					int stillWaiting = waitCounter.decrementAndGet();
 					if (cancel) {
-						if (0 == waitCounter.decrementAndGet())
+						Log.e("LOCK", "still waiting: " + stillWaiting);
+						if (0 == stillWaiting)
 							hasBeenCanceled.set(false);
 						subscriber.onError(new IllegalStateException("The Request has been canceled"));
 						return;

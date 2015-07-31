@@ -17,6 +17,9 @@ import retrofit.Callback;
 import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
+import rx.Observable;
+import rx.Observable.OnSubscribe;
+import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
@@ -25,6 +28,12 @@ public class MainActivity extends AppCompatActivity {
 
 	private SomeAuthenticatedService service;
 	private AuthAccountManager authAccountManager;
+
+	/**
+	 * This is to test how the library reacts on multiple request at a time.
+	 * default it is just using 1 request per button click
+	 */
+	private static final int MULTIREQUEST_AMOUNT = 1;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -46,23 +55,25 @@ public class MainActivity extends AppCompatActivity {
 		findViewById(R.id.buttonRxJavaRequest).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				service.listReposRxJava("Unic8")
-						.subscribeOn(Schedulers.io())
-						.observeOn(AndroidSchedulers.mainThread())
-						.subscribe(
-								new Action1<JsonElement>() {
-									@Override
-									public void call(JsonElement jsonElements) {
-										showResult(jsonElements);
+				for(int i=0;i<MULTIREQUEST_AMOUNT;i++) {
+					service.listReposRxJava("Unic8")
+							.subscribeOn(Schedulers.io())
+							.observeOn(AndroidSchedulers.mainThread())
+							.subscribe(
+									new Action1<JsonElement>() {
+										@Override
+										public void call(JsonElement jsonElements) {
+											showResult(jsonElements);
+										}
+									},
+									new Action1<Throwable>() {
+										@Override
+										public void call(Throwable throwable) {
+											showError(throwable);
+										}
 									}
-								},
-								new Action1<Throwable>() {
-									@Override
-									public void call(Throwable throwable) {
-										showError(throwable);
-									}
-								}
-						);
+							);
+				}
 			}
 		});
 
@@ -70,30 +81,33 @@ public class MainActivity extends AppCompatActivity {
 		findViewById(R.id.buttonBlockingRequest).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// I had to wrap this into an async task
-				// cause its a network request
-				new AsyncTask<Object, Object, JsonElement>() {
-					private Throwable error;
+				for(int i=0;i<MULTIREQUEST_AMOUNT;i++) {
 
-					@Override
-					protected JsonElement doInBackground(Object... params) {
-						try {
-							return service.listReposBlocking("Unic8");
-						} catch (Throwable e) {
-							error = e;
+					Observable.create(new OnSubscribe<JsonElement>() {
+						@Override
+						public void call(Subscriber<? super JsonElement> subscriber) {
+							subscriber.onNext(service.listReposBlocking("Unic8"));
+							subscriber.onCompleted();
 						}
-						return null;
-					}
+					})
+							.subscribeOn(Schedulers.io())
+							.observeOn(AndroidSchedulers.mainThread())
+							.subscribe(
+									new Action1<JsonElement>() {
+										@Override
+										public void call(JsonElement jsonElement) {
+											showResult(jsonElement);
+										}
+									},
+									new Action1<Throwable>() {
+										@Override
+										public void call(Throwable throwable) {
+											showError(throwable);
+										}
+									}
 
-					@Override
-					protected void onPostExecute(JsonElement o) {
-						if (o == null) {
-							showError(error);
-						} else {
-							showResult(o);
-						}
-					}
-				}.execute();
+							);
+				}
 			}
 		});
 
@@ -101,17 +115,19 @@ public class MainActivity extends AppCompatActivity {
 		findViewById(R.id.buttonAsyncRequest).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				service.listReposAsync("Unic8", new Callback<JsonElement>() {
-					@Override
-					public void success(JsonElement jsonElements, Response response) {
-						showResult(jsonElements);
-					}
+				for(int i=0;i<MULTIREQUEST_AMOUNT;i++) {
+					service.listReposAsync("Unic8", new Callback<JsonElement>() {
+						@Override
+						public void success(JsonElement jsonElements, Response response) {
+							showResult(jsonElements);
+						}
 
-					@Override
-					public void failure(RetrofitError error) {
-						showError(error);
-					}
-				});
+						@Override
+						public void failure(RetrofitError error) {
+							showError(error);
+						}
+					});
+				}
 			}
 		});
 
