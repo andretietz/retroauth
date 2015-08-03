@@ -146,7 +146,6 @@ public class LockingStrategy extends SimpleRetryStrategy {
 					if (waiting) {
 						// and increment a waiting queue counter
 						int w = waitCounter.incrementAndGet();
-						Log.e("LOCK", "waiting: " + w);
 						// wait for the next slot
 						semaphore.acquire();
 					}
@@ -174,7 +173,6 @@ public class LockingStrategy extends SimpleRetryStrategy {
 					Throwable error = canceledWithError.get();
 					int stillWaiting = waitCounter.decrementAndGet();
 					if (error != null) {
-						Log.e("LOCK", "still waiting: " + stillWaiting);
 						if (0 == stillWaiting)
 							canceledWithError.set(null);
 						subscriber.onError(error);
