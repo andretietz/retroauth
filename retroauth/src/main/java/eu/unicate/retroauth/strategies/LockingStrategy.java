@@ -38,7 +38,7 @@ import rx.functions.Func2;
  * <p/>
  * This strategy is chosen as default
  */
-public class LockingStrategy extends BaseRetryStrategy {
+public class LockingStrategy extends SimpleRetryStrategy {
 
 	private static final Map<String, Semaphore> TOKEN_TYPE_SEMAPHORES = new HashMap<>();
 	private static final AtomicInteger waitCounter = new AtomicInteger(0);

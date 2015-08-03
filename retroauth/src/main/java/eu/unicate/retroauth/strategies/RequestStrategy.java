@@ -20,13 +20,13 @@ import rx.Observable;
 
 /**
  * This class implements the most basic request strategy.
- * It does not retrying.
+ * It does no retrying.
  */
 public class RequestStrategy {
 	/**
 	 * This is to modify the request observable. In the easiest case you just return the request
 	 * that comes in.
-	 * This is used to extend the requests as it is done i.e. in the {@link BaseRetryStrategy}
+	 * This is used to extend the requests as it is done i.e. in the {@link SimpleRetryStrategy}
 	 * or in the {@link eu.unicate.retroauth.strategies.LockingStrategy}
 	 *
 	 * @param request the request as it is generated in the {@link eu.unicate.retroauth.AuthInvoker#invoke(Observable)}

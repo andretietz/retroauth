@@ -27,7 +27,7 @@ import rx.functions.Func2;
  *
  * Extend from this class if you need your custom retry method and override {@link #retry}
  */
-public class BaseRetryStrategy extends RequestStrategy {
+public class SimpleRetryStrategy extends RequestStrategy {
 
 	private static final int HTTP_UNAUTHORIZED = 401;
 
