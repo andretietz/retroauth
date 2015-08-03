@@ -14,15 +14,19 @@ import rx.schedulers.Schedulers;
 @RunWith(JUnit4.class)
 public class LockingStrategyTest {
 
+	private static final int REQUEST_AMOUNT = 100;
 
+	/**
+	 * Testing the happy case of 100 simultaneously called requests
+	 */
 	@Test
 	public void testBlocking() throws InterruptedException {
 		final LockingStrategy strategy = new LockingStrategy("test");
-		int requestNum = 100;
-		TestSubscriber<Integer>[] subscriber = new TestSubscriber[requestNum];
+		@SuppressWarnings("unchecked")
+		TestSubscriber<Integer>[] subscriber = new TestSubscriber[REQUEST_AMOUNT];
 
 		// execute 100 requests at once
-		for (int i = 0; i < requestNum; i++) {
+		for (int i = 0; i < REQUEST_AMOUNT; i++) {
 			subscriber[i] = TestSubscriber.create();
 			blockingWrapper(strategy, i)
 					.subscribeOn(Schedulers.newThread())
@@ -31,7 +35,7 @@ public class LockingStrategyTest {
 		// wait a bit to make sure all of them are executed
 		Thread.sleep(100);
 		// test all 100 if they emit one item and complete
-		for (int i = 0; i < requestNum; i++) {
+		for (int i = 0; i < REQUEST_AMOUNT; i++) {
 			subscriber[i].assertValueCount(1);
 			subscriber[i].assertCompleted();
 		}
@@ -53,7 +57,7 @@ public class LockingStrategyTest {
 	}
 
 	/**
-	 * execute the request as blocking
+	 * execute the requestHappy as blocking
 	 * using the LockingStrategy
 	 */
 	private Observable<Integer> blockingWrapper(final LockingStrategy strategy, final int id) {
@@ -72,7 +76,7 @@ public class LockingStrategyTest {
 
 
 	/**
-	 * Wrapping the request into an observable
+	 * Wrapping the requestHappy into an observable
 	 * (this is how it's gonna work in retroauth as well)
 	 */
 	private Observable<Integer> blockingRequestSimul(final int id) {
@@ -80,7 +84,7 @@ public class LockingStrategyTest {
 			@Override
 			public void call(Subscriber<? super Integer> subscriber) {
 				try {
-					subscriber.onNext(request(id));
+					subscriber.onNext(requestHappy(id));
 					subscriber.onCompleted();
 				} catch (Throwable e) {
 					subscriber.onError(e);
@@ -92,7 +96,7 @@ public class LockingStrategyTest {
 	/**
 	 * Emulated request
 	 */
-	private Integer request(int id) {
+	private Integer requestHappy(int id) {
 		System.out.println("Executing emulated request " + id);
 		return id;
 	}
