@@ -29,7 +29,7 @@ import java.util.HashMap;
 
 import eu.unicate.retroauth.interceptors.TokenInterceptor;
 import eu.unicate.retroauth.interfaces.BaseAccountManager;
-import eu.unicate.retroauth.interfaces.RequestStrategy;
+import eu.unicate.retroauth.strategies.RequestStrategy;
 import eu.unicate.retroauth.strategies.LockingStrategy;
 import rx.Observable;
 import rx.functions.Func0;

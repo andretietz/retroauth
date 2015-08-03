@@ -16,7 +16,6 @@
 
 package eu.unicate.retroauth.strategies;
 
-import eu.unicate.retroauth.interfaces.RequestStrategy;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 import rx.Observable;
@@ -28,7 +27,7 @@ import rx.functions.Func2;
  *
  * Extend from this class if you need your custom retry method and override {@link #retry}
  */
-public class BasicRetryStrategy implements RequestStrategy {
+public class BaseRetryStrategy extends RequestStrategy {
 
 	private static final int HTTP_UNAUTHORIZED = 401;
 

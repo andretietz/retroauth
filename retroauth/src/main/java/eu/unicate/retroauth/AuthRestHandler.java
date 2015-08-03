@@ -23,7 +23,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import eu.unicate.retroauth.interfaces.BaseAccountManager;
-import eu.unicate.retroauth.interfaces.RequestStrategy;
+import eu.unicate.retroauth.strategies.RequestStrategy;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;

@@ -29,7 +29,7 @@ import eu.unicate.retroauth.annotations.Authenticated;
 import eu.unicate.retroauth.annotations.Authentication;
 import eu.unicate.retroauth.interceptors.AuthenticationRequestInterceptor;
 import eu.unicate.retroauth.interceptors.TokenInterceptor;
-import eu.unicate.retroauth.interfaces.RequestStrategy;
+import eu.unicate.retroauth.strategies.RequestStrategy;
 import retrofit.Endpoint;
 import retrofit.ErrorHandler;
 import retrofit.Profiler;

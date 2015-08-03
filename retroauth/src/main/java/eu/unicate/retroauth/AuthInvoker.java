@@ -19,7 +19,7 @@ package eu.unicate.retroauth;
 import android.accounts.Account;
 
 import eu.unicate.retroauth.interfaces.BaseAccountManager;
-import eu.unicate.retroauth.interfaces.RequestStrategy;
+import eu.unicate.retroauth.strategies.RequestStrategy;
 import eu.unicate.retroauth.strategies.LockingStrategy;
 import rx.Observable;
 import rx.Observable.OnSubscribe;
