@@ -16,8 +16,6 @@
 
 package eu.unicate.retroauth.strategies;
 
-import android.util.Log;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
@@ -119,8 +117,8 @@ public class LockingStrategy extends SimpleRetryStrategy {
 							public Boolean call(Integer count, Throwable error) {
 								try {
 									if (error instanceof BaseAccountManager.UserCancelException) {
-										canceledWithError.set(error.getCause());
 										error = error.getCause();
+										canceledWithError.set(error);
 									}
 									return retry(count, error);
 								} finally {
@@ -145,7 +143,7 @@ public class LockingStrategy extends SimpleRetryStrategy {
 					boolean waiting = !semaphore.tryAcquire();
 					if (waiting) {
 						// and increment a waiting queue counter
-						int w = waitCounter.incrementAndGet();
+						waitCounter.incrementAndGet();
 						// wait for the next slot
 						semaphore.acquire();
 					}
