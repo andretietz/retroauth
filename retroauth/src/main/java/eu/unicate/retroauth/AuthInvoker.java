@@ -98,7 +98,7 @@ final class AuthInvoker {
 		return Observable.create(new OnSubscribe<Boolean>() {
 			@Override
 			public void call(Subscriber<? super Boolean> subscriber) {
-				serviceInfo.authenticationInterceptor.setToken(token);
+				serviceInfo.tokenSetup(token);
 				subscriber.onNext(true);
 				subscriber.onCompleted();
 			}

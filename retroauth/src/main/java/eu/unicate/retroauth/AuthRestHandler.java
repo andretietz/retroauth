@@ -47,7 +47,7 @@ final class AuthRestHandler<T> implements InvocationHandler {
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		ServiceInfo.AuthRequestType methodInfo = serviceInfo.methodInfoCache.get(method);
-		serviceInfo.authenticationInterceptor.setIgnore(false);
+		serviceInfo.tokenInterceptor.setIgnore(false);
 		switch (methodInfo) {
 			case RXJAVA:
 				return authInvoker.invoke(observableRequest(method, args)).subscribeOn(Schedulers.newThread());
@@ -81,7 +81,7 @@ final class AuthRestHandler<T> implements InvocationHandler {
 				return null;
 			case NONE:
 			default:
-				serviceInfo.authenticationInterceptor.setIgnore(true);
+				serviceInfo.tokenInterceptor.setIgnore(true);
 				return method.invoke(retrofitService, args);
 		}
 	}

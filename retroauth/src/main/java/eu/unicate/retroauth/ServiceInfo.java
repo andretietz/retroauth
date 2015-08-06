@@ -19,6 +19,7 @@ package eu.unicate.retroauth;
 import java.lang.reflect.Method;
 import java.util.Map;
 
+import eu.unicate.retroauth.interceptors.AuthenticationRequestInterceptor;
 import eu.unicate.retroauth.interceptors.TokenInterceptor;
 
 /**
@@ -29,13 +30,20 @@ final class ServiceInfo {
 	public final Map<Method, AuthRequestType> methodInfoCache;
 	public final String accountType;
 	public final String tokenType;
-	public final TokenInterceptor authenticationInterceptor;
+	public final TokenInterceptor tokenInterceptor;
+	public final AuthenticationRequestInterceptor authenticationRequestInterceptor;
 
-	public ServiceInfo(Map<Method, AuthRequestType> methodInfoCache, String accountType, String tokenType, TokenInterceptor requestInterceptor) {
+	public ServiceInfo(Map<Method, AuthRequestType> methodInfoCache, String accountType, String tokenType, AuthenticationRequestInterceptor baseRequestInterceptor, TokenInterceptor requestInterceptor) {
 		this.methodInfoCache = methodInfoCache;
 		this.accountType = accountType;
 		this.tokenType = tokenType;
-		this.authenticationInterceptor = requestInterceptor;
+		this.tokenInterceptor = requestInterceptor;
+		this.authenticationRequestInterceptor = baseRequestInterceptor;
+	}
+
+	public void tokenSetup(String token) {
+		tokenInterceptor.setToken(token);
+		authenticationRequestInterceptor.setAuthenticationInterceptor(tokenInterceptor);
 	}
 
 	/**

@@ -26,7 +26,6 @@ public class LockingStrategyTest {
 	/**
 	 * Testing the happy case of 100 simultaneously called requests
 	 */
-	@Ignore
 	@Test
 	public void testBlockingSuccess() throws InterruptedException {
 		final LockingStrategy strategy = new LockingStrategy("test");
@@ -70,6 +69,7 @@ public class LockingStrategyTest {
 	/**
 	 * Testing the failing case of 100 simultaneously called requests
 	 */
+	@Ignore
 	@Test
 	public void testBlockingFailing() throws InterruptedException {
 		final LockingStrategy strategy = new LockingStrategy("test");

@@ -80,22 +80,22 @@ public final class AuthRestAdapter {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T create(Context context, TokenInterceptor tokenInterceptor, Class<T> serviceClass, RequestStrategy requestStrategy) {
-		interceptor.setAuthenticationInterceptor(tokenInterceptor);
 		return (T) Proxy.newProxyInstance(serviceClass.getClassLoader(), new Class<?>[]{serviceClass},
-				new AuthRestHandler<>(adapter.create(serviceClass), getServiceInfo(context, serviceClass, tokenInterceptor), new AuthAccountManager(context), requestStrategy));
+				new AuthRestHandler<>(adapter.create(serviceClass), getServiceInfo(context, interceptor, serviceClass, tokenInterceptor), new AuthAccountManager(context), requestStrategy));
 	}
 
 	/**
 	 * Creates an Information object about the requested service
 	 *
-	 * @param context      Android Context
-	 * @param serviceClass The service class you want information of
-	 * @param interceptor  the {@link TokenInterceptor} this service should use
-	 * @param <T>          The type of the service
+	 * @param context            Android Context
+	 * @param serviceClass       The service class you want information of
+	 * @param interceptor        the {@link TokenInterceptor} this service should use
+	 * @param requestInterceptor the {@link AuthenticationRequestInterceptor} which contains the requestInterceptor, you set up in the {@link eu.unicate.retroauth.AuthRestAdapter.Builder#setRequestInterceptor(RequestInterceptor)}
+	 * @param <T>                The type of the service
 	 * @return a {@link ServiceInfo} object
 	 */
 	@NonNull
-	private <T> ServiceInfo getServiceInfo(@NonNull Context context, @NonNull Class<T> serviceClass, @NonNull TokenInterceptor interceptor) {
+	private <T> ServiceInfo getServiceInfo(@NonNull Context context, @NonNull AuthenticationRequestInterceptor requestInterceptor, @NonNull Class<T> serviceClass, @NonNull TokenInterceptor interceptor) {
 		synchronized (serviceInfoCache) {
 			ServiceInfo info = serviceInfoCache.get(serviceClass);
 			if (null == info) {
@@ -107,7 +107,7 @@ public final class AuthRestAdapter {
 					tokenType = context.getString(annotation.tokenType());
 				}
 				Map<Method, ServiceInfo.AuthRequestType> methodInfoCache = scanServiceMethods(serviceClass, (null != accountType));
-				info = new ServiceInfo(methodInfoCache, accountType, tokenType, interceptor);
+				info = new ServiceInfo(methodInfoCache, accountType, tokenType, requestInterceptor, interceptor);
 				serviceInfoCache.put(serviceClass, info);
 			}
 			return info;
@@ -118,7 +118,7 @@ public final class AuthRestAdapter {
 	 * Scans all methods of a service using reflection
 	 *
 	 * @param serviceClass               The Service class to scan
-	 * @param containsAuthenticationData a boolean reached throw from {@link #getServiceInfo(Context, Class, TokenInterceptor)}
+	 * @param containsAuthenticationData a boolean reached throw from {@link #getServiceInfo(Context, AuthenticationRequestInterceptor, Class, TokenInterceptor)}
 	 * @return a map with all methods of the service and which request type they are
 	 */
 	private Map<Method, ServiceInfo.AuthRequestType> scanServiceMethods(Class<?> serviceClass, boolean containsAuthenticationData) {

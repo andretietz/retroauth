@@ -27,6 +27,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
+import eu.unicate.retroauth.interceptors.AuthenticationRequestInterceptor;
 import eu.unicate.retroauth.interceptors.TokenInterceptor;
 import eu.unicate.retroauth.interfaces.BaseAccountManager;
 import eu.unicate.retroauth.strategies.RequestStrategy;
@@ -66,7 +67,7 @@ public class AuthInvokerTests {
 	@Before
 	public void setupTest() {
 		HashMap<Method, ServiceInfo.AuthRequestType> map = new HashMap<>();
-		ServiceInfo info = new ServiceInfo(map, "testAccountType", "testTokenType", TokenInterceptor.BEARER_TOKENINTERCEPTOR);
+		ServiceInfo info = new ServiceInfo(map, "testAccountType", "testTokenType", new AuthenticationRequestInterceptor(null), TokenInterceptor.BEARER_TOKENINTERCEPTOR);
 		invoker = new AuthInvoker(info, authAccountManager, STRATEGY);
 
 	}
