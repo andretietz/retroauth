@@ -22,6 +22,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import eu.unicate.retroauth.ServiceInfo.AuthRequestType;
 import eu.unicate.retroauth.interfaces.BaseAccountManager;
 import eu.unicate.retroauth.strategies.RequestStrategy;
 import retrofit.Callback;
@@ -47,7 +48,7 @@ final class AuthRestHandler<T> implements InvocationHandler {
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		ServiceInfo.AuthRequestType methodInfo = serviceInfo.methodInfoCache.get(method);
-		serviceInfo.tokenInterceptor.setIgnore(false);
+		serviceInfo.tokenInterceptor.setIgnore(AuthRequestType.NONE.equals(methodInfo));
 		switch (methodInfo) {
 			case RXJAVA:
 				return authInvoker.invoke(observableRequest(method, args)).subscribeOn(Schedulers.newThread());
@@ -81,7 +82,6 @@ final class AuthRestHandler<T> implements InvocationHandler {
 				return null;
 			case NONE:
 			default:
-				serviceInfo.tokenInterceptor.setIgnore(true);
 				return method.invoke(retrofitService, args);
 		}
 	}
