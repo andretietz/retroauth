@@ -17,12 +17,11 @@
 package eu.unicate.retroauth.strategies;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import eu.unicate.retroauth.interfaces.BaseAccountManager;
+import eu.unicate.retroauth.exceptions.AuthenticationCanceledException;
 import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Action1;
@@ -33,12 +32,12 @@ import rx.functions.Func2;
 /**
  * The locking strategy makes sure only one request at a time is executed. This is important to
  * avoid multiple unauthorized requests.
- * <p/>
+ * <p>
  * This strategy is chosen as default
  */
 public class LockingStrategy extends SimpleRetryStrategy {
 
-	private static final Map<String, Semaphore> TOKEN_TYPE_SEMAPHORES = new HashMap<>();
+	private static final AtomicReference<HashMap<String, Semaphore>> TOKEN_TYPE_SEMAPHORES = new AtomicReference<>(new HashMap<String, Semaphore>());
 	private static final AtomicInteger waitCounter = new AtomicInteger(0);
 	private static final AtomicReference<Throwable> canceledWithError = new AtomicReference<>(null);
 
@@ -59,7 +58,7 @@ public class LockingStrategy extends SimpleRetryStrategy {
 
 	/**
 	 * Creating a locking request strategy object
-	 * <p/>
+	 * <p>
 	 * {@code cancelPending} is {@code true} by default. this means, that all pending requests
 	 * will be canceled, when the user cancels the login
 	 *
@@ -77,10 +76,10 @@ public class LockingStrategy extends SimpleRetryStrategy {
 	 */
 	private Semaphore getSemaphore(String type) {
 		synchronized (TOKEN_TYPE_SEMAPHORES) {
-			Semaphore semaphore = TOKEN_TYPE_SEMAPHORES.get(type);
+			Semaphore semaphore = TOKEN_TYPE_SEMAPHORES.get().get(type);
 			if (semaphore == null) {
 				semaphore = new Semaphore(1);
-				TOKEN_TYPE_SEMAPHORES.put(type, semaphore);
+				TOKEN_TYPE_SEMAPHORES.get().put(type, semaphore);
 			}
 			return semaphore;
 		}
@@ -116,8 +115,8 @@ public class LockingStrategy extends SimpleRetryStrategy {
 							@Override
 							public Boolean call(Integer count, Throwable error) {
 								try {
-									if (error instanceof BaseAccountManager.UserCancelException) {
-										error = error.getCause();
+									//noinspection ThrowableResultOfMethodCallIgnored
+									if (null == canceledWithError.get() && error instanceof AuthenticationCanceledException) {
 										canceledWithError.set(error);
 									}
 									return retry(count, error);

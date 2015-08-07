@@ -33,6 +33,7 @@ import android.support.v7.app.AlertDialog;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import eu.unicate.retroauth.exceptions.AuthenticationCanceledException;
 import eu.unicate.retroauth.interfaces.BaseAccountManager;
 import rx.Observable;
 import rx.Subscriber;
@@ -261,7 +262,7 @@ public final class AuthAccountManager implements BaseAccountManager {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public String getAuthToken(@Nullable Account account, @NonNull String accountType, @NonNull String tokenType) throws UserCancelException {
+	public String getAuthToken(@Nullable Account account, @NonNull String accountType, @NonNull String tokenType) throws AuthenticationCanceledException {
 		try {
 			AccountManagerFuture<Bundle> future;
 			Activity activity = (context instanceof Activity) ? (Activity) context : null;
@@ -281,7 +282,7 @@ public final class AuthAccountManager implements BaseAccountManager {
 			}
 			return token;
 		} catch (AuthenticatorException | OperationCanceledException | IOException e) {
-			throw new UserCancelException(e);
+			throw new AuthenticationCanceledException(e);
 		}
 	}
 }

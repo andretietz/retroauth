@@ -1,4 +1,8 @@
 language: android
+branches:
+  only:
+    - master
+    - develop
 
 android:
   components:

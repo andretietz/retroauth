@@ -23,6 +23,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import eu.unicate.retroauth.AuthenticationActivity;
+import eu.unicate.retroauth.exceptions.AuthenticationCanceledException;
 
 public interface BaseAccountManager {
 	/**
@@ -127,19 +128,8 @@ public interface BaseAccountManager {
 	 * @param accountType the accountType to create if there's no account
 	 * @param tokenType   token type you need the token to be
 	 * @return the token
-	 * @throws UserCancelException thrown when the account creation is canceled
+	 * @throws AuthenticationCanceledException thrown when the account creation is canceled
 	 */
 	@Nullable
-	String getAuthToken(@Nullable Account account, @NonNull String accountType, @NonNull String tokenType) throws UserCancelException;
-
-	/**
-	 * This internal used only exception is thrown, when the user cancels the login process
-	 * It contains as "cause" the exception which was thrown by the android accountManager.getAuthToken
-	 */
-	final class UserCancelException extends RuntimeException {
-		public UserCancelException(Throwable e) {
-			super(e);
-		}
-	}
-
+	String getAuthToken(@Nullable Account account, @NonNull String accountType, @NonNull String tokenType) throws AuthenticationCanceledException;
 }

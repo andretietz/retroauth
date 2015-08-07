@@ -18,6 +18,7 @@ package eu.unicate.retroauth;
 
 import android.accounts.Account;
 
+import eu.unicate.retroauth.exceptions.AuthenticationCanceledException;
 import eu.unicate.retroauth.interfaces.BaseAccountManager;
 import eu.unicate.retroauth.strategies.RequestStrategy;
 import eu.unicate.retroauth.strategies.LockingStrategy;
@@ -118,7 +119,7 @@ final class AuthInvoker {
 				try {
 					subscriber.onNext(authAccountManager.getAuthToken(account, serviceInfo.accountType, serviceInfo.tokenType));
 					subscriber.onCompleted();
-				} catch (BaseAccountManager.UserCancelException e) {
+				} catch (AuthenticationCanceledException e) {
 					subscriber.onError(e);
 				}
 			}

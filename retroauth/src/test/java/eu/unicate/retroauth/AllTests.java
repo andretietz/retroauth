@@ -7,7 +7,8 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
 		AuthAccountManagerTests.class,
 		AuthInvokerTests.class,
-		AuthRestAdapterTests.class
+		AuthRestAdapterTests.class,
+		LockingStrategyTests.class
 })
 public class AllTests {
 }
