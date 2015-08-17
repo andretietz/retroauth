@@ -51,16 +51,19 @@ final class AuthRestHandler<T> implements InvocationHandler {
 		serviceInfo.tokenInterceptor.setIgnore(AuthRequestType.NONE.equals(methodInfo));
 		switch (methodInfo) {
 			case RXJAVA:
-				return authInvoker.invoke(observableRequest(method, args)).subscribeOn(Schedulers.newThread());
+				return authInvoker
+						.invoke(observableRequest(method, args))
+						.subscribeOn(Schedulers.newThread());
 			case BLOCKING:
-				return authInvoker.invoke(blockingRequest(method, args))
-						.subscribeOn(Schedulers.newThread())
+				return authInvoker
+						.invoke(blockingRequest(method, args))
 						.toBlocking().single();
 			case ASYNC:
 				// store original callback
 				@SuppressWarnings("unchecked")
 				final Callback<Object> originalCallback = (Callback<Object>) args[args.length - 1];
-				authInvoker.invoke(asyncRequest(method, args))
+				authInvoker
+						.invoke(asyncRequest(method, args))
 						.subscribeOn(Schedulers.newThread())
 						.observeOn(AndroidScheduler.mainThread())
 						.subscribe(new Action1<Pair<Object, Response>>() {
