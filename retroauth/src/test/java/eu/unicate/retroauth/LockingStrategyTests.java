@@ -29,7 +29,7 @@ import rx.schedulers.Schedulers;
 @RunWith(JUnit4.class)
 public class LockingStrategyTests {
 
-	private static final int REQUEST_AMOUNT = 10;
+	private static final int REQUEST_AMOUNT = 100;
 
 	/**
 	 * Testcase:
@@ -44,15 +44,20 @@ public class LockingStrategyTests {
 	@Test
 	public void testBlockingSuccess() throws InterruptedException {
 		final LockingStrategy strategy = new LockingStrategy("success-blocking");
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings("unchecked") final
 		TestSubscriber<Integer>[] subscriber = new TestSubscriber[REQUEST_AMOUNT];
-
-		AtomicInteger c = new AtomicInteger(0);
+		final AtomicInteger c = new AtomicInteger(0);
 		// execute 100 requests at once
 		for (int i = 0; i < REQUEST_AMOUNT; i++) {
 			subscriber[i] = TestSubscriber.create();
-			executeAsBlocking(strategy, requestSimulationHappyCase(i, c))
-					.subscribeOn(Schedulers.newThread())
+			final int finalI = i;
+			Observable.create(new OnSubscribe<Integer>() {
+				@Override
+				public void call(Subscriber<? super Integer> subscriber) {
+					subscriber.onNext(blockingCall(strategy, requestSimulationHappyCase(finalI, c)));
+					subscriber.onCompleted();
+				}
+			}).subscribeOn(Schedulers.newThread())
 					.subscribe(subscriber[i]);
 		}
 
@@ -100,13 +105,18 @@ public class LockingStrategyTests {
 		final LockingStrategy strategy = new LockingStrategy("failing-blocking");
 		@SuppressWarnings("unchecked")
 		TestSubscriber<Integer>[] subscriber = new TestSubscriber[REQUEST_AMOUNT];
-		AtomicInteger c = new AtomicInteger(0);
+		final AtomicInteger c = new AtomicInteger(0);
 		// execute 100 requests at once, they should be queued and the 2nd
 		// waits for the 1st to finish before executing
 		for (int i = 0; i < REQUEST_AMOUNT; i++) {
 			subscriber[i] = TestSubscriber.create();
-			executeAsBlocking(strategy, requestSimulationFailingCase(i, c))
-					.subscribeOn(Schedulers.newThread())
+			Observable.create(new OnSubscribe<Integer>() {
+				@Override
+				public void call(Subscriber<? super Integer> subscriber) {
+					subscriber.onNext(blockingCall(strategy, requestSimulationFailingCase(c)));
+					subscriber.onCompleted();
+				}
+			}).subscribeOn(Schedulers.newThread())
 					.subscribe(subscriber[i]);
 		}
 		// wait a bit to make sure all of them are executed before testing
@@ -162,7 +172,7 @@ public class LockingStrategyTests {
 		// execute 100 requests at once
 		for (int i = 0; i < REQUEST_AMOUNT; i++) {
 			subscriber[i] = TestSubscriber.create();
-			strategy.execute(requestSimulationHappyCase(i, c).subscribeOn(Schedulers.newThread())).subscribe(subscriber[i]);
+			rxjavaCall(strategy, requestSimulationHappyCase(i, c)).subscribe(subscriber[i]);
 		}
 
 		// wait a bit to make sure all of them are executed
@@ -214,13 +224,12 @@ public class LockingStrategyTests {
 		// waits for the 1st to finish before executing
 		for (int i = 0; i < REQUEST_AMOUNT; i++) {
 			subscriber[i] = TestSubscriber.create();
-			strategy.execute(requestSimulationFailingCase(i, c).subscribeOn(Schedulers.newThread())).subscribe(subscriber[i]);
+			rxjavaCall(strategy, requestSimulationFailingCase(c)).subscribe(subscriber[i]);
 		}
 		// wait a bit to make sure all of them are executed before testing
 		Thread.sleep(100L);
 		// test all 100 if they have been canceled
 		for (int i = 0; i < REQUEST_AMOUNT; i++) {
-			System.out.println(i);
 			subscriber[i].assertError(AuthenticationCanceledException.class);
 		}
 
@@ -241,7 +250,6 @@ public class LockingStrategyTests {
 			}
 		})).subscribe(finalTest);
 
-		Thread.sleep(10L);
 		// if this request finished successfully we can be sure that
 		// all locks have been reset
 		finalTest.assertValueCount(1);
@@ -264,15 +272,22 @@ public class LockingStrategyTests {
 		@SuppressWarnings("unchecked")
 		TestSubscriber<Integer>[] subscriber = new TestSubscriber[REQUEST_AMOUNT];
 
-		AtomicInteger c = new AtomicInteger(0);
+		final AtomicInteger c = new AtomicInteger(0);
 		// execute 100 requests at once
 		for (int i = 0; i < REQUEST_AMOUNT; i++) {
 			subscriber[i] = TestSubscriber.create();
 			Observable<Integer> request;
 			if (i % 2 == 0) {
-				request = strategy.execute(requestSimulationHappyCase(i, c).subscribeOn(Schedulers.newThread()));
+				request = rxjavaCall(strategy, requestSimulationHappyCase(i, c));
 			} else {
-				request = executeAsBlocking(strategy, requestSimulationHappyCase(i, c).subscribeOn(Schedulers.newThread()));
+				final int finalI = i;
+				request = Observable.create(new OnSubscribe<Integer>() {
+					@Override
+					public void call(Subscriber<? super Integer> subscriber) {
+						subscriber.onNext(blockingCall(strategy, requestSimulationHappyCase(finalI, c)));
+						subscriber.onCompleted();
+					}
+				}).subscribeOn(Schedulers.newThread());
 			}
 			request.subscribe(subscriber[i]);
 		}
@@ -321,21 +336,27 @@ public class LockingStrategyTests {
 		final LockingStrategy strategy = new LockingStrategy("failing-mixture");
 		@SuppressWarnings("unchecked")
 		TestSubscriber<Integer>[] subscriber = new TestSubscriber[REQUEST_AMOUNT];
-		AtomicInteger c = new AtomicInteger(0);
+		final AtomicInteger c = new AtomicInteger(0);
 		// execute 100 requests at once, they should be queued and the 2nd
 		// waits for the 1st to finish before executing
 		for (int i = 0; i < REQUEST_AMOUNT; i++) {
 			subscriber[i] = TestSubscriber.create();
 			Observable<Integer> request;
 			if (i % 2 == 0) {
-				request = strategy.execute(requestSimulationFailingCase(i, c).subscribeOn(Schedulers.newThread()));
+				request = strategy.execute(requestSimulationFailingCase(c));
 			} else {
-				request = executeAsBlocking(strategy, requestSimulationFailingCase(i, c)).subscribeOn(Schedulers.newThread());
+				request = Observable.create(new OnSubscribe<Integer>() {
+					@Override
+					public void call(Subscriber<? super Integer> subscriber) {
+						subscriber.onNext(blockingCall(strategy, requestSimulationFailingCase(c)));
+						subscriber.onCompleted();
+					}
+				}).subscribeOn(Schedulers.newThread());
 			}
 			request.subscribe(subscriber[i]);
 		}
 		// wait a bit to make sure all of them are executed before testing
-		Thread.sleep(300L);
+		Thread.sleep(100L);
 		// test all 100 if they have been canceled
 		for (int i = 0; i < REQUEST_AMOUNT; i++) {
 			if (i % 2 == 0) {
@@ -350,7 +371,7 @@ public class LockingStrategyTests {
 		// method)
 		Assert.assertEquals(1, c.get());
 
-		// to make sure all locks are released again, do another request
+		// to make sure all locks are released, do another request
 		TestSubscriber<Object> finalTest = TestSubscriber.create();
 		// if anything is still locked, this test fails
 		strategy.execute(Observable.create(new OnSubscribe<Object>() {
@@ -369,22 +390,6 @@ public class LockingStrategyTests {
 		finalTest.assertCompleted();
 	}
 
-
-	private Observable<Integer> executeAsBlocking(final LockingStrategy strategy, final Observable<Integer> request) {
-		return Observable.create(new OnSubscribe<Integer>() {
-			@Override
-			public void call(Subscriber<? super Integer> subscriber) {
-				try {
-					subscriber.onNext(strategy.execute(request).toBlocking().single());
-					subscriber.onCompleted();
-				} catch (Throwable e) {
-					subscriber.onError(e);
-				}
-			}
-		});
-	}
-
-
 	/**
 	 * Wrapping the requestHappy into an observable
 	 * (this is how it's gonna work in retroauth as well)
@@ -396,8 +401,8 @@ public class LockingStrategyTests {
 				try {
 					subscriber.onNext(requestHappy(id, c));
 					subscriber.onCompleted();
-				} catch (Throwable e) {
-					subscriber.onError(e);
+				} catch (InterruptedException e) {
+					Assert.fail();
 				}
 			}
 		});
@@ -407,18 +412,33 @@ public class LockingStrategyTests {
 	 * Wrapping the requestHappy into an observable
 	 * (this is how it's gonna work in retroauth as well)
 	 */
-	private Observable<Integer> requestSimulationFailingCase(final int id, final AtomicInteger c) {
+	private Observable<Integer> requestSimulationFailingCase(final AtomicInteger c) {
 		return Observable.create(new OnSubscribe<Integer>() {
 			@Override
 			public void call(Subscriber<? super Integer> subscriber) {
 				try {
-					subscriber.onNext(requestFailure(id, c));
+					subscriber.onNext(requestFailure(c));
 					subscriber.onCompleted();
-				} catch (Throwable e) {
-					subscriber.onError(e);
+				} catch (InterruptedException e) {
+					Assert.fail();
 				}
 			}
 		});
+	}
+
+	/**
+	 * This is how rxjava calls are executed in the {@link AuthRestHandler#invoke(Object, Method, Object[])} method
+	 */
+	public <T> Observable<T> rxjavaCall(LockingStrategy strategy, Observable<T> request) {
+		return strategy
+				.execute(request)
+				.subscribeOn(Schedulers.newThread());
+	}
+
+	public <T> T blockingCall(LockingStrategy strategy, Observable<T> request) {
+		return strategy
+				.execute(request)
+				.toBlocking().single();
 	}
 
 	/**
@@ -429,10 +449,11 @@ public class LockingStrategyTests {
 		return id;
 	}
 
-	private int requestFailure(int id, AtomicInteger executionCounter) throws AuthenticationCanceledException, InterruptedException {
+	private int requestFailure(AtomicInteger executionCounter) throws InterruptedException {
 		executionCounter.incrementAndGet();
 		// intentionally wait for the other requests to be queued.
-		Thread.sleep(80L);
+		// This is required for the failing tests since they assume that all requests are pending
+		Thread.sleep(50L);
 		throw new AuthenticationCanceledException(new OperationCanceledException());
 	}
 }

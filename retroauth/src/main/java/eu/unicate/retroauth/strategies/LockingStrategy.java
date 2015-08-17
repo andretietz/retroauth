@@ -32,16 +32,19 @@ import rx.functions.Func2;
 /**
  * The locking strategy makes sure only one request at a time is executed. This is important to
  * avoid multiple unauthorized requests.
- * <p>
+ * <p/>
  * This strategy is chosen as default
  */
 public class LockingStrategy extends SimpleRetryStrategy {
 
 	private static final AtomicReference<HashMap<String, Semaphore>> TOKEN_TYPE_SEMAPHORES = new AtomicReference<>(new HashMap<String, Semaphore>());
+	private static final AtomicReference<HashMap<String, AtomicReference<Throwable>>> TOKEN_TYPE_THROWABLES = new AtomicReference<>(new HashMap<String, AtomicReference<Throwable>>());
+
+	// TODO: replace with token dependent counter or better: create object for semaphore,throwable and counter
 	private static final AtomicInteger waitCounter = new AtomicInteger(0);
-	private static final AtomicReference<Throwable> canceledWithError = new AtomicReference<>(null);
 
 	private final Semaphore semaphore;
+	private final AtomicReference<Throwable> errorContainer;
 	private final boolean cancelPending;
 
 	/**
@@ -53,12 +56,13 @@ public class LockingStrategy extends SimpleRetryStrategy {
 	 */
 	public LockingStrategy(String type, boolean cancelPending) {
 		this.semaphore = getSemaphore(type);
+		this.errorContainer = getErrorContainer(type);
 		this.cancelPending = cancelPending;
 	}
 
 	/**
 	 * Creating a locking request strategy object
-	 * <p>
+	 * <p/>
 	 * {@code cancelPending} is {@code true} by default. this means, that all pending requests
 	 * will be canceled, when the user cancels the login
 	 *
@@ -82,6 +86,23 @@ public class LockingStrategy extends SimpleRetryStrategy {
 				TOKEN_TYPE_SEMAPHORES.get().put(type, semaphore);
 			}
 			return semaphore;
+		}
+	}
+
+	/**
+	 * Returns a errorContainer which is unique per type
+	 *
+	 * @param type Type you want the errorContainer for
+	 * @return a errorContainer
+	 */
+	private AtomicReference<Throwable> getErrorContainer(String type) {
+		synchronized (TOKEN_TYPE_THROWABLES) {
+			AtomicReference<Throwable> errorContainer = TOKEN_TYPE_THROWABLES.get().get(type);
+			if (errorContainer == null) {
+				errorContainer = new AtomicReference<>();
+				TOKEN_TYPE_THROWABLES.get().put(type, errorContainer);
+			}
+			return errorContainer;
 		}
 	}
 
@@ -116,8 +137,13 @@ public class LockingStrategy extends SimpleRetryStrategy {
 							public Boolean call(Integer count, Throwable error) {
 								try {
 									//noinspection ThrowableResultOfMethodCallIgnored
-									if (null == canceledWithError.get() && error instanceof AuthenticationCanceledException) {
-										canceledWithError.set(error);
+									if (null == errorContainer.get() && error instanceof AuthenticationCanceledException) {
+										System.out.println("set error!");
+										errorContainer.set(error);
+									}
+									if (0 == waitCounter.get()) {
+										System.out.println("reset error!");
+										errorContainer.set(null);
 									}
 									return retry(count, error);
 								} finally {
@@ -146,9 +172,11 @@ public class LockingStrategy extends SimpleRetryStrategy {
 						// wait for the next slot
 						semaphore.acquire();
 					}
-					// emit if this request had to wait
-					subscriber.onNext(waiting);
-					subscriber.onCompleted();
+					if (!subscriber.isUnsubscribed()) {
+						// emit if this request had to wait
+						subscriber.onNext(waiting);
+						subscriber.onCompleted();
+					}
 				} catch (InterruptedException e) {
 					subscriber.onError(e);
 				}
@@ -167,11 +195,9 @@ public class LockingStrategy extends SimpleRetryStrategy {
 			@Override
 			public void call(Subscriber<? super Object> subscriber) {
 				if (wasWaiting && cancelPending) {
-					Throwable error = canceledWithError.get();
-					int stillWaiting = waitCounter.decrementAndGet();
+					Throwable error = errorContainer.get();
+					waitCounter.decrementAndGet();
 					if (error != null) {
-						if (0 == stillWaiting)
-							canceledWithError.set(null);
 						subscriber.onError(error);
 						return;
 					}
