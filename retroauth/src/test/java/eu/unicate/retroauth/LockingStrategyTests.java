@@ -62,7 +62,7 @@ public class LockingStrategyTests {
 		}
 
 		// wait a bit to make sure all of them are executed
-		Thread.sleep(100L);
+		Thread.sleep(300L);
 		// test all 100 if they emit one item and complete
 		for (int i = 0; i < REQUEST_AMOUNT; i++) {
 			subscriber[i].assertValueCount(1);
@@ -120,7 +120,7 @@ public class LockingStrategyTests {
 					.subscribe(subscriber[i]);
 		}
 		// wait a bit to make sure all of them are executed before testing
-		Thread.sleep(100L);
+		Thread.sleep(300L);
 		// test all 100 if they have been canceled
 		for (int i = 0; i < REQUEST_AMOUNT; i++) {
 			subscriber[i].assertError(RuntimeException.class);
@@ -176,7 +176,7 @@ public class LockingStrategyTests {
 		}
 
 		// wait a bit to make sure all of them are executed
-		Thread.sleep(100L);
+		Thread.sleep(300L);
 		// test all 100 if they emit one item and complete
 		for (int i = 0; i < REQUEST_AMOUNT; i++) {
 			subscriber[i].assertValueCount(1);
@@ -227,7 +227,7 @@ public class LockingStrategyTests {
 			rxjavaCall(strategy, requestSimulationFailingCase(c)).subscribe(subscriber[i]);
 		}
 		// wait a bit to make sure all of them are executed before testing
-		Thread.sleep(100L);
+		Thread.sleep(300L);
 		// test all 100 if they have been canceled
 		for (int i = 0; i < REQUEST_AMOUNT; i++) {
 			subscriber[i].assertError(AuthenticationCanceledException.class);
@@ -293,7 +293,7 @@ public class LockingStrategyTests {
 		}
 
 		// wait a bit to make sure all of them are executed
-		Thread.sleep(100L);
+		Thread.sleep(300L);
 		// test all 100 if they emit one item and complete
 		for (int i = 0; i < REQUEST_AMOUNT; i++) {
 			subscriber[i].assertValueCount(1);
@@ -356,7 +356,7 @@ public class LockingStrategyTests {
 			request.subscribe(subscriber[i]);
 		}
 		// wait a bit to make sure all of them are executed before testing
-		Thread.sleep(100L);
+		Thread.sleep(300L);
 		// test all 100 if they have been canceled
 		for (int i = 0; i < REQUEST_AMOUNT; i++) {
 			if (i % 2 == 0) {
