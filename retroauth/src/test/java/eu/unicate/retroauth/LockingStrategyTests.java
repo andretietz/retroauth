@@ -30,36 +30,27 @@ import rx.schedulers.Schedulers;
 public class LockingStrategyTests {
 
 	/**
-	 * Amount of requests executed
-	 */
-	private static final int REQUEST_AMOUNT = 10;
-
-	/**
-	 * Time to wait after the requests started until the tests
-	 * will assert their values
-	 */
-	private static final long TIME_TO_WAIT_FOR_QUEUEING = 500L;
-
-	/**
 	 * Time in ms, that a failing request is taking
 	 * Since we want to make sure that this requests are queued waiting for the first one
 	 * this should be a bigger value. not too big since we want to have quick tests
 	 */
 	public static final long FAILING_REQUEST_TIME = 20L;
-
 	/**
 	 * Time in ms, a successful request is taking
 	 * (keep it short, since there are {@link #REQUEST_AMOUNT} of requests executed.)
 	 */
 	public static final long SUCCESSFUL_REQUEST_TIME = 0L;
+	/**
+	 * Amount of requests executed
+	 */
+	private static final int REQUEST_AMOUNT = 100;
 
 	/**
 	 * Testcase:
 	 * {@link #REQUEST_AMOUNT} simultaneously called requests are called. all of them are comparable to
 	 * retroauth blocking calls (i.e. {@code @Authenticated Object someCall()})
 	 * <p/>
-	 * After they are started it waits {@link #TIME_TO_WAIT_FOR_QUEUEING}ms, to make sure all of the are executed
-	 * then checking if all of them returned with a result and completed.
+	 * After they are started its checking if all of them returned with a result and completed.
 	 * To make sure that there's no lock anymore, there's another request started and
 	 * checked for result and completion as well
 	 */
@@ -83,10 +74,9 @@ public class LockingStrategyTests {
 					.subscribe(subscriber[i]);
 		}
 
-		// wait a bit to make sure all of them are executed
-		Thread.sleep(TIME_TO_WAIT_FOR_QUEUEING);
 		// test all requests if they emit one item and complete
 		for (int i = 0; i < REQUEST_AMOUNT; i++) {
+			subscriber[i].awaitTerminalEvent();
 			subscriber[i].assertValueCount(1);
 			subscriber[i].assertCompleted();
 		}
@@ -103,6 +93,7 @@ public class LockingStrategyTests {
 			}
 		})).subscribe(finalTest);
 
+		finalTest.awaitTerminalEvent();
 		finalTest.assertValueCount(1);
 		finalTest.assertCompleted();
 
@@ -114,9 +105,8 @@ public class LockingStrategyTests {
 	 * {@link #REQUEST_AMOUNT} simultaneously called requests are called. all of them are comparable to
 	 * retroauth blocking calls (i.e. {@code @Authenticated Object someCall()})
 	 * <p/>
-	 * After they are started it waits {@link #TIME_TO_WAIT_FOR_QUEUEING}ms, to make sure all of the are executed. The request
-	 * itself takes {@link #FAILING_REQUEST_TIME}ms as well. This is to make sure that all following requests will be queued
-	 * within the {@link LockingStrategy}.
+	 * The request itself takes {@link #FAILING_REQUEST_TIME}ms as well. This is to make sure
+	 * that all following requests will be queued within the {@link LockingStrategy}.
 	 * When the first one fails then, all queued requests are supposed to be canceled right
 	 * away, since the user decided to cancel the login operation.
 	 * To make sure that there's no lock in the end anymore, there's another request started and
@@ -141,10 +131,9 @@ public class LockingStrategyTests {
 			}).subscribeOn(Schedulers.newThread())
 					.subscribe(subscriber[i]);
 		}
-		// wait a bit to make sure all of them are executed before testing
-		Thread.sleep(TIME_TO_WAIT_FOR_QUEUEING);
 		// test all requests if they have been canceled
 		for (int i = 0; i < REQUEST_AMOUNT; i++) {
+			subscriber[i].awaitTerminalEvent();
 			subscriber[i].assertError(RuntimeException.class);
 		}
 
@@ -167,6 +156,7 @@ public class LockingStrategyTests {
 
 		// if this request finished successfully we can be sure that
 		// all locks have been reset
+		finalTest.awaitTerminalEvent();
 		finalTest.assertValueCount(1);
 		finalTest.assertCompleted();
 
@@ -178,8 +168,7 @@ public class LockingStrategyTests {
 	 * {@link #REQUEST_AMOUNT} simultaneously called requests are called. all of them are comparable to
 	 * retroauth rx-java calls (i.e. {@code @Authenticated Observable<Object> someCall()})
 	 * <p/>
-	 * After they are started it waits {@link #TIME_TO_WAIT_FOR_QUEUEING}ms, to make sure all of the are executed
-	 * then checking if all of them returned with a result and completed.
+	 * After they are started its checking if all of them returned with a result and completed.
 	 * To make sure that there's no lock anymore, there's another request started and
 	 * checked for result and completion as well
 	 */
@@ -196,10 +185,9 @@ public class LockingStrategyTests {
 			rxjavaCall(strategy, requestSimulationHappyCase(i, c)).subscribe(subscriber[i]);
 		}
 
-		// wait a bit to make sure all of them are executed
-		Thread.sleep(TIME_TO_WAIT_FOR_QUEUEING);
 		// test all requests if they emit one item and complete
 		for (int i = 0; i < REQUEST_AMOUNT; i++) {
+			subscriber[i].awaitTerminalEvent();
 			subscriber[i].assertValueCount(1);
 			subscriber[i].assertCompleted();
 		}
@@ -215,7 +203,7 @@ public class LockingStrategyTests {
 
 			}
 		})).subscribe(finalTest);
-
+		finalTest.awaitTerminalEvent();
 		finalTest.assertValueCount(1);
 		finalTest.assertCompleted();
 
@@ -227,8 +215,8 @@ public class LockingStrategyTests {
 	 * {@link #REQUEST_AMOUNT} simultaneously called requests are called. all of them are comparable to
 	 * retroauth blocking calls (i.e. {@code @Authenticated Observable<Object> someCall()})
 	 * <p/>
-	 * After they are started it waits {@link #TIME_TO_WAIT_FOR_QUEUEING}ms, to make sure all of the are executed. The request
-	 * itself takes {@link #FAILING_REQUEST_TIME}ms as well. This is to make sure that all following requests will be queued
+	 * The request itself takes {@link #FAILING_REQUEST_TIME}ms as well. This is to make sure
+	 * that all following requests will be queued
 	 * within the {@link LockingStrategy}.
 	 * When the first one fails then, all queued requests are supposed to be canceled right
 	 * away, since the user decided to cancel the login operation.
@@ -247,10 +235,9 @@ public class LockingStrategyTests {
 			subscriber[i] = TestSubscriber.create();
 			rxjavaCall(strategy, requestSimulationFailingCase(c)).subscribe(subscriber[i]);
 		}
-		// wait a bit to make sure all of them are executed before testing
-		Thread.sleep(FAILING_REQUEST_TIME);
 		// test all requests if they have been canceled
 		for (int i = 0; i < REQUEST_AMOUNT; i++) {
+			subscriber[i].awaitTerminalEvent();
 			subscriber[i].assertError(AuthenticationCanceledException.class);
 		}
 
@@ -273,6 +260,7 @@ public class LockingStrategyTests {
 
 		// if this request finished successfully we can be sure that
 		// all locks have been reset
+		finalTest.awaitTerminalEvent();
 		finalTest.assertValueCount(1);
 		finalTest.assertCompleted();
 	}
@@ -282,8 +270,7 @@ public class LockingStrategyTests {
 	 * {@link #REQUEST_AMOUNT} simultaneously called requests are called. all of them are comparable to
 	 * retroauth rx-java or blocking calls
 	 * <p/>
-	 * After they are started it waits {@link #TIME_TO_WAIT_FOR_QUEUEING}ms, to make sure all of the are executed
-	 * then checking if all of them returned with a result and completed.
+	 * After they are started its checking if all of them returned with a result and completed.
 	 * To make sure that there's no lock anymore, there's another request started and
 	 * checked for result and completion as well
 	 */
@@ -313,10 +300,9 @@ public class LockingStrategyTests {
 			request.subscribe(subscriber[i]);
 		}
 
-		// wait a bit to make sure all of them are executed
-		Thread.sleep(TIME_TO_WAIT_FOR_QUEUEING);
 		// test all requests if they emit one item and complete
 		for (int i = 0; i < REQUEST_AMOUNT; i++) {
+			subscriber[i].awaitTerminalEvent();
 			subscriber[i].assertValueCount(1);
 			subscriber[i].assertCompleted();
 		}
@@ -333,6 +319,7 @@ public class LockingStrategyTests {
 			}
 		})).subscribe(finalTest);
 
+		finalTest.awaitTerminalEvent();
 		finalTest.assertValueCount(1);
 		finalTest.assertCompleted();
 
@@ -344,8 +331,8 @@ public class LockingStrategyTests {
 	 * {@link #REQUEST_AMOUNT} simultaneously called requests are called. all of them are comparable to
 	 * retroauth rx-java or blocking calls
 	 * <p/>
-	 * After they are started it waits {@link #TIME_TO_WAIT_FOR_QUEUEING}ms, to make sure all of the are executed. The request
-	 * itself takes 80ms as well. This is to make sure that all following requests will be queued
+	 * The request
+	 * itself takes {@link #FAILING_REQUEST_TIME}ms as well. This is to make sure that all following requests will be queued
 	 * within the {@link LockingStrategy}.
 	 * When the first one fails then, all queued requests are supposed to be canceled right
 	 * away, since the user decided to cancel the login operation.
@@ -376,10 +363,9 @@ public class LockingStrategyTests {
 			}
 			request.subscribe(subscriber[i]);
 		}
-		// wait a bit to make sure all of them are executed before testing
-		Thread.sleep(TIME_TO_WAIT_FOR_QUEUEING);
 		// test all requests if they have been canceled
 		for (int i = 0; i < REQUEST_AMOUNT; i++) {
+			subscriber[i].awaitTerminalEvent();
 			if (i % 2 == 0) {
 				subscriber[i].assertError(AuthenticationCanceledException.class);
 			} else {
@@ -406,6 +392,7 @@ public class LockingStrategyTests {
 
 		// if this request finished successfully we can be sure that
 		// all locks have been reset
+		finalTest.awaitTerminalEvent();
 		finalTest.assertValueCount(1);
 		finalTest.assertCompleted();
 	}
