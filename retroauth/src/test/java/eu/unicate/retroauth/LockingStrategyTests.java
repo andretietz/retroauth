@@ -34,7 +34,7 @@ public class LockingStrategyTests {
 	 * Since we want to make sure that this requests are queued waiting for the first one
 	 * this should be a bigger value. not too big since we want to have quick tests
 	 */
-	public static final long FAILING_REQUEST_TIME = 20L;
+	public static final long FAILING_REQUEST_TIME = 100L;
 	/**
 	 * Time in ms, a successful request is taking
 	 * (keep it short, since there are {@link #REQUEST_AMOUNT} of requests executed.)
