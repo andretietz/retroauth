@@ -38,7 +38,7 @@ public class LockingStrategyTests {
 	 * Time to wait after the requests started until the tests
 	 * will assert their values
 	 */
-	private static final long TIME_TO_WAIT_FOR_QUEUEING = 300L;
+	private static final long TIME_TO_WAIT_FOR_QUEUEING = 500L;
 
 	/**
 	 * Time in ms, that a failing request is taking
