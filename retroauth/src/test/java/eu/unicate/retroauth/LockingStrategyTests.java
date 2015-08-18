@@ -29,7 +29,29 @@ import rx.schedulers.Schedulers;
 @RunWith(JUnit4.class)
 public class LockingStrategyTests {
 
-	private static final int REQUEST_AMOUNT = 5;
+	/**
+	 * Amount of requests executed
+	 */
+	private static final int REQUEST_AMOUNT = 100;
+
+	/**
+	 * Time to wait after the requests started until the tests
+	 * will assert their values
+	 */
+	private static final long TIME_TO_WAIT_FOR_QUEUEING = 300L;
+
+	/**
+	 * Time in ms, that a failing request is taking
+	 * Since we want to make sure that this requests are queued waiting for the first one
+	 * this should be a bigger value. not too big since we want to have quick tests
+	 */
+	public static final long FAILING_REQUEST_TIME = 20L;
+
+	/**
+	 * Time in ms, a successful request is taking
+	 * (keep it short, since there are {@link #REQUEST_AMOUNT} of requests executed.)
+	 */
+	public static final long SUCCESSFUL_REQUEST_TIME = 0L;
 
 	/**
 	 * Testcase:
@@ -62,7 +84,7 @@ public class LockingStrategyTests {
 		}
 
 		// wait a bit to make sure all of them are executed
-		Thread.sleep(300L);
+		Thread.sleep(TIME_TO_WAIT_FOR_QUEUEING);
 		// test all 100 if they emit one item and complete
 		for (int i = 0; i < REQUEST_AMOUNT; i++) {
 			subscriber[i].assertValueCount(1);
@@ -120,7 +142,7 @@ public class LockingStrategyTests {
 					.subscribe(subscriber[i]);
 		}
 		// wait a bit to make sure all of them are executed before testing
-		Thread.sleep(300L);
+		Thread.sleep(TIME_TO_WAIT_FOR_QUEUEING);
 		// test all 100 if they have been canceled
 		for (int i = 0; i < REQUEST_AMOUNT; i++) {
 			subscriber[i].assertError(RuntimeException.class);
@@ -176,7 +198,7 @@ public class LockingStrategyTests {
 		}
 
 		// wait a bit to make sure all of them are executed
-		Thread.sleep(300L);
+		Thread.sleep(TIME_TO_WAIT_FOR_QUEUEING);
 		// test all 100 if they emit one item and complete
 		for (int i = 0; i < REQUEST_AMOUNT; i++) {
 			subscriber[i].assertValueCount(1);
@@ -227,7 +249,7 @@ public class LockingStrategyTests {
 			rxjavaCall(strategy, requestSimulationFailingCase(c)).subscribe(subscriber[i]);
 		}
 		// wait a bit to make sure all of them are executed before testing
-		Thread.sleep(300L);
+		Thread.sleep(100L);
 		// test all 100 if they have been canceled
 		for (int i = 0; i < REQUEST_AMOUNT; i++) {
 			subscriber[i].assertError(AuthenticationCanceledException.class);
@@ -293,7 +315,7 @@ public class LockingStrategyTests {
 		}
 
 		// wait a bit to make sure all of them are executed
-		Thread.sleep(300L);
+		Thread.sleep(TIME_TO_WAIT_FOR_QUEUEING);
 		// test all 100 if they emit one item and complete
 		for (int i = 0; i < REQUEST_AMOUNT; i++) {
 			subscriber[i].assertValueCount(1);
@@ -356,7 +378,7 @@ public class LockingStrategyTests {
 			request.subscribe(subscriber[i]);
 		}
 		// wait a bit to make sure all of them are executed before testing
-		Thread.sleep(300L);
+		Thread.sleep(TIME_TO_WAIT_FOR_QUEUEING);
 		// test all 100 if they have been canceled
 		for (int i = 0; i < REQUEST_AMOUNT; i++) {
 			if (i % 2 == 0) {
@@ -446,6 +468,7 @@ public class LockingStrategyTests {
 	 */
 	private int requestHappy(int id, AtomicInteger executionCounter) throws InterruptedException {
 		executionCounter.incrementAndGet();
+		Thread.sleep(SUCCESSFUL_REQUEST_TIME);
 		return id;
 	}
 
@@ -453,7 +476,7 @@ public class LockingStrategyTests {
 		executionCounter.incrementAndGet();
 		// intentionally wait for the other requests to be queued.
 		// This is required for the failing tests since they assume that all requests are pending
-		Thread.sleep(10L);
+		Thread.sleep(FAILING_REQUEST_TIME);
 		throw new AuthenticationCanceledException(new OperationCanceledException());
 	}
 }
