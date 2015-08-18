@@ -32,20 +32,15 @@ import rx.functions.Func2;
 /**
  * The locking strategy makes sure only one request at a time is executed. This is important to
  * avoid multiple unauthorized requests.
- * <p/>
+ * <p>
  * This strategy is chosen as default
  */
 public class LockingStrategy extends SimpleRetryStrategy {
 
-	private static final AtomicReference<HashMap<String, Semaphore>> TOKEN_TYPE_SEMAPHORES = new AtomicReference<>(new HashMap<String, Semaphore>());
-	private static final AtomicReference<HashMap<String, AtomicReference<Throwable>>> TOKEN_TYPE_THROWABLES = new AtomicReference<>(new HashMap<String, AtomicReference<Throwable>>());
+	private static final AtomicReference<HashMap<String, PerTypeObject>> PER_TYPE = new AtomicReference<>(new HashMap<String, PerTypeObject>());
 
-	// TODO: replace with token dependent counter or better: create object for semaphore,throwable and counter
-	private static final AtomicInteger waitCounter = new AtomicInteger(0);
-
-	private final Semaphore semaphore;
-	private final AtomicReference<Throwable> errorContainer;
-	private final boolean cancelPending;
+	// TODO
+	private final PerTypeObject perTypeObject;
 
 	/**
 	 * Creating a locking request strategy object
@@ -55,14 +50,12 @@ public class LockingStrategy extends SimpleRetryStrategy {
 	 *                      when the user cancels the login
 	 */
 	public LockingStrategy(String type, boolean cancelPending) {
-		this.semaphore = getSemaphore(type);
-		this.errorContainer = getErrorContainer(type);
-		this.cancelPending = cancelPending;
+		this.perTypeObject = getPerTypeObject(type, cancelPending);
 	}
 
 	/**
 	 * Creating a locking request strategy object
-	 * <p/>
+	 * <p>
 	 * {@code cancelPending} is {@code true} by default. this means, that all pending requests
 	 * will be canceled, when the user cancels the login
 	 *
@@ -73,38 +66,19 @@ public class LockingStrategy extends SimpleRetryStrategy {
 	}
 
 	/**
-	 * Returns a semaphore which is unique per type
-	 *
-	 * @param type Type you want the semaphore for
-	 * @return a semaphore
+	 * TODO
 	 */
-	private Semaphore getSemaphore(String type) {
-		synchronized (TOKEN_TYPE_SEMAPHORES) {
-			Semaphore semaphore = TOKEN_TYPE_SEMAPHORES.get().get(type);
-			if (semaphore == null) {
-				semaphore = new Semaphore(1);
-				TOKEN_TYPE_SEMAPHORES.get().put(type, semaphore);
+	private PerTypeObject getPerTypeObject(String type, boolean cancelPending) {
+		synchronized (PER_TYPE) {
+			PerTypeObject perType = PER_TYPE.get().get(type);
+			if (perType == null) {
+				perType = new PerTypeObject(cancelPending);
+				PER_TYPE.get().put(type, perType);
 			}
-			return semaphore;
+			return perType;
 		}
 	}
 
-	/**
-	 * Returns a errorContainer which is unique per type
-	 *
-	 * @param type Type you want the errorContainer for
-	 * @return a errorContainer
-	 */
-	private AtomicReference<Throwable> getErrorContainer(String type) {
-		synchronized (TOKEN_TYPE_THROWABLES) {
-			AtomicReference<Throwable> errorContainer = TOKEN_TYPE_THROWABLES.get().get(type);
-			if (errorContainer == null) {
-				errorContainer = new AtomicReference<>();
-				TOKEN_TYPE_THROWABLES.get().put(type, errorContainer);
-			}
-			return errorContainer;
-		}
-	}
 
 	@Override
 	public <T> Observable<T> execute(final Observable<T> request) {
@@ -128,7 +102,7 @@ public class LockingStrategy extends SimpleRetryStrategy {
 						.doOnNext(new Action1<Object>() {
 							@Override
 							public void call(Object o) {
-								semaphore.release();
+								perTypeObject.semaphore.release();
 							}
 						})
 								// release the semaphore after the retry method if reached
@@ -137,17 +111,17 @@ public class LockingStrategy extends SimpleRetryStrategy {
 							public Boolean call(Integer count, Throwable error) {
 								try {
 									//noinspection ThrowableResultOfMethodCallIgnored
-									if (null == errorContainer.get() && error instanceof AuthenticationCanceledException) {
+									if (null == perTypeObject.errorContainer.get() && error instanceof AuthenticationCanceledException) {
 										System.out.println("set error!");
-										errorContainer.set(error);
+										perTypeObject.errorContainer.set(error);
 									}
-									if (0 == waitCounter.get()) {
+									if (0 == perTypeObject.waitCounter.get()) {
 										System.out.println("reset error!");
-										errorContainer.set(null);
+										perTypeObject.errorContainer.set(null);
 									}
 									return retry(count, error);
 								} finally {
-									semaphore.release();
+									perTypeObject.semaphore.release();
 								}
 							}
 						});
@@ -165,12 +139,12 @@ public class LockingStrategy extends SimpleRetryStrategy {
 			@Override
 			public void call(Subscriber<? super Boolean> subscriber) {
 				try {
-					boolean waiting = !semaphore.tryAcquire();
+					boolean waiting = !perTypeObject.semaphore.tryAcquire();
 					if (waiting) {
 						// and increment a waiting queue counter
-						waitCounter.incrementAndGet();
+						perTypeObject.waitCounter.incrementAndGet();
 						// wait for the next slot
-						semaphore.acquire();
+						perTypeObject.semaphore.acquire();
 					}
 					if (!subscriber.isUnsubscribed()) {
 						// emit if this request had to wait
@@ -194,9 +168,9 @@ public class LockingStrategy extends SimpleRetryStrategy {
 		return Observable.create(new Observable.OnSubscribe<Object>() {
 			@Override
 			public void call(Subscriber<? super Object> subscriber) {
-				if (wasWaiting && cancelPending) {
-					Throwable error = errorContainer.get();
-					waitCounter.decrementAndGet();
+				if (wasWaiting && perTypeObject.cancelPending) {
+					Throwable error = perTypeObject.errorContainer.get();
+					perTypeObject.waitCounter.decrementAndGet();
 					if (error != null) {
 						subscriber.onError(error);
 						return;
@@ -206,5 +180,22 @@ public class LockingStrategy extends SimpleRetryStrategy {
 				subscriber.onCompleted();
 			}
 		});
+	}
+
+	/**
+	 * TODO
+	 */
+	private class PerTypeObject {
+		public final Semaphore semaphore;
+		public final AtomicReference<Throwable> errorContainer;
+		public final AtomicInteger waitCounter;
+		public final boolean cancelPending;
+
+		public PerTypeObject(boolean cancelPending) {
+			this.semaphore = new Semaphore(1);
+			this.errorContainer = new AtomicReference<>();
+			this.waitCounter = new AtomicInteger();
+			this.cancelPending = cancelPending;
+		}
 	}
 }

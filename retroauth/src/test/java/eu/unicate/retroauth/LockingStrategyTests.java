@@ -29,7 +29,7 @@ import rx.schedulers.Schedulers;
 @RunWith(JUnit4.class)
 public class LockingStrategyTests {
 
-	private static final int REQUEST_AMOUNT = 100;
+	private static final int REQUEST_AMOUNT = 5;
 
 	/**
 	 * Testcase:
@@ -236,7 +236,7 @@ public class LockingStrategyTests {
 		// make sure only the one request has been executed (the otherones should be canceled before
 		// getting executed IF, they were waiting. This is why there is a sleep in the requestFailure
 		// method)
-//		Assert.assertEquals(1, c.get());
+		Assert.assertEquals(1, c.get());
 
 		// to make sure all locks are released again, do another request
 		TestSubscriber<Object> finalTest = TestSubscriber.create();
@@ -343,7 +343,7 @@ public class LockingStrategyTests {
 			subscriber[i] = TestSubscriber.create();
 			Observable<Integer> request;
 			if (i % 2 == 0) {
-				request = strategy.execute(requestSimulationFailingCase(c));
+				request = rxjavaCall(strategy, requestSimulationFailingCase(c));
 			} else {
 				request = Observable.create(new OnSubscribe<Integer>() {
 					@Override
@@ -453,7 +453,7 @@ public class LockingStrategyTests {
 		executionCounter.incrementAndGet();
 		// intentionally wait for the other requests to be queued.
 		// This is required for the failing tests since they assume that all requests are pending
-		Thread.sleep(50L);
+		Thread.sleep(10L);
 		throw new AuthenticationCanceledException(new OperationCanceledException());
 	}
 }
