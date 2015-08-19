@@ -3,15 +3,20 @@ package eu.unicate.retroauth;
 import android.accounts.OperationCanceledException;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import eu.unicate.retroauth.exceptions.AuthenticationCanceledException;
-import eu.unicate.retroauth.strategies.LockingStrategy;
+import eu.unicate.retroauth.interceptors.AuthenticationRequestInterceptor;
+import eu.unicate.retroauth.interceptors.TokenInterceptor;
+import eu.unicate.retroauth.interfaces.BaseAccountManager;
 import rx.Observable;
 import rx.Observable.OnSubscribe;
 import rx.Subscriber;
@@ -26,7 +31,7 @@ import rx.schedulers.Schedulers;
  * rx java methods (see {@link AuthRestHandler#asyncRequest(Method, Object[])})
  * I see no point in testing the as well
  */
-@RunWith(JUnit4.class)
+@RunWith(MockitoJUnitRunner.class)
 public class LockingStrategyTests {
 
 	/**
@@ -45,6 +50,22 @@ public class LockingStrategyTests {
 	 */
 	private static final int REQUEST_AMOUNT = 100;
 
+	@Mock
+	BaseAccountManager authAccountManager;
+	private LockingStrategy strategy;
+
+	@Before
+	public void setup() {
+		HashMap<Method, ServiceInfo.AuthRequestType> map = new HashMap<>();
+		ServiceInfo info = new ServiceInfo(map, "testAccountType", "testTokenType", new AuthenticationRequestInterceptor(null), TokenInterceptor.BEARER_TOKENINTERCEPTOR);
+		strategy = new LockingStrategy(info, authAccountManager) {
+			@Override
+			protected boolean retry(int count, Throwable error) {
+				return count <= 1 && "unauthorized".equals(error.getMessage());
+			}
+		};
+	}
+
 	/**
 	 * Testcase:
 	 * {@link #REQUEST_AMOUNT} simultaneously called requests are called. all of them are comparable to
@@ -56,7 +77,6 @@ public class LockingStrategyTests {
 	 */
 	@Test
 	public void testBlockingSuccess() throws InterruptedException {
-		final LockingStrategy strategy = new LockingStrategy("success-blocking");
 		@SuppressWarnings("unchecked") final
 		TestSubscriber<Integer>[] subscriber = new TestSubscriber[REQUEST_AMOUNT];
 		final AtomicInteger c = new AtomicInteger(0);
@@ -114,7 +134,6 @@ public class LockingStrategyTests {
 	 */
 	@Test
 	public void testBlockingFailing() throws InterruptedException {
-		final LockingStrategy strategy = new LockingStrategy("failing-blocking");
 		@SuppressWarnings("unchecked")
 		TestSubscriber<Integer>[] subscriber = new TestSubscriber[REQUEST_AMOUNT];
 		final AtomicInteger c = new AtomicInteger(0);
@@ -174,7 +193,6 @@ public class LockingStrategyTests {
 	 */
 	@Test
 	public void testRxJavaSuccess() throws InterruptedException {
-		final LockingStrategy strategy = new LockingStrategy("success-rx");
 		@SuppressWarnings("unchecked")
 		TestSubscriber<Integer>[] subscriber = new TestSubscriber[REQUEST_AMOUNT];
 
@@ -225,7 +243,6 @@ public class LockingStrategyTests {
 	 */
 	@Test
 	public void testRxJavaFailing() throws InterruptedException {
-		final LockingStrategy strategy = new LockingStrategy("failing-rx");
 		@SuppressWarnings("unchecked")
 		TestSubscriber<Integer>[] subscriber = new TestSubscriber[REQUEST_AMOUNT];
 		AtomicInteger c = new AtomicInteger(0);
@@ -276,7 +293,6 @@ public class LockingStrategyTests {
 	 */
 	@Test
 	public void testMixtureSuccess() throws InterruptedException {
-		final LockingStrategy strategy = new LockingStrategy("success-mixture");
 		@SuppressWarnings("unchecked")
 		TestSubscriber<Integer>[] subscriber = new TestSubscriber[REQUEST_AMOUNT];
 
@@ -341,7 +357,6 @@ public class LockingStrategyTests {
 	 */
 	@Test
 	public void testMixtureFailing() throws InterruptedException {
-		final LockingStrategy strategy = new LockingStrategy("failing-mixture");
 		@SuppressWarnings("unchecked")
 		TestSubscriber<Integer>[] subscriber = new TestSubscriber[REQUEST_AMOUNT];
 		final AtomicInteger c = new AtomicInteger(0);

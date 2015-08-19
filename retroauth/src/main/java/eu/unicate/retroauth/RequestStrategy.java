@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.unicate.retroauth.strategies;
+package eu.unicate.retroauth;
 
 import rx.Observable;
 
@@ -26,8 +26,8 @@ public class RequestStrategy {
 	/**
 	 * This is to modify the request observable. In the easiest case you just return the request
 	 * that comes in.
-	 * This is used to extend the requests as it is done i.e. in the {@link SimpleRetryStrategy}
-	 * or in the {@link eu.unicate.retroauth.strategies.LockingStrategy}
+	 * This is used to extend the requests as it is done i.e. in the {@link RetryAndInvalidateStrategy}
+	 * or in the {@link LockingStrategy}
 	 *
 	 * @param request the request as it is generated in the {@link eu.unicate.retroauth.AuthInvoker#invoke(Observable)}
 	 * @return The request as you want it to be

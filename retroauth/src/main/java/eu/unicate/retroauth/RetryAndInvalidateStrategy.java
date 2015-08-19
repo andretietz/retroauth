@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package eu.unicate.retroauth.strategies;
+package eu.unicate.retroauth;
 
+
+import eu.unicate.retroauth.interfaces.BaseAccountManager;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 import rx.Observable;
@@ -24,12 +26,19 @@ import rx.functions.Func2;
 /**
  * This {@link RequestStrategy} modifies the actual request to be retried, when
  * the server returns with an 401 (unauthenticated)
- *
+ * <p/>
  * Extend from this class if you need your custom retry method and override {@link #retry}
  */
-public class SimpleRetryStrategy extends RequestStrategy {
+public class RetryAndInvalidateStrategy extends RequestStrategy {
 
 	private static final int HTTP_UNAUTHORIZED = 401;
+	private final ServiceInfo serviceInfo;
+	private final BaseAccountManager accountManager;
+
+	public RetryAndInvalidateStrategy(ServiceInfo serviceInfo, BaseAccountManager accountManager) {
+		this.accountManager = accountManager;
+		this.serviceInfo = serviceInfo;
+	}
 
 	/**
 	 * this is adding a retry to the actual request.
@@ -56,6 +65,7 @@ public class SimpleRetryStrategy extends RequestStrategy {
 			if (error instanceof RetrofitError) {
 				Response response = ((RetrofitError) error).getResponse();
 				if (response != null && HTTP_UNAUTHORIZED == response.getStatus()) {
+					accountManager.invalidateTokenFromActiveUser(serviceInfo.accountType, serviceInfo.tokenType);
 					return true;
 				}
 			}

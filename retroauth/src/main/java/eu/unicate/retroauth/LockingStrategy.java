@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.unicate.retroauth.strategies;
+package eu.unicate.retroauth;
 
 import java.util.HashMap;
 import java.util.concurrent.Semaphore;
@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import eu.unicate.retroauth.exceptions.AuthenticationCanceledException;
+import eu.unicate.retroauth.interfaces.BaseAccountManager;
 import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Action1;
@@ -32,10 +33,10 @@ import rx.functions.Func2;
 /**
  * The locking strategy makes sure only one request at a time is executed. This is important to
  * avoid multiple unauthorized requests.
- * <p>
+ * <p/>
  * This strategy is chosen as default
  */
-public class LockingStrategy extends SimpleRetryStrategy {
+public class LockingStrategy extends RetryAndInvalidateStrategy {
 
 	private static final AtomicReference<HashMap<String, PerTypeObject>> PER_TYPE = new AtomicReference<>(new HashMap<String, PerTypeObject>());
 
@@ -45,24 +46,27 @@ public class LockingStrategy extends SimpleRetryStrategy {
 	/**
 	 * Creating a locking request strategy object
 	 *
-	 * @param type          name of the semaphore to use
-	 * @param cancelPending if this is set to {@code true}, all pending requests will be canceled
-	 *                      when the user cancels the login
+	 * @param serviceInfo    service infos
+	 * @param cancelPending  if this is set to {@code true}, all pending requests will be canceled
+	 *                       when the user cancels the login
+	 * @param accountManager to be able to invalidate accounts
 	 */
-	public LockingStrategy(String type, boolean cancelPending) {
-		this.perTypeObject = getPerTypeObject(type, cancelPending);
+	public LockingStrategy(ServiceInfo serviceInfo, boolean cancelPending, BaseAccountManager accountManager) {
+		super(serviceInfo, accountManager);
+		this.perTypeObject = getPerTypeObject(serviceInfo.tokenType, cancelPending);
 	}
 
 	/**
 	 * Creating a locking request strategy object
-	 * <p>
+	 * <p/>
 	 * {@code cancelPending} is {@code true} by default. this means, that all pending requests
 	 * will be canceled, when the user cancels the login
 	 *
-	 * @param type name of the semaphore to use
+	 * @param serviceInfo    name of the semaphore to use
+	 * @param accountManager to be able to invalidate accounts
 	 */
-	public LockingStrategy(String type) {
-		this(type, true);
+	public LockingStrategy(ServiceInfo serviceInfo, BaseAccountManager accountManager) {
+		this(serviceInfo, true, accountManager);
 	}
 
 	/**

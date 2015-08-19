@@ -30,8 +30,6 @@ import java.util.HashMap;
 import eu.unicate.retroauth.interceptors.AuthenticationRequestInterceptor;
 import eu.unicate.retroauth.interceptors.TokenInterceptor;
 import eu.unicate.retroauth.interfaces.BaseAccountManager;
-import eu.unicate.retroauth.strategies.RequestStrategy;
-import eu.unicate.retroauth.strategies.LockingStrategy;
 import rx.Observable;
 import rx.functions.Func0;
 import rx.observers.TestSubscriber;
@@ -43,18 +41,6 @@ import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AuthInvokerTests {
-
-	/**
-	 * This is a slightly different request than the one which is actually used by default
-	 * ({@link LockingStrategy})
-	 * Since we cannot mock retrofit error response-bodies, we use this one instead
-	 */
-	private static final RequestStrategy STRATEGY = new LockingStrategy("sometoken") {
-		@Override
-		protected boolean retry(int count, Throwable error) {
-			return count <= 1 && "unauthorized".equals(error.getMessage());
-		}
-	};
 
 	@Mock
 	BaseAccountManager authAccountManager;
@@ -68,7 +54,13 @@ public class AuthInvokerTests {
 	public void setupTest() {
 		HashMap<Method, ServiceInfo.AuthRequestType> map = new HashMap<>();
 		ServiceInfo info = new ServiceInfo(map, "testAccountType", "testTokenType", new AuthenticationRequestInterceptor(null), TokenInterceptor.BEARER_TOKENINTERCEPTOR);
-		invoker = new AuthInvoker(info, authAccountManager, STRATEGY);
+		RequestStrategy strategy = new LockingStrategy(info, authAccountManager) {
+			@Override
+			protected boolean retry(int count, Throwable error) {
+				return count <= 1 && "unauthorized".equals(error.getMessage());
+			}
+		};
+		invoker = new AuthInvoker(info, authAccountManager, strategy);
 
 	}
 

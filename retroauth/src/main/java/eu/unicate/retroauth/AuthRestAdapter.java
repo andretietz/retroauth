@@ -29,7 +29,6 @@ import eu.unicate.retroauth.annotations.Authenticated;
 import eu.unicate.retroauth.annotations.Authentication;
 import eu.unicate.retroauth.interceptors.AuthenticationRequestInterceptor;
 import eu.unicate.retroauth.interceptors.TokenInterceptor;
-import eu.unicate.retroauth.strategies.RequestStrategy;
 import retrofit.Endpoint;
 import retrofit.ErrorHandler;
 import retrofit.Profiler;
@@ -58,7 +57,7 @@ public final class AuthRestAdapter {
 	}
 
 	/**
-	 * This method creates your Service using {@link eu.unicate.retroauth.strategies.LockingStrategy}
+	 * This method creates your Service using {@link LockingStrategy}
 	 *
 	 * @param context          a context to use. You should prefer using an activity as Context, since it is needed to open the activity to login
 	 * @param tokenInterceptor The implementation of your {@link TokenInterceptor} to add the Token to the Request Header
