@@ -23,6 +23,10 @@ import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
 
+	/**
+	 * This is to test how the library reacts on multiple request at a time.
+	 * default it is just using 1 request per button click
+	 */
 	private SomeAuthenticatedService service;
 	private AuthAccountManager authAccountManager;
 
@@ -70,8 +74,6 @@ public class MainActivity extends AppCompatActivity {
 		findViewById(R.id.buttonBlockingRequest).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// I had to wrap this into an async task
-				// cause its a network request
 				new AsyncTask<Object, Object, JsonElement>() {
 					private Throwable error;
 
@@ -93,7 +95,11 @@ public class MainActivity extends AppCompatActivity {
 							showResult(o);
 						}
 					}
-				}.execute();
+				}
+						// since Honeycomb, asynctask is using a threadpool with only one
+						// thread (see: http://developer.android.com/reference/android/os/AsyncTask.html#execute(Params...) )
+						// this is why we change the executor here, in case MULTIREQUEST_AMOUNT is > than 1
+						.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 			}
 		});
 

@@ -19,8 +19,8 @@ package eu.unicate.retroauth;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerFuture;
+import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -30,9 +30,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
-import eu.unicate.retroauth.interfaces.MockableAccountManager;
+import eu.unicate.retroauth.exceptions.AuthenticationCanceledException;
+import eu.unicate.retroauth.interfaces.BaseAccountManager;
 import rx.Observable;
 import rx.Subscriber;
 
@@ -40,7 +42,7 @@ import rx.Subscriber;
  * This class wraps the Android AccountManager and adds some retroauth specific
  * functionality. This is the main helper class, when working with retroauth.
  */
-public final class AuthAccountManager implements MockableAccountManager {
+public final class AuthAccountManager implements BaseAccountManager {
 
 	static final String RETROAUTH_ACCOUNTNAME_KEY = "retroauthActiveAccount";
 	private Context context;
@@ -49,12 +51,13 @@ public final class AuthAccountManager implements MockableAccountManager {
 	/**
 	 * initializes the class with a context and an AccountManager
 	 *
-	 * @param context        the Android Context
+	 * @param context the Android Context
 	 */
 	public AuthAccountManager(Context context) {
 		this.context = context;
 		this.accountManager = AccountManager.get(context);
 	}
+
 	/**
 	 * initializes the class with a context and an AccountManager
 	 *
@@ -259,23 +262,27 @@ public final class AuthAccountManager implements MockableAccountManager {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public String getAuthToken(@Nullable Account account, @NonNull String accountType, @NonNull String tokenType) throws Exception {
-		AccountManagerFuture<Bundle> future;
-		Activity activity = (context instanceof Activity) ? (Activity) context : null;
-		if (account == null) {
-			future = accountManager.addAccount(accountType, tokenType, null, null, activity, null, null);
-		} else {
-			future = accountManager.getAuthToken(account, tokenType, null, activity, null, null);
-		}
+	public String getAuthToken(@Nullable Account account, @NonNull String accountType, @NonNull String tokenType) throws AuthenticationCanceledException {
+		try {
+			AccountManagerFuture<Bundle> future;
+			Activity activity = (context instanceof Activity) ? (Activity) context : null;
+			if (account == null) {
+				future = accountManager.addAccount(accountType, tokenType, null, null, activity, null, null);
+			} else {
+				future = accountManager.getAuthToken(account, tokenType, null, activity, null, null);
+			}
 
-		Bundle result = future.getResult();
-		String token = result.getString(AccountManager.KEY_AUTHTOKEN);
-		// even if the AuthenticationActivity set the KEY_AUTHTOKEN in the result bundle,
-		// it got stripped out by the AccountManager
-		if (token == null) {
-			// try using the newly created account to peek the token
-			token = accountManager.peekAuthToken(new Account(result.getString(AccountManager.KEY_ACCOUNT_NAME), result.getString(AccountManager.KEY_ACCOUNT_TYPE)), tokenType);
+			Bundle result = future.getResult();
+			String token = result.getString(AccountManager.KEY_AUTHTOKEN);
+			// even if the AuthenticationActivity set the KEY_AUTHTOKEN in the result bundle,
+			// it got stripped out by the AccountManager
+			if (token == null) {
+				// try using the newly created account to peek the token
+				token = accountManager.peekAuthToken(new Account(result.getString(AccountManager.KEY_ACCOUNT_NAME), result.getString(AccountManager.KEY_ACCOUNT_TYPE)), tokenType);
+			}
+			return token;
+		} catch (AuthenticatorException | OperationCanceledException | IOException e) {
+			throw new AuthenticationCanceledException(e);
 		}
-		return token;
 	}
 }

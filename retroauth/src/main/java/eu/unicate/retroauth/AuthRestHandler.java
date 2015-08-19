@@ -22,8 +22,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import eu.unicate.retroauth.interfaces.MockableAccountManager;
-import eu.unicate.retroauth.interfaces.RetryRule;
+import eu.unicate.retroauth.ServiceInfo.AuthRequestType;
+import eu.unicate.retroauth.interfaces.BaseAccountManager;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -38,27 +38,32 @@ final class AuthRestHandler<T> implements InvocationHandler {
 	private final T retrofitService;
 	private final AuthInvoker authInvoker;
 
-	public AuthRestHandler(T retrofitService, ServiceInfo serviceInfo, MockableAccountManager authAccountManager, RetryRule retryRule) {
+	public AuthRestHandler(T retrofitService, ServiceInfo serviceInfo, BaseAccountManager authAccountManager, RequestStrategy requestStrategy) {
 		this.retrofitService = retrofitService;
 		this.serviceInfo = serviceInfo;
-		authInvoker = new AuthInvoker(serviceInfo, authAccountManager, retryRule);
+		authInvoker = new AuthInvoker(serviceInfo, authAccountManager, requestStrategy);
 	}
 
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		ServiceInfo.AuthRequestType methodInfo = serviceInfo.methodInfoCache.get(method);
-		serviceInfo.authenticationInterceptor.setIgnore(false);
+		serviceInfo.tokenInterceptor.setIgnore(AuthRequestType.NONE.equals(methodInfo));
 		switch (methodInfo) {
 			case RXJAVA:
-				return authInvoker.invoke(observableRequest(method, args));
+				return authInvoker
+						.invoke(observableRequest(method, args))
+						.subscribeOn(Schedulers.newThread());
 			case BLOCKING:
-				return authInvoker.invoke(blockingRequest(method, args)).toBlocking().single();
+				return authInvoker
+						.invoke(blockingRequest(method, args))
+						.toBlocking().single();
 			case ASYNC:
 				// store original callback
 				@SuppressWarnings("unchecked")
 				final Callback<Object> originalCallback = (Callback<Object>) args[args.length - 1];
-				authInvoker.invoke(asyncRequest(method, args))
-						.subscribeOn(Schedulers.computation())
+				authInvoker
+						.invoke(asyncRequest(method, args))
+						.subscribeOn(Schedulers.newThread())
 						.observeOn(AndroidScheduler.mainThread())
 						.subscribe(new Action1<Pair<Object, Response>>() {
 									   @Override
@@ -79,7 +84,6 @@ final class AuthRestHandler<T> implements InvocationHandler {
 				return null;
 			case NONE:
 			default:
-				serviceInfo.authenticationInterceptor.setIgnore(true);
 				return method.invoke(retrofitService, args);
 		}
 	}

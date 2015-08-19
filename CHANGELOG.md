@@ -1,3 +1,16 @@
+## 1.0.2 (2015-08-19)
+
+* Dependency updates:
+  * rxjava 1.0.14
+  * appcompat 23.0.0
+* Introducing RequestStrategies
+  * RequestStrategy
+    * The most basic one, just executes the request without retrying
+  * RetryAndInvalidateStrategy: based on RequestStrategy
+    * Retries the request if it returns with 401 and invalidates the token, which was (obviously) not valid anymore
+  * LockingStrategy: based on RetryAndInvalidateStrategy
+    * only one request (of a tokentype) is executed at once. this is to prevent multiple login screens.
+
 ## 1.0.1 (2015-07-28)
 
 * Bugfix

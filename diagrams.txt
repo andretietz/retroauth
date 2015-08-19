@@ -1,0 +1,19 @@
+Following diagrams can be rendered with: www.websequencediagrams.com
+
+title Authentication using LockingStrategy: Happy Case
+App-->+APIService: Authenticated Request
+APIService-->+LockingStrategy: execute
+LockingStrategy->LockingStrategy: lock
+LockingStrategy-->+AuthInvoker: authenticate
+AuthInvoker->AuthInvoker:getAccountName
+AuthInvoker->AuthInvoker:getAccount
+AuthInvoker-->+AuthAccountManager:getAuthToken
+AuthAccountManager-->+AccountManager:getAuthToken
+AccountManager-->-AuthAccountManager: token
+AuthAccountManager-->-AuthInvoker: token
+AuthInvoker->AuthInvoker:authenticate
+AuthInvoker->AuthInvoker: invoke request
+AuthInvoker->LockingStrategy: response
+LockingStrategy->LockingStrategy: unlock
+LockingStrategy->APIService: response
+APIService->-App: Response

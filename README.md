@@ -2,8 +2,8 @@
 [![Build Status](https://travis-ci.org/Unic8/retroauth.svg?branch=master)](https://travis-ci.org/Unic8/retroauth)
 ## Dependencies
 * [Retrofit](https://github.com/square/retrofit) 1.9.0
-* [RxJava](https://github.com/ReactiveX/RxJava) 1.0.12
-* appcompat-v7: 22.2.1
+* [RxJava](https://github.com/ReactiveX/RxJava) 1.0.14
+* appcompat-v7: 23.0.0
 
 Min SDK Version: 9
 
@@ -35,7 +35,7 @@ If you call a request method, annotated with the authenticated annotation, it'll
 ## How to use it?
 Add it as dependency:
 ```groovy
-compile 'eu.unicate.android:retroauth:1.0.1'
+compile 'eu.unicate.android:retroauth:1.0.2'
 ```
 
 ### 1. Create 3 strings in your strings.xml

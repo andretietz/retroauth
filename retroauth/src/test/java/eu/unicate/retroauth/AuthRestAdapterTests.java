@@ -76,12 +76,12 @@ public class AuthRestAdapterTests {
 		AuthRestAdapter.Builder builder = new AuthRestAdapter.Builder();
 		builder.setEndpoint("http://localhost");
 		AuthRestAdapter authRestAdapter = builder.build();
-		Method method = AuthRestAdapter.class.getDeclaredMethod("getServiceInfo", Context.class, Class.class, TokenInterceptor.class);
-		method.setAccessible(true);
+		Method method = getServiceInfoMethod();
 		// calling getService info with the context, the service and some TokenInterceptor
-		ServiceInfo serviceInfo = (ServiceInfo) method.invoke(authRestAdapter, context, NoAnnotationService.class, TokenInterceptor.BEARER_TOKENINTERCEPTOR);
+		ServiceInfo serviceInfo = (ServiceInfo) method.invoke(authRestAdapter, context, new AuthenticationRequestInterceptor(null), NoAnnotationService.class, TokenInterceptor.BEARER_TOKENINTERCEPTOR);
 		Assert.assertNotNull(serviceInfo);
 	}
+
 
 	@Test
 	public void testServiceWithMissingAnnotationsTest() throws NoSuchMethodException, IllegalAccessException {
@@ -89,11 +89,10 @@ public class AuthRestAdapterTests {
 		AuthRestAdapter.Builder builder = new AuthRestAdapter.Builder();
 		builder.setEndpoint("http://localhost");
 		AuthRestAdapter authRestAdapter = builder.build();
-		Method method = AuthRestAdapter.class.getDeclaredMethod("getServiceInfo", Context.class, Class.class, TokenInterceptor.class);
-		method.setAccessible(true);
+		Method method = getServiceInfoMethod();
 		try {
 			// calling getService info with the context, the service and some TokenInterceptor
-			method.invoke(authRestAdapter, context, MissingAnnotationService.class, TokenInterceptor.BEARER_TOKENINTERCEPTOR);
+			method.invoke(authRestAdapter, context, new AuthenticationRequestInterceptor(null), MissingAnnotationService.class, TokenInterceptor.BEARER_TOKENINTERCEPTOR);
 		} catch (InvocationTargetException e) {
 			Assert.assertEquals("MissingAnnotationService.authenticated: The Method authenticated contains the Authenticated " +
 							"Annotation, but the interface does not implement the Authentication Annotation",
@@ -108,15 +107,14 @@ public class AuthRestAdapterTests {
 		AuthRestAdapter.Builder builder = new AuthRestAdapter.Builder();
 		builder.setEndpoint("http://localhost");
 		AuthRestAdapter authRestAdapter = builder.build();
-		Method getServiceInfoMethod = AuthRestAdapter.class.getDeclaredMethod("getServiceInfo", Context.class, Class.class, TokenInterceptor.class);
-		getServiceInfoMethod.setAccessible(true);
-		ServiceInfo serviceInfo = (ServiceInfo) getServiceInfoMethod.invoke(authRestAdapter, context, AnnotationService.class, TokenInterceptor.BEARER_TOKENINTERCEPTOR);
+		Method getServiceInfoMethod = getServiceInfoMethod();
+		ServiceInfo serviceInfo = (ServiceInfo) getServiceInfoMethod.invoke(authRestAdapter, context, new AuthenticationRequestInterceptor(null), AnnotationService.class, TokenInterceptor.BEARER_TOKENINTERCEPTOR);
 
 
 		Assert.assertNotNull(serviceInfo);
 		Assert.assertEquals("testAccountType", serviceInfo.accountType);
 		Assert.assertEquals("testTokenType", serviceInfo.tokenType);
-		Assert.assertEquals(TokenInterceptor.BEARER_TOKENINTERCEPTOR, serviceInfo.authenticationInterceptor);
+		Assert.assertEquals(TokenInterceptor.BEARER_TOKENINTERCEPTOR, serviceInfo.tokenInterceptor);
 		Assert.assertNotNull(serviceInfo.methodInfoCache);
 
 		for (Method method : serviceInfo.methodInfoCache.keySet()) {
@@ -158,6 +156,13 @@ public class AuthRestAdapterTests {
 
 		@Authenticated
 		Object authenticatedBlocking();
+	}
+
+
+	private Method getServiceInfoMethod() throws NoSuchMethodException {
+		Method method = AuthRestAdapter.class.getDeclaredMethod("getServiceInfo", Context.class, AuthenticationRequestInterceptor.class, Class.class, TokenInterceptor.class);
+		method.setAccessible(true);
+		return method;
 	}
 
 }

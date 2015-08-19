@@ -14,16 +14,25 @@
  * limitations under the License.
  */
 
-package eu.unicate.retroauth.interfaces;
+package eu.unicate.retroauth;
+
+import rx.Observable;
 
 /**
- * This interface can be used to define a rule to retry a request
+ * This class implements the most basic request strategy.
+ * It does no retrying.
  */
-public interface RetryRule {
+public class RequestStrategy {
 	/**
-	 * @param count The amount of failures
-	 * @param error The error that occured
-	 * @return <code>true</code> if you want to retry, <code>false</code> if not
+	 * This is to modify the request observable. In the easiest case you just return the request
+	 * that comes in.
+	 * This is used to extend the requests as it is done i.e. in the {@link RetryAndInvalidateStrategy}
+	 * or in the {@link LockingStrategy}
+	 *
+	 * @param request the request that is supposed to be executed
+	 * @return The request as you want it to be
 	 */
-	boolean retry(int count, Throwable error);
+	public <T> Observable<T> execute(Observable<T> request) {
+		return request;
+	}
 }
