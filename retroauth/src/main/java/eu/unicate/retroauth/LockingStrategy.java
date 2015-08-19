@@ -38,7 +38,7 @@ import rx.functions.Func2;
  */
 public class LockingStrategy extends RetryAndInvalidateStrategy {
 
-	private static final AtomicReference<HashMap<String, AccountTokenLock>> PER_TYPE = new AtomicReference<>(new HashMap<String, AccountTokenLock>());
+	private static final AtomicReference<HashMap<String, AccountTokenLock>> ACCOUNTTOKENLOCKS = new AtomicReference<>(new HashMap<String, AccountTokenLock>());
 
 	/**
 	 * This object gets created ones for a specific token type of an account
@@ -78,13 +78,13 @@ public class LockingStrategy extends RetryAndInvalidateStrategy {
 	 * @return an {@link AccountTokenLock} Object
 	 */
 	private AccountTokenLock getAccountTokenLock(String type, boolean cancelPending) {
-		synchronized (PER_TYPE) {
-			AccountTokenLock perType = PER_TYPE.get().get(type);
-			if (perType == null) {
-				perType = new AccountTokenLock(cancelPending);
-				PER_TYPE.get().put(type, perType);
+		synchronized (ACCOUNTTOKENLOCKS) {
+			AccountTokenLock tokenLock = ACCOUNTTOKENLOCKS.get().get(type);
+			if (tokenLock == null) {
+				tokenLock = new AccountTokenLock(cancelPending);
+				ACCOUNTTOKENLOCKS.get().put(type, tokenLock);
 			}
-			return perType;
+			return tokenLock;
 		}
 	}
 
