@@ -38,10 +38,12 @@ import rx.functions.Func2;
  */
 public class LockingStrategy extends RetryAndInvalidateStrategy {
 
-	private static final AtomicReference<HashMap<String, PerTypeObject>> PER_TYPE = new AtomicReference<>(new HashMap<String, PerTypeObject>());
+	private static final AtomicReference<HashMap<String, AccountTokenLock>> PER_TYPE = new AtomicReference<>(new HashMap<String, AccountTokenLock>());
 
-	// TODO
-	private final PerTypeObject perTypeObject;
+	/**
+	 * This object gets created ones for a specific token type of an account
+	 */
+	private final AccountTokenLock accountTokenLock;
 
 	/**
 	 * Creating a locking request strategy object
@@ -53,7 +55,7 @@ public class LockingStrategy extends RetryAndInvalidateStrategy {
 	 */
 	public LockingStrategy(ServiceInfo serviceInfo, boolean cancelPending, BaseAccountManager accountManager) {
 		super(serviceInfo, accountManager);
-		this.perTypeObject = getPerTypeObject(serviceInfo.tokenType, cancelPending);
+		this.accountTokenLock = getAccountTokenLock((serviceInfo.accountType + serviceInfo.tokenType), cancelPending);
 	}
 
 	/**
@@ -70,13 +72,16 @@ public class LockingStrategy extends RetryAndInvalidateStrategy {
 	}
 
 	/**
-	 * TODO
+	 * @param type          Type of the LockObject. This can be any String, but should be unique for account+token
+	 * @param cancelPending if this is set to {@code true}, all pending requests will be canceled
+	 *                      when the user cancels the login
+	 * @return an {@link AccountTokenLock} Object
 	 */
-	private PerTypeObject getPerTypeObject(String type, boolean cancelPending) {
+	private AccountTokenLock getAccountTokenLock(String type, boolean cancelPending) {
 		synchronized (PER_TYPE) {
-			PerTypeObject perType = PER_TYPE.get().get(type);
+			AccountTokenLock perType = PER_TYPE.get().get(type);
 			if (perType == null) {
-				perType = new PerTypeObject(cancelPending);
+				perType = new AccountTokenLock(cancelPending);
 				PER_TYPE.get().put(type, perType);
 			}
 			return perType;
@@ -106,7 +111,7 @@ public class LockingStrategy extends RetryAndInvalidateStrategy {
 						.doOnNext(new Action1<Object>() {
 							@Override
 							public void call(Object o) {
-								perTypeObject.semaphore.release();
+								accountTokenLock.semaphore.release();
 							}
 						})
 								// release the semaphore after the retry method if reached
@@ -115,17 +120,17 @@ public class LockingStrategy extends RetryAndInvalidateStrategy {
 							public Boolean call(Integer count, Throwable error) {
 								try {
 									//noinspection ThrowableResultOfMethodCallIgnored
-									if (null == perTypeObject.errorContainer.get() && error instanceof AuthenticationCanceledException) {
+									if (null == accountTokenLock.errorContainer.get() && error instanceof AuthenticationCanceledException) {
 										System.out.println("set error!");
-										perTypeObject.errorContainer.set(error);
+										accountTokenLock.errorContainer.set(error);
 									}
-									if (0 == perTypeObject.waitCounter.get()) {
+									if (0 == accountTokenLock.waitCounter.get()) {
 										System.out.println("reset error!");
-										perTypeObject.errorContainer.set(null);
+										accountTokenLock.errorContainer.set(null);
 									}
 									return retry(count, error);
 								} finally {
-									perTypeObject.semaphore.release();
+									accountTokenLock.semaphore.release();
 								}
 							}
 						});
@@ -143,12 +148,12 @@ public class LockingStrategy extends RetryAndInvalidateStrategy {
 			@Override
 			public void call(Subscriber<? super Boolean> subscriber) {
 				try {
-					boolean waiting = !perTypeObject.semaphore.tryAcquire();
+					boolean waiting = !accountTokenLock.semaphore.tryAcquire();
 					if (waiting) {
 						// and increment a waiting queue counter
-						perTypeObject.waitCounter.incrementAndGet();
+						accountTokenLock.waitCounter.incrementAndGet();
 						// wait for the next slot
-						perTypeObject.semaphore.acquire();
+						accountTokenLock.semaphore.acquire();
 					}
 					if (!subscriber.isUnsubscribed()) {
 						// emit if this request had to wait
@@ -172,9 +177,9 @@ public class LockingStrategy extends RetryAndInvalidateStrategy {
 		return Observable.create(new Observable.OnSubscribe<Object>() {
 			@Override
 			public void call(Subscriber<? super Object> subscriber) {
-				if (wasWaiting && perTypeObject.cancelPending) {
-					Throwable error = perTypeObject.errorContainer.get();
-					perTypeObject.waitCounter.decrementAndGet();
+				if (wasWaiting && accountTokenLock.cancelPending) {
+					Throwable error = accountTokenLock.errorContainer.get();
+					accountTokenLock.waitCounter.decrementAndGet();
 					if (error != null) {
 						subscriber.onError(error);
 						return;
@@ -187,15 +192,16 @@ public class LockingStrategy extends RetryAndInvalidateStrategy {
 	}
 
 	/**
-	 * TODO
+	 * This immutable object contains all account+token dependent objects for a successful locking
+	 * strategy
 	 */
-	private class PerTypeObject {
+	private class AccountTokenLock {
 		public final Semaphore semaphore;
 		public final AtomicReference<Throwable> errorContainer;
 		public final AtomicInteger waitCounter;
 		public final boolean cancelPending;
 
-		public PerTypeObject(boolean cancelPending) {
+		public AccountTokenLock(boolean cancelPending) {
 			this.semaphore = new Semaphore(1);
 			this.errorContainer = new AtomicReference<>();
 			this.waitCounter = new AtomicInteger();
