@@ -3,7 +3,7 @@
 ## Dependencies
 * [Retrofit](https://github.com/square/retrofit) 1.9.0
 * [RxJava](https://github.com/ReactiveX/RxJava) 1.0.14
-* appcompat-v7: 22.2.1
+* appcompat-v7: 23.0.0
 
 Min SDK Version: 9
 
