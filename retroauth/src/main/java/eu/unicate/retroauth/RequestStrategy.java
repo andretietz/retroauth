@@ -29,7 +29,7 @@ public class RequestStrategy {
 	 * This is used to extend the requests as it is done i.e. in the {@link RetryAndInvalidateStrategy}
 	 * or in the {@link LockingStrategy}
 	 *
-	 * @param request the request as it is generated in the {@link eu.unicate.retroauth.AuthInvoker#invoke(Observable)}
+	 * @param request the request that is supposed to be executed
 	 * @return The request as you want it to be
 	 */
 	public <T> Observable<T> execute(Observable<T> request) {
