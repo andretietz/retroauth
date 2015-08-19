@@ -33,7 +33,7 @@ import rx.functions.Func2;
 /**
  * The locking strategy makes sure only one request at a time is executed. This is important to
  * avoid multiple unauthorized requests.
- * <p/>
+ *
  * This strategy is chosen as default
  */
 public class LockingStrategy extends RetryAndInvalidateStrategy {
@@ -60,7 +60,7 @@ public class LockingStrategy extends RetryAndInvalidateStrategy {
 
 	/**
 	 * Creating a locking request strategy object
-	 * <p/>
+	 *
 	 * {@code cancelPending} is {@code true} by default. this means, that all pending requests
 	 * will be canceled, when the user cancels the login
 	 *

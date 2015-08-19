@@ -8,7 +8,7 @@ android {
 		minSdkVersion 9
 		targetSdkVersion 23
 		versionCode 1
-		versionName "1.0.1"
+		versionName "1.0.2"
 	}
 	buildTypes {
 		release {
@@ -29,4 +29,4 @@ dependencies {
 }
 
 // uncommented for travis-ci
-//apply from: 'bintray-publish.gradle'
+apply from: 'bintray-publish.gradle'
