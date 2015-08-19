@@ -35,7 +35,7 @@ If you call a request method, annotated with the authenticated annotation, it'll
 ## How to use it?
 Add it as dependency:
 ```groovy
-compile 'eu.unicate.android:retroauth:1.0.1'
+compile 'eu.unicate.android:retroauth:1.0.2'
 ```
 
 ### 1. Create 3 strings in your strings.xml

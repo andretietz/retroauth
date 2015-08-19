@@ -1,4 +1,4 @@
-## 1.0.2
+## 1.0.2 (2015-08-19)
 
 * Dependency updates:
   * rxjava 1.0.14
