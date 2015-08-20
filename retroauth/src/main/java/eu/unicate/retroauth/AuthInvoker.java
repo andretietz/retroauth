@@ -20,6 +20,8 @@ import android.accounts.Account;
 
 import eu.unicate.retroauth.exceptions.AuthenticationCanceledException;
 import eu.unicate.retroauth.interfaces.BaseAccountManager;
+import eu.unicate.retroauth.strategies.LockingStrategy;
+import eu.unicate.retroauth.strategies.RequestStrategy;
 import rx.Observable;
 import rx.Observable.OnSubscribe;
 import rx.Subscriber;
@@ -44,8 +46,8 @@ final class AuthInvoker {
 	public AuthInvoker(ServiceInfo serviceInfo, BaseAccountManager authAccountManager, RequestStrategy strategy) {
 		this.serviceInfo = serviceInfo;
 		this.authAccountManager = authAccountManager;
-		if(strategy == null) {
-			strategy = new LockingStrategy(serviceInfo, authAccountManager);
+		if (strategy == null) {
+			strategy = new LockingStrategy(serviceInfo.accountType, serviceInfo.tokenType, authAccountManager);
 		}
 		this.strategy = strategy;
 

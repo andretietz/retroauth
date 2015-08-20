@@ -26,7 +26,7 @@ import rx.functions.Func2;
 /**
  * This {@link RequestStrategy} modifies the actual request to be retried, when
  * the server returns with an 401 (unauthenticated)
- * 
+ *
  * Extend from this class if you need your custom retry method and override {@link #retry}
  */
 public class RetryAndInvalidateStrategy extends RequestStrategy {

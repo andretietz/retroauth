@@ -30,6 +30,8 @@ import java.util.HashMap;
 import eu.unicate.retroauth.interceptors.AuthenticationRequestInterceptor;
 import eu.unicate.retroauth.interceptors.TokenInterceptor;
 import eu.unicate.retroauth.interfaces.BaseAccountManager;
+import eu.unicate.retroauth.strategies.LockingStrategy;
+import eu.unicate.retroauth.strategies.RequestStrategy;
 import rx.Observable;
 import rx.functions.Func0;
 import rx.observers.TestSubscriber;
@@ -54,7 +56,7 @@ public class AuthInvokerTests {
 	public void setupTest() {
 		HashMap<Method, ServiceInfo.AuthRequestType> map = new HashMap<>();
 		ServiceInfo info = new ServiceInfo(map, "testAccountType", "testTokenType", new AuthenticationRequestInterceptor(null), TokenInterceptor.BEARER_TOKENINTERCEPTOR);
-		RequestStrategy strategy = new LockingStrategy(info, authAccountManager) {
+		RequestStrategy strategy = new LockingStrategy(info.accountType, info.tokenType, authAccountManager) {
 			@Override
 			protected boolean retry(int count, Throwable error) {
 				return count <= 1 && "unauthorized".equals(error.getMessage());
