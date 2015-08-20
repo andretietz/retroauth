@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.unicate.retroauth;
+package eu.unicate.retroauth.strategies;
 
 import java.util.HashMap;
 import java.util.concurrent.Semaphore;
@@ -48,27 +48,29 @@ public class LockingStrategy extends RetryAndInvalidateStrategy {
 	/**
 	 * Creating a locking request strategy object
 	 *
-	 * @param serviceInfo    service infos
+	 * @param accountType    Type of account you are using for your API
+	 * @param tokenType      Type of Token your API is using
 	 * @param cancelPending  if this is set to {@code true}, all pending requests will be canceled
 	 *                       when the user cancels the login
-	 * @param accountManager to be able to invalidate accounts
+	 * @param accountManager an AccountManager to invalidate Tokens if necessary
 	 */
-	public LockingStrategy(ServiceInfo serviceInfo, boolean cancelPending, BaseAccountManager accountManager) {
-		super(serviceInfo, accountManager);
-		this.accountTokenLock = getAccountTokenLock((serviceInfo.accountType + serviceInfo.tokenType), cancelPending);
+	public LockingStrategy(String accountType, String tokenType, boolean cancelPending, BaseAccountManager accountManager) {
+		super(accountType, tokenType, accountManager);
+		this.accountTokenLock = getAccountTokenLock((accountType + tokenType), cancelPending);
 	}
 
 	/**
 	 * Creating a locking request strategy object
-	 *
+	 * <p/>
 	 * {@code cancelPending} is {@code true} by default. this means, that all pending requests
 	 * will be canceled, when the user cancels the login
 	 *
-	 * @param serviceInfo    name of the semaphore to use
+	 * @param accountType    name of the semaphore to use
+	 * @param tokenType      name of the semaphore to use
 	 * @param accountManager to be able to invalidate accounts
 	 */
-	public LockingStrategy(ServiceInfo serviceInfo, BaseAccountManager accountManager) {
-		this(serviceInfo, true, accountManager);
+	public LockingStrategy(String accountType, String tokenType, BaseAccountManager accountManager) {
+		this(accountType, tokenType, true, accountManager);
 	}
 
 	/**

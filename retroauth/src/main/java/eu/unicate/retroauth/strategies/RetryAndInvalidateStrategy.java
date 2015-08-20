@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.unicate.retroauth;
+package eu.unicate.retroauth.strategies;
 
 
 import eu.unicate.retroauth.interfaces.BaseAccountManager;
@@ -26,18 +26,26 @@ import rx.functions.Func2;
 /**
  * This {@link RequestStrategy} modifies the actual request to be retried, when
  * the server returns with an 401 (unauthenticated)
- *
+ * 
  * Extend from this class if you need your custom retry method and override {@link #retry}
  */
 public class RetryAndInvalidateStrategy extends RequestStrategy {
 
 	private static final int HTTP_UNAUTHORIZED = 401;
-	private final ServiceInfo serviceInfo;
 	private final BaseAccountManager accountManager;
+	private final String accountType;
+	private final String tokenType;
 
-	public RetryAndInvalidateStrategy(ServiceInfo serviceInfo, BaseAccountManager accountManager) {
+
+	/**
+	 * @param accountType    Type of account you are using for your API
+	 * @param tokenType      Type of Token your API is using
+	 * @param accountManager an AccountManager to invalidate Tokens if necessary
+	 */
+	public RetryAndInvalidateStrategy(String accountType, String tokenType, BaseAccountManager accountManager) {
 		this.accountManager = accountManager;
-		this.serviceInfo = serviceInfo;
+		this.accountType = accountType;
+		this.tokenType = tokenType;
 	}
 
 	/**
@@ -65,7 +73,7 @@ public class RetryAndInvalidateStrategy extends RequestStrategy {
 			if (error instanceof RetrofitError) {
 				Response response = ((RetrofitError) error).getResponse();
 				if (response != null && HTTP_UNAUTHORIZED == response.getStatus()) {
-					accountManager.invalidateTokenFromActiveUser(serviceInfo.accountType, serviceInfo.tokenType);
+					accountManager.invalidateTokenFromActiveUser(accountType, tokenType);
 					return true;
 				}
 			}

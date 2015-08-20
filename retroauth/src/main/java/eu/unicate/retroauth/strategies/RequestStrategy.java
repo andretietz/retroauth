@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.unicate.retroauth;
+package eu.unicate.retroauth.strategies;
 
 import rx.Observable;
 
