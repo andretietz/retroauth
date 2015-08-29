@@ -32,6 +32,8 @@ If you call a request method, annotated with the authenticated annotation, it'll
 * Step 3: Sends the actual request
 * Step 4: If the request fails with an 401 (by default, but changeable) it invalidates the used token in the Android AccountManager and continues with step 1.
 
+Sequence Diagrams can be found in the DIAGRAMS.md file
+
 ## How to use it?
 Add it as dependency:
 ```groovy

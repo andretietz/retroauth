@@ -1,6 +1,7 @@
 ## 1.0.3
 
 * Storing multiple tokens in the AuthenticationActivity
+* Adding some sequence diagrams for a better understanding
 * Bugfixes:
   * Creating an instance of the LockingStrategy required a protected class as argument. fixed this.
 
