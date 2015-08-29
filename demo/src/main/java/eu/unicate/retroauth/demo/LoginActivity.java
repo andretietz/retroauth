@@ -1,5 +1,6 @@
 package eu.unicate.retroauth.demo;
 
+import android.accounts.Account;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -27,7 +28,11 @@ public class LoginActivity extends AuthenticationActivity {
 				// do the login
 				String token = demoLogin(textUser.getText().toString(), textPass.getText().toString());
 				if (null != token) {
-					finalizeAuthentication(textUser.getText().toString(), getString(R.string.auth_token_type), token, null);
+					String accountName = textUser.getText().toString();
+					// create the account if necessary
+					Account account = createOrGetAccount(accountName);
+					storeToken(account, getString(R.string.auth_token_type), token);
+					finalizeAuthentication(account);
 				}
 			}
 		});
