@@ -37,7 +37,7 @@ Sequence Diagrams can be found in the DIAGRAMS.md file
 ## How to use it?
 Add it as dependency:
 ```groovy
-compile 'eu.unicate.android:retroauth:1.0.2'
+compile 'eu.unicate.android:retroauth:1.0.3'
 ```
 
 ### 1. Create 3 strings in your strings.xml

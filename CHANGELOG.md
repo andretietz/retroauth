@@ -1,4 +1,4 @@
-## 1.0.3
+## 1.0.3 (2015-08-29)
 
 * Storing multiple tokens in the AuthenticationActivity
 * Adding some sequence diagrams for a better understanding

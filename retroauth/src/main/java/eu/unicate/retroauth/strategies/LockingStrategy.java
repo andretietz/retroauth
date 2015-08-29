@@ -61,7 +61,7 @@ public class LockingStrategy extends RetryAndInvalidateStrategy {
 
 	/**
 	 * Creating a locking request strategy object
-	 * <p/>
+	 *
 	 * {@code cancelPending} is {@code true} by default. this means, that all pending requests
 	 * will be canceled, when the user cancels the login
 	 *
