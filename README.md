@@ -59,12 +59,18 @@ i.e. (see Demo for an example)
 public class LoginActivity extends AuthenticationActivity {
    ...
    private void someLoginMethod() {
-       String user;
-       String token;
-       Bundle additionalUserData; // nullable
-       ... // do login work here and make sure, that you provide at least a user and a token String
-       // the Token type is the one you defined in Step 1
-       finalizeAuthentication(user, getString(R.string.auth_token_type), token, additionalUserData);
+        String user;
+        String token;
+        Bundle additionalUserData; // nullable
+        ... // do login work here and make sure, that you provide at least a user and a token String
+        // the Token type is the one you defined in Step 1
+        Account account = createOrGetAccount(user);
+        storeToken(account, getString(R.string.auth_token_type), token);
+        // add multiple tokens: storeToken(account, getString(R.string.auth_token_type2), token2);
+        // store some additional userdata (optionally)
+        storeUserData(account, "key_for_some_user_data", "very-important-userdata");
+        // finishes the activity and set this account to the "current-active" one
+        finalizeAuthentication(account);
    }
    ...
 }

@@ -1,3 +1,8 @@
+## 1.0.3
+
+* Storing multiple tokens while beeing in the AuthenticationActivity is possible now
+* Creating an instance of the LockingStrategy required a protected class as argument. fixed this.
+
 ## 1.0.2 (2015-08-19)
 
 * Dependency updates:
