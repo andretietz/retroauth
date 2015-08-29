@@ -107,10 +107,34 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 	}
 
 	/**
+	 * This method is deprecated and will be removed in a future release. Use
+	 * {@link AuthenticationActivity#storeToken(Account, String, String)},
+	 * {@link AuthenticationActivity#storeUserData(Account, String, String)} and
+	 * {@link AuthenticationActivity#finalizeAuthentication(Account)} instead.
+	 *
+	 * @param accountName Name of the account owner
+	 * @param tokenType   Type of the auth token provided by this login
+	 * @param token       Token to store
+	 * @param userData    Additional Userdata to store
+	 */
+	@Deprecated
+	protected void finalizeAuthentication(@NonNull String accountName, @NonNull String tokenType, @NonNull String token, @Nullable Bundle userData) {
+		Account account = createOrGetAccount(accountName);
+		storeToken(account, tokenType, token);
+		if(userData != null) {
+			for (String key : userData.keySet()) {
+				String value = userData.getString(key);
+				if(value != null) storeUserData(account, key, value);
+			}
+		}
+		finalizeAuthentication(account);
+	}
+
+	/**
 	 * Tries finding an existing account with the given name.
 	 * It creates a new Account if it couldn't find it
 	 *
-	 * @return The account if found, or <code>null</code>
+	 * @return The account if found, or a newly created one
 	 */
 	@NonNull
 	@SuppressWarnings("unused")
