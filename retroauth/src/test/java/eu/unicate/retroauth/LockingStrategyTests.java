@@ -6,17 +6,13 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.junit.runners.JUnit4;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import eu.unicate.retroauth.exceptions.AuthenticationCanceledException;
-import eu.unicate.retroauth.interceptors.AuthenticationRequestInterceptor;
-import eu.unicate.retroauth.interceptors.TokenInterceptor;
-import eu.unicate.retroauth.interfaces.BaseAccountManager;
+import eu.unicate.retroauth.strategies.LockingStrategy;
 import rx.Observable;
 import rx.Observable.OnSubscribe;
 import rx.Subscriber;
@@ -31,7 +27,7 @@ import rx.schedulers.Schedulers;
  * rx java methods (see {@link AuthRestHandler#asyncRequest(Method, Object[])})
  * I see no point in testing the as well
  */
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(JUnit4.class)
 public class LockingStrategyTests {
 
 	/**
@@ -50,15 +46,11 @@ public class LockingStrategyTests {
 	 */
 	private static final int REQUEST_AMOUNT = 100;
 
-	@Mock
-	BaseAccountManager authAccountManager;
 	private LockingStrategy strategy;
 
 	@Before
 	public void setup() {
-		HashMap<Method, ServiceInfo.AuthRequestType> map = new HashMap<>();
-		ServiceInfo info = new ServiceInfo(map, "testAccountType", "testTokenType", new AuthenticationRequestInterceptor(null), TokenInterceptor.BEARER_TOKENINTERCEPTOR);
-		strategy = new LockingStrategy(info, authAccountManager) {
+		strategy = new LockingStrategy("testAccountType", "testTokenType", null) {
 			@Override
 			protected boolean retry(int count, Throwable error) {
 				return count <= 1 && "unauthorized".equals(error.getMessage());
