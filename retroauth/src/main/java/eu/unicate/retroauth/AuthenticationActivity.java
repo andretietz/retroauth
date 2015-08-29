@@ -56,44 +56,89 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 			mAccountAuthenticatorResponse.onRequestContinued();
 		}
 		accountType = intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE);
+		if (accountType == null)
+			throw new RuntimeException("This Activity cannot be started without the \"" + AccountManager.KEY_ACCOUNT_TYPE + "\" extra in the intent!");
 		accountName = intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
 		tokenType = intent.getStringExtra(AccountAuthenticator.KEY_TOKEN_TYPE);
 		accountManager = AccountManager.get(this);
+
+
+		mResultBundle = new Bundle();
+		mResultBundle.putString(AccountManager.KEY_ACCOUNT_TYPE, accountType);
 	}
 
 	/**
-	 * This method will finish the login process and add an account to
-	 * the {@link AccountManager}
+	 * This method stores an authentication Token to a specific account.
+	 *
+	 * @param account   Account you want to store the token for
+	 * @param tokenType Type of token you want to store
+	 * @param token     Token itself
+	 */
+	@SuppressWarnings("unused")
+	protected void storeToken(@NonNull Account account, @NonNull String tokenType, @NonNull String token) {
+		accountManager.setAuthToken(account, tokenType, token);
+	}
+
+	/**
+	 * With this you can store some additional userdata in key-value-pairs to the account.
+	 *
+	 * @param account Account you want to store information for
+	 * @param key     the key for the data
+	 * @param value   the actual data you want to store
+	 */
+	@SuppressWarnings("unused")
+	protected void storeUserData(@NonNull Account account, @NonNull String key, @NonNull String value) {
+		accountManager.setUserData(account, key, value);
+	}
+
+	/**
+	 * This method will finish the login process, close the login activity.
+	 * The account which is reached into this method will be set as
+	 * "current-active" account. Use {@link AuthAccountManager#resetActiveAccount(String)} to
+	 * reset this if necessary
+	 *
+	 * @param account Account you want to set as current active
+	 */
+	protected void finalizeAuthentication(@NonNull Account account) {
+		mResultBundle.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
+		SharedPreferences preferences = getSharedPreferences(accountType, Context.MODE_PRIVATE);
+		preferences.edit().putString(AuthAccountManager.RETROAUTH_ACCOUNTNAME_KEY, account.name).apply();
+		finish();
+	}
+
+	/**
+	 * This method is deprecated and will be removed in a future release. Use
+	 * {@link AuthenticationActivity#storeToken(Account, String, String)},
+	 * {@link AuthenticationActivity#storeUserData(Account, String, String)} and
+	 * {@link AuthenticationActivity#finalizeAuthentication(Account)} instead.
 	 *
 	 * @param accountName Name of the account owner
 	 * @param tokenType   Type of the auth token provided by this login
 	 * @param token       Token to store
 	 * @param userData    Additional Userdata to store
 	 */
+	@Deprecated
 	protected void finalizeAuthentication(@NonNull String accountName, @NonNull String tokenType, @NonNull String token, @Nullable Bundle userData) {
-		mResultBundle = new Bundle();
-		mResultBundle.putString(AccountManager.KEY_ACCOUNT_NAME, accountName);
-		mResultBundle.putString(AccountManager.KEY_ACCOUNT_TYPE, accountType);
-		Account account = getAccount();
-		if (null == account) {
-			mResultBundle.putParcelable(AccountManager.KEY_USERDATA, userData);
-			account = new Account(accountName, accountType);
-			accountManager.addAccountExplicitly(account, null, userData);
+		Account account = createOrGetAccount(accountName);
+		storeToken(account, tokenType, token);
+		if(userData != null) {
+			for (String key : userData.keySet()) {
+				String value = userData.getString(key);
+				if(value != null) storeUserData(account, key, value);
+			}
 		}
-		accountManager.setAuthToken(account, tokenType, token);
-		SharedPreferences preferences = getSharedPreferences(accountType, Context.MODE_PRIVATE);
-		preferences.edit().putString(AuthAccountManager.RETROAUTH_ACCOUNTNAME_KEY, accountName).apply();
-		finish();
+		finalizeAuthentication(account);
 	}
 
 	/**
-	 * Tries to find an existing account with the given name, that could be reached into
-	 * this activity, when the token was invalid
+	 * Tries finding an existing account with the given name.
+	 * It creates a new Account if it couldn't find it
 	 *
-	 * @return The account if found, or <code>null</code>
+	 * @return The account if found, or a newly created one
 	 */
-	@Nullable
-	private Account getAccount() {
+	@NonNull
+	@SuppressWarnings("unused")
+	protected Account createOrGetAccount(@Nullable String accountName) {
 		// if this is a relogin
 		if (null != accountName) {
 			Account[] accountList = accountManager.getAccountsByType(accountType);
@@ -103,7 +148,9 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 			}
 
 		}
-		return null;
+		Account account = new Account(accountName, accountType);
+		accountManager.addAccountExplicitly(account, null, null);
+		return account;
 	}
 
 	/**

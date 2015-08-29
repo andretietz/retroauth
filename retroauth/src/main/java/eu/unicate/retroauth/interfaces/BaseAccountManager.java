@@ -102,14 +102,14 @@ public interface BaseAccountManager {
 	 * @return the active account or <code>null</code> if the account could not be found
 	 */
 	@Nullable
-	Account setActiveUser(@NonNull String accountName, @NonNull String accountType);
+	Account setActiveAccount(@NonNull String accountName, @NonNull String accountType);
 
 	/**
 	 * Unset the active user.
 	 *
 	 * @param accountType The account type where you want to unset it's current
 	 */
-	void resetActiveUser(@NonNull String accountType);
+	void resetActiveAccount(@NonNull String accountType);
 
 	/**
 	 * Starts the Activity to start the login process which adds the account.
