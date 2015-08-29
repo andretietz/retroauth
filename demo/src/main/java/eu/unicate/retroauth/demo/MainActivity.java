@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
 		findViewById(R.id.buttonResetPrefAccount).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				authAccountManager.resetActiveUser(getString(R.string.auth_account_type));
+				authAccountManager.resetActiveAccount(getString(R.string.auth_account_type));
 				showCurrentAccount();
 			}
 		});

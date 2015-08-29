@@ -62,7 +62,7 @@ final class AuthInvoker {
 	 */
 	public <T> Observable<T> invoke(final Observable<T> request) {
 		return strategy.execute(
-				getAccountName()
+				getActiveAccountName()
 						.flatMap(new Func1<String, Observable<Account>>() {
 							@Override
 							public Observable<Account> call(String name) {
@@ -148,7 +148,7 @@ final class AuthInvoker {
 	 *
 	 * @return an Observable that emits the accountName as String if available
 	 */
-	private Observable<String> getAccountName() {
+	private Observable<String> getActiveAccountName() {
 		return Observable.create(new OnSubscribe<String>() {
 			@Override
 			public void call(Subscriber<? super String> subscriber) {

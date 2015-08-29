@@ -156,7 +156,7 @@ public final class AuthAccountManager implements BaseAccountManager {
 	 */
 	@Nullable
 	@Override
-	public Account setActiveUser(@NonNull String accountName, @NonNull String accountType) {
+	public Account setActiveAccount(@NonNull String accountName, @NonNull String accountType) {
 		SharedPreferences preferences = context.getSharedPreferences(accountType, Context.MODE_PRIVATE);
 		preferences.edit().putString(RETROAUTH_ACCOUNTNAME_KEY, accountName).apply();
 		return getAccountByName(accountName, accountType);
@@ -166,7 +166,7 @@ public final class AuthAccountManager implements BaseAccountManager {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void resetActiveUser(@NonNull String accountType) {
+	public void resetActiveAccount(@NonNull String accountType) {
 		SharedPreferences preferences = context.getSharedPreferences(accountType, Context.MODE_PRIVATE);
 		preferences.edit().remove(RETROAUTH_ACCOUNTNAME_KEY).apply();
 	}
@@ -237,7 +237,7 @@ public final class AuthAccountManager implements BaseAccountManager {
 									if (choosenAccount >= accounts.length) {
 										subscriber.onNext(null);
 									} else {
-										setActiveUser(accounts[choosenAccount].name, accountType);
+										setActiveAccount(accounts[choosenAccount].name, accountType);
 										SharedPreferences preferences = context.getSharedPreferences(accountType, Context.MODE_PRIVATE);
 										preferences.edit().putString(RETROAUTH_ACCOUNTNAME_KEY, accounts[choosenAccount].name).apply();
 										subscriber.onNext(accounts[choosenAccount].name);

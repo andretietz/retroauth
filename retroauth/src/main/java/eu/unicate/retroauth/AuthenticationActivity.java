@@ -94,7 +94,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 	/**
 	 * This method will finish the login process, close the login activity.
 	 * The account which is reached into this method will be set as
-	 * "current-active" account. Use {@link AuthAccountManager#resetActiveUser(String)} to
+	 * "current-active" account. Use {@link AuthAccountManager#resetActiveAccount(String)} to
 	 * reset this if necessary
 	 *
 	 * @param account Account you want to set as current active
