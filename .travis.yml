@@ -11,4 +11,4 @@ android:
     - extra-android-m2repository
 
 script:
-  - ./gradlew :retroauth:clean :retroauth:build
+  - ./gradlew :retroauth:build
