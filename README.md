@@ -63,7 +63,6 @@ public class LoginActivity extends AuthenticationActivity {
    private void someLoginMethod() {
         String user;
         String token;
-        Bundle additionalUserData; // nullable
         ... // do login work here and make sure, that you provide at least a user and a token String
         // the Token type is the one you defined in Step 1
         Account account = createOrGetAccount(user);
