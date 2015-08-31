@@ -69,3 +69,44 @@ AuthInvoker->LockingStrategy: response
 LockingStrategy->LockingStrategy: unlock
 LockingStrategy->APIService: response
 APIService->-App: Response
+
+
+title Authentication using the default LockingStrategy: >= 1 Accounts exist, active account, Token is invalid
+App->+APIService: Authenticated Request
+APIService->+LockingStrategy: execute
+LockingStrategy->LockingStrategy: lock
+LockingStrategy->+AuthInvoker: authenticate
+AuthInvoker->+AuthAccountManager:getActiveAccountName
+AuthAccountManager->-AuthInvoker:name
+AuthInvoker->+AuthAccountManager:getAccount(name)
+AuthAccountManager->-AuthInvoker: account
+AuthInvoker->+AuthAccountManager:getAuthToken(account)
+AuthAccountManager->+AccountManager:getAuthToken
+AccountManager->-AuthAccountManager: token
+AuthAccountManager->-AuthInvoker: token
+AuthInvoker->AuthInvoker:add token to header
+AuthInvoker->+Retrofit: invoke request
+Retrofit->-AuthInvoker: response (401 unauthorized)
+AuthInvoker->-LockingStrategy: response (401)
+LockingStrategy->+AuthAccountManager: invalidate token
+AuthAccountManager->+AccountManager: invalidate token
+AccountManager->-AuthAccountManager:
+AuthAccountManager->-LockingStrategy:
+LockingStrategy->+AuthInvoker: authenticate
+AuthInvoker->+AuthAccountManager:getActiveAccountName
+AuthAccountManager->-AuthInvoker:name
+AuthInvoker->+AuthAccountManager:getAccount(name)
+AuthAccountManager->-AuthInvoker: account
+AuthInvoker->+AuthAccountManager:getAuthToken(account)
+AuthAccountManager->+AccountManager:getAuthToken
+AccountManager-->+AuthenticationActivity: Relogin
+AuthenticationActivity-->-AccountManager: Account with token
+AccountManager->-AuthAccountManager: token
+AuthAccountManager->-AuthInvoker: token
+AuthInvoker->AuthInvoker:add token to header
+AuthInvoker->+Retrofit: invoke request
+Retrofit->-AuthInvoker: response
+AuthInvoker->-LockingStrategy: response
+LockingStrategy->LockingStrategy: unlock
+LockingStrategy->APIService: response
+APIService->-App: response
