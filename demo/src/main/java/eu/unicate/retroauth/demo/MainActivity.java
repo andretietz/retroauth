@@ -8,10 +8,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import com.google.gson.JsonElement;
+import java.util.List;
 
 import eu.unicate.retroauth.AuthAccountManager;
 import eu.unicate.retroauth.AuthRestAdapter;
+import eu.unicate.retroauth.demo.github.Email;
 import eu.unicate.retroauth.interceptors.TokenInterceptor;
 import retrofit.Callback;
 import retrofit.RestAdapter;
@@ -27,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
 	 * This is to test how the library reacts on multiple request at a time.
 	 * default it is just using 1 request per button click
 	 */
-	private SomeAuthenticatedService service;
+	private GithubService service;
 	private AuthAccountManager authAccountManager;
 
 	@Override
@@ -44,20 +45,20 @@ public class MainActivity extends AppCompatActivity {
 				.build();
 
 		// create the service with an activity, a token interceptor and the service interface you want to create
-		service = restAdapter.create(this, new SomeFakeAuthenticationToken(), SomeAuthenticatedService.class);
+		service = restAdapter.create(this, new SomeFakeAuthenticationToken(), GithubService.class);
 
 		// this is an example for the call of an rxjava method
 		findViewById(R.id.buttonRxJavaRequest).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				service.listReposRxJava("Unic8")
+				service.getEmails()
 						.subscribeOn(Schedulers.io())
 						.observeOn(AndroidSchedulers.mainThread())
 						.subscribe(
-								new Action1<JsonElement>() {
+								new Action1<List<Email>>() {
 									@Override
-									public void call(JsonElement jsonElements) {
-										showResult(jsonElements);
+									public void call(List<Email> emails) {
+										Toast.makeText(MainActivity.this, emails.toString(), Toast.LENGTH_SHORT).show();
 									}
 								},
 								new Action1<Throwable>() {
@@ -74,13 +75,13 @@ public class MainActivity extends AppCompatActivity {
 		findViewById(R.id.buttonBlockingRequest).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				new AsyncTask<Object, Object, JsonElement>() {
+				new AsyncTask<Object, Object, List<Email>>() {
 					private Throwable error;
 
 					@Override
-					protected JsonElement doInBackground(Object... params) {
+					protected List<Email> doInBackground(Object... params) {
 						try {
-							return service.listReposBlocking("Unic8");
+							return service.getEmailsBlocking();
 						} catch (Throwable e) {
 							error = e;
 						}
@@ -88,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
 					}
 
 					@Override
-					protected void onPostExecute(JsonElement o) {
+					protected void onPostExecute(List<Email> o) {
 						if (o == null) {
 							showError(error);
 						} else {
@@ -107,10 +108,10 @@ public class MainActivity extends AppCompatActivity {
 		findViewById(R.id.buttonAsyncRequest).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				service.listReposAsync("Unic8", new Callback<JsonElement>() {
+				service.getEmails(new Callback<List<Email>>() {
 					@Override
-					public void success(JsonElement jsonElements, Response response) {
-						showResult(jsonElements);
+					public void success(List<Email> emails, Response response) {
+						showResult(emails);
 					}
 
 					@Override
@@ -152,9 +153,9 @@ public class MainActivity extends AppCompatActivity {
 			setTitle("No active Account!");
 	}
 
-	private void showResult(JsonElement jsonElement) {
+	private void showResult(List<Email> emailList) {
 		showCurrentAccount();
-		Toast.makeText(MainActivity.this, jsonElement.toString(), Toast.LENGTH_SHORT).show();
+		Toast.makeText(MainActivity.this, emailList.toString(), Toast.LENGTH_SHORT).show();
 	}
 
 	private void showError(Throwable error) {
@@ -165,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
 	public static class SomeFakeAuthenticationToken extends TokenInterceptor {
 		@Override
 		public void injectToken(RequestFacade facade, String token) {
-			facade.addHeader("Token", token);
+			facade.addHeader("Authorization", "token " + token);
 		}
 	}
 
