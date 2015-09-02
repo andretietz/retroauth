@@ -22,19 +22,12 @@ import rx.schedulers.Schedulers;
 
 public class LoginActivity extends AuthenticationActivity {
 
-	private TextView textUser;
-	private TextView textPass;
-
 	private AlertDialog dialog;
 
 	@Override
 	protected void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 		setContentView(R.layout.activity_login);
-		textUser = (TextView) findViewById(R.id.textUser);
-		textPass = (TextView) findViewById(R.id.textPassword);
-
-
 		final GithubHelper helper = new GithubHelper("applications-client-id", "applications-client-secret", "http://localhost:8000/accounts/github/login/callback");
 
 
@@ -87,51 +80,8 @@ public class LoginActivity extends AuthenticationActivity {
 				});
 
 				alert.setView(wv);
-//				alert.setNegativeButton("Close", new DialogInterface.OnClickListener() {
-//					@Override
-//					public void onClick(DialogInterface dialog, int id) {
-//						dialog.dismiss();
-//					}
-//				});
 				dialog = alert.show();
-				// do the login
-//				String token = demoLogin(textUser.getText().toString(), textPass.getText().toString());
-//				if (null != token) {
-//					String accountName = textUser.getText().toString();
-//					// create the account if necessary
-//					Account account = createOrGetAccount(accountName);
-//					storeToken(account, getString(R.string.auth_token_type), token);
-//					finalizeAuthentication(account);
-//				}
 			}
 		});
-
-		String username = getAccountName();
-		if (null != username) {
-			textUser.setEnabled(false);
-			textUser.setText(username);
-		}
 	}
-
-	private void closeDialog() {
-
-	}
-
-	private String demoLogin(String username, String password) {
-		if (errorCheck(username, textUser, "Don't leave the username empty!"))
-			return null;
-		if (errorCheck(password, textPass, "Don't leave the password empty!"))
-			return null;
-		if ("test".equalsIgnoreCase(password))
-			return "this-is-a-demo-token-from-user: " + username;
-		return null;
-	}
-
-	private boolean errorCheck(String s, TextView tv, String message) {
-		boolean error = TextUtils.isEmpty(s);
-		tv.setError(error ? message : null);
-		tv.requestFocus();
-		return error;
-	}
-
 }

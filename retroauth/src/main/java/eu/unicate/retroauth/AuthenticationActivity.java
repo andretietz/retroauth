@@ -192,7 +192,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 	/**
 	 * @return The requested account type if available. otherwise <code>null</code>
 	 */
-	@Nullable
+	@NonNull
 	protected String getRequestedAccountType() {
 		return accountType;
 	}
