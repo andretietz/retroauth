@@ -1,4 +1,4 @@
-package eu.unicate.retroauth.demo.github;
+package eu.unicate.retroauth.demo.auth.github.model;
 
 import com.google.gson.annotations.SerializedName;
 

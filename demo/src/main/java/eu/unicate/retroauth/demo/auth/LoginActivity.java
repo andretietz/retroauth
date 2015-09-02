@@ -1,22 +1,21 @@
-package eu.unicate.retroauth.demo;
+package eu.unicate.retroauth.demo.auth;
 
 import android.accounts.Account;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
-import android.text.TextUtils;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import eu.unicate.retroauth.AuthenticationActivity;
-import eu.unicate.retroauth.demo.github.AccessToken;
-import eu.unicate.retroauth.demo.github.GithubHelper;
-import eu.unicate.retroauth.demo.github.GithubUser;
+import eu.unicate.retroauth.demo.R;
+import eu.unicate.retroauth.demo.auth.github.model.AccessToken;
+import eu.unicate.retroauth.demo.auth.github.GithubHelper;
+import eu.unicate.retroauth.demo.auth.github.model.GithubUser;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
