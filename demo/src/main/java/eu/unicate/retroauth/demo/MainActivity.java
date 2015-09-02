@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
 				.build();
 
 		// create the service with an activity, a token interceptor and the service interface you want to create
-		service = restAdapter.create(this, new SomeFakeAuthenticationToken(), GithubService.class);
+		service = restAdapter.create(this, new GithubTokenInterceptor(), GithubService.class);
 
 		// this is an example for the call of an rxjava method
 		findViewById(R.id.buttonRxJavaRequest).setOnClickListener(new View.OnClickListener() {
@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
 								new Action1<List<Email>>() {
 									@Override
 									public void call(List<Email> emails) {
-										Toast.makeText(MainActivity.this, emails.toString(), Toast.LENGTH_SHORT).show();
+										showResult(emails);
 									}
 								},
 								new Action1<Throwable>() {
@@ -96,11 +96,11 @@ public class MainActivity extends AppCompatActivity {
 							showResult(o);
 						}
 					}
-				}
-						// since Honeycomb, asynctask is using a threadpool with only one
-						// thread (see: http://developer.android.com/reference/android/os/AsyncTask.html#execute(Params...) )
-						// this is why we change the executor here, in case MULTIREQUEST_AMOUNT is > than 1
-						.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				}.execute();
+				// since Honeycomb, asynctask is using a threadpool with only one
+				// thread (see: http://developer.android.com/reference/android/os/AsyncTask.html#execute(Params...) )
+				// remember this, when you need to call more than one request at once using async task!
+				// use: .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR); instead of ".execute()"
 			}
 		});
 
@@ -163,9 +163,11 @@ public class MainActivity extends AppCompatActivity {
 		Toast.makeText(MainActivity.this, error.toString(), Toast.LENGTH_SHORT).show();
 	}
 
-	public static class SomeFakeAuthenticationToken extends TokenInterceptor {
+	public static class GithubTokenInterceptor extends TokenInterceptor {
 		@Override
 		public void injectToken(RequestFacade facade, String token) {
+			// according to the github documentation
+			// https://developer.github.com/v3/#authentication
 			facade.addHeader("Authorization", "token " + token);
 		}
 	}
