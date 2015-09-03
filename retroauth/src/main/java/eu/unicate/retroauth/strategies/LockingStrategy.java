@@ -16,7 +16,8 @@
 
 package eu.unicate.retroauth.strategies;
 
-import java.util.HashMap;
+import android.util.SparseArray;
+
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -38,7 +39,8 @@ import rx.functions.Func2;
  */
 public class LockingStrategy extends RetryAndInvalidateStrategy {
 
-	private static final HashMap<String, AccountTokenLock> ACCOUNTTOKENLOCKS = new HashMap<>();
+
+	private static final SparseArray<AccountTokenLock> ACCOUNTTOKENLOCKS = new SparseArray<>();
 
 	/**
 	 * This object gets created ones for a specific token type of an account
@@ -81,10 +83,10 @@ public class LockingStrategy extends RetryAndInvalidateStrategy {
 	 */
 	private AccountTokenLock getAccountTokenLock(String type, boolean cancelPending) {
 		synchronized (ACCOUNTTOKENLOCKS) {
-			AccountTokenLock tokenLock = ACCOUNTTOKENLOCKS.get(type);
+			AccountTokenLock tokenLock = ACCOUNTTOKENLOCKS.get(type.hashCode());
 			if (tokenLock == null) {
 				tokenLock = new AccountTokenLock(cancelPending);
-				ACCOUNTTOKENLOCKS.put(type, tokenLock);
+				ACCOUNTTOKENLOCKS.put(type.hashCode(), tokenLock);
 			}
 			return tokenLock;
 		}
