@@ -38,7 +38,7 @@ import rx.functions.Func2;
  */
 public class LockingStrategy extends RetryAndInvalidateStrategy {
 
-	private static final AtomicReference<HashMap<String, AccountTokenLock>> ACCOUNTTOKENLOCKS = new AtomicReference<>(new HashMap<String, AccountTokenLock>());
+	private static final HashMap<String, AccountTokenLock> ACCOUNTTOKENLOCKS = new HashMap<>();
 
 	/**
 	 * This object gets created ones for a specific token type of an account
@@ -81,10 +81,10 @@ public class LockingStrategy extends RetryAndInvalidateStrategy {
 	 */
 	private AccountTokenLock getAccountTokenLock(String type, boolean cancelPending) {
 		synchronized (ACCOUNTTOKENLOCKS) {
-			AccountTokenLock tokenLock = ACCOUNTTOKENLOCKS.get().get(type);
+			AccountTokenLock tokenLock = ACCOUNTTOKENLOCKS.get(type);
 			if (tokenLock == null) {
 				tokenLock = new AccountTokenLock(cancelPending);
-				ACCOUNTTOKENLOCKS.get().put(type, tokenLock);
+				ACCOUNTTOKENLOCKS.put(type, tokenLock);
 			}
 			return tokenLock;
 		}
@@ -123,11 +123,9 @@ public class LockingStrategy extends RetryAndInvalidateStrategy {
 								try {
 									//noinspection ThrowableResultOfMethodCallIgnored
 									if (null == accountTokenLock.errorContainer.get() && error instanceof AuthenticationCanceledException) {
-										System.out.println("set error!");
 										accountTokenLock.errorContainer.set(error);
 									}
 									if (0 == accountTokenLock.waitCounter.get()) {
-										System.out.println("reset error!");
 										accountTokenLock.errorContainer.set(null);
 									}
 									return retry(count, error);

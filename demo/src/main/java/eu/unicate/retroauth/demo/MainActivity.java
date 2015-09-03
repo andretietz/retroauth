@@ -24,6 +24,15 @@ import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
 
+	public static final TokenInterceptor GITHUB_INTERCEPTOR = new TokenInterceptor() {
+		@Override
+		public void injectToken(RequestFacade facade, String token) {
+			// according to the github documentation
+			// https://developer.github.com/v3/#authentication
+			facade.addHeader("Authorization", "token " + token);
+		}
+	};
+
 	/**
 	 * This is to test how the library reacts on multiple request at a time.
 	 * default it is just using 1 request per button click
@@ -45,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
 				.build();
 
 		// create the service with an activity, a token interceptor and the service interface you want to create
-		service = restAdapter.create(this, new GithubTokenInterceptor(), GithubService.class);
+		service = restAdapter.create(this, GITHUB_INTERCEPTOR, GithubService.class);
 
 		// this is an example for the call of an rxjava method
 		findViewById(R.id.buttonRxJavaRequest).setOnClickListener(new View.OnClickListener() {
@@ -161,15 +170,6 @@ public class MainActivity extends AppCompatActivity {
 	private void showError(Throwable error) {
 		Log.e("TAG", "Error", error);
 		Toast.makeText(MainActivity.this, error.toString(), Toast.LENGTH_SHORT).show();
-	}
-
-	public static class GithubTokenInterceptor extends TokenInterceptor {
-		@Override
-		public void injectToken(RequestFacade facade, String token) {
-			// according to the github documentation
-			// https://developer.github.com/v3/#authentication
-			facade.addHeader("Authorization", "token " + token);
-		}
 	}
 
 }
