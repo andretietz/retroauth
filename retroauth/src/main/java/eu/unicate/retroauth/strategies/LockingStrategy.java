@@ -81,15 +81,13 @@ public class LockingStrategy extends RetryAndInvalidateStrategy {
 	 *                      when the user cancels the login
 	 * @return an {@link AccountTokenLock} Object
 	 */
-	private AccountTokenLock getAccountTokenLock(String type, boolean cancelPending) {
-		synchronized (ACCOUNTTOKENLOCKS) {
-			AccountTokenLock tokenLock = ACCOUNTTOKENLOCKS.get(type.hashCode());
-			if (tokenLock == null) {
-				tokenLock = new AccountTokenLock(cancelPending);
-				ACCOUNTTOKENLOCKS.put(type.hashCode(), tokenLock);
-			}
-			return tokenLock;
+	private synchronized AccountTokenLock getAccountTokenLock(String type, boolean cancelPending) {
+		AccountTokenLock tokenLock = ACCOUNTTOKENLOCKS.get(type.hashCode());
+		if (tokenLock == null) {
+			tokenLock = new AccountTokenLock(cancelPending);
+			ACCOUNTTOKENLOCKS.put(type.hashCode(), tokenLock);
 		}
+		return tokenLock;
 	}
 
 
