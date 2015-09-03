@@ -1,3 +1,8 @@
+## 1.0.4
+
+* Demo App:
+  * Added Github authentication as an example
+
 ## 1.0.3 (2015-08-29)
 
 * Storing multiple tokens in the AuthenticationActivity

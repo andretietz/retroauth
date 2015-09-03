@@ -12,7 +12,7 @@ import java.util.List;
 
 import eu.unicate.retroauth.AuthAccountManager;
 import eu.unicate.retroauth.AuthRestAdapter;
-import eu.unicate.retroauth.demo.github.Email;
+import eu.unicate.retroauth.demo.auth.github.model.Email;
 import eu.unicate.retroauth.interceptors.TokenInterceptor;
 import retrofit.Callback;
 import retrofit.RestAdapter;
@@ -33,10 +33,6 @@ public class MainActivity extends AppCompatActivity {
 		}
 	};
 
-	/**
-	 * This is to test how the library reacts on multiple request at a time.
-	 * default it is just using 1 request per button click
-	 */
 	private GithubService service;
 	private AuthAccountManager authAccountManager;
 

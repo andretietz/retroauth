@@ -1,9 +1,11 @@
-package eu.unicate.retroauth.demo.github;
+package eu.unicate.retroauth.demo.auth.github;
 
 import android.text.TextUtils;
 
 import java.util.List;
 
+import eu.unicate.retroauth.demo.auth.github.model.AccessToken;
+import eu.unicate.retroauth.demo.auth.github.model.GithubUser;
 import retrofit.RestAdapter.Builder;
 import retrofit.RestAdapter.LogLevel;
 import rx.Observable;
@@ -36,8 +38,7 @@ public class GithubHelper {
 	}
 
 	public Observable<AccessToken> getAccessTokenUrl(String authCode) {
-		return authService.getAccessToken(clientID, clientSecret,
-				callbackUrl, authCode);
+		return authService.getAccessToken(clientID, clientSecret, callbackUrl, authCode);
 	}
 
 	public Observable<GithubUser> getUser(AccessToken token) {
