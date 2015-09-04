@@ -2,6 +2,8 @@
 
 * Demo App:
   * Added Github authentication as an example
+* Dependency Updates:
+  * appcompat 23.0.1
 
 ## 1.0.3 (2015-08-29)
 
