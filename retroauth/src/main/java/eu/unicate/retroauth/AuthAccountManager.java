@@ -273,12 +273,18 @@ public final class AuthAccountManager implements BaseAccountManager {
 			}
 
 			Bundle result = future.getResult();
-			String token = result.getString(AccountManager.KEY_AUTHTOKEN);
 			// even if the AuthenticationActivity set the KEY_AUTHTOKEN in the result bundle,
 			// it got stripped out by the AccountManager
-			if (token == null) {
+			String token = result.getString(AccountManager.KEY_AUTHTOKEN);
+			if(account == null) {
 				// try using the newly created account to peek the token
 				token = accountManager.peekAuthToken(new Account(result.getString(AccountManager.KEY_ACCOUNT_NAME), result.getString(AccountManager.KEY_ACCOUNT_TYPE)), tokenType);
+				if (token == null) {
+					throw new AuthenticatorException("You have to store a token using "+AuthenticationActivity.class.getSimpleName()+" #storeToken() in order to append it to the request");
+				}
+			} else {
+				if(token == null)
+					throw new OperationCanceledException("user " + account.name + " canceled the login!");
 			}
 			return token;
 		} catch (AuthenticatorException | OperationCanceledException | IOException e) {
