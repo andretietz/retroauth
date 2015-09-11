@@ -48,7 +48,8 @@ final class AuthRestHandler<T> implements InvocationHandler {
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		ServiceInfo.AuthRequestType methodInfo = serviceInfo.methodInfoCache.get(method);
-		serviceInfo.tokenInterceptor.setIgnore(AuthRequestType.NONE.equals(methodInfo));
+		if(serviceInfo.tokenInterceptor != null)
+			serviceInfo.tokenInterceptor.setIgnore(AuthRequestType.NONE.equals(methodInfo));
 		switch (methodInfo) {
 			case RXJAVA:
 				return authInvoker

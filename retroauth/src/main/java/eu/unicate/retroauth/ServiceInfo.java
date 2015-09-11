@@ -42,7 +42,8 @@ final class ServiceInfo {
 	}
 
 	public void tokenSetup(String token) {
-		tokenInterceptor.setToken(token);
+		if(null != tokenInterceptor)
+			tokenInterceptor.setToken(token);
 		authenticationRequestInterceptor.setAuthenticationInterceptor(tokenInterceptor);
 	}
 
