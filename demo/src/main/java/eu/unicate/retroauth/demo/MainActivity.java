@@ -160,7 +160,12 @@ public class MainActivity extends AppCompatActivity {
 
 	private void showResult(List<Email> emailList) {
 		showCurrentAccount();
-		Toast.makeText(MainActivity.this, emailList.toString(), Toast.LENGTH_SHORT).show();
+		StringBuilder sb = new StringBuilder();
+		sb.append("Your protected emails:\n");
+		for(Email email : emailList) {
+			sb.append(email.email).append('\n');
+		}
+		Toast.makeText(MainActivity.this, sb.toString(), Toast.LENGTH_SHORT).show();
 	}
 
 	private void showError(Throwable error) {
