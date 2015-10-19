@@ -2,8 +2,12 @@
 
 * Demo App:
   * Added Github authentication as an example
+  * Fixed issue regarding Observable.zip (if one of the containing zip observables was canceled, the locking strategy didn't work out properly, it does not)
+    * Tests included
 * Dependency Updates:
-  * appcompat 23.0.1
+  * appcompat 23.1.0
+  * (Demo App:) rxandroid 1.0.1
+
 
 ## 1.0.3 (2015-08-29)
 
