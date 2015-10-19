@@ -26,9 +26,11 @@ import eu.unicate.retroauth.exceptions.AuthenticationCanceledException;
 import eu.unicate.retroauth.interfaces.BaseAccountManager;
 import rx.Observable;
 import rx.Subscriber;
+import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.functions.Func2;
+import rx.subscriptions.Subscriptions;
 
 
 /**
@@ -41,7 +43,7 @@ public class LockingStrategy extends RetryAndInvalidateStrategy {
 
 
 	private static final SparseArray<AccountTokenLock> ACCOUNTTOKENLOCKS = new SparseArray<>();
-
+	private static final AtomicInteger requestIdGenerator = new AtomicInteger();
 	/**
 	 * This object gets created ones for a specific token type of an account
 	 */
@@ -95,7 +97,7 @@ public class LockingStrategy extends RetryAndInvalidateStrategy {
 	public <T> Observable<T> execute(final Observable<T> request) {
 		return
 				// lock the semaphore
-				lockRequest()
+				lockRequest(requestIdGenerator.incrementAndGet())
 						.flatMap(new Func1<Boolean, Observable<?>>() {
 							@Override
 							public Observable<?> call(Boolean wasWaiting) {
@@ -143,10 +145,18 @@ public class LockingStrategy extends RetryAndInvalidateStrategy {
 	 * @return an observable that emits one boolean item that is {@code true} if the request had to wait
 	 * in a queue
 	 */
-	private Observable<Boolean> lockRequest() {
+	private Observable<Boolean> lockRequest(final int requestId) {
 		return Observable.create(new Observable.OnSubscribe<Boolean>() {
 			@Override
 			public void call(Subscriber<? super Boolean> subscriber) {
+				subscriber.add(Subscriptions.create(new Action0() {
+					@Override
+					public void call() {
+						if (accountTokenLock.currentRequestLockId == requestId && accountTokenLock.semaphore.availablePermits() == 0) {
+							accountTokenLock.semaphore.release();
+						}
+					}
+				}));
 				try {
 					boolean waiting = !accountTokenLock.semaphore.tryAcquire();
 					if (waiting) {
@@ -155,6 +165,7 @@ public class LockingStrategy extends RetryAndInvalidateStrategy {
 						// wait for the next slot
 						accountTokenLock.semaphore.acquire();
 					}
+					accountTokenLock.currentRequestLockId = requestId;
 					if (!subscriber.isUnsubscribed()) {
 						// emit if this request had to wait
 						subscriber.onNext(waiting);
@@ -200,6 +211,7 @@ public class LockingStrategy extends RetryAndInvalidateStrategy {
 		public final AtomicReference<Throwable> errorContainer;
 		public final AtomicInteger waitCounter;
 		public final boolean cancelPending;
+		public int currentRequestLockId;
 
 		public AccountTokenLock(boolean cancelPending) {
 			this.semaphore = new Semaphore(1);

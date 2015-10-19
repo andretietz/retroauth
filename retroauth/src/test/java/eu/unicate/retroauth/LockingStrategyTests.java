@@ -16,6 +16,7 @@ import eu.unicate.retroauth.strategies.LockingStrategy;
 import rx.Observable;
 import rx.Observable.OnSubscribe;
 import rx.Subscriber;
+import rx.functions.Func2;
 import rx.observers.TestSubscriber;
 import rx.schedulers.Schedulers;
 
@@ -404,6 +405,57 @@ public class LockingStrategyTests {
 		finalTest.assertCompleted();
 	}
 
+	@Test
+	public void testFailingZippedRequests() {
+		@SuppressWarnings("unchecked")
+		TestSubscriber<Integer>[] subscriber = new TestSubscriber[REQUEST_AMOUNT];
+		final AtomicInteger c = new AtomicInteger(0);
+
+		Observable<Integer> tmp = null;
+
+		for (int i = 0; i < REQUEST_AMOUNT; i++) {
+			Observable<Integer> request;
+			if (i % 2 == 0) {
+				tmp = rxjavaCall(strategy, requestSimulationHappyCase(i, c));
+			} else {
+				subscriber[i / 2] = TestSubscriber.create();
+				request = Observable.zip(tmp, rxjavaCall(strategy, requestSimulationFailingCase(c)),
+						new Func2<Integer, Integer, Integer>() {
+							@Override
+							public Integer call(Integer integer, Integer integer2) {
+								return 0;
+							}
+						}
+				);
+				request.subscribe(subscriber[i / 2]);
+			}
+		}
+
+		// test all requests if they have been canceled
+		for (int i = 0; i < REQUEST_AMOUNT / 2; i++) {
+			subscriber[i].awaitTerminalEvent();
+			subscriber[i].assertError(AuthenticationCanceledException.class);
+		}
+
+		// to make sure all locks are released, do another request
+		TestSubscriber<Object> finalTest = TestSubscriber.create();
+		// if anything is still locked, this test fails
+		strategy.execute(Observable.create(new OnSubscribe<Object>() {
+			@Override
+			public void call(Subscriber<? super Object> subscriber) {
+				subscriber.onNext(null);
+				subscriber.onCompleted();
+
+			}
+		})).subscribe(finalTest);
+
+		// if this request finished successfully we can be sure that
+		// all locks have been reset
+		finalTest.awaitTerminalEvent();
+		finalTest.assertValueCount(1);
+		finalTest.assertCompleted();
+	}
+
 	/**
 	 * Wrapping the requestHappy into an observable
 	 * (this is how it's gonna work in retroauth as well)
@@ -459,12 +511,14 @@ public class LockingStrategyTests {
 	 * Emulated request
 	 */
 	private int requestHappy(int id, AtomicInteger executionCounter) throws InterruptedException {
+		System.out.println("happy");
 		executionCounter.incrementAndGet();
 		Thread.sleep(SUCCESSFUL_REQUEST_TIME);
 		return id;
 	}
 
 	private int requestFailure(AtomicInteger executionCounter) throws InterruptedException {
+		System.out.println("failure");
 		executionCounter.incrementAndGet();
 		// intentionally wait for the other requests to be queued.
 		// This is required for the failing tests since they assume that all requests are pending
