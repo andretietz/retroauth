@@ -11,9 +11,9 @@
 		android:text="Demo Login"
 		android:textAppearance="@style/TextAppearance.AppCompat.Display1"/>
 
-	<Button
-		android:id="@+id/buttonLogin"
+	<WebView
+		android:id="@+id/webView"
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:text="Github Login"/>
+		android:layout_height="match_parent" />
+
 </LinearLayout>

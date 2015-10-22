@@ -37,7 +37,7 @@ public class GithubHelper {
 		return authorizationUrl + "&scope=" + TextUtils.join(",", scopes);
 	}
 
-	public Observable<AccessToken> getAccessTokenUrl(String authCode) {
+	public Observable<AccessToken> getAccessToken(String authCode) {
 		return authService.getAccessToken(clientID, clientSecret, callbackUrl, authCode);
 	}
 

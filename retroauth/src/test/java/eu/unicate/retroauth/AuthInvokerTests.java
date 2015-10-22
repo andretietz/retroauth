@@ -82,6 +82,7 @@ public class AuthInvokerTests {
 
 		invoker.invoke(service.request()).subscribe(testSubscriber);
 
+		testSubscriber.awaitTerminalEvent();
 		testSubscriber.assertValue("mocked-result");
 		testSubscriber.assertCompleted();
 	}
@@ -106,7 +107,7 @@ public class AuthInvokerTests {
 				.thenReturn(Observable.just("mocked-result"));
 
 		invoker.invoke(request()).subscribe(testSubscriber);
-
+		testSubscriber.awaitTerminalEvent();
 		testSubscriber.assertValue("mocked-result");
 		testSubscriber.assertCompleted();
 	}
@@ -130,7 +131,7 @@ public class AuthInvokerTests {
 
 		invoker.invoke(request()).subscribe(testSubscriber);
 
-
+		testSubscriber.awaitTerminalEvent();
 		testSubscriber.assertNoValues();
 		testSubscriber.assertError(Exception.class);
 		testSubscriber.assertNotCompleted();
@@ -154,7 +155,7 @@ public class AuthInvokerTests {
 
 		invoker.invoke(request()).subscribe(testSubscriber);
 
-
+		testSubscriber.awaitTerminalEvent();
 		testSubscriber.assertNoValues();
 		testSubscriber.assertError(Exception.class);
 		testSubscriber.assertNotCompleted();
