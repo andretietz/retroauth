@@ -16,6 +16,7 @@
 
 package eu.unicate.retroauth.strategies;
 
+import android.util.Log;
 import android.util.SparseArray;
 
 import java.util.concurrent.Semaphore;
@@ -107,8 +108,7 @@ public class LockingStrategy extends RetryAndInvalidateStrategy {
 						.concatMap(new Func1<Object, Observable<T>>() {
 							@Override
 							public Observable<T> call(Object o) {
-								// TODO: find a better solution!
-								return request.delay(100, TimeUnit.MILLISECONDS);
+								return request;
 							}
 						})
 								// release the semaphore on success
