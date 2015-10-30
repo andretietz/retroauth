@@ -29,6 +29,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -275,7 +276,6 @@ public final class AuthAccountManager implements BaseAccountManager {
 				throw new OperationCanceledException("user canceled the login!");
 			return token;
 		} catch (AuthenticatorException | OperationCanceledException | IOException e) {
-			e.printStackTrace();
 			throw new AuthenticationCanceledException(e);
 		}
 	}
@@ -292,14 +292,13 @@ public final class AuthAccountManager implements BaseAccountManager {
 	}
 
 	private String getToken(@Nullable Activity activity, @NonNull Account account, @NonNull String tokenType) throws AuthenticatorException, OperationCanceledException, IOException {
-		String token = accountManager.peekAuthToken(account, tokenType);
+		// Clear the interrupted flag
+		Thread.interrupted();
+		AccountManagerFuture<Bundle> future = accountManager.getAuthToken(account, tokenType, null, activity, null, null);
+		Bundle result = future.getResult();
+		String token = result.getString(AccountManager.KEY_AUTHTOKEN);
 		if(token == null) {
-			AccountManagerFuture<Bundle> future = accountManager.getAuthToken(account, tokenType, null, activity, null, null);
-			Bundle result = future.getResult();
-			token = result.getString(AccountManager.KEY_AUTHTOKEN);
-			if(token == null) {
-				token = accountManager.peekAuthToken(account, tokenType);
-			}
+			token = accountManager.peekAuthToken(account, tokenType);
 		}
 		return token;
 	}
