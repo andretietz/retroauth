@@ -2,7 +2,9 @@ package eu.unicate.retroauth.demo.auth;
 
 import android.accounts.Account;
 import android.net.Uri;
+import android.os.Build.VERSION;
 import android.os.Bundle;
+import android.webkit.CookieManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -27,7 +29,6 @@ public class LoginActivity extends AuthenticationActivity {
 		setContentView(R.layout.activity_login);
 
 		helper = new GithubHelper("405f730d96862da912a8", "dce0264a8c9eb94689d4d8ffbe1fadb59c33c4c3", "http://localhost:8000/accounts/github/login/callback");
-
 		WebView webView = (WebView) findViewById(R.id.webView);
 		List<String> scopes = new ArrayList<>();
 		scopes.add("user");
@@ -70,5 +71,23 @@ public class LoginActivity extends AuthenticationActivity {
 				return true;
 			}
 		});
+	}
+
+	private void removeCookies() {
+		CookieManager cookieManager = CookieManager.getInstance();
+		if (VERSION.SDK_INT < 21) {
+			//noinspection deprecation
+			cookieManager.removeAllCookie();
+		} else {
+			cookieManager.removeAllCookies(null);
+		}
+	}
+
+	@Override
+	public void finish() {
+		// remove cookies
+		// without that, multiaccount does not work since the browser will relogin the user
+		removeCookies();
+		super.finish();
 	}
 }
