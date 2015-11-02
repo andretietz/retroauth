@@ -65,13 +65,15 @@ public class RetryAndInvalidateStrategy extends RequestStrategy {
 	 * Override this method, if you need another retry logic
 	 *
 	 * @param count the amount of requests (not retries) that were already done
-	 * @param error the error that occured and caused the retry
+	 * @param throwable the error that occured and caused the retry
 	 * @return {@code true} when this is the first retry and the server returned with 401 {@code false} otherwise
 	 */
-	protected boolean retry(int count, Throwable error) {
+	protected boolean retry(int count, Throwable throwable) {
 		if (count <= 1) {
-			if (error instanceof RetrofitError) {
-				Response response = ((RetrofitError) error).getResponse();
+			@SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+			RetrofitError error = isRetrofitError(throwable);
+			if (error != null) {
+				Response response = error.getResponse();
 				if (response != null && HTTP_UNAUTHORIZED == response.getStatus()) {
 					accountManager.invalidateTokenFromActiveUser(accountType, tokenType);
 					return true;
@@ -79,5 +81,16 @@ public class RetryAndInvalidateStrategy extends RequestStrategy {
 			}
 		}
 		return false;
+	}
+
+	private RetrofitError isRetrofitError(Throwable error) {
+		if (error instanceof RetrofitError) {
+			return (RetrofitError) error;
+		}
+		Throwable cause = error.getCause();
+		if(cause != null) {
+			return isRetrofitError(cause);
+		}
+		return null;
 	}
 }
