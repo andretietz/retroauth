@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/andretietz/retroauth.svg?branch=master)](https://travis-ci.org/andretietz/retroauth)
 ## Dependencies
 * [Retrofit](https://github.com/square/retrofit) 1.9.0
-* [RxJava](https://github.com/ReactiveX/RxJava) 1.0.14
+* [RxJava](https://github.com/ReactiveX/RxJava) 1.0.15
 * appcompat-v7: 23.1.0
 
 Min SDK Version: 9
@@ -37,7 +37,7 @@ Sequence Diagrams can be found in the DIAGRAMS.md file
 ## How to use it?
 Add it as dependency:
 ```groovy
-compile 'eu.unicate.android:retroauth:1.0.3'
+compile 'eu.unicate.android:retroauth:1.0.4'
 ```
 
 ### 1. Create 3 strings in your strings.xml
