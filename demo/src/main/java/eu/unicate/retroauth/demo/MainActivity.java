@@ -1,6 +1,7 @@
 package eu.unicate.retroauth.demo;
 
 import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -131,7 +132,8 @@ public class MainActivity extends AppCompatActivity {
 		findViewById(R.id.buttonInvalidateToken).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				authAccountManager.invalidateTokenFromActiveUser(getString(R.string.auth_account_type), getString(R.string.auth_token_type));
+				// override the current token to force a 401
+				AccountManager.get(MainActivity.this).setAuthToken(authAccountManager.getActiveAccount(getString(R.string.auth_account_type), false), getString(R.string.auth_token_type), "some-invalid-token");
 			}
 		});
 		findViewById(R.id.buttonResetPrefAccount).setOnClickListener(new View.OnClickListener() {
