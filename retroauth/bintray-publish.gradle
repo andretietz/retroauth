@@ -2,7 +2,7 @@ apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
 group = 'eu.unicate.android'
-version = '1.0.3'
+version = '1.0.4'
 
 // Before deploying your project to maven central the first time, you have to create a jira ticket for the project
 // https://issues.sonatype.org/secure/CreateIssue.jspa?issuetype=21&pid=10134
