@@ -1,33 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical">
+			  android:layout_width="match_parent"
+			  android:layout_height="match_parent"
+			  android:orientation="vertical">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:text="Demo Login"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display1"/>
+	<TextView
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center_horizontal"
+		android:text="Demo Login"
+		android:textAppearance="@style/TextAppearance.AppCompat.Display1"/>
 
-    <android.support.v7.widget.AppCompatEditText
-        android:id="@+id/textUser"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="username"/>
+	<WebView
+		android:id="@+id/webView"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent" />
 
-    <android.support.v7.widget.AppCompatEditText
-        android:id="@+id/textPassword"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="password (test for demo)"
-        android:inputType="textPassword"
-        android:text="test"/>
-
-    <android.support.v7.widget.AppCompatButton
-        android:id="@+id/buttonLogin"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Login"/>
 </LinearLayout>

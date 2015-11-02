@@ -18,7 +18,6 @@ package eu.unicate.retroauth;
 
 import android.accounts.Account;
 
-import eu.unicate.retroauth.exceptions.AuthenticationCanceledException;
 import eu.unicate.retroauth.interfaces.BaseAccountManager;
 import eu.unicate.retroauth.strategies.LockingStrategy;
 import eu.unicate.retroauth.strategies.RequestStrategy;
@@ -26,6 +25,7 @@ import rx.Observable;
 import rx.Observable.OnSubscribe;
 import rx.Subscriber;
 import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 /**
  * This class invokes authenticated requests
@@ -62,25 +62,7 @@ final class AuthInvoker {
 	 */
 	public <T> Observable<T> invoke(final Observable<T> request) {
 		return strategy.execute(
-				getActiveAccountName()
-						.flatMap(new Func1<String, Observable<Account>>() {
-							@Override
-							public Observable<Account> call(String name) {
-								return getAccount(name);
-							}
-						})
-						.flatMap(new Func1<Account, Observable<String>>() {
-							@Override
-							public Observable<String> call(Account account) {
-								return getAuthToken(account);
-							}
-						})
-						.flatMap(new Func1<String, Observable<?>>() {
-							@Override
-							public Observable<?> call(String token) {
-								return authenticate(token);
-							}
-						})
+				authenticate()
 						.flatMap(new Func1<Object, Observable<T>>() {
 							@Override
 							public Observable<T> call(Object o) {
@@ -92,70 +74,19 @@ final class AuthInvoker {
 	/**
 	 * Authenticates a request
 	 *
-	 * @param token Token to authenticate with
 	 * @return an Observable that emits one boolean true after the token was added to the request
 	 */
-	private Observable<Boolean> authenticate(final String token) {
+	private Observable<Boolean> authenticate() {
 		return Observable.create(new OnSubscribe<Boolean>() {
 			@Override
 			public void call(Subscriber<? super Boolean> subscriber) {
+				String name = authAccountManager.getActiveAccountName(serviceInfo.accountType, true);
+				Account account = authAccountManager.getAccountByName(name, serviceInfo.accountType);
+				String token = authAccountManager.getAuthToken(account, serviceInfo.accountType, serviceInfo.tokenType);
 				serviceInfo.tokenSetup(token);
 				subscriber.onNext(true);
 				subscriber.onCompleted();
 			}
-		});
+		}).subscribeOn(Schedulers.computation());
 	}
-
-	/**
-	 * gets the token from the given account
-	 *
-	 * @param account you want the token from
-	 * @return Observable that emits the token as String if successful
-	 */
-	private Observable<String> getAuthToken(final Account account) {
-		return Observable.create(new OnSubscribe<String>() {
-			@Override
-			public void call(Subscriber<? super String> subscriber) {
-				try {
-					subscriber.onNext(authAccountManager.getAuthToken(account, serviceInfo.accountType, serviceInfo.tokenType));
-					subscriber.onCompleted();
-				} catch (AuthenticationCanceledException e) {
-					subscriber.onError(e);
-				}
-			}
-		});
-	}
-
-
-	/**
-	 * Gets the account by the given name
-	 *
-	 * @param name Name of the account you're searching for
-	 * @return An Observable that emits the account if it could be found
-	 */
-	private Observable<Account> getAccount(final String name) {
-		return Observable.create(new OnSubscribe<Account>() {
-			@Override
-			public void call(Subscriber<? super Account> subscriber) {
-				subscriber.onNext(authAccountManager.getAccountByName(name, serviceInfo.accountType));
-				subscriber.onCompleted();
-			}
-		});
-	}
-
-	/**
-	 * Gets the name of the currently active account
-	 *
-	 * @return an Observable that emits the accountName as String if available
-	 */
-	private Observable<String> getActiveAccountName() {
-		return Observable.create(new OnSubscribe<String>() {
-			@Override
-			public void call(Subscriber<? super String> subscriber) {
-				subscriber.onNext(authAccountManager.getActiveAccountName(serviceInfo.accountType, true));
-				subscriber.onCompleted();
-			}
-		});
-	}
-
 }

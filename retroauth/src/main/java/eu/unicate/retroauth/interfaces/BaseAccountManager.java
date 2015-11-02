@@ -28,14 +28,15 @@ import eu.unicate.retroauth.exceptions.AuthenticationCanceledException;
 public interface BaseAccountManager {
 	/**
 	 * Gets the currently active account by the account type. The active account name is determined
-	 * by the method {@link #getActiveAccountName(String, boolean)}
+	 * by the method {@link #getActiveAccountName(String, boolean)}. If there's only one account
+	 * this one will be returned, no matter if you reseted the currently active one
 	 *
 	 * @param accountType     Account Type you want to retreive
 	 * @param userInteraction If there is more than one account and there is no
 	 *                        current active account, a user interaction is required to
 	 *                        let the user choose one. If you want to do so, set this to <code>true</code>
 	 *                        else to <code>false</code>.
-	 * @return the Active account or <code>null</code>
+	 * @return the active (or only) Account or <code>null</code> in case there is no account
 	 */
 	@Nullable
 	Account getActiveAccount(@NonNull String accountType, boolean userInteraction);

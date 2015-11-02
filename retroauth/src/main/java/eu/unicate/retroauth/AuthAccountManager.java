@@ -29,6 +29,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -264,25 +265,41 @@ public final class AuthAccountManager implements BaseAccountManager {
 	@Override
 	public String getAuthToken(@Nullable Account account, @NonNull String accountType, @NonNull String tokenType) throws AuthenticationCanceledException {
 		try {
-			AccountManagerFuture<Bundle> future;
+			String token;
 			Activity activity = (context instanceof Activity) ? (Activity) context : null;
 			if (account == null) {
-				future = accountManager.addAccount(accountType, tokenType, null, null, activity, null, null);
+				token = createAccountAndGetToken(activity, accountType, tokenType);
 			} else {
-				future = accountManager.getAuthToken(account, tokenType, null, activity, null, null);
+				token = getToken(activity, account, tokenType);
 			}
-
-			Bundle result = future.getResult();
-			String token = result.getString(AccountManager.KEY_AUTHTOKEN);
-			// even if the AuthenticationActivity set the KEY_AUTHTOKEN in the result bundle,
-			// it got stripped out by the AccountManager
-			if (token == null) {
-				// try using the newly created account to peek the token
-				token = accountManager.peekAuthToken(new Account(result.getString(AccountManager.KEY_ACCOUNT_NAME), result.getString(AccountManager.KEY_ACCOUNT_TYPE)), tokenType);
-			}
+			if(token == null)
+				throw new OperationCanceledException("user canceled the login!");
 			return token;
 		} catch (AuthenticatorException | OperationCanceledException | IOException e) {
 			throw new AuthenticationCanceledException(e);
 		}
+	}
+
+	private String createAccountAndGetToken(@Nullable Activity activity, @NonNull String accountType, @NonNull String tokenType) throws AuthenticatorException, OperationCanceledException, IOException {
+		AccountManagerFuture<Bundle> future = accountManager.addAccount(accountType, tokenType, null, null, activity, null, null);
+		Bundle result = future.getResult();
+		String accountName = result.getString(AccountManager.KEY_ACCOUNT_NAME);
+		if(accountName != null) {
+			Account account = new Account(result.getString(AccountManager.KEY_ACCOUNT_NAME), result.getString(AccountManager.KEY_ACCOUNT_TYPE));
+			return accountManager.peekAuthToken(account, tokenType);
+		}
+		return null;
+	}
+
+	private String getToken(@Nullable Activity activity, @NonNull Account account, @NonNull String tokenType) throws AuthenticatorException, OperationCanceledException, IOException {
+		// Clear the interrupted flag
+		Thread.interrupted();
+		AccountManagerFuture<Bundle> future = accountManager.getAuthToken(account, tokenType, null, activity, null, null);
+		Bundle result = future.getResult();
+		String token = result.getString(AccountManager.KEY_AUTHTOKEN);
+		if(token == null) {
+			token = accountManager.peekAuthToken(account, tokenType);
+		}
+		return token;
 	}
 }

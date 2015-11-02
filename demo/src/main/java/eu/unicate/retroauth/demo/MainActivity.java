@@ -1,6 +1,7 @@
 package eu.unicate.retroauth.demo;
 
 import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -8,10 +9,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import com.google.gson.JsonElement;
+import java.util.List;
 
 import eu.unicate.retroauth.AuthAccountManager;
 import eu.unicate.retroauth.AuthRestAdapter;
+import eu.unicate.retroauth.demo.auth.github.model.Email;
 import eu.unicate.retroauth.interceptors.TokenInterceptor;
 import retrofit.Callback;
 import retrofit.RestAdapter;
@@ -23,11 +25,16 @@ import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
 
-	/**
-	 * This is to test how the library reacts on multiple request at a time.
-	 * default it is just using 1 request per button click
-	 */
-	private SomeAuthenticatedService service;
+	public static final TokenInterceptor GITHUB_INTERCEPTOR = new TokenInterceptor() {
+		@Override
+		public void injectToken(RequestFacade facade, String token) {
+			// according to the github documentation
+			// https://developer.github.com/v3/#authentication
+			facade.addHeader("Authorization", "token " + token);
+		}
+	};
+
+	private GithubService service;
 	private AuthAccountManager authAccountManager;
 
 	@Override
@@ -44,20 +51,23 @@ public class MainActivity extends AppCompatActivity {
 				.build();
 
 		// create the service with an activity, a token interceptor and the service interface you want to create
-		service = restAdapter.create(this, new SomeFakeAuthenticationToken(), SomeAuthenticatedService.class);
+		service = restAdapter.create(this, GITHUB_INTERCEPTOR, GithubService.class);
 
-		// this is an example for the call of an rxjava method
+		/**
+		 * RxJava demo
+		 * this is an example for the call of an rxjava method
+		 */
 		findViewById(R.id.buttonRxJavaRequest).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				service.listReposRxJava("Unic8")
+				service.getEmails()
 						.subscribeOn(Schedulers.io())
 						.observeOn(AndroidSchedulers.mainThread())
 						.subscribe(
-								new Action1<JsonElement>() {
+								new Action1<List<Email>>() {
 									@Override
-									public void call(JsonElement jsonElements) {
-										showResult(jsonElements);
+									public void call(List<Email> emails) {
+										showResult(emails);
 									}
 								},
 								new Action1<Throwable>() {
@@ -70,17 +80,20 @@ public class MainActivity extends AppCompatActivity {
 			}
 		});
 
-		// this is an example of a blocking call
+		/**
+		 * Blocking Calls demo:
+		 * this is an example of a blocking call
+		 */
 		findViewById(R.id.buttonBlockingRequest).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				new AsyncTask<Object, Object, JsonElement>() {
+				new AsyncTask<Object, Object, List<Email>>() {
 					private Throwable error;
 
 					@Override
-					protected JsonElement doInBackground(Object... params) {
+					protected List<Email> doInBackground(Object... params) {
 						try {
-							return service.listReposBlocking("Unic8");
+							return service.getEmailsBlocking();
 						} catch (Throwable e) {
 							error = e;
 						}
@@ -88,29 +101,33 @@ public class MainActivity extends AppCompatActivity {
 					}
 
 					@Override
-					protected void onPostExecute(JsonElement o) {
+					protected void onPostExecute(List<Email> o) {
 						if (o == null) {
 							showError(error);
 						} else {
 							showResult(o);
 						}
 					}
-				}
-						// since Honeycomb, asynctask is using a threadpool with only one
-						// thread (see: http://developer.android.com/reference/android/os/AsyncTask.html#execute(Params...) )
-						// this is why we change the executor here, in case MULTIREQUEST_AMOUNT is > than 1
-						.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				}.execute();
+				// since Honeycomb, asynctask is using a threadpool with only one
+				// thread (see: http://developer.android.com/reference/android/os/AsyncTask.html#execute(Params...) )
+				// remember this, when you need to call more than one request at once using async task!
+				// use: .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR); instead of ".execute()"
 			}
 		});
 
-		// this is an example of a async request using the Callable Interface from retrofit
+
+		/**
+		 * Demo, using retrofit's async Callback
+		 * this is an example of a async request using the Callback Interface from retrofit
+		 */
 		findViewById(R.id.buttonAsyncRequest).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				service.listReposAsync("Unic8", new Callback<JsonElement>() {
+				service.getEmails(new Callback<List<Email>>() {
 					@Override
-					public void success(JsonElement jsonElements, Response response) {
-						showResult(jsonElements);
+					public void success(List<Email> emails, Response response) {
+						showResult(emails);
 					}
 
 					@Override
@@ -125,7 +142,13 @@ public class MainActivity extends AppCompatActivity {
 		findViewById(R.id.buttonInvalidateToken).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				authAccountManager.invalidateTokenFromActiveUser(getString(R.string.auth_account_type), getString(R.string.auth_token_type));
+				// override the current token to force a 401
+				AccountManager.get(MainActivity.this)
+						.setAuthToken(
+								authAccountManager.getActiveAccount(getString(R.string.auth_account_type), false),
+								getString(R.string.auth_token_type),
+								"some-invalid-token"
+						);
 			}
 		});
 		findViewById(R.id.buttonResetPrefAccount).setOnClickListener(new View.OnClickListener() {
@@ -152,21 +175,19 @@ public class MainActivity extends AppCompatActivity {
 			setTitle("No active Account!");
 	}
 
-	private void showResult(JsonElement jsonElement) {
+	private void showResult(List<Email> emailList) {
 		showCurrentAccount();
-		Toast.makeText(MainActivity.this, jsonElement.toString(), Toast.LENGTH_SHORT).show();
+		StringBuilder sb = new StringBuilder();
+		sb.append("Your protected emails:\n");
+		for(Email email : emailList) {
+			sb.append(email.email).append('\n');
+		}
+		Toast.makeText(MainActivity.this, sb.toString(), Toast.LENGTH_SHORT).show();
 	}
 
 	private void showError(Throwable error) {
 		Log.e("TAG", "Error", error);
 		Toast.makeText(MainActivity.this, error.toString(), Toast.LENGTH_SHORT).show();
-	}
-
-	public static class SomeFakeAuthenticationToken extends TokenInterceptor {
-		@Override
-		public void injectToken(RequestFacade facade, String token) {
-			facade.addHeader("Token", token);
-		}
 	}
 
 }

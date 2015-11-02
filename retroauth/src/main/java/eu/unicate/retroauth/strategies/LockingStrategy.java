@@ -16,8 +16,11 @@
 
 package eu.unicate.retroauth.strategies;
 
-import java.util.HashMap;
+import android.util.Log;
+import android.util.SparseArray;
+
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -38,7 +41,8 @@ import rx.functions.Func2;
  */
 public class LockingStrategy extends RetryAndInvalidateStrategy {
 
-	private static final AtomicReference<HashMap<String, AccountTokenLock>> ACCOUNTTOKENLOCKS = new AtomicReference<>(new HashMap<String, AccountTokenLock>());
+
+	private static final SparseArray<AccountTokenLock> ACCOUNTTOKENLOCKS = new SparseArray<>();
 
 	/**
 	 * This object gets created ones for a specific token type of an account
@@ -79,15 +83,13 @@ public class LockingStrategy extends RetryAndInvalidateStrategy {
 	 *                      when the user cancels the login
 	 * @return an {@link AccountTokenLock} Object
 	 */
-	private AccountTokenLock getAccountTokenLock(String type, boolean cancelPending) {
-		synchronized (ACCOUNTTOKENLOCKS) {
-			AccountTokenLock tokenLock = ACCOUNTTOKENLOCKS.get().get(type);
-			if (tokenLock == null) {
-				tokenLock = new AccountTokenLock(cancelPending);
-				ACCOUNTTOKENLOCKS.get().put(type, tokenLock);
-			}
-			return tokenLock;
+	private synchronized AccountTokenLock getAccountTokenLock(String type, boolean cancelPending) {
+		AccountTokenLock tokenLock = ACCOUNTTOKENLOCKS.get(type.hashCode());
+		if (tokenLock == null) {
+			tokenLock = new AccountTokenLock(cancelPending);
+			ACCOUNTTOKENLOCKS.put(type.hashCode(), tokenLock);
 		}
+		return tokenLock;
 	}
 
 
@@ -96,14 +98,14 @@ public class LockingStrategy extends RetryAndInvalidateStrategy {
 		return
 				// lock the semaphore
 				lockRequest()
-						.flatMap(new Func1<Boolean, Observable<?>>() {
+						.concatMap(new Func1<Boolean, Observable<?>>() {
 							@Override
 							public Observable<?> call(Boolean wasWaiting) {
 								return cancelIfRequired(wasWaiting);
 							}
 						})
 								// execute the request
-						.flatMap(new Func1<Object, Observable<T>>() {
+						.concatMap(new Func1<Object, Observable<T>>() {
 							@Override
 							public Observable<T> call(Object o) {
 								return request;
@@ -123,11 +125,9 @@ public class LockingStrategy extends RetryAndInvalidateStrategy {
 								try {
 									//noinspection ThrowableResultOfMethodCallIgnored
 									if (null == accountTokenLock.errorContainer.get() && error instanceof AuthenticationCanceledException) {
-										System.out.println("set error!");
 										accountTokenLock.errorContainer.set(error);
 									}
 									if (0 == accountTokenLock.waitCounter.get()) {
-										System.out.println("reset error!");
 										accountTokenLock.errorContainer.set(null);
 									}
 									return retry(count, error);

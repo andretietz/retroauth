@@ -138,15 +138,12 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 	 */
 	@NonNull
 	@SuppressWarnings("unused")
-	protected Account createOrGetAccount(@Nullable String accountName) {
+	protected Account createOrGetAccount(@NonNull String accountName) {
 		// if this is a relogin
-		if (null != accountName) {
-			Account[] accountList = accountManager.getAccountsByType(accountType);
-			for (Account account : accountList) {
-				if (account.name.equals(accountName))
-					return account;
-			}
-
+		Account[] accountList = accountManager.getAccountsByType(accountType);
+		for (Account account : accountList) {
+			if (account.name.equals(accountName))
+				return account;
 		}
 		Account account = new Account(accountName, accountType);
 		accountManager.addAccountExplicitly(account, null, null);
@@ -192,7 +189,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
 	/**
 	 * @return The requested account type if available. otherwise <code>null</code>
 	 */
-	@Nullable
+	@NonNull
 	protected String getRequestedAccountType() {
 		return accountType;
 	}

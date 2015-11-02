@@ -1,48 +1,48 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical"
-              android:paddingBottom="@dimen/activity_vertical_margin"
-              android:paddingLeft="@dimen/activity_horizontal_margin"
-              android:paddingRight="@dimen/activity_horizontal_margin"
-              android:paddingTop="@dimen/activity_vertical_margin"
-              tools:activity=".MainActivity">
+			  xmlns:tools="http://schemas.android.com/tools"
+			  android:layout_width="match_parent"
+			  android:layout_height="match_parent"
+			  android:orientation="vertical"
+			  android:paddingBottom="@dimen/activity_vertical_margin"
+			  android:paddingLeft="@dimen/activity_horizontal_margin"
+			  android:paddingRight="@dimen/activity_horizontal_margin"
+			  android:paddingTop="@dimen/activity_vertical_margin"
+			  tools:activity=".MainActivity">
 
-    <android.support.v7.widget.AppCompatButton
-        android:id="@+id/buttonRxJavaRequest"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="RxJava Call"/>
+	<Button
+		android:id="@+id/buttonRxJavaRequest"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:text="RxJava Call"/>
 
-    <android.support.v7.widget.AppCompatButton
-        android:id="@+id/buttonBlockingRequest"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Blocking Call"/>
+	<Button
+		android:id="@+id/buttonBlockingRequest"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:text="Blocking Call"/>
 
-    <android.support.v7.widget.AppCompatButton
-        android:id="@+id/buttonAsyncRequest"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Async Request"/>
+	<Button
+		android:id="@+id/buttonAsyncRequest"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:text="Async Request"/>
 
-    <android.support.v7.widget.AppCompatButton
-        android:id="@+id/buttonInvalidateToken"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Invalidate Token"/>
+	<Button
+		android:id="@+id/buttonInvalidateToken"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:text="Invalidate Token"/>
 
-    <android.support.v7.widget.AppCompatButton
-        android:id="@+id/buttonResetPrefAccount"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Reset active Account"/>
+	<Button
+		android:id="@+id/buttonResetPrefAccount"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:text="Reset active Account"/>
 
-    <android.support.v7.widget.AppCompatButton
-        android:id="@+id/buttonAddAccount"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Add a new Account"/>
+	<Button
+		android:id="@+id/buttonAddAccount"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:text="Add a new Account"/>
 
 </LinearLayout>

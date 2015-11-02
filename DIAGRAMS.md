@@ -10,3 +10,7 @@
 (you can force this, by using the Method resetActiveAccount of the AuthAccountManager)
 
 ![Authenticated Request, when it's not clear which account to use](https://cloud.githubusercontent.com/assets/2174386/9561858/0ab670d6-4e59-11e5-9ae6-ba5bdf398ab2.png)
+
+### When you have at least on account, an active one is set but your token is not vaild (anymore)
+
+![Authenticated Request, invalid token](https://cloud.githubusercontent.com/assets/2174386/9575401/b3285e10-4fcf-11e5-966f-59dcbb2e8822.png)
