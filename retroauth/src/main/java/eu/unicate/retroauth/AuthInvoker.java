@@ -66,7 +66,7 @@ final class AuthInvoker {
 						.flatMap(new Func1<Object, Observable<T>>() {
 							@Override
 							public Observable<T> call(Object o) {
-								return request.subscribeOn(Schedulers.newThread());
+								return request;
 							}
 						}));
 	}
@@ -87,6 +87,6 @@ final class AuthInvoker {
 				subscriber.onNext(true);
 				subscriber.onCompleted();
 			}
-		});
+		}).subscribeOn(Schedulers.computation());
 	}
 }

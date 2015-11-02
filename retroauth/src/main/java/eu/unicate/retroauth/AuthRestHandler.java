@@ -21,7 +21,6 @@ import android.support.v4.util.Pair;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.UndeclaredThrowableException;
 
 import eu.unicate.retroauth.ServiceInfo.AuthRequestType;
 import eu.unicate.retroauth.interfaces.BaseAccountManager;
@@ -32,7 +31,6 @@ import retrofit.client.Response;
 import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 
 final class AuthRestHandler<T> implements InvocationHandler {
 
@@ -49,7 +47,7 @@ final class AuthRestHandler<T> implements InvocationHandler {
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		ServiceInfo.AuthRequestType methodInfo = serviceInfo.methodInfoCache.get(method);
-		if(serviceInfo.tokenInterceptor != null)
+		if (serviceInfo.tokenInterceptor != null)
 			serviceInfo.tokenInterceptor.setIgnore(AuthRequestType.NONE.equals(methodInfo));
 		switch (methodInfo) {
 			case RXJAVA:
@@ -159,13 +157,7 @@ final class AuthRestHandler<T> implements InvocationHandler {
 						subscriber.onError(error);
 					}
 				};
-				try {
-					method.invoke(retrofitService, args);
-				} catch (IllegalAccessException e) {
-					throw new RuntimeException(e);
-				} catch (InvocationTargetException e) {
-					throw new RuntimeException(e);
-				}
+				observableRequest(method, args);
 			}
 		});
 
