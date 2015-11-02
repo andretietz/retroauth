@@ -27,8 +27,16 @@ public class LoginActivity extends AuthenticationActivity {
 	protected void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 		setContentView(R.layout.activity_login);
-
-		helper = new GithubHelper("405f730d96862da912a8", "dce0264a8c9eb94689d4d8ffbe1fadb59c33c4c3", "http://localhost:8000/accounts/github/login/callback");
+		// I do trust you here! usually you don't hand out the applicationId or the secret
+		// as soon as I feel like it, I'll deactivate the demo on github.
+		helper = new GithubHelper(
+				// github client id
+				"405f730d96862da912a8",
+				// github client secret
+				"dce0264a8c9eb94689d4d8ffbe1fadb59c33c4c3",
+				// callback link you defined, when creating the application on github
+				"http://localhost:8000/accounts/github/login/callback"
+		);
 		WebView webView = (WebView) findViewById(R.id.webView);
 		List<String> scopes = new ArrayList<>();
 		scopes.add("user");

@@ -53,7 +53,10 @@ public class MainActivity extends AppCompatActivity {
 		// create the service with an activity, a token interceptor and the service interface you want to create
 		service = restAdapter.create(this, GITHUB_INTERCEPTOR, GithubService.class);
 
-		// this is an example for the call of an rxjava method
+		/**
+		 * RxJava demo
+		 * this is an example for the call of an rxjava method
+		 */
 		findViewById(R.id.buttonRxJavaRequest).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -77,7 +80,10 @@ public class MainActivity extends AppCompatActivity {
 			}
 		});
 
-		// this is an example of a blocking call
+		/**
+		 * Blocking Calls demo:
+		 * this is an example of a blocking call
+		 */
 		findViewById(R.id.buttonBlockingRequest).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -110,7 +116,11 @@ public class MainActivity extends AppCompatActivity {
 			}
 		});
 
-		// this is an example of a async request using the Callable Interface from retrofit
+
+		/**
+		 * Demo, using retrofit's async Callback
+		 * this is an example of a async request using the Callback Interface from retrofit
+		 */
 		findViewById(R.id.buttonAsyncRequest).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -133,7 +143,12 @@ public class MainActivity extends AppCompatActivity {
 			@Override
 			public void onClick(View v) {
 				// override the current token to force a 401
-				AccountManager.get(MainActivity.this).setAuthToken(authAccountManager.getActiveAccount(getString(R.string.auth_account_type), false), getString(R.string.auth_token_type), "some-invalid-token");
+				AccountManager.get(MainActivity.this)
+						.setAuthToken(
+								authAccountManager.getActiveAccount(getString(R.string.auth_account_type), false),
+								getString(R.string.auth_token_type),
+								"some-invalid-token"
+						);
 			}
 		});
 		findViewById(R.id.buttonResetPrefAccount).setOnClickListener(new View.OnClickListener() {

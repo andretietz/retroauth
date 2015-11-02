@@ -6,6 +6,8 @@
 * Dependency Updates:
   * appcompat 23.1.0
   * (Demo App:) rxandroid 1.0.1
+* Bugfixes:
+  * there were several issues regarding the relogin on a 401 on specific request types (blocking/async/rx)
 
 
 ## 1.0.3 (2015-08-29)
