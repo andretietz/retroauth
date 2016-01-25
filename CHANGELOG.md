@@ -1,3 +1,11 @@
+## 1.0.5 ()
+
+* Dependency Updates:
+  * appcompat 23.1.1
+  * rxjava 1.1.0
+  * (Demo App:) rxandroid 1.1.0
+
+
 ## 1.0.4 (2015-11-02)
 
 * Demo App:

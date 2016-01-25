@@ -2,8 +2,8 @@
 [![Build Status](https://travis-ci.org/andretietz/retroauth.svg?branch=master)](https://travis-ci.org/andretietz/retroauth)
 ## Dependencies
 * [Retrofit](https://github.com/square/retrofit) 1.9.0
-* [RxJava](https://github.com/ReactiveX/RxJava) 1.0.15
-* appcompat-v7: 23.1.0
+* [RxJava](https://github.com/ReactiveX/RxJava) 1.1.0
+* appcompat-v7: 23.1.1
 
 Min SDK Version: 9
 
