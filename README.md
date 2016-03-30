@@ -1,9 +1,7 @@
 # The simple way of calling authenticated requests in retrofit style
 [![Build Status](https://travis-ci.org/andretietz/retroauth.svg?branch=master)](https://travis-ci.org/andretietz/retroauth)
 ## Dependencies
-* [Retrofit](https://github.com/square/retrofit) 1.9.0
-* [RxJava](https://github.com/ReactiveX/RxJava) 1.1.0
-* appcompat-v7: 23.1.1
+* [Retrofit](https://github.com/square/retrofit) 2.0.0
 
 Min SDK Version: 9
 
@@ -12,16 +10,15 @@ Your services using retrofit:
 ``` java
 public interface SomeService {
     @GET("/some/path")
-    Observable<ResultObject> someRxJavaCall();
+    Call<ResultObject> someRxJavaCall();
 }
 ```
 Your services using retroauth:
 ``` java
-@Authentication(accountType = R.string.auth_account_type, tokenType = R.string.auth_token_type)
 public interface SomeService {
-    @Authenticated
+    @Authenticated({"account-type", "token-type"})
     @GET("/some/path")
-    Observable<ResultObject> someAuthenticatedRxJavaCall();
+    Call<ResultObject> someAuthenticatedRxJavaCall();
 }
 
 ```
@@ -37,7 +34,7 @@ Sequence Diagrams can be found in the DIAGRAMS.md file
 ## How to use it?
 Add it as dependency:
 ```groovy
-compile 'eu.unicate.android:retroauth:1.0.4'
+compile 'com.andretietz:retroauth:2.0.0'
 ```
 
 ### 1. Create 3 strings in your strings.xml

@@ -11,16 +11,16 @@ def siteUrl = 'https://github.com/andretietz/retroauth'
 def codeRepositoryUrl = 'https://github.com/andretietz/retroauth.git'
 def issuesUrl = 'https://github.com/andretietz/retroauth/issues'
 
-def libraryDescription = "A Java Library to handle authentication while using retrofit2"
+def libraryDescription = "Android library build on top of retrofit, for simple handling of authenticated requests"
 
-def mavenPackageType = 'jar'
+def mavenPackageType = 'aar'
 def mavenDeveloperId = 'unicate'
 def mavenDeveloperName = 'Andre'
 def mavenDeveloperEmail = 'andre.tietz@gmail.com'
-def mavenArtifactName = 'A Java Library to handle authentication while using retrofit2'
+def mavenArtifactName = 'Android library build on top of retrofit, for simple handling of authenticated requests'
 
 def bintrayRepository = 'java'
-def bintrayLabels = ['jar', 'java', 'retrofit', 'retrofit2', 'accountmanager', 'authentication', 'authentification']
+def bintrayLabels = ['aar', 'android', 'retrofit', 'accountmanager', 'authentication', 'authentification']
 def bintrayLicenses = ['Apache-2.0']
 
 

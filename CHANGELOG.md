@@ -1,9 +1,11 @@
-## 1.0.5 ()
+## 2.0.0 ()
 
-* Dependency Updates:
-  * appcompat 23.1.1
-  * rxjava 1.1.0
-  * (Demo App:) rxandroid 1.1.0
+* Complete rebuild, to be able to work with retrofit2
+  * Removed rxjava as dependency
+  * Works as well with plain java
+  * added retroauth-android library (for android accountmanager needs)
+  * added java demo (javafx)
+  * added android demo (github, webview)
 
 
 ## 1.0.4 (2015-11-02)

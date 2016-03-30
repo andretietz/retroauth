@@ -1,1 +1,3 @@
-include ':demo', ':retroauth'
+include ':retroauth', ':demojava'
+include ':demoandroid', ':retroauth-android'
+
