@@ -33,6 +33,12 @@ import android.support.annotation.Nullable;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 /**
  * This class wraps the Android AccountManager and adds some retroauth specific
@@ -87,20 +93,24 @@ public final class AuthAccountManager implements BaseAccountManager {
     @Nullable
     @Override
     public String getActiveAccountName(@NonNull String accountType, boolean showDialog) {
+        // get all accounts of your account type
         Account[] accounts = accountManager.getAccountsByType(accountType);
         if (accounts.length < 1) {
             return null;
-        } else if (accounts.length > 1) {
+        } else if (accounts.length >= 1) {
             // check if there is an account setup as current
-            SharedPreferences preferences = contextManager.getContext().getSharedPreferences(accountType, Context.MODE_PRIVATE);
+/*            SharedPreferences preferences = contextManager.getContext().getSharedPreferences(accountType, Context.MODE_PRIVATE);
             String accountName = preferences.getString(RETROAUTH_ACCOUNTNAME_KEY, null);
             if (accountName != null) {
                 for (Account account : accounts) {
                     if (accountName.equals(account.name)) return account.name;
                 }
+            }*/
+            try {
+                return showAccountPickerDialog(accountType, true).get();
+            } catch (Exception e) {
+                return null;
             }
-        } else {
-            return accounts[0].name;
         }
         return null;
     }
@@ -168,7 +178,7 @@ public final class AuthAccountManager implements BaseAccountManager {
      */
     @Override
     public String getAuthToken(@Nullable Account account, @NonNull String accountType, @NonNull String tokenType)
-          throws AuthenticationCanceledException {
+            throws AuthenticationCanceledException {
         try {
             String token;
             Activity activity = contextManager.getActivity();
@@ -177,7 +187,9 @@ public final class AuthAccountManager implements BaseAccountManager {
             } else {
                 token = getToken(activity, account, tokenType);
             }
-            if (token == null) { throw new AuthenticationCanceledException("user canceled the login!"); }
+            if (token == null) {
+                throw new AuthenticationCanceledException("user canceled the login!");
+            }
             return token;
         } catch (AuthenticatorException | OperationCanceledException | IOException e) {
             throw new AuthenticationCanceledException(e);
@@ -187,47 +199,52 @@ public final class AuthAccountManager implements BaseAccountManager {
     /**
      * Shows an account picker for the user to choose an account
      *
-     * @param accountType Account type of the accounts the user can choose
-     * @param onItemSelected a listener to get a callback when the user selects on item
-     * @param onOkClicked a listener for the click on the ok button
-     * @param onCancelClicked a listener for the click on the cancel button
+     * @param accountType   Account type of the accounts the user can choose
      * @param canAddAccount if <code>true</code> the user has the option to add an account
      * @return the accounts the user chooses from
      */
-    public Account[] showAccountPickerDialog(String accountType, DialogInterface.OnClickListener onItemSelected,
-          DialogInterface.OnClickListener onOkClicked, DialogInterface.OnClickListener onCancelClicked,
-          boolean canAddAccount) {
+    public Future<String> showAccountPickerDialog(String accountType, boolean canAddAccount) {
         final Account[] accounts = accountManager.getAccountsByType(accountType);
-        AlertDialog.Builder builder = new AlertDialog.Builder(contextManager.getActivity());
         final ArrayList<String> accountList = new ArrayList<>();
         for (Account account : accounts) {
             accountList.add(account.name);
         }
-        if (canAddAccount) { accountList.add(contextManager.getContext().getString(R.string.add_account_button_label)); }
-        builder.setTitle(contextManager.getContext().getString(R.string.choose_account_label));
-        builder.setSingleChoiceItems(accountList.toArray(new String[accountList.size()]), 0, onItemSelected);
-        builder.setPositiveButton(android.R.string.ok, onOkClicked);
-        builder.setNegativeButton(android.R.string.cancel, onCancelClicked);
-        builder.show();
-        return accounts;
+        if (canAddAccount) {
+            accountList.add(contextManager.getContext().getString(R.string.add_account_button_label));
+        }
+        final AccountChosenCallable chosenCallable = new AccountChosenCallable(accountList);
+        FutureTask<String> task = new FutureTask<>(chosenCallable);
+        contextManager.getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(contextManager.getActivity());
+                builder.setTitle(contextManager.getContext().getString(R.string.choose_account_label));
+                builder.setSingleChoiceItems(accountList.toArray(new String[accountList.size()]), 0, null);
+                builder.setPositiveButton(android.R.string.ok, chosenCallable);
+                builder.setNegativeButton(android.R.string.cancel, null);
+                builder.show();
+            }
+        });
+        Executors.newCachedThreadPool().submit(task);
+        return task;
     }
 
     private String createAccountAndGetToken(@Nullable Activity activity, @NonNull String accountType,
-          @NonNull String tokenType) throws AuthenticatorException, OperationCanceledException, IOException {
+                                            @NonNull String tokenType) throws AuthenticatorException, OperationCanceledException, IOException {
         AccountManagerFuture<Bundle> future =
-              accountManager.addAccount(accountType, tokenType, null, null, activity, null, null);
+                accountManager.addAccount(accountType, tokenType, null, null, activity, null, null);
         Bundle result = future.getResult();
         String accountName = result.getString(AccountManager.KEY_ACCOUNT_NAME);
         if (accountName != null) {
             Account account = new Account(result.getString(AccountManager.KEY_ACCOUNT_NAME),
-                  result.getString(AccountManager.KEY_ACCOUNT_TYPE));
+                    result.getString(AccountManager.KEY_ACCOUNT_TYPE));
             return accountManager.peekAuthToken(account, tokenType);
         }
         return null;
     }
 
     private String getToken(@Nullable Activity activity, @NonNull Account account, @NonNull String tokenType)
-          throws AuthenticatorException, OperationCanceledException, IOException {
+            throws AuthenticatorException, OperationCanceledException, IOException {
         // Clear the interrupted flag
         Thread.interrupted();
         AccountManagerFuture<Bundle> future = accountManager.getAuthToken(account, tokenType, null, activity, null, null);
@@ -237,6 +254,28 @@ public final class AuthAccountManager implements BaseAccountManager {
             token = accountManager.peekAuthToken(account, tokenType);
         }
         return token;
+    }
+
+    private static class AccountChosenCallable implements DialogInterface.OnClickListener, Callable<String> {
+
+        private final List<String> accounts;
+        String choosenAccount;
+
+        AccountChosenCallable(List<String> accounts) {
+            this.accounts = accounts;
+        }
+
+        @Override
+        public String call() throws Exception {
+            wait();
+            return choosenAccount;
+        }
+
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            if (which > 0) choosenAccount = accounts.get(which);
+            notify();
+        }
     }
 
     /* public static class AccountChooseDialog extends DialogFragment {
