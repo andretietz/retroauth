@@ -4,7 +4,7 @@ mainClassName = "com.andretietz.retroauth.Demo"
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 dependencies {
-    compile project(':retroauth')
+    compile project(':retroauth-core')
     compile 'com.squareup.retrofit2:converter-moshi:2.0.0'
     compile 'com.squareup.retrofit2:adapter-rxjava:2.0.0'
     compile 'io.reactivex:rxjava:1.1.2'
