@@ -11,15 +11,15 @@ import android.support.annotation.Nullable;
 /**
  *
  */
-final class ContextManager implements ActivityLifecycleCallbacks {
+final class ContextManager {
 
     private static ContextManager instance;
     private final Context applicationContext;
-    private Activity activity;
+    private static final LifecycleHandler handler = new LifecycleHandler();
 
     private ContextManager(@NonNull Application application) {
         applicationContext = application.getApplicationContext();
-        application.registerActivityLifecycleCallbacks(this);
+        application.registerActivityLifecycleCallbacks(handler);
     }
 
     public static ContextManager get(@NonNull Application application) {
@@ -36,6 +36,7 @@ final class ContextManager implements ActivityLifecycleCallbacks {
     @NonNull
     public Context getContext() {
         synchronized (this) {
+            Activity activity = handler.getActivity();
             if (activity != null) {
                 return activity;
             }
@@ -47,37 +48,49 @@ final class ContextManager implements ActivityLifecycleCallbacks {
     @Nullable
     public Activity getActivity() {
         synchronized (this) {
+            return handler.getActivity();
+        }
+    }
+
+    private static class LifecycleHandler implements ActivityLifecycleCallbacks {
+
+        private Activity activity = null;
+
+        @Override
+        public void onActivityResumed(Activity activity) {
+            synchronized (this) {
+                this.activity = activity;
+            }
+        }
+
+
+        @Override
+        public void onActivityPaused(Activity activity) {
+            synchronized (this) {
+                this.activity = null;
+            }
+        }
+
+        @Override
+        public void onActivityCreated(Activity activity, Bundle savedInstanceState) { }
+
+        @Override
+        public void onActivityStarted(Activity activity) { }
+
+        @Override
+        public void onActivityStopped(Activity activity) { }
+
+        @Override
+        public void onActivitySaveInstanceState(Activity activity, Bundle outState) { }
+
+        @Override
+        public void onActivityDestroyed(Activity activity) { }
+
+        @Nullable
+        public Activity getActivity() {
             return activity;
         }
     }
 
-    @Override
-    public void onActivityResumed(Activity activity) {
-        synchronized (this) {
-            this.activity = activity;
-        }
-    }
 
-
-    @Override
-    public void onActivityPaused(Activity activity) {
-        synchronized (this) {
-            this.activity = null;
-        }
-    }
-
-    @Override
-    public void onActivityCreated(Activity activity, Bundle savedInstanceState) { }
-
-    @Override
-    public void onActivityStarted(Activity activity) { }
-
-    @Override
-    public void onActivityStopped(Activity activity) { }
-
-    @Override
-    public void onActivitySaveInstanceState(Activity activity, Bundle outState) { }
-
-    @Override
-    public void onActivityDestroyed(Activity activity) { }
 }
