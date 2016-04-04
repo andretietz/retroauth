@@ -201,18 +201,18 @@ public final class AuthAccountManager implements BaseAccountManager {
      * @return the accounts the user chooses from
      */
     public String showAccountPickerDialog(String accountType, boolean canAddAccount) throws ChooseAccountCanceledException {
-        final Account[] accounts = accountManager.getAccountsByType(accountType);
-        final ArrayList<String> accountList = new ArrayList<>();
-        for (Account account : accounts) {
-            accountList.add(account.name);
+        Account[] accounts = accountManager.getAccountsByType(accountType);
+        String[] accountList = new String[canAddAccount?accounts.length+1:accounts.length];
+        for (int i = 0; i< accounts.length ;i++) {
+            accountList[i] = accounts[i].name;
         }
         if (canAddAccount) {
-            accountList.add(contextManager.getContext().getString(R.string.add_account_button_label));
+            accountList[accounts.length] = contextManager.getContext().getString(R.string.add_account_button_label);
         }
         ReentrantLock lock = new ReentrantLock();
-        final Condition condition = lock.newCondition();
+        Condition condition = lock.newCondition();
         Activity activity = contextManager.getActivity();
-        ShowDialogOnUI showDialog = new ShowDialogOnUI(accountList.toArray(new String[accountList.size()]), lock, condition);
+        ShowDialogOnUI showDialog = new ShowDialogOnUI(accountList, lock, condition);
         if (activity != null) {
             activity.runOnUiThread(showDialog);
             lock.lock();
