@@ -35,7 +35,7 @@ public interface BaseAccountManager {
      * @return the active (or only) Account or <code>null</code> in case there is no account
      */
     @Nullable
-    Account getActiveAccount(@NonNull String accountType, boolean userInteraction);
+    Account getActiveAccount(@NonNull String accountType, boolean userInteraction) throws ChooseAccountCanceledException;
 
     /**
      * Gets an account by the name of the account and it's type.
@@ -59,7 +59,7 @@ public interface BaseAccountManager {
      * @return The currently active account name or <code>null</code>
      */
     @Nullable
-    String getActiveAccountName(@NonNull String accountType, boolean userInteraction);
+    String getActiveAccountName(@NonNull String accountType, boolean userInteraction) throws ChooseAccountCanceledException;
 
     /**
      * Returns the Token of the currently active user.
@@ -69,7 +69,7 @@ public interface BaseAccountManager {
      * @return The Token or <code>null</code>
      */
     @Nullable
-    String getTokenFromActiveUser(@NonNull String accountType, @NonNull String tokenType);
+    String getTokenFromActiveUser(@NonNull String accountType, @NonNull String tokenType) throws ChooseAccountCanceledException;
 
     /**
      * Returns userdata which has to be setup while calling {@link AuthenticationActivity#storeUserData(Account, String,
@@ -81,7 +81,7 @@ public interface BaseAccountManager {
      */
     @SuppressWarnings("unused")
     @Nullable
-    String getUserData(@NonNull String accountType, @NonNull String key);
+    String getUserData(@NonNull String accountType, @NonNull String key) throws ChooseAccountCanceledException;
 
     /**
      * Invalidates the Token of the given type for the active user.
@@ -89,7 +89,7 @@ public interface BaseAccountManager {
      * @param accountType Account type of the active user
      * @param tokenType Token type you want to invalidate
      */
-    void invalidateTokenFromActiveUser(@NonNull String accountType, @NonNull String tokenType);
+    void invalidateTokenFromActiveUser(@NonNull String accountType, @NonNull String tokenType) throws ChooseAccountCanceledException;
 
     /**
      * Sets an active user. If you handle with multiple accounts you can setup an active user.

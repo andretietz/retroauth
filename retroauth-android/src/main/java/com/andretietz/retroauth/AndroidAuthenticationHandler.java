@@ -47,7 +47,11 @@ public final class AndroidAuthenticationHandler implements AuthenticationHandler
     public boolean retryRequired(int count, Response response, AndroidTokenType type) {
         if (!response.isSuccessful()) {
             if (response.code() == 401) {
-                authAccountManager.invalidateTokenFromActiveUser(type.accountType, type.tokenType);
+                try {
+                    authAccountManager.invalidateTokenFromActiveUser(type.accountType, type.tokenType);
+                } catch (ChooseAccountCanceledException e) {
+                    return false;
+                }
                 return (count < 2);
             }
         }
