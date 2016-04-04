@@ -225,7 +225,7 @@ public final class AuthAccountManager implements BaseAccountManager {
                 builder.show();
             }
         });
-        Executors.newCachedThreadPool().submit(task);
+        //Executors.newCachedThreadPool().submit(task);
         return task;
     }
 

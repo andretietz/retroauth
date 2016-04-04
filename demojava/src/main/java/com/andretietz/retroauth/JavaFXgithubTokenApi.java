@@ -13,7 +13,7 @@ import okhttp3.Request;
 /**
  * Created by andre on 23.03.2016.
  */
-public class JavaFXGithubTokenApi implements TokenApi<String, OAuth2AccessToken> {
+class JavaFXGithubTokenApi implements TokenApi<String, OAuth2AccessToken> {
 
     private final OAuth20Service service;
     private final Stage stage;
