@@ -25,7 +25,7 @@ public interface BaseAccountManager {
     /**
      * Gets the currently active account by the account type. The active account name is determined
      * by the method {@link #getActiveAccountName(String, boolean)}. If there's only one account
-     * this one will be returned, no matter if you reseted the currently active one
+     * this one will be returned, no matter if you reseted the currently active one.
      *
      * @param accountType Account Type you want to retreive
      * @param userInteraction If there is more than one account and there is no
@@ -38,7 +38,7 @@ public interface BaseAccountManager {
     Account getActiveAccount(@NonNull String accountType, boolean userInteraction);
 
     /**
-     * Gets an account by the name of the account and it's type
+     * Gets an account by the name of the account and it's type.
      *
      * @param accountName Name of the Account you want to get
      * @param accountType Account Type of which your account is
@@ -48,7 +48,7 @@ public interface BaseAccountManager {
     Account getAccountByName(@Nullable String accountName, @NonNull String accountType);
 
     /**
-     * Get the currently active account name
+     * Get the currently active account name.
      *
      * @param accountType Type of the Account you want the usernames from <code>null</code> for
      * all types
@@ -62,7 +62,7 @@ public interface BaseAccountManager {
     String getActiveAccountName(@NonNull String accountType, boolean userInteraction);
 
     /**
-     * Returns the Token of the currently active user
+     * Returns the Token of the currently active user.
      *
      * @param accountType Account type of the user you want the token from
      * @param tokenType Token type of the token you want to retrieve
@@ -73,7 +73,7 @@ public interface BaseAccountManager {
 
     /**
      * Returns userdata which has to be setup while calling {@link AuthenticationActivity#storeUserData(Account, String,
-     * String)}
+     * String)}.
      *
      * @param accountType Account type to get the active account
      * @param key Key wiht which you want to request the value
@@ -84,7 +84,7 @@ public interface BaseAccountManager {
     String getUserData(@NonNull String accountType, @NonNull String key);
 
     /**
-     * Invalidates the Token of the given type for the active user
+     * Invalidates the Token of the given type for the active user.
      *
      * @param accountType Account type of the active user
      * @param tokenType Token type you want to invalidate
@@ -93,7 +93,7 @@ public interface BaseAccountManager {
 
     /**
      * Sets an active user. If you handle with multiple accounts you can setup an active user.
-     * The token of the active user will be taken for all future requests
+     * The token of the active user will be taken for all future requests.
      *
      * @param accountName name of the account
      * @param accountType Account type of the active user

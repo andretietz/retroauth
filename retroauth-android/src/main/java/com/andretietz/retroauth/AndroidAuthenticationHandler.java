@@ -16,7 +16,7 @@ public final class AndroidAuthenticationHandler implements AuthenticationHandler
     public AndroidAuthenticationHandler(@NonNull Context context, @NonNull TokenInjector tokenInjector) {
         this.tokenInjector = tokenInjector;
         Context applicationContext = context.getApplicationContext();
-        if(applicationContext instanceof Application) {
+        if (applicationContext instanceof Application) {
             authAccountManager = new AuthAccountManager(ContextManager.get((Application) applicationContext));
         } else {
             throw new RuntimeException("Invalid Context!");
@@ -30,9 +30,9 @@ public final class AndroidAuthenticationHandler implements AuthenticationHandler
     @Override
     public AndroidTokenType convert(String[] annotationValues) {
         return new AndroidTokenType.Builder()
-              .accountType(annotationValues[0])
-              .tokenType(annotationValues[1])
-              .build();
+                .accountType(annotationValues[0])
+                .tokenType(annotationValues[1])
+                .build();
     }
 
     @Override

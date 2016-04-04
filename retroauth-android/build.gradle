@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.noveogroup.android.check'
 android {
 	compileSdkVersion 23
-	buildToolsVersion "23.0.2"
+	buildToolsVersion "23.0.3"
 
 	defaultConfig {
 		minSdkVersion 14
@@ -27,7 +27,7 @@ android {
 check {
 	abortOnError true
 	checkstyle {
-		config project.file('checkstyle.xml')
+		config project.file('../checkstyle.xml')
 	}
 
 	findbugs {

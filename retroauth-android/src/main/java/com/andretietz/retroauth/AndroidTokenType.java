@@ -28,7 +28,7 @@ public final class AndroidTokenType {
         }
 
         public AndroidTokenType build() {
-            if(accountType == null || tokenType == null) {
+            if (accountType == null || tokenType == null) {
                 throw new RuntimeException("You must set a valid account and token type");
             }
             return new AndroidTokenType(this);

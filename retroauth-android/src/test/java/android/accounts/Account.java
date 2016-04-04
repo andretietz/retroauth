@@ -17,14 +17,14 @@
 package android.accounts;
 
 /**
- * Mocked Account Object
+ * Mocked Account Object.
  */
 public class Account {
-	public final String name;
-	public final String type;
+    public final String name;
+    public final String type;
 
-	public Account(String name, String type) {
-		this.name = name;
-		this.type = type;
-	}
+    public Account(String name, String type) {
+        this.name = name;
+        this.type = type;
+    }
 }
