@@ -52,8 +52,8 @@ public final class AuthAccountManager implements BaseAccountManager {
         this.accountManager = AccountManager.get(contextManager.getContext());
     }
 
-    public AuthAccountManager(Context context) {
-        this(ContextManager.get((Application) context.getApplicationContext()));
+    public AuthAccountManager(Activity activity) {
+        this(ContextManager.get(activity));
     }
 
     /**

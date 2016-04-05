@@ -78,7 +78,22 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
      */
     @SuppressWarnings("unused")
     protected void storeToken(@NonNull Account account, @NonNull String token) {
+        storeToken(account, token, null);
+    }
+
+    /**
+     * This method stores an authentication Token to a specific account.
+     *
+     * @param account      Account you want to store the token for
+     * @param token        Token itself
+     * @param refreshToken a refresh token if present
+     */
+    @SuppressWarnings("unused")
+    protected void storeToken(@NonNull Account account, @NonNull String token, @Nullable String refreshToken) {
         accountManager.setAuthToken(account, tokenType, token);
+        if (refreshToken != null) {
+            accountManager.setAuthToken(account, String.format("%s_refresh", tokenType), refreshToken);
+        }
     }
 
     /**
@@ -143,7 +158,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
             }
             accountAuthenticatorResponse = null;
         } else {
-            if (resultBundle != null) {
+            if (resultBundle != null && resultBundle.containsKey(AccountManager.KEY_ACCOUNT_NAME)) {
                 Intent intent = new Intent();
                 intent.putExtras(resultBundle);
                 setResult(RESULT_OK, intent);
@@ -161,6 +176,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
      * @return account name of the user
      */
     @Nullable
+    @SuppressWarnings("unused")
     protected String getAccountName() {
         return accountName;
     }

@@ -15,18 +15,22 @@ final class ContextManager {
 
     private static ContextManager instance;
     private final Context applicationContext;
-    private static final LifecycleHandler handler = new LifecycleHandler();
+    private final LifecycleHandler handler;
 
-    private ContextManager(@NonNull Application application) {
-        applicationContext = application.getApplicationContext();
-        application.registerActivityLifecycleCallbacks(handler);
+    private ContextManager(@NonNull Activity activity) {
+        applicationContext = activity.getApplicationContext();
+        handler = new LifecycleHandler(activity);
+        if(applicationContext instanceof Application) {
+            ((Application)applicationContext).registerActivityLifecycleCallbacks(handler);
+
+        }
     }
 
-    public static ContextManager get(@NonNull Application application) {
+    public static ContextManager get(@NonNull Activity activity) {
         if (instance == null) {
             synchronized (ContextManager.class) {
                 if (instance == null) {
-                    instance = new ContextManager(application);
+                    instance = new ContextManager(activity);
                 }
             }
         }
@@ -55,6 +59,10 @@ final class ContextManager {
     private static class LifecycleHandler implements ActivityLifecycleCallbacks {
 
         private Activity activity = null;
+
+        public LifecycleHandler(Activity activity) {
+            this.activity = activity;
+        }
 
         @Override
         public void onActivityResumed(Activity activity) {

@@ -1,8 +1,7 @@
 package com.andretietz.retroauth;
 
 import android.accounts.Account;
-import android.app.Application;
-import android.content.Context;
+import android.app.Activity;
 import android.support.annotation.NonNull;
 
 import okhttp3.Request;
@@ -13,14 +12,9 @@ public final class AndroidAuthenticationHandler implements AuthenticationHandler
     private final TokenInjector tokenInjector;
     private final AuthAccountManager authAccountManager;
 
-    public AndroidAuthenticationHandler(@NonNull Context context, @NonNull TokenInjector tokenInjector) {
+    public AndroidAuthenticationHandler(@NonNull Activity activity, @NonNull TokenInjector tokenInjector) {
         this.tokenInjector = tokenInjector;
-        Context applicationContext = context.getApplicationContext();
-        if (applicationContext instanceof Application) {
-            authAccountManager = new AuthAccountManager(ContextManager.get((Application) applicationContext));
-        } else {
-            throw new RuntimeException("Invalid Context!");
-        }
+        this.authAccountManager = new AuthAccountManager(ContextManager.get(activity));
     }
 
     public Request modifyRequest(@NonNull Request request, @NonNull String token) {
