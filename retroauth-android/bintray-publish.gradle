@@ -1,7 +1,8 @@
 apply plugin: 'maven'
-
-group = 'com.andretietz.retroauth'
-version = '2.0.0-SNAPSHOT'
+// to read properties from gradle-local.properties
+apply plugin: 'net.saliman.properties'
+group = libraryGroup
+version = libraryVersion
 
 configurations {
 	archives {
@@ -24,30 +25,6 @@ artifacts {
 	archives androidSourcesJar
 }
 
-/*
-uploadArchives {
-    configuration = configurations.archives
-    repositories {
-        mavenDeployer {
-            repository(url: "http://52.19.153.63:8081/nexus/content/repositories/moovel-android") {
-                authentication(userName: ldapUsername, password: ldapPassword)
-            }
-
-            pom.project {
-                name 'Moovel Authentication Library'
-                packaging 'aar'
-                description 'App authentication for Moovel apps'
-                url 'https://github.com/moovel/android-authentication_manager'
-
-                scm {
-                    url 'scm:git@lab.mytaxi.com:gitlab.ims/authentication-manager-android.git'
-                    connection 'scm:git@lab.mytaxi.com:gitlab.ims/authentication-manager-android.git'
-                    developerConnection 'scm:git@lab.mytaxi.com:gitlab.ims/authentication-manager-android.git'
-                }
-            }
-        }
-    }
-} */
 
 /**
  * upload aar and artifacts to local repository
@@ -63,6 +40,36 @@ task installArchives(type: Upload) {
 				name 'Android Retroauth Plugin'
 				packaging 'aar'
 				description 'Authentication library for retrofit 2 using android'
+				url 'https://github.com/andretietz/retroauth'
+
+				scm {
+					url 'scm:git@github.com:andretietz/retroauth.git'
+					connection 'scm:git@github.com:andretietz/retroauth.git'
+					developerConnection 'scm:git@github.com:andretietz/retroauth.git'
+				}
+			}
+		}
+	}
+}
+
+
+uploadArchives {
+	repositories {
+		mavenDeployer {
+			repository (
+					id: 'java',
+					url: 'https://api.bintray.com/maven/unicate/java/retroauth'
+			) {
+				authentication(
+						userName: bintrayUser,
+						password: bintrayPass
+				)
+			}
+
+			pom.project {
+				name 'Retroauth Library for Android'
+				packaging 'aar'
+				description 'This library, is an android extension for the retroauth library'
 				url 'https://github.com/andretietz/retroauth'
 
 				scm {
