@@ -1,0 +1,15 @@
+
+apply plugin: 'com.noveogroup.android.check'
+check {
+    abortOnError true
+    checkstyle {
+        config project.file('../checkstyle.xml')
+    }
+
+    findbugs {
+        skip true
+    }
+    pmd {
+        skip true
+    }
+}
