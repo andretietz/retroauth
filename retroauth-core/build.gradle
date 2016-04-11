@@ -1,10 +1,21 @@
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'net.saliman:gradle-properties-plugin:1.4.5'
+        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.0.0'
+    }
+}
+
 apply plugin: 'java'
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
 
 dependencies {
-    compile 'com.squareup.retrofit2:retrofit:2.0.1'
+    compile "com.squareup.retrofit2:retrofit:$retrofitVersion"
 }
 apply from: 'jfrog-publish.gradle'
 //apply from: '../check.gradle'

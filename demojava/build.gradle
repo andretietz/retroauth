@@ -5,8 +5,8 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 dependencies {
     compile project(':retroauth-core')
-    compile 'com.squareup.retrofit2:converter-moshi:2.0.0'
-    compile 'com.squareup.retrofit2:adapter-rxjava:2.0.0'
+    compile "com.squareup.retrofit2:converter-moshi:$retrofitVersion"
+    compile "com.squareup.retrofit2:adapter-rxjava:$retrofitVersion"
     compile 'io.reactivex:rxjava:1.1.2'
     compile 'io.reactivex:rxjavafx:0.0.5'
     compile 'com.github.scribejava:scribejava-apis:2.5.2'

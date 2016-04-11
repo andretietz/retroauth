@@ -60,7 +60,7 @@ public class LoginActivity extends AuthenticationActivity {
                                          @Override
                                          public void call(Pair<OAuth2AccessToken, String> pair) {
                                              Account account = createOrGetAccount(pair.second);
-                                             storeToken(account, pair.first.getAccessToken());
+                                             storeToken(account, getRequestedTokenType(), pair.first.getAccessToken());
                                              finalizeAuthentication(account);
                                          }
                                      },
