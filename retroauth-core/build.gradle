@@ -4,7 +4,7 @@ targetCompatibility = 1.7
 
 
 dependencies {
-    compile 'com.squareup.retrofit2:retrofit:2.0.0'
+    compile 'com.squareup.retrofit2:retrofit:2.0.1'
 }
 apply from: 'jfrog-publish.gradle'
 //apply from: '../check.gradle'
