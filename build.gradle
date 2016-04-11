@@ -8,12 +8,14 @@ buildscript {
 		classpath 'com.noveogroup.android:check:1.2.3'
 		classpath 'com.android.tools.build:gradle:2.1.0-alpha5'
 		classpath 'net.saliman:gradle-properties-plugin:1.4.5'
+        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.0.0'
 	}
 }
 
 allprojects {
 	repositories {
 		jcenter()
+        maven { url("https://oss.jfrog.org/artifactory/oss-snapshot-local/") }
 	}
 }
 
