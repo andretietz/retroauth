@@ -66,7 +66,7 @@ public class Demo extends Application {
         this.githubService = retrofit.create(Github.class);
 
         text = new Text();
-        Button button = new Button("Show my githubmails");
+        Button button = new Button("Request Emails");
         button.setOnAction(event ->
                 githubService.getEmails()
                         .subscribeOn(Schedulers.io())
