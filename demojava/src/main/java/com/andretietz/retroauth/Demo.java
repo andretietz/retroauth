@@ -48,14 +48,13 @@ public class Demo extends Application {
                 .build(GitHubApi.instance());
 
 
-        BasicAuthenticationHandler<String, OAuth2AccessToken> authHandler = new BasicAuthenticationHandler<>(
+        BasicAuthenticationHandler<String, OAuth2AccessToken, Object> authHandler = new BasicAuthenticationHandler<>(
                 Executors.newSingleThreadExecutor(),
                 new JavaFXGithubTokenApi(new Stage(), github),
                 new CredentialStorage()
         );
 
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(new LogInterceptor()).build();
+        OkHttpClient client = new OkHttpClient.Builder().build();
 
         Retrofit retrofit = new Retroauth.Builder<>(authHandler)
                 .baseUrl("https://api.github.com")

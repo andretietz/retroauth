@@ -11,19 +11,22 @@ import java.util.concurrent.locks.ReentrantLock;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class BasicAuthenticationHandler<S, T> implements AuthenticationHandler<S> {
+public class BasicAuthenticationHandler<S, T, U> implements AuthenticationHandler<S, U> {
 
     private final ExecutorService executorService;
     private final TokenStorage<S, T> storage;
-    private final TokenApi<S, T> tokenApi;
+    private final TokenApi<S, T, U> tokenApi;
+    private final ReentrantLock lock;
+    private U refreshApi;
 
     public BasicAuthenticationHandler(
           ExecutorService executorService,
-          TokenApi<S, T> tokenApi,
+          TokenApi<S, T, U> tokenApi,
           TokenStorage<S, T> storage) {
         this.executorService = executorService;
         this.storage = storage;
         this.tokenApi = tokenApi;
+        this.lock = new ReentrantLock();
     }
 
     @Override
@@ -36,9 +39,7 @@ public class BasicAuthenticationHandler<S, T> implements AuthenticationHandler<S
         T token = storage.getToken(type);
         RunnableFuture<Request> future;
         if (token == null) {
-            ReentrantLock lock = new ReentrantLock();
-            Condition condition = lock.newCondition();
-            StoreTokenFuture<S, T> tokenFuture = new StoreTokenFuture<>(request, lock, condition, tokenApi, storage, type);
+            StoreTokenFuture<S, T, U> tokenFuture = new StoreTokenFuture<>(request, lock, tokenApi, storage, type);
             tokenApi.receiveToken(tokenFuture);
             future = new FutureTask<>(tokenFuture);
         } else {
@@ -53,22 +54,87 @@ public class BasicAuthenticationHandler<S, T> implements AuthenticationHandler<S
         if (!response.isSuccessful()) {
             if (response.code() == 401) {
                 storage.removeToken(type);
-                return (count < 2);
+                try {
+                    RefreshFuture<S, T> refreshTask = new RefreshFuture<>(lock, storage, type);
+                    FutureTask<Boolean> future = new FutureTask<>(refreshTask);
+                    executorService.submit(future);
+                    tokenApi.refreshToken(refreshApi, refreshTask);
+                    return future.get();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return false;
+                }
+
             }
         }
         return false;
     }
 
-    private static class TokenFuture<S, T> implements Callable<Request> {
+    @Override
+    public void setRefreshApi(U refreshApi) {
+        this.refreshApi = refreshApi;
+    }
+
+    private static class RefreshFuture<S, T> implements Callable<Boolean>, TokenApi.OnTokenReceiveListener<T> {
+
+        private final S type;
+        private final Lock lock;
+        private final Condition condition;
+        private final TokenStorage<S, T> storage;
+
+        private boolean refreshEnabled = false;
+
+        RefreshFuture(Lock lock, TokenStorage<S, T> storage, S type) {
+            this.type = type;
+            this.lock = lock;
+            this.storage = storage;
+            this.condition = lock.newCondition();
+        }
+
+        @Override
+        public Boolean call() throws Exception {
+            lock.lock();
+            try {
+                condition.await();
+            } finally {
+                lock.unlock();
+            }
+            return refreshEnabled;
+        }
+
+        @Override
+        public void onTokenReceive(T token) {
+            storage.saveToken(type, token);
+            lock.lock();
+            try {
+                condition.signal();
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public void onCancel() {
+            refreshEnabled = false;
+            lock.lock();
+            try {
+                condition.signal();
+            } finally {
+                lock.unlock();
+            }
+        }
+    }
+
+    private static class TokenFuture<S, T, U> implements Callable<Request> {
         final Request request;
-        final TokenApi<S, T> tokenApi;
+        final TokenApi<S, T, U> tokenApi;
         T token;
 
-        TokenFuture(Request request, TokenApi<S, T> tokenApi) {
+        TokenFuture(Request request, TokenApi<S, T, U> tokenApi) {
             this(request, tokenApi, null);
         }
 
-        TokenFuture(Request request, TokenApi<S, T> tokenApi, T token) {
+        TokenFuture(Request request, TokenApi<S, T, U> tokenApi, T token) {
             this.request = request;
             this.tokenApi = tokenApi;
             this.token = token;
@@ -80,19 +146,20 @@ public class BasicAuthenticationHandler<S, T> implements AuthenticationHandler<S
         }
     }
 
-    private static final class StoreTokenFuture<S, T> extends TokenFuture<S, T> implements TokenApi
+
+    private static final class StoreTokenFuture<S, T, U> extends TokenFuture<S, T, U> implements TokenApi
           .OnTokenReceiveListener<T> {
         private final TokenStorage<S, T> storage;
         private final S type;
         private final Lock lock;
         private final Condition condition;
 
-        StoreTokenFuture(Request request, Lock lock, Condition condition, TokenApi<S, T> tokenApi, TokenStorage<S, T> storage, S type) {
+        StoreTokenFuture(Request request, Lock lock, TokenApi<S, T, U> tokenApi, TokenStorage<S, T> storage, S type) {
             super(request, tokenApi);
             this.storage = storage;
             this.type = type;
             this.lock = lock;
-            this.condition = condition;
+            this.condition = lock.newCondition();
         }
 
         @Override
@@ -120,7 +187,12 @@ public class BasicAuthenticationHandler<S, T> implements AuthenticationHandler<S
 
         @Override
         public void onCancel() {
-            // TODO: cancel future task
+            lock.lock();
+            try {
+                condition.signal();
+            } finally {
+                lock.unlock();
+            }
         }
     }
 }

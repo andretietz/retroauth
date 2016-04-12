@@ -2,17 +2,19 @@ package com.andretietz.retroauth;
 
 import android.accounts.Account;
 import android.app.Activity;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 
 import okhttp3.Request;
 import okhttp3.Response;
 
-public final class AndroidAuthenticationHandler implements AuthenticationHandler<AndroidTokenType> {
+public final class AndroidAuthenticationHandler<T> implements AuthenticationHandler<AndroidTokenType, T> {
 
-    private final TokenInjector tokenInjector;
+    private final TokenInjector<T> tokenInjector;
     private final AuthAccountManager authAccountManager;
+    private T refreshApi;
 
-    public AndroidAuthenticationHandler(@NonNull Activity activity, @NonNull TokenInjector tokenInjector) {
+    public AndroidAuthenticationHandler(@NonNull Activity activity, @NonNull TokenInjector<T> tokenInjector) {
         this.tokenInjector = tokenInjector;
         this.authAccountManager = new AuthAccountManager(ContextManager.get(activity));
     }
@@ -43,6 +45,20 @@ public final class AndroidAuthenticationHandler implements AuthenticationHandler
             if (response.code() == 401) {
                 try {
                     authAccountManager.invalidateTokenFromActiveUser(type.accountType, type.tokenType);
+                    String refreshToken = authAccountManager.getRefreshToken(type.accountType, type.tokenType);
+                    if(refreshToken != null && refreshApi != null) {
+                        tokenInjector.refreshToken(refreshApi, refreshToken, new TokenInjector.TokenStorage() {
+                            @Override
+                            public void storeToken(String token) {
+
+                            }
+
+                            @Override
+                            public void storeRefreshToken(String token) {
+
+                            }
+                        });
+                    }
                 } catch (ChooseAccountCanceledException e) {
                     return false;
                 }
@@ -50,5 +66,10 @@ public final class AndroidAuthenticationHandler implements AuthenticationHandler
             }
         }
         return false;
+    }
+
+    @Override
+    public void setRefreshApi(T refreshApi) {
+        this.refreshApi = refreshApi;
     }
 }

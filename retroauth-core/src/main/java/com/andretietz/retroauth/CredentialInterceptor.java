@@ -6,11 +6,11 @@ import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public final class CredentialInterceptor<S> implements Interceptor {
-    private final AuthenticationHandler<S> authHandler;
+public final class CredentialInterceptor<S, T> implements Interceptor {
+    private final AuthenticationHandler<S, T> authHandler;
     private final MethodCache<S> cache;
 
-    public CredentialInterceptor(AuthenticationHandler<S> authHandler, MethodCache<S> cache) {
+    public CredentialInterceptor(AuthenticationHandler<S, T> authHandler, MethodCache<S> cache) {
         this.cache = cache;
         this.authHandler = authHandler;
     }

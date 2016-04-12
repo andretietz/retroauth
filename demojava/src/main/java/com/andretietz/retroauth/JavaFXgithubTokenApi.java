@@ -13,7 +13,7 @@ import okhttp3.Request;
 /**
  * Created by andre on 23.03.2016.
  */
-class JavaFXGithubTokenApi implements TokenApi<String, OAuth2AccessToken> {
+class JavaFXGithubTokenApi implements TokenApi<String, OAuth2AccessToken, Object> {
 
     private final OAuth20Service service;
     private final Stage stage;
@@ -54,5 +54,10 @@ class JavaFXGithubTokenApi implements TokenApi<String, OAuth2AccessToken> {
             stage.setScene(new Scene(webView, 600, 600));
             stage.show();
         });
+    }
+
+    @Override
+    public void refreshToken(Object refreshApi, OnTokenReceiveListener<OAuth2AccessToken> listener) {
+        listener.onCancel();
     }
 }
