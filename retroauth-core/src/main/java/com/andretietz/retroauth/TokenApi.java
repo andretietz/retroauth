@@ -11,11 +11,10 @@ import okhttp3.Request;
 public interface TokenApi<S, T, U> {
     Request modifyRequest(T token, Request request);
     S convert(String[] annotationValues);
-    void receiveToken(OnTokenReceiveListener<T> listener);
+    void receiveToken(OnTokenReceiveListener<T> listener) throws Exception;
     void refreshToken(U refreshApi, OnTokenReceiveListener<T> listener);
 
     interface OnTokenReceiveListener<T> {
         void onTokenReceive(T token);
-        void onCancel();
     }
 }

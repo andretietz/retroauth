@@ -50,18 +50,10 @@ public class AndroidTokenApi implements TokenApi<AndroidTokenType, String, Objec
     }
 
     @Override
-    public void receiveToken(final OnTokenReceiveListener<String> listener) {
-        try {
-            Account account = requestActiveAccount(type.accountType);
-            String token = getAuthToken(account, type.accountType, type.tokenType);
-            listener.onTokenReceive(token);
-        } catch (ChooseAccountCanceledException e) {
-            listener.onCancel();
-        } catch (AuthenticationCanceledException e) {
-            listener.onCancel();
-        } catch (Exception e) {
-            listener.onCancel();
-        }
+    public void receiveToken(final OnTokenReceiveListener<String> listener) throws Exception{
+        Account account = requestActiveAccount(type.accountType);
+        String token = getAuthToken(account, type.accountType, type.tokenType);
+        listener.onTokenReceive(token);
     }
 
     @Override
@@ -118,11 +110,19 @@ public class AndroidTokenApi implements TokenApi<AndroidTokenType, String, Objec
 
     @Nullable
     private Account requestActiveAccount(@NonNull String accountType) throws ChooseAccountCanceledException {
+        // get active account name
         String accountName = accountManager.getActiveAccountName(accountType);
-        if(accountName == null) {
-            accountName = showAccountPickerDialog(accountType, true);
+        // if this one exists, try to get the account
+        if (accountName != null) return accountManager.getAccountByName(accountType, accountName);
+        // if it doesn't, ask the user to pick an account
+        accountName = showAccountPickerDialog(accountType, true);
+        // if the user has chosen an existing account
+        if (accountName != null) {
+            accountManager.setActiveAccount(accountType, accountName);
+            return accountManager.getAccountByName(accountType, accountName);
         }
-        return accountManager.getAccountByName(accountType, accountName);
+        // if the user chose to add an account
+        return null;
     }
 
     /**
@@ -134,8 +134,8 @@ public class AndroidTokenApi implements TokenApi<AndroidTokenType, String, Objec
      */
     public String showAccountPickerDialog(String accountType, boolean canAddAccount) throws ChooseAccountCanceledException {
         Account[] accounts = accountManager.android.getAccountsByType(accountType);
-        String[] accountList = new String[canAddAccount?accounts.length+1:accounts.length];
-        for (int i = 0; i< accounts.length ;i++) {
+        String[] accountList = new String[canAddAccount ? accounts.length + 1 : accounts.length];
+        for (int i = 0; i < accounts.length; i++) {
             accountList[i] = accounts[i].name;
         }
         if (canAddAccount) {

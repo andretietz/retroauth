@@ -1,6 +1,7 @@
 package com.andretietz.retroauth;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.RunnableFuture;
@@ -42,7 +43,12 @@ public class BasicAuthenticationHandler<TOKEN_TYPE, TOKEN, REFRESH_API> implemen
             StoreTokenFuture<TOKEN_TYPE, TOKEN, REFRESH_API> tokenFuture = new StoreTokenFuture<>(request, lock, tokenApi, storage, type);
             future = new FutureTask<>(tokenFuture);
             executorService.submit(future);
-            tokenApi.receiveToken(tokenFuture);
+            try {
+                tokenApi.receiveToken(tokenFuture);
+            } catch(Exception e) {
+                future.cancel(true);
+                throw e;
+            }
         } else {
             future = new FutureTask<>(new TokenFuture<>(request, tokenApi, token));
             executorService.submit(future);
@@ -65,7 +71,6 @@ public class BasicAuthenticationHandler<TOKEN_TYPE, TOKEN, REFRESH_API> implemen
                     e.printStackTrace();
                     return false;
                 }
-
             }
         }
         return false;
@@ -113,17 +118,6 @@ public class BasicAuthenticationHandler<TOKEN_TYPE, TOKEN, REFRESH_API> implemen
                 lock.unlock();
             }
         }
-
-        @Override
-        public void onCancel() {
-            refreshEnabled = false;
-            lock.lock();
-            try {
-                condition.signal();
-            } finally {
-                lock.unlock();
-            }
-        }
     }
 
     private static class TokenFuture<TOKEN_TYPE, TOKEN, U> implements Callable<Request> {
@@ -143,7 +137,10 @@ public class BasicAuthenticationHandler<TOKEN_TYPE, TOKEN, REFRESH_API> implemen
 
         @Override
         public Request call() throws Exception {
-            return tokenApi.modifyRequest(token, request);
+            if(token != null)
+                return tokenApi.modifyRequest(token, request);
+            else
+                return request;
         }
     }
 
@@ -178,16 +175,6 @@ public class BasicAuthenticationHandler<TOKEN_TYPE, TOKEN, REFRESH_API> implemen
         @Override
         public void onTokenReceive(TOKEN token) {
             this.token = token;
-            lock.lock();
-            try {
-                condition.signal();
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public void onCancel() {
             lock.lock();
             try {
                 condition.signal();
