@@ -32,6 +32,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.3.0'
     compile "com.squareup.retrofit2:converter-moshi:$retrofitVersion"
     compile "com.squareup.retrofit2:adapter-rxjava:$retrofitVersion"
+    compile 'com.squareup.okhttp3:logging-interceptor:3.2.0'
 
     compile 'com.github.scribejava:scribejava-apis:2.5.2'
 

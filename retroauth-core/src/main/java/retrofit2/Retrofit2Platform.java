@@ -19,7 +19,7 @@ public final class Retrofit2Platform {
         return Platform.get().defaultCallAdapterFactory(executor);
     }
 
-    private static Executor defaultCallbackExecutor() {
+    public static Executor defaultCallbackExecutor() {
         return Platform.get().defaultCallbackExecutor();
     }
 }
