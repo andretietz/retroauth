@@ -39,12 +39,6 @@ final class ContextManager {
 
     @NonNull
     public Context getContext() {
-        synchronized (this) {
-            Activity activity = handler.getActivity();
-            if (activity != null) {
-                return activity;
-            }
-        }
         return applicationContext;
     }
 

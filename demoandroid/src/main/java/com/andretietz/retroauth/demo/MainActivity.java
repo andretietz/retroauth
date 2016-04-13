@@ -1,7 +1,6 @@
 package com.andretietz.retroauth.demo;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -10,7 +9,6 @@ import android.widget.Toast;
 
 import com.andretietz.retroauth.AndroidAuthenticationHandler;
 import com.andretietz.retroauth.AuthAccountManager;
-import com.andretietz.retroauth.ChooseAccountCanceledException;
 import com.andretietz.retroauth.Retroauth;
 import com.andretietz.retroauth.TokenApplier;
 import com.andretietz.retroauth.demo.GithubService.Email;
@@ -110,20 +108,8 @@ public class MainActivity extends AppCompatActivity {
         buttonInvalidateToken.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    Account activeAccount = authAccountManager.getActiveAccount(GithubService.ACCOUNT_TYPE, false);
-
-                    // override the current token to force a 401
-                    AccountManager.get(MainActivity.this)
-                            .setAuthToken(
-                                    authAccountManager.getActiveAccount(GithubService.ACCOUNT_TYPE, false),
-                                    GithubService.TOKEN_TYPE,
-                                    "some-invalid-token"
-                            );
-                } catch (ChooseAccountCanceledException e) {
-                    e.printStackTrace();
-                }
-
+                Account activeAccount = authAccountManager.getActiveAccount(GithubService.ACCOUNT_TYPE);
+                authAccountManager.android.setAuthToken(activeAccount, GithubService.TOKEN_TYPE, "some-invalid-token");
             }
         });
 
