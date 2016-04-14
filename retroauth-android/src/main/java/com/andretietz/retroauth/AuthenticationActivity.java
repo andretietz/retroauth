@@ -73,9 +73,9 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
     /**
      * This method stores an authentication Token to a specific account.
      *
-     * @param account Account you want to store the token for
-	 * @param tokenType    type of the token you want to store
-     * @param token   Token itself
+     * @param account   Account you want to store the token for
+     * @param tokenType type of the token you want to store
+     * @param token     Token itself
      */
     @SuppressWarnings("unused")
     protected void storeToken(@NonNull Account account, @NonNull String tokenType, @NonNull String token) {
@@ -91,7 +91,8 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
      * @param refreshToken a refresh token if present
      */
     @SuppressWarnings("unused")
-    protected void storeToken(@NonNull Account account, @NonNull String tokenType, @NonNull String token, @Nullable String refreshToken) {
+    protected void storeToken(@NonNull Account account, @NonNull String tokenType,
+                              @NonNull String token, @Nullable String refreshToken) {
         accountManager.setAuthToken(account, tokenType, token);
         if (refreshToken != null) {
             accountManager.setAuthToken(account, String.format("%s_refresh", tokenType), refreshToken);

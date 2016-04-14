@@ -22,7 +22,7 @@ import okhttp3.Request;
 /**
  * Created by andre on 13/04/16.
  */
-public class AndroidTokenApi implements TokenApi<AndroidTokenType, String, Object> {
+public class AndroidTokenApi implements TokenApi<AndroidTokenType, String> {
 
     private final AuthAccountManager accountManager;
     private final TokenApplier applier;
@@ -50,15 +50,10 @@ public class AndroidTokenApi implements TokenApi<AndroidTokenType, String, Objec
     }
 
     @Override
-    public void receiveToken(final OnTokenReceiveListener<String> listener) throws Exception{
+    public void receiveToken(final OnTokenReceiveListener<String> listener) throws Exception {
         Account account = requestActiveAccount(type.accountType);
         String token = getAuthToken(account, type.accountType, type.tokenType);
         listener.onTokenReceive(token);
-    }
-
-    @Override
-    public void refreshToken(Object refreshApi, OnTokenReceiveListener<String> listener) {
-        //listener.onCancel();
     }
 
     public String getAuthToken(@Nullable Account account, @NonNull String accountType, @NonNull String tokenType)
@@ -81,7 +76,8 @@ public class AndroidTokenApi implements TokenApi<AndroidTokenType, String, Objec
     }
 
     private String createAccountAndGetToken(@Nullable Activity activity, @NonNull String accountType,
-                                            @NonNull String tokenType) throws AuthenticatorException, OperationCanceledException, IOException {
+                                            @NonNull String tokenType)
+            throws AuthenticatorException, OperationCanceledException, IOException {
         AccountManagerFuture<Bundle> future = accountManager.addAccount(activity, accountType, tokenType);
         Bundle result = future.getResult();
         String accountName = result.getString(AccountManager.KEY_ACCOUNT_NAME);
@@ -126,7 +122,7 @@ public class AndroidTokenApi implements TokenApi<AndroidTokenType, String, Objec
     }
 
     /**
-     * Shows an account picker for the user to choose an account
+     * Shows an account picker for the user to choose an account.
      *
      * @param accountType   Account type of the accounts the user can choose
      * @param canAddAccount if <code>true</code> the user has the option to add an account
@@ -134,7 +130,7 @@ public class AndroidTokenApi implements TokenApi<AndroidTokenType, String, Objec
      */
     public String showAccountPickerDialog(String accountType, boolean canAddAccount) throws ChooseAccountCanceledException {
         Account[] accounts = accountManager.android.getAccountsByType(accountType);
-        if(accounts.length == 0) return null;
+        if (accounts.length == 0) return null;
         String[] accountList = new String[canAddAccount ? accounts.length + 1 : accounts.length];
         for (int i = 0; i < accounts.length; i++) {
             accountList[i] = accounts[i].name;

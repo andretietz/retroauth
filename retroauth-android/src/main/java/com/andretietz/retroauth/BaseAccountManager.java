@@ -69,7 +69,8 @@ public interface BaseAccountManager {
      * @return The Token or <code>null</code>
      */
     @Nullable
-    String getTokenFromActiveUser(@NonNull String accountType, @NonNull String tokenType) throws ChooseAccountCanceledException;
+    String getTokenFromActiveUser(@NonNull String accountType, @NonNull String tokenType)
+            throws ChooseAccountCanceledException;
 
     /**
      * Returns userdata which has to be setup while calling {@link AuthenticationActivity#storeUserData(Account, String,
@@ -89,7 +90,8 @@ public interface BaseAccountManager {
      * @param accountType Account type of the active user
      * @param tokenType Token type you want to invalidate
      */
-    void invalidateTokenFromActiveUser(@NonNull String accountType, @NonNull String tokenType) throws ChooseAccountCanceledException;
+    void invalidateTokenFromActiveUser(@NonNull String accountType, @NonNull String tokenType)
+            throws ChooseAccountCanceledException;
 
     /**
      * Sets an active user. If you handle with multiple accounts you can setup an active user.

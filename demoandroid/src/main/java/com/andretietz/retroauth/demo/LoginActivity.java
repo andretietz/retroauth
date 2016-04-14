@@ -1,7 +1,6 @@
 package com.andretietz.retroauth.demo;
 
 import android.accounts.Account;
-import android.os.Build;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;

@@ -16,9 +16,9 @@ public final class RetroauthCallAdapterFactory<S, T> extends CallAdapter.Factory
 
     private final List<CallAdapter.Factory> callAdapterFactories;
     private final MethodCache<S> registration;
-    private final AuthenticationHandler<S, T> authHandler;
+    private final AuthenticationHandler<S> authHandler;
 
-    RetroauthCallAdapterFactory(List<CallAdapter.Factory> callAdapterFactories, AuthenticationHandler<S, T> authHandler, MethodCache<S> registration) {
+    RetroauthCallAdapterFactory(List<CallAdapter.Factory> callAdapterFactories, AuthenticationHandler<S> authHandler, MethodCache<S> registration) {
         this.callAdapterFactories = callAdapterFactories;
         this.registration = registration;
         this.authHandler = authHandler;

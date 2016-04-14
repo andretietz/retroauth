@@ -23,7 +23,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.converter.moshi.MoshiConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -54,14 +53,18 @@ public class MainActivity extends AppCompatActivity {
         /**
          * Create an instance of the {@link AndroidAuthenticationHandler}
          */
-        AndroidAuthenticationHandler authHandler = new AndroidAuthenticationHandler(this, Executors.newSingleThreadExecutor(), new TokenApplier() {
-            @Override
-            public Request applyToken(String token, Request request) {
-                return request.newBuilder()
-                        .header("Authorization", "token " + token)
-                        .build();
-            }
-        });
+        AndroidAuthenticationHandler authHandler =
+                new AndroidAuthenticationHandler(
+                this,
+                Executors.newSingleThreadExecutor(),
+                new TokenApplier() {
+                    @Override
+                    public Request applyToken(String token, Request request) {
+                        return request.newBuilder()
+                                .header("Authorization", "token " + token)
+                                .build();
+                    }
+                });
 
 
         /**

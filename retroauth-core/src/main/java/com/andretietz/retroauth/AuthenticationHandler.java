@@ -10,7 +10,7 @@ import okhttp3.Response;
  *
  * @param <S> Type of the token you want to use
  */
-public interface AuthenticationHandler<S, T> {
+public interface AuthenticationHandler<S> {
 
     /**
      * Converts the String you get from the annotation into your Token Type
@@ -39,7 +39,4 @@ public interface AuthenticationHandler<S, T> {
      * @return {@code true} if there should be a retry, {@code false} if not
      */
     boolean retryRequired(int count, Response response, S type);
-
-    void setRefreshApi(T refreshApi);
-
 }
