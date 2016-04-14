@@ -109,7 +109,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Account activeAccount = authAccountManager.getActiveAccount(GithubService.ACCOUNT_TYPE);
-                authAccountManager.android.setAuthToken(activeAccount, GithubService.TOKEN_TYPE, "some-invalid-token");
+                if(activeAccount != null)
+                    authAccountManager.android.setAuthToken(activeAccount, GithubService.TOKEN_TYPE, "some-invalid-token");
             }
         });
 

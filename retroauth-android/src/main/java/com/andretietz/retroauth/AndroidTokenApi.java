@@ -134,6 +134,7 @@ public class AndroidTokenApi implements TokenApi<AndroidTokenType, String, Objec
      */
     public String showAccountPickerDialog(String accountType, boolean canAddAccount) throws ChooseAccountCanceledException {
         Account[] accounts = accountManager.android.getAccountsByType(accountType);
+        if(accounts.length == 0) return null;
         String[] accountList = new String[canAddAccount ? accounts.length + 1 : accounts.length];
         for (int i = 0; i < accounts.length; i++) {
             accountList[i] = accounts[i].name;
