@@ -8,11 +8,11 @@ import okhttp3.Request;
  * the {@link Authenticated} annotation.
  * @param <T> class type in which the token object is represented.
  */
-public interface TokenApi<S, T> {
+public interface TokenApi<S, T, U> {
     Request modifyRequest(T token, Request request);
     S convert(String[] annotationValues);
     void receiveToken(OnTokenReceiveListener<T> listener) throws Exception;
-//    void refreshToken(U refreshApi, OnTokenReceiveListener<T> listener);
+    void refreshToken(U refreshApi, OnTokenReceiveListener<T> listener);
 
     interface OnTokenReceiveListener<T> {
         void onTokenReceive(T token);

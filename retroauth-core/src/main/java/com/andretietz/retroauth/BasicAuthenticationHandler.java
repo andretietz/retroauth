@@ -12,16 +12,17 @@ import java.util.concurrent.locks.ReentrantLock;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class BasicAuthenticationHandler<TOKEN_TYPE, TOKEN> implements AuthenticationHandler<TOKEN_TYPE> {
+public class BasicAuthenticationHandler<TOKEN_TYPE, TOKEN, REFRESH_API> implements AuthenticationHandler<TOKEN_TYPE, REFRESH_API> {
 
     private final ExecutorService executorService;
     private final TokenStorage<TOKEN_TYPE, TOKEN> storage;
-    private final TokenApi<TOKEN_TYPE, TOKEN> tokenApi;
+    private final TokenApi<TOKEN_TYPE, TOKEN, REFRESH_API> tokenApi;
     private final ReentrantLock lock;
+    private REFRESH_API refreshApi;
 
     public BasicAuthenticationHandler(
           ExecutorService executorService,
-          TokenApi<TOKEN_TYPE, TOKEN> tokenApi,
+          TokenApi<TOKEN_TYPE, TOKEN, REFRESH_API> tokenApi,
           TokenStorage<TOKEN_TYPE, TOKEN> storage) {
         this.executorService = executorService;
         this.storage = storage;
@@ -39,7 +40,7 @@ public class BasicAuthenticationHandler<TOKEN_TYPE, TOKEN> implements Authentica
         TOKEN token = storage.getToken(type);
         RunnableFuture<Request> future;
         if (token == null) {
-            StoreTokenFuture<TOKEN_TYPE, TOKEN> tokenFuture = new StoreTokenFuture<>(request, lock, tokenApi, storage, type);
+            StoreTokenFuture<TOKEN_TYPE, TOKEN, REFRESH_API> tokenFuture = new StoreTokenFuture<>(request, lock, tokenApi, storage, type);
             future = new FutureTask<>(tokenFuture);
             executorService.submit(future);
             try {
@@ -60,19 +61,24 @@ public class BasicAuthenticationHandler<TOKEN_TYPE, TOKEN> implements Authentica
         if (!response.isSuccessful()) {
             if (response.code() == 401) {
                 storage.removeToken(type);
-//                try {
-//                    RefreshFuture<TOKEN_TYPE, TOKEN> refreshTask = new RefreshFuture<>(lock, storage, type);
-//                    FutureTask<Boolean> future = new FutureTask<>(refreshTask);
-//                    executorService.submit(future);
-//                    tokenApi.refreshToken(refreshApi, refreshTask);
-//                    return future.get();
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                    return false;
-//                }
+                try {
+                    RefreshFuture<TOKEN_TYPE, TOKEN> refreshTask = new RefreshFuture<>(lock, storage, type);
+                    FutureTask<Boolean> future = new FutureTask<>(refreshTask);
+                    executorService.submit(future);
+                    tokenApi.refreshToken(refreshApi, refreshTask);
+                    return future.get();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return false;
+                }
             }
         }
         return false;
+    }
+
+    @Override
+    public void setRefreshApi(REFRESH_API refreshApi) {
+        this.refreshApi = refreshApi;
     }
 
     private static class RefreshFuture<TOKEN_TYPE, TOKEN> implements Callable<Boolean>, TokenApi.OnTokenReceiveListener<TOKEN> {
@@ -114,16 +120,16 @@ public class BasicAuthenticationHandler<TOKEN_TYPE, TOKEN> implements Authentica
         }
     }
 
-    private static class TokenFuture<TOKEN_TYPE, TOKEN> implements Callable<Request> {
+    private static class TokenFuture<TOKEN_TYPE, TOKEN, U> implements Callable<Request> {
         final Request request;
-        final TokenApi<TOKEN_TYPE, TOKEN> tokenApi;
+        final TokenApi<TOKEN_TYPE, TOKEN, U> tokenApi;
         TOKEN token;
 
-        TokenFuture(Request request, TokenApi<TOKEN_TYPE, TOKEN> tokenApi) {
+        TokenFuture(Request request, TokenApi<TOKEN_TYPE, TOKEN, U> tokenApi) {
             this(request, tokenApi, null);
         }
 
-        TokenFuture(Request request, TokenApi<TOKEN_TYPE, TOKEN> tokenApi, TOKEN token) {
+        TokenFuture(Request request, TokenApi<TOKEN_TYPE, TOKEN, U> tokenApi, TOKEN token) {
             this.request = request;
             this.tokenApi = tokenApi;
             this.token = token;
@@ -139,14 +145,14 @@ public class BasicAuthenticationHandler<TOKEN_TYPE, TOKEN> implements Authentica
     }
 
 
-    private static final class StoreTokenFuture<TOKEN_TYPE, TOKEN> extends TokenFuture<TOKEN_TYPE, TOKEN> implements TokenApi
+    private static final class StoreTokenFuture<TOKEN_TYPE, TOKEN, U> extends TokenFuture<TOKEN_TYPE, TOKEN, U> implements TokenApi
           .OnTokenReceiveListener<TOKEN> {
         private final TokenStorage<TOKEN_TYPE, TOKEN> storage;
         private final TOKEN_TYPE type;
         private final Lock lock;
         private final Condition condition;
 
-        StoreTokenFuture(Request request, Lock lock, TokenApi<TOKEN_TYPE, TOKEN> tokenApi, TokenStorage<TOKEN_TYPE, TOKEN> storage, TOKEN_TYPE type) {
+        StoreTokenFuture(Request request, Lock lock, TokenApi<TOKEN_TYPE, TOKEN, U> tokenApi, TokenStorage<TOKEN_TYPE, TOKEN> storage, TOKEN_TYPE type) {
             super(request, tokenApi);
             this.storage = storage;
             this.type = type;

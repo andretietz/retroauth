@@ -42,7 +42,7 @@ public final class AuthAccountManager { //implements BaseAccountManager {
     }
 
     /**
-     * This method returns the name of the active account of the chosen accountType.
+     * This method returns the name of the active account of the chosen accountType
      *
      * @param accountType of which you want to get the active accountname of
      * @return the name of the currently active account or {@code null}
@@ -100,15 +100,11 @@ public final class AuthAccountManager { //implements BaseAccountManager {
         return addAccount(activity, accountType, null);
     }
 
-    public AccountManagerFuture<Bundle> addAccount(@Nullable Activity activity,
-                                                   @NonNull String accountType,
-                                                   @Nullable String tokenType) {
+    public AccountManagerFuture<Bundle> addAccount(@Nullable Activity activity, @NonNull String accountType, @Nullable String tokenType) {
         return android.addAccount(accountType, tokenType, null, null, activity, null, null);
     }
 
-    public AccountManagerFuture<Bundle> getAuthToken(@Nullable Activity activity,
-                                                     @NonNull Account account,
-                                                     @NonNull String tokenType) {
+    public AccountManagerFuture<Bundle> getAuthToken(@Nullable Activity activity, @NonNull Account account, @NonNull String tokenType) {
         return android.getAuthToken(account, tokenType, null, activity, null, null);
     }
 

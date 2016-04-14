@@ -22,59 +22,64 @@ public final class Retroauth {
     }
 
 
-    public static final class Builder<S> {
+    public static final class Builder<S, T> {
 
         private final Retrofit.Builder builder;
-        private final AuthenticationHandler<S> authHandler;
+        private final AuthenticationHandler<S, T> authHandler;
         private final List<CallAdapter.Factory> callAdapterFactories;
+        private final Class<T> refreshApi;
         private MethodCache<S> methodCache;
         private OkHttpClient okHttpClient;
         private Executor executor;
 
-        public Builder(AuthenticationHandler<S> authHandler) {
+        public Builder(AuthenticationHandler<S, T> authHandler) {
+            this(authHandler, null);
+        }
+        public Builder(AuthenticationHandler<S, T> authHandler, Class<T> refreshService) {
             builder = new Retrofit.Builder();
             this.authHandler = authHandler;
             this.callAdapterFactories = new LinkedList<>();
+            this.refreshApi = refreshService;
         }
 
-        public Builder<S> client(OkHttpClient client) {
+        public Builder<S, T> client(OkHttpClient client) {
             this.okHttpClient = client;
             return this;
         }
 
-        public Builder<S> baseUrl(HttpUrl baseUrl) {
+        public Builder<S, T> baseUrl(HttpUrl baseUrl) {
             builder.baseUrl(baseUrl);
             return this;
         }
 
-        public Builder<S> baseUrl(String baseUrl) {
+        public Builder<S, T> baseUrl(String baseUrl) {
             builder.baseUrl(baseUrl);
             return this;
         }
 
 
-        public Builder<S> addConverterFactory(Converter.Factory factory) {
+        public Builder<S, T> addConverterFactory(Converter.Factory factory) {
             builder.addConverterFactory(factory);
             return this;
         }
 
-        public Builder<S> addCallAdapterFactory(CallAdapter.Factory factory) {
+        public Builder<S, T> addCallAdapterFactory(CallAdapter.Factory factory) {
             callAdapterFactories.add(factory);
             return this;
         }
 
-        public Builder<S> callbackExecutor(Executor executor) {
+        public Builder<S, T> callbackExecutor(Executor executor) {
             this.executor = executor;
             builder.callbackExecutor(executor);
             return this;
         }
 
-        public Builder<S> validateEagerly(boolean validateEagerly) {
+        public Builder<S, T> validateEagerly(boolean validateEagerly) {
             builder.validateEagerly(validateEagerly);
             return this;
         }
 
-        public Builder<S> methodCache(MethodCache<S> methodCache) {
+        public Builder<S, T> methodCache(MethodCache<S> methodCache) {
             this.methodCache = methodCache;
             return this;
         }
@@ -98,9 +103,8 @@ public final class Retroauth {
 
             this.builder.callFactory(builder.build());
             Retrofit retrofit =  this.builder.build();
-            /*
             if(refreshApi != null)
-                authHandler.setRefreshApi(retrofit.create(refreshApi));*/
+                authHandler.setRefreshApi(retrofit.create(refreshApi));
             return retrofit;
         }
     }
