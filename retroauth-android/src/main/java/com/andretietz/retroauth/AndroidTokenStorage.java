@@ -6,7 +6,7 @@ import android.support.annotation.NonNull;
 /**
  * Created by andre on 13/04/16.
  */
-public class AndroidTokenStorage implements TokenStorage<AndroidTokenType, String> {
+public class AndroidTokenStorage implements TokenStorage<AndroidTokenType> {
 
     private final AuthAccountManager accountManager;
 
@@ -27,7 +27,7 @@ public class AndroidTokenStorage implements TokenStorage<AndroidTokenType, Strin
     @Override
     public String getToken(AndroidTokenType type) {
         Account account = accountManager.getActiveAccount(type.accountType);
-        if(account == null) return null;
+        if (account == null) return null;
         return accountManager.android.peekAuthToken(account, type.tokenType);
     }
 }

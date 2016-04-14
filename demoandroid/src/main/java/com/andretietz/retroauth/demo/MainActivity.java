@@ -10,7 +10,7 @@ import android.widget.Toast;
 import com.andretietz.retroauth.AndroidAuthenticationHandler;
 import com.andretietz.retroauth.AuthAccountManager;
 import com.andretietz.retroauth.Retroauth;
-import com.andretietz.retroauth.TokenApplier;
+import com.andretietz.retroauth.TokenProvider;
 import com.andretietz.retroauth.demo.GithubService.Email;
 
 import java.util.List;
@@ -54,15 +54,19 @@ public class MainActivity extends AppCompatActivity {
         /**
          * Create an instance of the {@link AndroidAuthenticationHandler}
          */
-        AndroidAuthenticationHandler authHandler = new AndroidAuthenticationHandler(this, Executors.newSingleThreadExecutor(), new TokenApplier() {
+        AndroidAuthenticationHandler authHandler = new AndroidAuthenticationHandler(this, Executors.newSingleThreadExecutor(), new TokenProvider() {
             @Override
             public Request applyToken(String token, Request request) {
                 return request.newBuilder()
                         .header("Authorization", "token " + token)
                         .build();
             }
-        });
 
+            @Override
+            public String refreshToken(Retrofit retrofit) {
+                return null;
+            }
+        });
 
         /**
          * Create your Retrofit Object using the {@link Retroauth.Builder}
@@ -109,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Account activeAccount = authAccountManager.getActiveAccount(GithubService.ACCOUNT_TYPE);
-                if(activeAccount != null)
+                if (activeAccount != null)
                     authAccountManager.android.setAuthToken(activeAccount, GithubService.TOKEN_TYPE, "some-invalid-token");
             }
         });

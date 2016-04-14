@@ -18,18 +18,19 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import okhttp3.Request;
+import retrofit2.Retrofit;
 
 /**
  * Created by andre on 13/04/16.
  */
-public class AndroidTokenApi implements TokenApi<AndroidTokenType, String, Object> {
+public class AndroidTokenApi implements TokenApi<AndroidTokenType> {
 
     private final AuthAccountManager accountManager;
-    private final TokenApplier applier;
+    private final TokenProvider applier;
     private final ContextManager contextManager;
     private AndroidTokenType type;
 
-    public AndroidTokenApi(@NonNull Activity activity, @NonNull TokenApplier applier) {
+    public AndroidTokenApi(@NonNull Activity activity, @NonNull TokenProvider applier) {
         this.contextManager = ContextManager.get(activity);
         this.accountManager = new AuthAccountManager(contextManager.getContext());
         this.applier = applier;
@@ -50,15 +51,15 @@ public class AndroidTokenApi implements TokenApi<AndroidTokenType, String, Objec
     }
 
     @Override
-    public void receiveToken(final OnTokenReceiveListener<String> listener) throws Exception{
+    public void receiveToken(final OnTokenReceiveListener listener) throws Exception {
         Account account = requestActiveAccount(type.accountType);
         String token = getAuthToken(account, type.accountType, type.tokenType);
         listener.onTokenReceive(token);
     }
 
     @Override
-    public void refreshToken(Object refreshApi, OnTokenReceiveListener<String> listener) {
-        //listener.onCancel();
+    public String refreshToken(Retrofit retrofit, String token) {
+        return applier.refreshToken(retrofit);
     }
 
     public String getAuthToken(@Nullable Account account, @NonNull String accountType, @NonNull String tokenType)
@@ -134,7 +135,7 @@ public class AndroidTokenApi implements TokenApi<AndroidTokenType, String, Objec
      */
     public String showAccountPickerDialog(String accountType, boolean canAddAccount) throws ChooseAccountCanceledException {
         Account[] accounts = accountManager.android.getAccountsByType(accountType);
-        if(accounts.length == 0) return null;
+        if (accounts.length == 0) return null;
         String[] accountList = new String[canAddAccount ? accounts.length + 1 : accounts.length];
         for (int i = 0; i < accounts.length; i++) {
             accountList[i] = accounts[i].name;

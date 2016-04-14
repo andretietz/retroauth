@@ -7,8 +7,8 @@ import java.util.concurrent.ExecutorService;
 /**
  * Created by andre on 13.04.2016.
  */
-public class AndroidAuthenticationHandler extends BasicAuthenticationHandler<AndroidTokenType, String, Object> {
-    public AndroidAuthenticationHandler(Activity activity, ExecutorService executorService, TokenApplier applier) {
+public class AndroidAuthenticationHandler extends BaseAuthenticationHandler<AndroidTokenType> {
+    public AndroidAuthenticationHandler(Activity activity, ExecutorService executorService, TokenProvider applier) {
         super(executorService,
                 new AndroidTokenApi(activity, applier),
                 new AndroidTokenStorage(new AuthAccountManager(activity)));

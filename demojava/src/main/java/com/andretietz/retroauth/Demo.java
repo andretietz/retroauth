@@ -48,7 +48,7 @@ public class Demo extends Application {
                 .build(GitHubApi.instance());
 
 
-        BasicAuthenticationHandler<String, OAuth2AccessToken, Object> authHandler = new BasicAuthenticationHandler<>(
+        BaseAuthenticationHandler<String, OAuth2AccessToken, Object> authHandler = new BaseAuthenticationHandler<>(
                 Executors.newSingleThreadExecutor(),
                 new JavaFXGithubTokenApi(new Stage(), github),
                 new CredentialStorage()

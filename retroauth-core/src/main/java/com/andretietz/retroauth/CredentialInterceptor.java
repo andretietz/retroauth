@@ -6,11 +6,11 @@ import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public final class CredentialInterceptor<S, T> implements Interceptor {
-    private final AuthenticationHandler<S, T> authHandler;
-    private final MethodCache<S> cache;
+public final class CredentialInterceptor<TOKEN_TYPE> implements Interceptor {
+    private final AuthenticationHandler<TOKEN_TYPE> authHandler;
+    private final MethodCache<TOKEN_TYPE> cache;
 
-    public CredentialInterceptor(AuthenticationHandler<S, T> authHandler, MethodCache<S> cache) {
+    public CredentialInterceptor(AuthenticationHandler<TOKEN_TYPE> authHandler, MethodCache<TOKEN_TYPE> cache) {
         this.cache = cache;
         this.authHandler = authHandler;
     }
@@ -19,13 +19,13 @@ public final class CredentialInterceptor<S, T> implements Interceptor {
     public synchronized Response intercept(Chain chain) throws IOException {
         Response response;
         Request request = chain.request();
-        S type = cache.getTokenType(Utils.createUniqueIdentifier(request));
+        TOKEN_TYPE type = cache.getTokenType(Utils.createUniqueIdentifier(request));
         if (type != null) {
             int tryCount = 0;
             do {
                 try {
-                    // execute the request
                     request = authHandler.handleAuthentication(request, type);
+                    // execute the request
                     response = chain.proceed(request);
                 } catch (Exception e) {
                     throw new AuthenticationCanceledException(e);

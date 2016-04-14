@@ -12,13 +12,13 @@ import java.util.List;
 /**
  * Created by andre.tietz on 22/03/16.
  */
-public final class RetroauthCallAdapterFactory<S, T> extends CallAdapter.Factory {
+public final class RetroauthCallAdapterFactory<TOKEN_TYPE> extends CallAdapter.Factory {
 
     private final List<CallAdapter.Factory> callAdapterFactories;
-    private final MethodCache<S> registration;
-    private final AuthenticationHandler<S, T> authHandler;
+    private final MethodCache<TOKEN_TYPE> registration;
+    private final AuthenticationHandler<TOKEN_TYPE> authHandler;
 
-    RetroauthCallAdapterFactory(List<CallAdapter.Factory> callAdapterFactories, AuthenticationHandler<S, T> authHandler, MethodCache<S> registration) {
+    RetroauthCallAdapterFactory(List<CallAdapter.Factory> callAdapterFactories, AuthenticationHandler<TOKEN_TYPE> authHandler, MethodCache<TOKEN_TYPE> registration) {
         this.callAdapterFactories = callAdapterFactories;
         this.registration = registration;
         this.authHandler = authHandler;
@@ -40,9 +40,9 @@ public final class RetroauthCallAdapterFactory<S, T> extends CallAdapter.Factory
     }
 
     private Authenticated isAuthenticated(Annotation[] annotations) {
-        for (int i = 0; i < annotations.length; i++) {
-            if (Authenticated.class == annotations[i].annotationType()) {
-                return (Authenticated) annotations[i];
+        for (Annotation annotation : annotations) {
+            if (Authenticated.class == annotation.annotationType()) {
+                return (Authenticated) annotation;
             }
         }
         return null;

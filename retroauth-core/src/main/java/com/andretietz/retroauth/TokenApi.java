@@ -1,20 +1,22 @@
 package com.andretietz.retroauth;
 
 import okhttp3.Request;
+import retrofit2.Retrofit;
 
 /**
- *
- * @param <S> Token Type Object (in most cases this is a string) which will be created depending on the annotations in
- * the {@link Authenticated} annotation.
- * @param <T> class type in which the token object is represented.
+ * @param <TOKEN_TYPE> Token Type Object (in most cases this is a string) which will be created depending on the annotations in
+ *                     the {@link Authenticated} annotation.
  */
-public interface TokenApi<S, T, U> {
-    Request modifyRequest(T token, Request request);
-    S convert(String[] annotationValues);
-    void receiveToken(OnTokenReceiveListener<T> listener) throws Exception;
-    void refreshToken(U refreshApi, OnTokenReceiveListener<T> listener);
+public interface TokenApi<TOKEN_TYPE> {
+    Request modifyRequest(String token, Request request);
 
-    interface OnTokenReceiveListener<T> {
-        void onTokenReceive(T token);
+    TOKEN_TYPE convert(String[] annotationValues);
+
+    void receiveToken(OnTokenReceiveListener listener) throws Exception;
+
+    String refreshToken(Retrofit retrofit, String token);
+
+    interface OnTokenReceiveListener {
+        void onTokenReceive(String token);
     }
 }
