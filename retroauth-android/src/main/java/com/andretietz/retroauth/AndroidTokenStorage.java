@@ -15,8 +15,8 @@ public class AndroidTokenStorage implements TokenStorage<AndroidTokenType> {
     }
 
     @Override
-    public void removeToken(AndroidTokenType type) {
-        accountManager.android.invalidateAuthToken(type.accountType, getToken(type));
+    public void removeToken(AndroidTokenType type, String token) {
+        accountManager.android.invalidateAuthToken(type.accountType, token);
     }
 
     @Override
@@ -29,5 +29,12 @@ public class AndroidTokenStorage implements TokenStorage<AndroidTokenType> {
         Account account = accountManager.getActiveAccount(type.accountType);
         if (account == null) return null;
         return accountManager.android.peekAuthToken(account, type.tokenType);
+    }
+
+    @Override
+    public String getRefreshToken(AndroidTokenType type) {
+        Account account = accountManager.getActiveAccount(type.accountType);
+        if (account == null) return null;
+        return accountManager.android.peekAuthToken(account, String.format("%s_refresh", type.tokenType));
     }
 }

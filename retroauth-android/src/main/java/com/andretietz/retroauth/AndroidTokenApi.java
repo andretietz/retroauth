@@ -59,7 +59,7 @@ public class AndroidTokenApi implements TokenApi<AndroidTokenType> {
 
     @Override
     public String refreshToken(Retrofit retrofit, String token) {
-        return applier.refreshToken(retrofit);
+        return applier.refreshToken(retrofit, token);
     }
 
     public String getAuthToken(@Nullable Account account, @NonNull String accountType, @NonNull String tokenType)

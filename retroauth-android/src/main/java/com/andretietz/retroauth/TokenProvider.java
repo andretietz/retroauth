@@ -8,5 +8,5 @@ import retrofit2.Retrofit;
  */
 public interface TokenProvider {
     Request applyToken(String token, Request request);
-    String refreshToken(Retrofit retrofit);
+    String refreshToken(Retrofit retrofit, String token);
 }

@@ -63,17 +63,19 @@ public class BaseAuthenticationHandler<TOKEN_TYPE> implements AuthenticationHand
                 // get the current token
                 String token = storage.getToken(type);
                 // remove the token from storage
-                storage.removeToken(type);
-                // try to refresh the token
-                token = tokenApi.refreshToken(retrofit, token);
-                // if successfull
-                if (token != null) {
-                    // store token
-                    storage.saveToken(type, token);
-                    // and retry request
-                    return true;
-                } else {
-                    return false;
+                storage.removeToken(type, token);
+
+                String refreshToken = storage.getRefreshToken(type);
+                if(refreshToken != null) {
+                    // try to refresh the token
+                    token = tokenApi.refreshToken(retrofit, refreshToken);
+                    // if successfull
+                    if (token != null) {
+                        // store token
+                        storage.saveToken(type, token);
+                        // and retry request
+                        return true;
+                    }
                 }
             }
         }
