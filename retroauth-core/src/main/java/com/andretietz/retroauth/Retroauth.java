@@ -24,12 +24,12 @@ public final class Retroauth {
     public static final class Builder<OWNER, TOKEN_TYPE, TOKEN> {
 
         private final Retrofit.Builder builder;
-        private final AuthHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler;
+        private final AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler;
         private final List<CallAdapter.Factory> callAdapterFactories;
         private OkHttpClient okHttpClient;
         private Executor executor;
 
-        public Builder(AuthHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler) {
+        public Builder(AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler) {
             builder = new Retrofit.Builder();
             this.authHandler = authHandler;
             this.callAdapterFactories = new LinkedList<>();

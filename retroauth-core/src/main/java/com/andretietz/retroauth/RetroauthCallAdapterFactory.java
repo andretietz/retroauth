@@ -15,9 +15,9 @@ import retrofit2.Retrofit;
 public final class RetroauthCallAdapterFactory<OWNER, TOKEN_TYPE, TOKEN> extends CallAdapter.Factory {
 
     private final List<CallAdapter.Factory> callAdapterFactories;
-    private final AuthHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler;
+    private final AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler;
 
-    RetroauthCallAdapterFactory(List<CallAdapter.Factory> callAdapterFactories, AuthHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler) {
+    RetroauthCallAdapterFactory(List<CallAdapter.Factory> callAdapterFactories, AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler) {
         this.callAdapterFactories = callAdapterFactories;
         this.authHandler = authHandler;
     }

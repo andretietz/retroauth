@@ -15,9 +15,9 @@ import okhttp3.Response;
  * @param <TOKEN_TYPE>
  */
 public final class CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN> implements Interceptor {
-    private final AuthHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler;
+    private final AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler;
 
-    public CredentialInterceptor(AuthHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler) {
+    public CredentialInterceptor(AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler) {
         this.authHandler = authHandler;
     }
 
