@@ -75,22 +75,19 @@ public final class Retroauth {
         public Retrofit build() {
             callAdapterFactories.add(Retrofit2Platform.defaultCallAdapterFactory(executor));
 
-
             CallAdapter.Factory callAdapter =
-                    new RetroauthCallAdapterFactory<>(
-                            callAdapterFactories, authHandler);
-
+                    new RetroauthCallAdapterFactory<>(callAdapterFactories, authHandler);
 
             builder.addCallAdapterFactory(callAdapter);
 
             if (okHttpClient == null) okHttpClient = new OkHttpClient();
             OkHttpClient.Builder builder = okHttpClient.newBuilder();
-
-            builder.interceptors().add(0, new CredentialInterceptor<>(authHandler));
+            CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN> interceptor = new CredentialInterceptor<>(authHandler);
+            builder.interceptors().add(0, interceptor);
 
             this.builder.callFactory(builder.build());
             Retrofit retrofit = this.builder.build();
-            // authHandler.retrofit(retrofit);
+            interceptor.retrofit(retrofit);
             return retrofit;
         }
     }

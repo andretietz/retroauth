@@ -5,6 +5,7 @@ import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
+import retrofit2.Retrofit;
 
 /**
  * This interceptor intercepts the okhttp requests and checks if authentication is required.
@@ -14,8 +15,9 @@ import okhttp3.Response;
  * @param <OWNER>
  * @param <TOKEN_TYPE>
  */
-public final class CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN> implements Interceptor {
+final class CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN> implements Interceptor {
     private final AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler;
+    private Retrofit retrofit;
 
     public CredentialInterceptor(AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler) {
         this.authHandler = authHandler;
@@ -45,11 +47,15 @@ public final class CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN> implements In
                 } catch (Exception e) {
                     throw new AuthenticationCanceledException(e);
                 }
-            } while (authHandler.provider.retryRequired(++tryCount, response, authHandler.tokenStorage, owner, type, token));
+            } while (authHandler.provider.retryRequired(++tryCount, retrofit, response, authHandler.tokenStorage, owner, type, token));
         } else {
             // no authentication required, proceed as usual
             response = chain.proceed(request);
         }
         return response;
+    }
+
+    public void retrofit(Retrofit retrofit) {
+        this.retrofit = retrofit;
     }
 }
