@@ -3,12 +3,13 @@ package com.andretietz.retroauth;
 /**
  * Created by andre on 23.03.2016.
  */
-public interface TokenStorage<TOKEN_TYPE> {
-    String getToken(TOKEN_TYPE type);
-    String getRefreshToken(TOKEN_TYPE type);
+public interface TokenStorage<OWNER, TOKEN_TYPE, TOKEN> {
 
-    void removeToken(TOKEN_TYPE type, String token);
-    void removeRefreshToken(TOKEN_TYPE type, String refreshToken);
+    TOKEN_TYPE createType(String[] annotationValues);
 
-    void saveToken(TOKEN_TYPE type, String token);
+    TOKEN getToken(OWNER owner, TOKEN_TYPE type) throws AuthenticationCanceledException;
+
+    void removeToken(OWNER owner, TOKEN_TYPE type, TOKEN token);
+
+    void saveToken(OWNER owner, TOKEN_TYPE type, TOKEN token);
 }

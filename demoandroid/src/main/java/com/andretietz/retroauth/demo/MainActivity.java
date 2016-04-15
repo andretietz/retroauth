@@ -8,13 +8,13 @@ import android.view.View.OnClickListener;
 import android.widget.Toast;
 
 import com.andretietz.retroauth.AndroidAuthenticationHandler;
+import com.andretietz.retroauth.AndroidToken;
 import com.andretietz.retroauth.AuthAccountManager;
+import com.andretietz.retroauth.Provider;
 import com.andretietz.retroauth.Retroauth;
-import com.andretietz.retroauth.TokenProvider;
 import com.andretietz.retroauth.demo.GithubService.Email;
 
 import java.util.List;
-import java.util.concurrent.Executors;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -54,19 +54,20 @@ public class MainActivity extends AppCompatActivity {
         /**
          * Create an instance of the {@link AndroidAuthenticationHandler}
          */
-        AndroidAuthenticationHandler authHandler = new AndroidAuthenticationHandler(this, Executors.newSingleThreadExecutor(), new TokenProvider() {
+        AndroidAuthenticationHandler authHandler = new AndroidAuthenticationHandler(this, new Provider<AndroidToken>() {
             @Override
-            public Request applyToken(String token, Request request) {
+            public Request modifyRequest(Request request, AndroidToken androidToken) {
                 return request.newBuilder()
-                        .header("Authorization", "token " + token)
+                        .header("Authorization", "token " + androidToken.token)
                         .build();
             }
 
             @Override
-            public String refreshToken(Retrofit retrofit, String token) {
-                return null;
+            public boolean retryRequired(int count, okhttp3.Response response, AndroidToken type) {
+                return false;
             }
         });
+
 
         /**
          * Create your Retrofit Object using the {@link Retroauth.Builder}

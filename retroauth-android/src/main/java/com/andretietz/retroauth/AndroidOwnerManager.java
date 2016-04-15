@@ -17,112 +17,33 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import okhttp3.Request;
-import retrofit2.Retrofit;
-
 /**
- * Created by andre on 13/04/16.
+ * Created by andre on 15/04/16.
  */
-public class AndroidTokenApi implements TokenApi<AndroidTokenType> {
+public class AndroidOwnerManager implements OwnerManager<Account, AndroidTokenType> {
 
     private final AuthAccountManager accountManager;
-    private final TokenProvider applier;
     private final ContextManager contextManager;
-    private AndroidTokenType type;
 
-    public AndroidTokenApi(@NonNull Activity activity, @NonNull TokenProvider applier) {
-        this.contextManager = ContextManager.get(activity);
-        this.accountManager = new AuthAccountManager(contextManager.getContext());
-        this.applier = applier;
-    }
-
-    @Override
-    public Request modifyRequest(String token, Request request) {
-        return applier.applyToken(token, request);
-    }
-
-    @Override
-    public AndroidTokenType convert(String[] annotationValues) {
-        type = new AndroidTokenType.Builder()
-                .accountType(annotationValues[0])
-                .tokenType(annotationValues[1])
-                .build();
-        return type;
-    }
-
-    @Override
-    public void receiveToken(final OnTokenReceiveListener listener) throws Exception {
-        Account account = requestActiveAccount(type.accountType);
-        String token = getAuthToken(account, type.accountType, type.tokenType);
-        listener.onTokenReceive(token);
-    }
-
-    @Override
-    public String refreshToken(Retrofit retrofit, String token) {
-        return applier.refreshToken(retrofit, token);
-    }
-
-    public String getAuthToken(@Nullable Account account, @NonNull String accountType, @NonNull String tokenType)
-            throws AuthenticationCanceledException {
-        try {
-            String token;
-            Activity activity = contextManager.getActivity();
-            if (account == null) {
-                token = createAccountAndGetToken(activity, accountType, tokenType);
-            } else {
-                token = getToken(activity, account, tokenType);
-            }
-            if (token == null) {
-                throw new AuthenticationCanceledException("user canceled the login!");
-            }
-            return token;
-        } catch (AuthenticatorException | OperationCanceledException | IOException e) {
-            throw new AuthenticationCanceledException(e);
-        }
-    }
-
-    private String createAccountAndGetToken(@Nullable Activity activity, @NonNull String accountType,
-                                            @NonNull String tokenType) throws AuthenticatorException, OperationCanceledException, IOException {
-        AccountManagerFuture<Bundle> future = accountManager.addAccount(activity, accountType, tokenType);
-        Bundle result = future.getResult();
-        String accountName = result.getString(AccountManager.KEY_ACCOUNT_NAME);
-        if (accountName != null) {
-            Account account = new Account(result.getString(AccountManager.KEY_ACCOUNT_NAME),
-                    result.getString(AccountManager.KEY_ACCOUNT_TYPE));
-            return accountManager.android.peekAuthToken(account, tokenType);
-        }
-        return null;
+    public AndroidOwnerManager(AuthAccountManager accountManager, ContextManager contextManager) {
+        this.accountManager = accountManager;
+        this.contextManager = contextManager;
     }
 
 
-    private String getToken(@Nullable Activity activity, @NonNull Account account, @NonNull String tokenType)
-            throws AuthenticatorException, OperationCanceledException, IOException {
-        // Clear the interrupted flag
-        Thread.interrupted();
-        AccountManagerFuture<Bundle> future = accountManager.getAuthToken(activity, account, tokenType);
-        Bundle result = future.getResult();
-        String token = result.getString(AccountManager.KEY_AUTHTOKEN);
-        if (token == null) {
-            token = accountManager.android.peekAuthToken(account, tokenType);
-
-        }
-        return token;
-    }
-
-    @Nullable
-    private Account requestActiveAccount(@NonNull String accountType) throws ChooseOwnerCanceledException {
+    public Account getOwner(AndroidTokenType type) throws ChooseOwnerCanceledException {
         // get active account name
-        String accountName = accountManager.getActiveAccountName(accountType);
+        String accountName = accountManager.getActiveAccountName(type.accountType);
         // if this one exists, try to get the account
-        if (accountName != null) return accountManager.getAccountByName(accountType, accountName);
+        if (accountName != null) return accountManager.getAccountByName(type.accountType, accountName);
         // if it doesn't, ask the user to pick an account
-        accountName = showAccountPickerDialog(accountType, true);
+        accountName = showAccountPickerDialog(type.accountType, true);
         // if the user has chosen an existing account
         if (accountName != null) {
-            accountManager.setActiveAccount(accountType, accountName);
-            return accountManager.getAccountByName(accountType, accountName);
+            accountManager.setActiveAccount(type.accountType, accountName);
+            return accountManager.getAccountByName(type.accountType, accountName);
         }
-        // if the user chose to add an account
+        // if the user chose to add an account, handled by the android token storage
         return null;
     }
 

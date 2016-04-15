@@ -1,26 +1,24 @@
 package com.andretietz.retroauth;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.List;
+
 import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.CallAdapter;
 import retrofit2.Retrofit;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.util.List;
-
 /**
  * Created by andre.tietz on 22/03/16.
  */
-public final class RetroauthCallAdapterFactory<TOKEN_TYPE> extends CallAdapter.Factory {
+public final class RetroauthCallAdapterFactory<OWNER, TOKEN_TYPE, TOKEN> extends CallAdapter.Factory {
 
     private final List<CallAdapter.Factory> callAdapterFactories;
-    private final MethodCache<TOKEN_TYPE> registration;
-    private final AuthenticationHandler<TOKEN_TYPE> authHandler;
+    private final AuthHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler;
 
-    RetroauthCallAdapterFactory(List<CallAdapter.Factory> callAdapterFactories, AuthenticationHandler<TOKEN_TYPE> authHandler, MethodCache<TOKEN_TYPE> registration) {
+    RetroauthCallAdapterFactory(List<CallAdapter.Factory> callAdapterFactories, AuthHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler) {
         this.callAdapterFactories = callAdapterFactories;
-        this.registration = registration;
         this.authHandler = authHandler;
     }
 
@@ -34,7 +32,12 @@ public final class RetroauthCallAdapterFactory<TOKEN_TYPE> extends CallAdapter.F
         for (int i = 0; i < callAdapterFactories.size(); i++) {
             CallAdapter<?> adapter = callAdapterFactories.get(i).get(returnType, annotations, retrofit);
             if (adapter != null)
-                return (auth != null) ? new RetroauthCallAdapter<>(adapter, authHandler.convert(auth.value()), registration) : adapter;
+                return (auth != null)
+                        ? new RetroauthCallAdapter<>(
+                        adapter,
+                        authHandler.tokenStorage.createType(auth.value()),
+                        authHandler.methodCache)
+                        : adapter;
         }
         return null;
     }
