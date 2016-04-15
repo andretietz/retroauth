@@ -7,12 +7,12 @@ public class AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> {
     public final MethodCache<TOKEN_TYPE> methodCache;
     public final OwnerManager<OWNER, TOKEN_TYPE> ownerManager;
     public final TokenStorage<OWNER, TOKEN_TYPE, TOKEN> tokenStorage;
-    public final Provider<TOKEN> provider;
+    public final Provider<OWNER, TOKEN_TYPE, TOKEN> provider;
 
     protected AuthenticationHandler(MethodCache<TOKEN_TYPE> methodCache,
                                     OwnerManager<OWNER, TOKEN_TYPE> ownerManager,
                                     TokenStorage<OWNER, TOKEN_TYPE, TOKEN> tokenStorage,
-                                    Provider<TOKEN> provider) {
+                                    Provider<OWNER, TOKEN_TYPE, TOKEN> provider) {
 
         this.methodCache = methodCache;
         this.ownerManager = ownerManager;
@@ -24,7 +24,7 @@ public class AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> {
         private MethodCache<TOKEN_TYPE> methodCache;
         private OwnerManager<OWNER, TOKEN_TYPE> ownerManager;
         private TokenStorage<OWNER, TOKEN_TYPE, TOKEN> tokenStorage;
-        private Provider<TOKEN> provider;
+        private Provider<OWNER, TOKEN_TYPE, TOKEN> provider;
 
         public Builder(TokenStorage<OWNER, TOKEN_TYPE, TOKEN> storage) {
             this.tokenStorage = storage;
@@ -40,7 +40,7 @@ public class AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> {
             return this;
         }
 
-        public Builder<OWNER, TOKEN_TYPE, TOKEN> provider(Provider<TOKEN> provider) {
+        public Builder<OWNER, TOKEN_TYPE, TOKEN> provider(Provider<OWNER, TOKEN_TYPE, TOKEN> provider) {
             this.provider = provider;
             return this;
         }

@@ -30,11 +30,12 @@ public final class CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN> implements In
         // if the request does require authentication
         if (type != null) {
             TOKEN token;
+            OWNER owner;
             int tryCount = 0;
             do {
                 try {
                     // get the owner of the token
-                    OWNER owner = authHandler.ownerManager.getOwner(type);
+                    owner = authHandler.ownerManager.getOwner(type);
                     // get the token
                     token = authHandler.tokenStorage.getToken(owner, type);
                     // modify the request using the token
@@ -44,7 +45,7 @@ public final class CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN> implements In
                 } catch (Exception e) {
                     throw new AuthenticationCanceledException(e);
                 }
-            } while (authHandler.provider.retryRequired(++tryCount, response, token));
+            } while (authHandler.provider.retryRequired(++tryCount, response, authHandler.tokenStorage, owner, type, token));
         } else {
             // no authentication required, proceed as usual
             response = chain.proceed(request);

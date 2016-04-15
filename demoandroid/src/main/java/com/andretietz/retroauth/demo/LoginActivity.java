@@ -1,7 +1,6 @@
 package com.andretietz.retroauth.demo;
 
 import android.accounts.Account;
-import android.os.Build;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
@@ -38,11 +37,11 @@ public class LoginActivity extends AuthenticationActivity {
         // I do trust you here! usually you don't hand out the applicationId or the secret
         // as soon as I feel like it, I'll deactivate the demo on providers.
         helper = new ServiceBuilder()
-              .apiKey("405f730d96862da912a8")
-              .apiSecret("dce0264a8c9eb94689d4d8ffbe1fadb59c33c4c3")
-              .scope("user")
-              .callback("http://localhost:8000/accounts/github/login/callback")
-              .build(GitHubApi.instance());
+                .apiKey("405f730d96862da912a8")
+                .apiSecret("dce0264a8c9eb94689d4d8ffbe1fadb59c33c4c3")
+                .scope("user")
+                .callback("http://localhost:8000/accounts/github/login/callback")
+                .build(GitHubApi.instance());
 
         WebView webView = (WebView) findViewById(R.id.webView);
         webView.loadUrl(helper.getAuthorizationUrl());
@@ -55,21 +54,21 @@ public class LoginActivity extends AuthenticationActivity {
                     view.loadUrl(url);
                 } else {
                     Observable.fromCallable(new TokenVerifier(helper, code))
-                          .subscribeOn(Schedulers.io())
-                          .subscribe(new Action1<Pair<OAuth2AccessToken, String>>() {
-                                         @Override
-                                         public void call(Pair<OAuth2AccessToken, String> pair) {
-                                             Account account = createOrGetAccount(pair.second);
-                                             storeToken(account, getRequestedTokenType(), pair.first.getAccessToken());
-                                             finalizeAuthentication(account);
-                                         }
-                                     },
-                                new Action1<Throwable>() {
-                                    @Override
-                                    public void call(Throwable throwable) {
-                                        throwable.printStackTrace();
-                                    }
-                                });
+                            .subscribeOn(Schedulers.io())
+                            .subscribe(new Action1<Pair<OAuth2AccessToken, String>>() {
+                                           @Override
+                                           public void call(Pair<OAuth2AccessToken, String> pair) {
+                                               Account account = createOrGetAccount(pair.second);
+                                               storeToken(account, getRequestedTokenType(), pair.first.getAccessToken());
+                                               finalizeAuthentication(account);
+                                           }
+                                       },
+                                    new Action1<Throwable>() {
+                                        @Override
+                                        public void call(Throwable throwable) {
+                                            throwable.printStackTrace();
+                                        }
+                                    });
                 }
                 return true;
             }

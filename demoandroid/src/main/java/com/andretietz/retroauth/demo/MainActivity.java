@@ -9,9 +9,11 @@ import android.widget.Toast;
 
 import com.andretietz.retroauth.AndroidAuthenticationHandler;
 import com.andretietz.retroauth.AndroidToken;
+import com.andretietz.retroauth.AndroidTokenType;
 import com.andretietz.retroauth.AuthAccountManager;
 import com.andretietz.retroauth.Provider;
 import com.andretietz.retroauth.Retroauth;
+import com.andretietz.retroauth.TokenStorage;
 import com.andretietz.retroauth.demo.GithubService.Email;
 
 import java.util.List;
@@ -54,19 +56,28 @@ public class MainActivity extends AppCompatActivity {
         /**
          * Create an instance of the {@link AndroidAuthenticationHandler}
          */
-        AndroidAuthenticationHandler authHandler = new AndroidAuthenticationHandler(this, new Provider<AndroidToken>() {
-            @Override
-            public Request modifyRequest(Request request, AndroidToken androidToken) {
-                return request.newBuilder()
-                        .header("Authorization", "token " + androidToken.token)
-                        .build();
-            }
+        AndroidAuthenticationHandler authHandler = new AndroidAuthenticationHandler(this,
 
-            @Override
-            public boolean retryRequired(int count, okhttp3.Response response, AndroidToken type) {
-                return false;
-            }
-        });
+                new Provider<Account, AndroidTokenType, AndroidToken>() {
+                    @Override
+                    public Request modifyRequest(Request request, AndroidToken androidToken) {
+                        return request.newBuilder()
+                                .header("Authorization", "token " + androidToken.token)
+                                .build();
+                    }
+
+                    @Override
+                    public boolean retryRequired(int count,
+                                                 okhttp3.Response response,
+                                                 TokenStorage<Account, AndroidTokenType, AndroidToken> tokenStorage,
+                                                 Account account,
+                                                 AndroidTokenType type,
+                                                 AndroidToken androidToken) {
+
+
+                        return false;
+                    }
+                });
 
 
         /**
