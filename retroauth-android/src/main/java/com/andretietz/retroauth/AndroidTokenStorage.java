@@ -21,7 +21,9 @@ public class AndroidTokenStorage implements TokenStorage<AndroidTokenType> {
 
     @Override
     public void saveToken(AndroidTokenType type, String token) {
-        // this has been done in login activity already
+        Account account = accountManager.getActiveAccount(type.accountType);
+        if (account == null) return;
+        accountManager.android.setAuthToken(account, type.tokenType, token);
     }
 
     @Override

@@ -75,6 +75,8 @@ public class BaseAuthenticationHandler<TOKEN_TYPE> implements AuthenticationHand
                         storage.saveToken(type, token);
                         // and retry request
                         return true;
+                    } else {
+                        storage.removeRefreshToken(type, refreshToken);
                     }
                 }
             }

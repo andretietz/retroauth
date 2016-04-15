@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public String refreshToken(Retrofit retrofit) {
+            public String refreshToken(Retrofit retrofit, String token) {
                 return null;
             }
         });
