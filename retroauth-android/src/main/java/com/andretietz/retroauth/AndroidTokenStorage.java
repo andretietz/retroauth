@@ -20,6 +20,11 @@ public class AndroidTokenStorage implements TokenStorage<AndroidTokenType> {
     }
 
     @Override
+    public void removeRefreshToken(AndroidTokenType type, String refreshToken) {
+        accountManager.android.invalidateAuthToken(type.accountType, String.format("%s_refresh", type.tokenType));
+    }
+
+    @Override
     public void saveToken(AndroidTokenType type, String token) {
         Account account = accountManager.getActiveAccount(type.accountType);
         if (account == null) return;
