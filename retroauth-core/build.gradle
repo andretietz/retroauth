@@ -1,21 +1,17 @@
-buildscript {
-    repositories {
-        jcenter()
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'net.saliman:gradle-properties-plugin:1.4.5'
-        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.0.0'
-    }
-}
-
 apply plugin: 'java'
+apply plugin: 'net.saliman.properties'
+
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
+project(":retroauth-core") {
+    repositories {
+        jcenter()
+    }
+}
 
 dependencies {
     compile "com.squareup.retrofit2:retrofit:$retrofitVersion"
 }
-apply from: 'jfrog-publish.gradle'
-//apply from: '../check.gradle'
+// only uncomment when uncommenting dependency in root gradle
+//apply from: 'jfrog-publish.gradle'

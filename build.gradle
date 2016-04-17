@@ -1,11 +1,18 @@
-subprojects {
-	repositories {
+buildscript {
+    repositories {
         mavenLocal()
-        maven { url("https://oss.jfrog.org/artifactory/oss-snapshot-local/") }
-		jcenter()
-	}
+        jcenter()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'net.saliman:gradle-properties-plugin:1.4.5'
+        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.0.0'
+        classpath 'com.noveogroup.android:check:1.2.3'
+        classpath 'com.android.tools.build:gradle:2.1.0-beta1'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.3'
+    }
 }
 
 task clean(type: Delete) {
-	delete rootProject.buildDir
+    delete rootProject.buildDir
 }

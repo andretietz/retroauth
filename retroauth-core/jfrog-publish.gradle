@@ -1,6 +1,5 @@
-apply plugin: 'com.jfrog.artifactory'
-apply plugin: 'net.saliman.properties'
 apply plugin: 'java'
+apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'maven-publish'
 
 group = libraryGroup

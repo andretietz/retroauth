@@ -1,3 +1,9 @@
+repositories {
+    mavenLocal()
+    maven { url("https://oss.jfrog.org/artifactory/oss-snapshot-local/") }
+    jcenter()
+    mavenCentral()
+}
 apply plugin: 'java'
 apply plugin: 'application'
 mainClassName = "com.andretietz.retroauth.Demo"

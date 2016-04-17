@@ -1,18 +1,10 @@
-buildscript {
-    repositories {
-        jcenter()
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.3'
-        classpath 'com.noveogroup.android:check:1.2.3'
-        classpath 'com.android.tools.build:gradle:2.1.0-beta1'
-        classpath 'net.saliman:gradle-properties-plugin:1.4.5'
-    }
-}
-
 apply plugin: 'com.android.library'
 apply plugin: 'com.noveogroup.android.check'
+
+repositories {
+    mavenLocal()
+    jcenter()
+}
 
 android {
 	compileSdkVersion 23
