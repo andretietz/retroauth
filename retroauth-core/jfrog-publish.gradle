@@ -1,6 +1,7 @@
 apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'maven-publish'
 apply plugin: 'net.saliman.properties'
+
 group = libraryGroup
 version = libraryVersion
 
@@ -8,6 +9,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
+            groupId = libraryGroup
         }
     }
 }
@@ -19,6 +21,7 @@ artifactory {
             repoKey = 'oss-snapshot-local' // The Artifactory repository key to publish to
             username = bintrayUser // The publisher user name
             password = bintrayPass // The publisher password
+            maven = true
         }
         defaults {
             publications('mavenJava')
@@ -27,6 +30,7 @@ artifactory {
             properties = ['qa.level': 'basic', 'dev.team' : 'core']
             // Publish generated POM files to Artifactory (true by default)
             publishPom = true
+            publishIvy = false
         }
     }
     resolve {

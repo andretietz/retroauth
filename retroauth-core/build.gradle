@@ -1,5 +1,6 @@
 apply plugin: 'java'
 apply plugin: 'checkstyle'
+apply plugin: 'net.saliman.properties'
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
@@ -17,5 +18,10 @@ checkstyle {
 dependencies {
     compile "com.squareup.retrofit2:retrofit:$retrofitVersion"
 }
-// only uncomment when uncommenting dependency in root gradle
-//apply from: 'jfrog-publish.gradle'
+/**
+ * Before release:
+ * - remove gradle.properties speed up config (pom is not generated otherwise for some reason)
+ * - make sure the android project is not in release mode
+ * /
+ apply from: 'jfrog-publish.gradle'
+ //*/
