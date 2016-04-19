@@ -4,11 +4,12 @@ apply plugin: 'com.noveogroup.android.check'
 repositories {
     mavenLocal()
     jcenter()
+    maven { url('https://oss.jfrog.org/artifactory/oss-snapshot-local/') }
 }
 
 android {
-	compileSdkVersion 23
-	buildToolsVersion "23.0.3"
+    compileSdkVersion 23
+    buildToolsVersion "23.0.3"
 
     defaultConfig {
         minSdkVersion 14
@@ -48,10 +49,10 @@ configurations.all { resolutionStrategy.cacheChangingModulesFor 0, 'seconds' }
 
 dependencies {
     compile 'com.android.support:appcompat-v7:23.3.0'
-    compile project(':retroauth-core')
-    /* compile ("com.andretietz.retroauth:retroauth-core:$libraryVersion") {
+    // compile project(':retroauth-core')
+    compile ("com.andretietz.retroauth:retroauth-core:$libraryVersion") {
         changing = true
-    } */
+    }
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-core:2.0.31-beta'
