@@ -1,18 +1,10 @@
 package com.andretietz.retroauth;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
-import android.accounts.AccountManagerFuture;
-import android.accounts.AuthenticatorException;
-import android.accounts.OperationCanceledException;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
-import java.io.IOException;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -48,7 +40,7 @@ public class AndroidOwnerManager implements OwnerManager<Account, AndroidTokenTy
     }
 
     /**
-     * Shows an account picker for the user to choose an account
+     * Shows an account picker for the user to choose an account.
      *
      * @param accountType   Account type of the accounts the user can choose
      * @param canAddAccount if <code>true</code> the user has the option to add an account

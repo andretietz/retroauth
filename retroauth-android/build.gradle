@@ -58,4 +58,4 @@ dependencies {
 
 }
 
-apply from: 'bintray-publish.gradle'
+apply from: 'jfrog-publish.gradle'

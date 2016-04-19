@@ -73,7 +73,8 @@ public class AndroidTokenStorage implements TokenStorage<Account, AndroidTokenTy
             throws AuthenticatorException, OperationCanceledException, IOException {
         // Clear the interrupted flag
         Thread.interrupted();
-        AccountManagerFuture<Bundle> future = accountManager.getAuthToken(account, type.tokenType, null, activity, null, null);
+        AccountManagerFuture<Bundle> future = accountManager
+                .getAuthToken(account, type.tokenType, null, activity, null, null);
         Bundle result = future.getResult();
         String token = result.getString(AccountManager.KEY_AUTHTOKEN);
         String refreshToken = accountManager.peekAuthToken(account, getRefreshTokenType(type));
@@ -95,7 +96,7 @@ public class AndroidTokenStorage implements TokenStorage<Account, AndroidTokenTy
     }
 
     @Override
-    public void saveToken(Account account, AndroidTokenType type, AndroidToken androidToken) {
+    public void storeToken(Account account, AndroidTokenType type, AndroidToken androidToken) {
         accountManager.setAuthToken(account, type.tokenType, androidToken.token);
         accountManager.setAuthToken(account, getRefreshTokenType(type), androidToken.refreshToken);
     }
