@@ -5,7 +5,7 @@ import java.util.concurrent.Executor;
 import retrofit2.CallAdapter.Factory;
 
 /**
- * Created by andre.tietz on 30/03/16.
+ * This helper gets some os dependent information from retrofit.
  */
 public final class Retrofit2Platform {
 
@@ -13,7 +13,7 @@ public final class Retrofit2Platform {
     }
 
     public static Factory defaultCallAdapterFactory(Executor executor) {
-        if(executor == null) {
+        if (executor == null) {
             executor = defaultCallbackExecutor();
         }
         return Platform.get().defaultCallAdapterFactory(executor);

@@ -11,12 +11,12 @@ import retrofit2.Retrofit;
 
 /**
  * This is a {@link retrofit2.CallAdapter.Factory} implementation for handling annotated
- * requests using retrofit2
+ * requests using retrofit2.
  */
 final class RetroauthCallAdapterFactory<OWNER, TOKEN_TYPE, TOKEN> extends CallAdapter.Factory {
 
     /**
-     * registered {@link retrofit2.CallAdapter.Factory}s
+     * registered {@link retrofit2.CallAdapter.Factory}s.
      */
     private final List<CallAdapter.Factory> callAdapterFactories;
 
@@ -25,7 +25,8 @@ final class RetroauthCallAdapterFactory<OWNER, TOKEN_TYPE, TOKEN> extends CallAd
      */
     private final AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler;
 
-    RetroauthCallAdapterFactory(List<CallAdapter.Factory> callAdapterFactories, AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler) {
+    RetroauthCallAdapterFactory(List<CallAdapter.Factory> callAdapterFactories,
+                                AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler) {
         this.callAdapterFactories = callAdapterFactories;
         this.authHandler = authHandler;
     }
@@ -47,7 +48,7 @@ final class RetroauthCallAdapterFactory<OWNER, TOKEN_TYPE, TOKEN> extends CallAd
     }
 
     /**
-     * checks if an {@link Authenticated} annotation exists on this request
+     * checks if an {@link Authenticated} annotation exists on this request.
      *
      * @param annotations annotations to check
      * @return if the {@link Authenticated} annotation exists it returns it, otherwise {@code null}
@@ -68,7 +69,7 @@ final class RetroauthCallAdapterFactory<OWNER, TOKEN_TYPE, TOKEN> extends CallAd
      * @param <TOKEN_TYPE> Type of Token to use
      * @param <RETURN_TYPE> Return type of the call
      */
-    private final static class RetroauthCallAdapter<TOKEN_TYPE, RETURN_TYPE>
+    private static final class RetroauthCallAdapter<TOKEN_TYPE, RETURN_TYPE>
             implements CallAdapter<RETURN_TYPE> {
 
         private final CallAdapter<RETURN_TYPE> adapter;

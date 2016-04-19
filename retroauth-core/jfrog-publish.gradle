@@ -1,7 +1,6 @@
-apply plugin: 'java'
 apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'maven-publish'
-
+apply plugin: 'net.saliman.properties'
 group = libraryGroup
 version = libraryVersion
 
@@ -22,9 +21,6 @@ artifactory {
             password = bintrayPass // The publisher password
         }
         defaults {
-            // Reference to Gradle publications defined in the build script.
-            // This is how we tell the Artifactory Plugin which artifacts should be
-            // published to Artifactory.
             publications('mavenJava')
             publishArtifacts = true
             // Properties to be attached to the published artifacts.

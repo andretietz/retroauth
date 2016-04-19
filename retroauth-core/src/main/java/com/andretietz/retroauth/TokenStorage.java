@@ -9,7 +9,7 @@ public interface TokenStorage<OWNER, TOKEN_TYPE, TOKEN> {
      * Creates a token type object. This doe
      *
      * @param annotationValues The values from the {@link Authenticated} annotation
-     * @return a token type
+     * @return a token type.
      */
     TOKEN_TYPE createType(String[] annotationValues);
 
@@ -25,7 +25,7 @@ public interface TokenStorage<OWNER, TOKEN_TYPE, TOKEN> {
     TOKEN getToken(OWNER owner, TOKEN_TYPE type) throws AuthenticationCanceledException;
 
     /**
-     * Removes the token of a specific type and owner from the token storage
+     * Removes the token of a specific type and owner from the token storage.
      *
      * @param owner Owner of the token
      * @param type Type of the token
@@ -34,7 +34,7 @@ public interface TokenStorage<OWNER, TOKEN_TYPE, TOKEN> {
     void removeToken(OWNER owner, TOKEN_TYPE type, TOKEN token);
 
     /**
-     * Stores a token of a specific type and owner to the token storage
+     * Stores a token of a specific type and owner to the token storage.
      *
      * @param owner Owner of the token
      * @param type Type of the token

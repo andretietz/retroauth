@@ -6,12 +6,12 @@ import retrofit2.Retrofit;
 
 /**
  * The Provider interface is a very specific provider endpoint dependent implementation,
- * to authenticate your request and defines when or if to retry
+ * to authenticate your request and defines when or if to retry.
  */
 public interface Provider<OWNER, TOKEN_TYPE, TOKEN> {
 
     /**
-     * Authenticates a {@link Request}
+     * Authenticates a {@link Request}.
      *
      * @param request request to authenticate
      * @param token Token to authenticate
@@ -33,5 +33,6 @@ public interface Provider<OWNER, TOKEN_TYPE, TOKEN> {
      * @param token token used for the last execution of the request
      * @return {@code true} if a retry is required, {@code false} if not
      */
-    boolean retryRequired(int count, Retrofit retrofit, Response response, TokenStorage<OWNER, TOKEN_TYPE, TOKEN> tokenStorage, OWNER owner, TOKEN_TYPE type, TOKEN token);
+    boolean retryRequired(int count, Retrofit retrofit, Response response,
+                          TokenStorage<OWNER, TOKEN_TYPE, TOKEN> tokenStorage, OWNER owner, TOKEN_TYPE type, TOKEN token);
 }

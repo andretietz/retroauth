@@ -1,5 +1,5 @@
 apply plugin: 'java'
-apply plugin: 'net.saliman.properties'
+apply plugin: 'checkstyle'
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
@@ -10,8 +10,12 @@ project(":retroauth-core") {
     }
 }
 
+checkstyle {
+    configFile = new File(rootDir, "checkstyle.xml")
+}
+
 dependencies {
     compile "com.squareup.retrofit2:retrofit:$retrofitVersion"
 }
 // only uncomment when uncommenting dependency in root gradle
-apply from: 'jfrog-publish.gradle'
+//apply from: 'jfrog-publish.gradle'

@@ -12,7 +12,7 @@ import retrofit2.Retrofit;
 import retrofit2.Retrofit2Platform;
 
 /**
- * This is the wrapper builder to create the {@link Retrofit} object
+ * This is the wrapper builder to create the {@link Retrofit} object.
  */
 public final class Retroauth {
 

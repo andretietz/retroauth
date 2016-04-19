@@ -47,7 +47,8 @@ final class CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN> implements Intercept
                 } catch (Exception e) {
                     throw new AuthenticationCanceledException(e);
                 }
-            } while (authHandler.provider.retryRequired(++tryCount, retrofit, response, authHandler.tokenStorage, owner, type, token));
+            } while (authHandler.provider
+                    .retryRequired(++tryCount, retrofit, response, authHandler.tokenStorage, owner, type, token));
         } else {
             // no authentication required, proceed as usual
             response = chain.proceed(request);
