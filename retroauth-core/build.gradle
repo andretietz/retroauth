@@ -14,4 +14,4 @@ dependencies {
     compile "com.squareup.retrofit2:retrofit:$retrofitVersion"
 }
 // only uncomment when uncommenting dependency in root gradle
-//apply from: 'jfrog-publish.gradle'
+apply from: 'jfrog-publish.gradle'

@@ -60,23 +60,18 @@ public class MainActivity extends AppCompatActivity {
 
                 new Provider<Account, AndroidTokenType, AndroidToken>() {
                     @Override
-                    public Request modifyRequest(Request request, AndroidToken androidToken) {
+                    public Request authenticateRequest(Request request, AndroidToken androidToken) {
                         return request.newBuilder()
                                 .header("Authorization", "token " + androidToken.token)
                                 .build();
                     }
 
                     @Override
-                    public boolean retryRequired(int count,
-                                                 okhttp3.Response response,
-                                                 TokenStorage<Account, AndroidTokenType, AndroidToken> tokenStorage,
-                                                 Account account,
-                                                 AndroidTokenType type,
-                                                 AndroidToken androidToken) {
-
-
+                    public boolean retryRequired(int count, Retrofit retrofit, okhttp3.Response response, TokenStorage<Account, AndroidTokenType, AndroidToken> tokenStorage, Account account, AndroidTokenType type, AndroidToken androidToken) {
                         return false;
                     }
+
+
                 });
 
 

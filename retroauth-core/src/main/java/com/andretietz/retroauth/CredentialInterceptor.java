@@ -41,7 +41,7 @@ final class CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN> implements Intercept
                     // get the token
                     token = authHandler.tokenStorage.getToken(owner, type);
                     // modify the request using the token
-                    request = authHandler.provider.modifyRequest(request, token);
+                    request = authHandler.provider.authenticateRequest(request, token);
                     // execute the request
                     response = chain.proceed(request);
                 } catch (Exception e) {
@@ -55,6 +55,10 @@ final class CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN> implements Intercept
         return response;
     }
 
+    /**
+     * TODO: There could be a better solution?
+     * @param retrofit
+     */
     public void retrofit(Retrofit retrofit) {
         this.retrofit = retrofit;
     }

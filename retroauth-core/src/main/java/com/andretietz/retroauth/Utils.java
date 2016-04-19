@@ -3,7 +3,7 @@ package com.andretietz.retroauth;
 import okhttp3.Request;
 
 /**
- * Created by andre on 23.03.2016.
+ * This util class is only used to create a
  */
 public class Utils {
     public static int createUniqueIdentifier(Request request) {
