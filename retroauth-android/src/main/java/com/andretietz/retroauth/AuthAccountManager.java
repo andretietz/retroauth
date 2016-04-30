@@ -33,7 +33,7 @@ import android.support.annotation.Nullable;
 public final class AuthAccountManager {
 
     static final String RETROAUTH_ACCOUNTNAME_KEY = "com.andretietz.retroauth.ACTIVE_ACCOUNT";
-    public final AccountManager android;
+    private final AccountManager android;
     private final Context context;
 
     public AuthAccountManager(@NonNull Context context) {

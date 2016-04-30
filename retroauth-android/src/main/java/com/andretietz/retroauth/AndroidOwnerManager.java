@@ -1,6 +1,7 @@
 package com.andretietz.retroauth;
 
 import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -47,7 +48,7 @@ public class AndroidOwnerManager implements OwnerManager<Account, AndroidTokenTy
      * @return the accounts the user chooses from
      */
     public String showAccountPickerDialog(String accountType, boolean canAddAccount) throws ChooseOwnerCanceledException {
-        Account[] accounts = accountManager.android.getAccountsByType(accountType);
+        Account[] accounts = AccountManager.get(contextManager.getContext()).getAccountsByType(accountType);
         if (accounts.length == 0) return null;
         String[] accountList = new String[canAddAccount ? accounts.length + 1 : accounts.length];
         for (int i = 0; i < accounts.length; i++) {

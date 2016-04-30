@@ -1,6 +1,7 @@
 package com.andretietz.retroauth.demo;
 
 import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -8,18 +9,10 @@ import android.view.View.OnClickListener;
 import android.widget.Toast;
 
 import com.andretietz.retroauth.AndroidAuthenticationHandler;
-import com.andretietz.retroauth.AndroidToken;
-import com.andretietz.retroauth.AndroidTokenType;
 import com.andretietz.retroauth.AuthAccountManager;
-import com.andretietz.retroauth.Provider;
 import com.andretietz.retroauth.Retroauth;
-import com.andretietz.retroauth.TokenStorage;
-import com.andretietz.retroauth.demo.GithubService.Email;
-
-import java.util.List;
 
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -29,7 +22,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
-    private GithubService githubService;
+    private GoogleService service;
     private AuthAccountManager authAccountManager;
 
     @SuppressWarnings("ConstantConditions")
@@ -40,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
         View buttonRequestEmail = findViewById(R.id.buttonRequestEmail);
         View buttonInvalidateToken = findViewById(R.id.buttonInvalidateToken);
+        View buttonInvalidateRefreshToken = findViewById(R.id.buttonInvalidateRefreshToken);
         View buttonResetPrefAccount = findViewById(R.id.buttonResetPrefAccount);
         View buttonAddAccount = findViewById(R.id.buttonAddAccount);
 
@@ -56,31 +50,15 @@ public class MainActivity extends AppCompatActivity {
         /**
          * Create an instance of the {@link AndroidAuthenticationHandler}
          */
-        AndroidAuthenticationHandler authHandler = new AndroidAuthenticationHandler(this,
-
-                new Provider<Account, AndroidTokenType, AndroidToken>() {
-                    @Override
-                    public Request authenticateRequest(Request request, AndroidToken androidToken) {
-                        return request.newBuilder()
-                                .header("Authorization", "token " + androidToken.token)
-                                .build();
-                    }
-
-                    @Override
-                    public boolean retryRequired(int count, Retrofit retrofit, okhttp3.Response response, TokenStorage<Account, AndroidTokenType, AndroidToken> tokenStorage, Account account, AndroidTokenType type, AndroidToken androidToken) {
-                        return false;
-                    }
-
-
-                });
+        AndroidAuthenticationHandler authHandler =
+                new AndroidAuthenticationHandler(this, new ProviderGoogle());
 
 
         /**
          * Create your Retrofit Object using the {@link Retroauth.Builder}
          */
         Retrofit retrofit = new Retroauth.Builder<>(authHandler)
-                //.methodCache(new AndroidMethodCache()) // optional: using sparsearray instead of hashmap
-                .baseUrl("https://api.github.com")
+                .baseUrl("https://www.googleapis.com/")
                 .client(httpClient)
                 .addConverterFactory(MoshiConverterFactory.create())
                 .build();
@@ -88,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         /**
          * Create your API Service
          */
-        githubService = retrofit.create(GithubService.class);
+        service = retrofit.create(GoogleService.class);
 
 
         buttonRequestEmail.setOnClickListener(new OnClickListener() {
@@ -97,18 +75,18 @@ public class MainActivity extends AppCompatActivity {
                 /**
                  * Use it!
                  */
-                githubService.getEmails().enqueue(new Callback<List<Email>>() {
+                service.getUserInfo().enqueue(new Callback<GoogleService.Info>() {
                     @Override
-                    public void onResponse(Call<List<Email>> call, Response<List<Email>> response) {
+                    public void onResponse(Call<GoogleService.Info> call, Response<GoogleService.Info> response) {
                         if (response.isSuccessful()) {
-                            showEmails(response.body());
+                            show("Hallo: " + response.body().name);
                         } else {
                             show("Error: " + response.message());
                         }
                     }
 
                     @Override
-                    public void onFailure(Call<List<Email>> call, Throwable t) {
+                    public void onFailure(Call<GoogleService.Info> call, Throwable t) {
                         showError(t);
                     }
                 });
@@ -116,37 +94,43 @@ public class MainActivity extends AppCompatActivity {
         });
 
         authAccountManager = new AuthAccountManager(this);
+
+
         buttonInvalidateToken.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Account activeAccount = authAccountManager.getActiveAccount(GithubService.ACCOUNT_TYPE);
-                if (activeAccount != null)
-                    authAccountManager.android.setAuthToken(activeAccount, GithubService.TOKEN_TYPE, "some-invalid-token");
+                Account activeAccount = authAccountManager.getActiveAccount(GoogleService.ACCOUNT_TYPE);
+                if (activeAccount != null) {
+                    AccountManager.get(MainActivity.this).setAuthToken(activeAccount, GoogleService.TOKEN_TYPE, "some-invalid-token");
+                }
+            }
+        });
+        buttonInvalidateRefreshToken.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Account activeAccount = authAccountManager.getActiveAccount(GoogleService.ACCOUNT_TYPE);
+                if (activeAccount != null) {
+                    AccountManager.get(MainActivity.this)
+                            .setAuthToken(activeAccount,
+                                    String.format("%s_refresh", GoogleService.TOKEN_TYPE),
+                                    "some-invalid-token");
+                }
             }
         });
 
         buttonResetPrefAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                authAccountManager.resetActiveAccount(GithubService.ACCOUNT_TYPE);
+                authAccountManager.resetActiveAccount(GoogleService.ACCOUNT_TYPE);
             }
         });
 
         buttonAddAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                authAccountManager.addAccount(MainActivity.this, GithubService.ACCOUNT_TYPE, GithubService.TOKEN_TYPE);
+                authAccountManager.addAccount(MainActivity.this, GoogleService.ACCOUNT_TYPE, GoogleService.TOKEN_TYPE);
             }
         });
-    }
-
-    private void showEmails(List<Email> emailList) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Your protected emails:\n");
-        for (int i = 0; i < emailList.size(); i++) {
-            sb.append(emailList.get(i).email).append('\n');
-        }
-        show(sb.toString());
     }
 
     private void show(String toShow) {

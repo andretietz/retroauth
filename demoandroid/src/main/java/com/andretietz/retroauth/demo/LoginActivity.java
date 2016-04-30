@@ -10,16 +10,19 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.andretietz.retroauth.AuthenticationActivity;
-import com.github.scribejava.apis.GitHubApi;
+import com.github.scribejava.apis.GoogleApi20;
 import com.github.scribejava.core.builder.ServiceBuilder;
 import com.github.scribejava.core.model.OAuth2AccessToken;
 import com.github.scribejava.core.model.OAuth2Authorization;
 import com.github.scribejava.core.model.OAuthRequest;
 import com.github.scribejava.core.model.Verb;
 import com.github.scribejava.core.oauth.OAuth20Service;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
 
-import org.json.JSONObject;
-
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.Callable;
 
 import rx.Observable;
@@ -36,15 +39,24 @@ public class LoginActivity extends AuthenticationActivity {
         setContentView(R.layout.activity_login);
         // I do trust you here! usually you don't hand out the applicationId or the secret
         // as soon as I feel like it, I'll deactivate the demo on providers.
+
         helper = new ServiceBuilder()
-                .apiKey("405f730d96862da912a8")
-                .apiSecret("dce0264a8c9eb94689d4d8ffbe1fadb59c33c4c3")
-                .scope("user")
-                .callback("http://localhost:8000/accounts/github/login/callback")
-                .build(GitHubApi.instance());
+                .apiKey("329078189044-q3g29v14uhnrbb5vsaj8d34j26vh4fb4.apps.googleusercontent.com")
+                .apiSecret("HOePqkgIemKIcNhfRt8_jpfF")
+                .scope("profile")
+                .state("secret" + new Random().nextInt(999_999))
+                .callback("http://localhost:8000/accounts/google/login/callback/")
+                .build(GoogleApi20.instance());
+
+        final Map<String, String> additionalParams = new HashMap<>();
+        additionalParams.put("access_type", "offline");
+        //force to reget refresh token (if usera are asked not the first time)
+        additionalParams.put("prompt", "consent");
+
 
         WebView webView = (WebView) findViewById(R.id.webView);
-        webView.loadUrl(helper.getAuthorizationUrl());
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.loadUrl(helper.getAuthorizationUrl(additionalParams));
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -59,7 +71,7 @@ public class LoginActivity extends AuthenticationActivity {
                                            @Override
                                            public void call(Pair<OAuth2AccessToken, String> pair) {
                                                Account account = createOrGetAccount(pair.second);
-                                               storeToken(account, getRequestedTokenType(), pair.first.getAccessToken());
+                                               storeToken(account, getRequestedTokenType(), pair.first.getAccessToken(), pair.first.getRefreshToken());
                                                finalizeAuthentication(account);
                                            }
                                        },
@@ -100,11 +112,18 @@ public class LoginActivity extends AuthenticationActivity {
         @Override
         public Pair<OAuth2AccessToken, String> call() throws Exception {
             OAuth2AccessToken accessToken = service.getAccessToken(code);
-            OAuthRequest request = new OAuthRequest(Verb.GET, "https://api.github.com/user", service);
+            OAuthRequest request = new OAuthRequest(Verb.GET, "https://www.googleapis.com/oauth2/v1/userinfo", service);
             service.signRequest(accessToken, request);
-            String content = request.send().getBody();
-            JSONObject obj = new JSONObject(content);
-            return Pair.create(accessToken, obj.getString("login"));
+            Moshi moshi = new Moshi.Builder().build();
+            JsonAdapter<Profile> jsonAdapter = moshi.adapter(Profile.class);
+            String body = request.send().getBody();
+            System.out.println(body);
+            Profile profile = jsonAdapter.fromJson(body);
+            return Pair.create(accessToken, profile.name);
+        }
+
+        static class Profile {
+            String name;
         }
     }
 }
