@@ -1,11 +1,17 @@
 package com.andretietz.retroauth;
 
-import com.andretietz.retroauth.providers.Github;
-import com.andretietz.retroauth.providers.model.Email;
-import com.github.scribejava.apis.GitHubApi;
+import com.github.scribejava.apis.GoogleApi20;
 import com.github.scribejava.core.builder.ServiceBuilder;
 import com.github.scribejava.core.model.OAuth2AccessToken;
+import com.github.scribejava.core.model.OAuth2Authorization;
 import com.github.scribejava.core.oauth.OAuth20Service;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.Callable;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
@@ -13,20 +19,21 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.moshi.MoshiConverterFactory;
+import rx.Observable;
 import rx.schedulers.JavaFxScheduler;
 import rx.schedulers.Schedulers;
 
-import java.io.IOException;
-import java.util.concurrent.Executors;
-
 
 public class Demo extends Application {
-    private Github githubService;
+    private Google service;
     private Text text;
 
     public static void main(String[] args) throws IOException {
@@ -40,42 +47,43 @@ public class Demo extends Application {
             Platform.exit();
             System.exit(0);
         });
-        OAuth20Service github = new ServiceBuilder()
-                .apiKey("405f730d96862da912a8")
-                .apiSecret("dce0264a8c9eb94689d4d8ffbe1fadb59c33c4c3")
-                .scope("user")
-                .callback("http://localhost:8000/accounts/github/login/callback")
-                .build(GitHubApi.instance());
+        OAuth20Service helper = new ServiceBuilder()
+                .apiKey("329078189044-q3g29v14uhnrbb5vsaj8d34j26vh4fb4.apps.googleusercontent.com")
+                .apiSecret("HOePqkgIemKIcNhfRt8_jpfF")
+                .scope("profile")
+                .state("secret" + new Random().nextInt(999_999))
+                .callback("http://localhost:8000/accounts/google/login/callback/")
+                .build(GoogleApi20.instance());
 
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        OkHttpClient httpClient = new OkHttpClient.Builder()
+                .addInterceptor(interceptor)
+                .build();
 
-        BaseAuthenticationHandler<String, OAuth2AccessToken, Object> authHandler = new BaseAuthenticationHandler<>(
-                Executors.newSingleThreadExecutor(),
-                new JavaFXGithubTokenApi(new Stage(), github),
-                new CredentialStorage()
+        XMLTokenStorage xmlTokenStorage = new XMLTokenStorage(helper);
+
+        AuthenticationHandler<String, String, OAuth2AccessToken> authHandler = new AuthenticationHandler<>(
+                new MethodCache.DefaultMethodCache<>(),
+                new SimpleOwnerManager(), xmlTokenStorage, new ProviderGoogle()
         );
 
-        OkHttpClient client = new OkHttpClient.Builder().build();
-
         Retrofit retrofit = new Retroauth.Builder<>(authHandler)
-                .baseUrl("https://api.github.com")
-                .client(client)
+                .baseUrl("https://www.googleapis.com/")
+                .client(httpClient)
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .addConverterFactory(MoshiConverterFactory.create())
                 .build();
-        this.githubService = retrofit.create(Github.class);
+        this.service = retrofit.create(Google.class);
 
         text = new Text();
         Button button = new Button("Request Emails");
         button.setOnAction(event ->
-                githubService.getEmails()
+                service.getEmails()
                         .subscribeOn(Schedulers.io())
                         .observeOn(JavaFxScheduler.getInstance())
                         .subscribe(emails -> {
-                            StringBuilder sb = new StringBuilder();
-                            for (Email email : emails) {
-                                sb.append(email.email).append('\n');
-                            }
-                            text.setText(sb.toString());
+                            text.setText("Hello: " + emails.name);
                         }));
 
         GridPane grid = new GridPane();
