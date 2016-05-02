@@ -22,11 +22,13 @@ import java.io.IOException;
  * some other error happens. The Reason can be read, on calling {@link AuthenticationCanceledException#getCause()}
  */
 public class AuthenticationCanceledException extends IOException {
-    public AuthenticationCanceledException(Throwable e) {
-        super(e);
+    public AuthenticationCanceledException(String detailMessage) {
+        super(detailMessage);
     }
-
-    public AuthenticationCanceledException(String message) {
-        super(message);
+    public AuthenticationCanceledException(String detailMessage, Throwable throwable) {
+        super(detailMessage, throwable);
+    }
+    public AuthenticationCanceledException(Throwable throwable) {
+        super(throwable);
     }
 }

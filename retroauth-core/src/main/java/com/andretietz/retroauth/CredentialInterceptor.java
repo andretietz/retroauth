@@ -12,8 +12,8 @@ import retrofit2.Retrofit;
  * If so, it tries to get the owner of the token, then tries to get the token and
  * applies the token to the request
  *
- * @param <OWNER>
- * @param <TOKEN_TYPE>
+ * @param <OWNER> a type that represents the owner of a token. Since there could be multiple users on one client.
+ * @param <TOKEN_TYPE> type of the token that should be added to the request
  */
 final class CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN> implements Interceptor {
     private final AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler;
