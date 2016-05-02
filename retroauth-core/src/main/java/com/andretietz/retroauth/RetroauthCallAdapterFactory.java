@@ -66,7 +66,7 @@ final class RetroauthCallAdapterFactory<OWNER, TOKEN_TYPE, TOKEN> extends CallAd
      * @param <TOKEN_TYPE> Type of Token to use
      * @param <RETURN_TYPE> Return type of the call
      */
-    private static final class RetroauthCallAdapter<TOKEN_TYPE, RETURN_TYPE>
+    static final class RetroauthCallAdapter<TOKEN_TYPE, RETURN_TYPE>
             implements CallAdapter<RETURN_TYPE> {
 
         private final CallAdapter<RETURN_TYPE> adapter;
