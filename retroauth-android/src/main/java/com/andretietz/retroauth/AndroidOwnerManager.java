@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2016 Andre Tietz
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.andretietz.retroauth;
 
 import android.accounts.Account;
@@ -5,15 +21,16 @@ import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.os.Looper;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Created by andre on 15/04/16.
+ * This is the Android implementation of an {@link OwnerManager}. It does all the Android {@link Account} handling
  */
-public class AndroidOwnerManager implements OwnerManager<Account, AndroidTokenType> {
+final class AndroidOwnerManager implements OwnerManager<Account, AndroidTokenType> {
 
     private final AuthAccountManager accountManager;
     private final ContextManager contextManager;
@@ -23,7 +40,7 @@ public class AndroidOwnerManager implements OwnerManager<Account, AndroidTokenTy
         this.contextManager = contextManager;
     }
 
-
+    @Override
     public Account getOwner(AndroidTokenType type) throws ChooseOwnerCanceledException {
         // get active account name
         String accountName = accountManager.getActiveAccountName(type.accountType);
@@ -41,13 +58,16 @@ public class AndroidOwnerManager implements OwnerManager<Account, AndroidTokenTy
     }
 
     /**
-     * Shows an account picker for the user to choose an account.
+     * Shows an account picker for the user to choose an account. Make sure you're calling this from a non-ui thread
      *
      * @param accountType   Account type of the accounts the user can choose
      * @param canAddAccount if <code>true</code> the user has the option to add an account
      * @return the accounts the user chooses from
      */
-    public String showAccountPickerDialog(String accountType, boolean canAddAccount) throws ChooseOwnerCanceledException {
+    private String showAccountPickerDialog(String accountType, boolean canAddAccount) throws ChooseOwnerCanceledException {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            throw new RuntimeException("Method was called from the wrong thread!");
+        }
         Account[] accounts = AccountManager.get(contextManager.getContext()).getAccountsByType(accountType);
         if (accounts.length == 0) return null;
         String[] accountList = new String[canAddAccount ? accounts.length + 1 : accounts.length];
@@ -60,11 +80,13 @@ public class AndroidOwnerManager implements OwnerManager<Account, AndroidTokenTy
         ReentrantLock lock = new ReentrantLock();
         Condition condition = lock.newCondition();
         Activity activity = contextManager.getActivity();
-        ShowDialogOnUI showDialog = new ShowDialogOnUI(accountList, lock, condition);
+        // show the account chooser
+        ShowAccountChooser showDialog = new ShowAccountChooser(contextManager, accountList, lock, condition);
         if (activity != null) {
             activity.runOnUiThread(showDialog);
             lock.lock();
             try {
+                // wait until the user has chosen
                 condition.await();
             } catch (InterruptedException e) {
                 // ignore
@@ -78,19 +100,24 @@ public class AndroidOwnerManager implements OwnerManager<Account, AndroidTokenTy
         return showDialog.selectedOption;
     }
 
-    private class ShowDialogOnUI implements Runnable {
+    /**
+     * This {@link Runnable} shows an {@link AlertDialog} where the user can choose an account or create a new one
+     */
+    private static class ShowAccountChooser implements Runnable {
 
         private final Condition condition;
         private final String[] options;
         private final Lock lock;
-        String selectedOption;
+        private final ContextManager contextManager;
         boolean canceled = false;
+        private String selectedOption;
 
-        ShowDialogOnUI(String[] options, Lock lock, Condition condition) {
+        ShowAccountChooser(ContextManager contextManager, String[] options, Lock lock, Condition condition) {
             this.options = options;
             this.condition = condition;
             this.lock = lock;
             this.selectedOption = options[0];
+            this.contextManager = contextManager;
         }
 
         @Override

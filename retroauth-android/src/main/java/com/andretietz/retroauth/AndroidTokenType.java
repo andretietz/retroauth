@@ -1,37 +1,34 @@
+/*
+ * Copyright (c) 2016 Andre Tietz
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package com.andretietz.retroauth;
 
+import android.support.annotation.NonNull;
+
 /**
- * Created by andre.tietz on 29/03/16.
+ * represents a token bound to an account
  */
 public final class AndroidTokenType {
 
     public final String tokenType;
     public final String accountType;
 
-    private AndroidTokenType(Builder builder) {
-        this.accountType = builder.accountType;
-        this.tokenType = builder.tokenType;
-    }
-
-    public static class Builder {
-        private String accountType;
-        private String tokenType;
-
-        public Builder accountType(String accountType) {
-            this.accountType = accountType;
-            return this;
-        }
-
-        public Builder tokenType(String tokenType) {
-            this.tokenType = tokenType;
-            return this;
-        }
-
-        public AndroidTokenType build() {
-            if (accountType == null || tokenType == null) {
-                throw new RuntimeException("You must set a valid account and token type");
-            }
-            return new AndroidTokenType(this);
-        }
+    public AndroidTokenType(@NonNull String accountType, @NonNull String tokenType) {
+        this.accountType = accountType;
+        this.tokenType = tokenType;
     }
 }

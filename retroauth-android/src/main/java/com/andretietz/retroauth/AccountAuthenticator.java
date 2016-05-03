@@ -27,7 +27,8 @@ import android.os.Bundle;
 
 /**
  * This AccountAuthenticator is a very basic implementation of Android's
- * {@link AbstractAccountAuthenticator}.
+ * {@link AbstractAccountAuthenticator}. This implementation is intentional as empty as it is. Cause of this is, that
+ * it's executed in a different process, which makes it difficult to provide login endpoints from the app process in here.
  */
 public final class AccountAuthenticator extends AbstractAccountAuthenticator {
 

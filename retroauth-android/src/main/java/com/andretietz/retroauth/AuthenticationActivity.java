@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Andre Tietz
+ * Copyright (c) 2016 Andre Tietz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,17 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
+import okhttp3.Response;
+import retrofit2.Retrofit;
+
 
 /**
- * Activity that creates the Account.
+ * Your activity that's supposed to create the account (i.e. Login{@link android.app.Activity}) has to implement this.
+ * It'll provide functionality to {@link #storeToken(Account, String, String)} and
+ * {@link #storeUserData(Account, String, String)} when logging in. In case your service is providing a refresh token,
+ * use {@link #storeToken(Account, String, String, String)}. This will additionally store a refresh token that can be used
+ * in {@link Provider#retryRequired(int, Retrofit, Response, TokenStorage, Object, Object, Object)} to update the access
+ * token
  */
 public abstract class AuthenticationActivity extends AppCompatActivity {
 
@@ -47,6 +55,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
      *
      * @param icicle the save instance data of this Activity, may be null
      */
+    @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         Intent intent = getIntent();
@@ -119,6 +128,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
      *
      * @param account Account you want to set as current active
      */
+    @SuppressWarnings("unused")
     protected void finalizeAuthentication(@NonNull Account account) {
         resultBundle.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
         SharedPreferences preferences = getSharedPreferences(accountType, Context.MODE_PRIVATE);
@@ -150,6 +160,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
     /**
      * Sends the result or a Constants.ERROR_CODE_CANCELED error if a result isn't present.
      */
+    @SuppressWarnings("unused")
     public void finish() {
         if (accountAuthenticatorResponse != null) {
             // send the result bundle back if set, otherwise send an error.
@@ -188,6 +199,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
      * @return The requested account type if available. otherwise <code>null</code>
      */
     @NonNull
+    @SuppressWarnings("unused")
     protected String getRequestedAccountType() {
         return accountType;
     }
@@ -196,6 +208,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
      * @return The requested token type if available. otherwise <code>null</code>
      */
     @Nullable
+    @SuppressWarnings("unused")
     protected String getRequestedTokenType() {
         return tokenType;
     }

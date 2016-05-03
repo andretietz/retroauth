@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Andre Tietz
+ * Copyright (c) 2016 Andre Tietz
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,8 @@ import android.content.Intent;
 import android.os.IBinder;
 
 /**
- * You have to extend this service in order to use this library.
+ * You have to extend this service if you want to provide your own implementation of the {@link AuthenticationService}.
+ * In most cases you can use the default implementation {@link RetroauthAuthenticationService}.
  */
 public abstract class AuthenticationService extends Service {
 
