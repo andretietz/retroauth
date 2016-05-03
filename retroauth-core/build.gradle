@@ -12,7 +12,10 @@ project(":retroauth-core") {
 }
 
 checkstyle {
+    toolVersion '6.0'
     configFile = new File(rootDir, "checkstyle.xml")
+    ignoreFailures false
+    showViolations true
 }
 
 dependencies {

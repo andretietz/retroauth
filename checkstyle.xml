@@ -34,7 +34,9 @@
         <!--module name="JavadocMethod"/-->
         <!--module name="JavadocType"/-->
         <!--module name="JavadocVariable"/-->
-        <module name="JavadocStyle" />
+        <module name="JavadocStyle">
+            <property name="checkFirstSentence" value="false"/>
+        </module>
 
 
         <!-- Checks for Naming Conventions.                  -->
