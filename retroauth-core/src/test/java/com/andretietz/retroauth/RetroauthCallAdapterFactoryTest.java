@@ -1,13 +1,13 @@
 package com.andretietz.retroauth;
 
-import com.andretietz.retroauth.dummy.DummyOwnerManager;
-import com.andretietz.retroauth.dummy.DummyTokenStorage;
-import com.andretietz.retroauth.dummy.TestProvider;
+import com.andretietz.retroauth.stub.TestTokenStorage;
+import com.andretietz.retroauth.stub.TestProvider;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.lang.annotation.Annotation;
@@ -30,7 +30,7 @@ public class RetroauthCallAdapterFactoryTest {
     CallAdapter callAdapter;
 
     @Test
-    public void isAuthenticated() {
+    public void adapterFactory() {
         List<CallAdapter.Factory> factories = new ArrayList<>();
         factories.add(new CallAdapter.Factory() {
             @Override
@@ -42,8 +42,8 @@ public class RetroauthCallAdapterFactoryTest {
         AuthenticationHandler<String, String, String> authHandler =
                 new AuthenticationHandler<>(
                         methodCache,
-                        new DummyOwnerManager(),
-                        new DummyTokenStorage(),
+                        Mockito.mock(OwnerManager.class),
+                        new TestTokenStorage(),
                         new TestProvider()
                 );
 

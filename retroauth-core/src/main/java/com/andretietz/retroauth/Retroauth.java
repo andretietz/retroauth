@@ -38,6 +38,7 @@ public final class Retroauth {
         /**
          * {@link retrofit2.Retrofit.Builder#client(OkHttpClient)}
          */
+        @SuppressWarnings("unused")
         public Builder<OWNER, TOKEN_TYPE, TOKEN> client(OkHttpClient client) {
             this.okHttpClient = client;
             return this;
@@ -46,6 +47,7 @@ public final class Retroauth {
         /**
          * {@link retrofit2.Retrofit.Builder#baseUrl(HttpUrl)}
          */
+        @SuppressWarnings("unused")
         public Builder<OWNER, TOKEN_TYPE, TOKEN> baseUrl(HttpUrl baseUrl) {
             builder.baseUrl(baseUrl);
             return this;
@@ -54,6 +56,7 @@ public final class Retroauth {
         /**
          * {@link retrofit2.Retrofit.Builder#baseUrl(String)}
          */
+        @SuppressWarnings("unused")
         public Builder<OWNER, TOKEN_TYPE, TOKEN> baseUrl(String baseUrl) {
             builder.baseUrl(baseUrl);
             return this;
@@ -62,6 +65,7 @@ public final class Retroauth {
         /**
          * {@link retrofit2.Retrofit.Builder#addConverterFactory(Converter.Factory)}
          */
+        @SuppressWarnings("unused")
         public Builder<OWNER, TOKEN_TYPE, TOKEN> addConverterFactory(Converter.Factory factory) {
             builder.addConverterFactory(factory);
             return this;
@@ -70,6 +74,7 @@ public final class Retroauth {
         /**
          * {@link retrofit2.Retrofit.Builder#addCallAdapterFactory(CallAdapter.Factory)}
          */
+        @SuppressWarnings("unused")
         public Builder<OWNER, TOKEN_TYPE, TOKEN> addCallAdapterFactory(CallAdapter.Factory factory) {
             callAdapterFactories.add(factory);
             return this;
@@ -78,6 +83,7 @@ public final class Retroauth {
         /**
          * {@link retrofit2.Retrofit.Builder#callbackExecutor(Executor)}
          */
+        @SuppressWarnings("unused")
         public Builder<OWNER, TOKEN_TYPE, TOKEN> callbackExecutor(Executor executor) {
             this.executor = executor;
             builder.callbackExecutor(executor);
@@ -87,6 +93,7 @@ public final class Retroauth {
         /**
          * {@link retrofit2.Retrofit.Builder#validateEagerly(boolean)}
          */
+        @SuppressWarnings("unused")
         public Builder<OWNER, TOKEN_TYPE, TOKEN> validateEagerly(boolean validateEagerly) {
             builder.validateEagerly(validateEagerly);
             return this;
@@ -95,6 +102,7 @@ public final class Retroauth {
         /**
          * @return a {@link Retrofit} instance using the given parameter.
          */
+        @SuppressWarnings("unused")
         public Retrofit build() {
 
             // after adding the retrofit default callAdapter factories
@@ -121,8 +129,7 @@ public final class Retroauth {
             // create the retrofit object
             Retrofit retrofit = this.builder.build();
 
-            // pass this object to the interceptor
-            // TODO: ugly solution
+            // pass this object to the interceptor - searching for a better solution
             interceptor.retrofit(retrofit);
 
             return retrofit;

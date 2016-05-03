@@ -4,8 +4,8 @@
   * Removed rxjava as dependency
   * Works as well with plain java
   * added retroauth-android library (for android accountmanager needs)
-  * added java demo (javafx)
-  * added android demo (github, webview)
+  * added java demo (google, javafx)
+  * added android demo (google, webview)
 
 
 ## 1.0.4 (2015-11-02)

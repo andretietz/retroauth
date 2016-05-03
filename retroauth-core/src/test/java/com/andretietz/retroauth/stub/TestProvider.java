@@ -1,4 +1,4 @@
-package com.andretietz.retroauth.dummy;
+package com.andretietz.retroauth.stub;
 
 import com.andretietz.retroauth.Provider;
 import com.andretietz.retroauth.TokenStorage;

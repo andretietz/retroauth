@@ -1,9 +1,5 @@
 package com.andretietz.retroauth;
 
-import com.andretietz.retroauth.dummy.DummyOwnerManager;
-import com.andretietz.retroauth.dummy.DummyTokenStorage;
-import com.andretietz.retroauth.dummy.TestProvider;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
