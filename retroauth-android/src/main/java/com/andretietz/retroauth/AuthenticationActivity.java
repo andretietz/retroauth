@@ -214,4 +214,20 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Creates an intent to call if you need a login in your app
+     *
+     * @param action The action you provided in the manifest to start the login
+     * @param accountType the account type you want to create an account for
+     * @param tokenType   the type of token you want to create
+     * @return an intent to start the login
+     */
+    public static Intent createLoginIntent(@NonNull String action, @NonNull String accountType, @Nullable String tokenType) {
+        Intent intent = new Intent(action);
+        intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, accountType);
+        intent.putExtra(AccountAuthenticator.KEY_TOKEN_TYPE, tokenType);
+        return intent;
+    }
+
+
 }

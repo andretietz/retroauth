@@ -26,6 +26,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
+
+import java.lang.ref.WeakReference;
+import java.util.Stack;
 
 /**
  * The {@link ContextManager} provides an application {@link Context} as well as an {@link Activity} if this was not stopped
@@ -38,6 +42,7 @@ import android.support.annotation.Nullable;
  */
 final class ContextManager {
 
+    private static final String TAG = ContextManager.class.getSimpleName();
     private static ContextManager instance;
     private final Context applicationContext;
     private final LifecycleHandler handler;
@@ -101,7 +106,11 @@ final class ContextManager {
     @Nullable
     public Activity getActivity() {
         synchronized (this) {
-            return handler.activity;
+            Activity current = handler.getCurrent();
+            if (current == null) {
+                Log.w(TAG, "Requesting activity when it is null");
+            }
+            return current;
         }
     }
 
@@ -110,11 +119,17 @@ final class ContextManager {
      * it is not stopped. If the {@link Activity} is stopped, the reference will be removed.
      */
     private static class LifecycleHandler implements ActivityLifecycleCallbacks {
-
-        public Activity activity = null;
+        private static final String TAG = LifecycleHandler.class.getSimpleName();
+        private final Stack<WeakReference<Activity>> activityStack;
 
         LifecycleHandler(Activity activity) {
-            this.activity = activity;
+            this.activityStack = new Stack<>();
+            if (activity != null) {
+                Log.i(TAG, String.format("Contructor: %s", activity.getClass().getSimpleName()));
+                activityStack.push(new WeakReference<>(activity));
+            } else {
+                Log.w(TAG, "Initializing with null!");
+            }
         }
 
         @Override
@@ -133,14 +148,14 @@ final class ContextManager {
         @Override
         public void onActivityStarted(Activity activity) {
             synchronized (this) {
-                this.activity = activity;
+                activityStack.push(new WeakReference<>(activity));
             }
         }
 
         @Override
         public void onActivityStopped(Activity activity) {
             synchronized (this) {
-                this.activity = null;
+                activityStack.pop();
             }
         }
 
@@ -150,6 +165,10 @@ final class ContextManager {
 
         @Override
         public void onActivityDestroyed(Activity activity) {
+        }
+
+        Activity getCurrent() {
+            return activityStack.peek().get();
         }
     }
 }

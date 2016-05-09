@@ -21,6 +21,7 @@ import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -150,5 +151,20 @@ public final class AuthAccountManager {
      */
     public void addAccount(@Nullable Activity activity, @NonNull String accountType, @Nullable String tokenType) {
         accountManager.addAccount(accountType, tokenType, null, null, activity, null, null);
+    }
+
+    /**
+     * Removes the currently active account
+     *
+     * @param accountType the account type of which you want to delete the active user from
+     */
+    public void removeActiveAccount(@NonNull String accountType) {
+        accountManager.removeAccountExplicitly(getActiveAccount(accountType));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            accountManager.removeAccount(getActiveAccount(accountType), null, null, null);
+        } else {
+            accountManager.removeAccount(getActiveAccount(accountType), null, null);
+        }
+        resetActiveAccount(accountType);
     }
 }
