@@ -42,6 +42,12 @@ final class ContextManager {
     private final Context applicationContext;
     private final LifecycleHandler handler;
 
+    private ContextManager(@NonNull Application application) {
+        applicationContext = application;
+        handler = new LifecycleHandler(null);
+        application.registerActivityLifecycleCallbacks(handler);
+    }
+
     private ContextManager(@NonNull Activity activity) {
         applicationContext = activity.getApplicationContext();
         handler = new LifecycleHandler(activity);
@@ -59,6 +65,21 @@ final class ContextManager {
             synchronized (ContextManager.class) {
                 if (instance == null) {
                     instance = new ContextManager(activity);
+                }
+            }
+        }
+        return instance;
+    }
+
+    /**
+     * @param application some {@link Activity} to be able to create the instance
+     * @return a singleton instance of the {@link ContextManager}.
+     */
+    public static ContextManager get(@NonNull Application application) {
+        if (instance == null) {
+            synchronized (ContextManager.class) {
+                if (instance == null) {
+                    instance = new ContextManager(application);
                 }
             }
         }
