@@ -159,7 +159,6 @@ public final class AuthAccountManager {
      * @param accountType the account type of which you want to delete the active user from
      */
     public void removeActiveAccount(@NonNull String accountType) {
-        accountManager.removeAccountExplicitly(getActiveAccount(accountType));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
             accountManager.removeAccount(getActiveAccount(accountType), null, null, null);
         } else {
