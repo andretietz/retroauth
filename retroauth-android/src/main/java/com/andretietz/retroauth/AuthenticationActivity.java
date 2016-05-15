@@ -22,6 +22,7 @@ import android.accounts.AccountManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -155,6 +156,20 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
         Account account = new Account(accountName, accountType);
         accountManager.addAccountExplicitly(account, null, null);
         return account;
+    }
+
+    /**
+     * If for some reason an account was created already and the login couldn't complete successfully, you can user this
+     * method to remove this account
+     *
+     * @param account to remove
+     */
+    protected void removeAccount(@NonNull Account account) {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            accountManager.removeAccount(account, null, null, null);
+        } else {
+            accountManager.removeAccount(account, null, null);
+        }
     }
 
     /**

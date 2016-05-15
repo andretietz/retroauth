@@ -143,13 +143,7 @@ public final class Retroauth {
             this.builder.callFactory(builder.build());
 
             // create the retrofit object
-            Retrofit retrofit = this.builder.build();
-
-            // pass this object to the interceptor - searching for a better solution
-            interceptor.retrofit(retrofit);
-
-            return retrofit;
+            return this.builder.build();
         }
     }
-
 }
