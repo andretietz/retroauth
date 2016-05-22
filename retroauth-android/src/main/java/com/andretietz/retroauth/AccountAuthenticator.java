@@ -30,7 +30,7 @@ import android.os.Bundle;
  * {@link AbstractAccountAuthenticator}. This implementation is intentional as empty as it is. Cause of this is, that
  * it's executed in a different process, which makes it difficult to provide login endpoints from the app process in here.
  */
-public final class AccountAuthenticator extends AbstractAccountAuthenticator {
+public class AccountAuthenticator extends AbstractAccountAuthenticator {
 
     public static final String KEY_TOKEN_TYPE = "account_token_type";
 

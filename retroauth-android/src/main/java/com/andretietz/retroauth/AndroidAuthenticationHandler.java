@@ -26,7 +26,7 @@ import android.support.annotation.NonNull;
  * {@link AndroidOwnerManager}, {@link AndroidTokenStorage}) together into one {@link AuthenticationHandler}. This should
  * make your life easier.
  */
-public class AndroidAuthenticationHandler extends AuthenticationHandler<Account, AndroidTokenType, AndroidToken> {
+public final class AndroidAuthenticationHandler extends AuthenticationHandler<Account, AndroidTokenType, AndroidToken> {
 
 
     public AndroidAuthenticationHandler(@NonNull Application application,

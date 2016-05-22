@@ -1,16 +1,16 @@
 # The simple way of calling authenticated requests in retrofit style
 [![Build Status](https://travis-ci.org/andretietz/retroauth.svg?branch=master)](https://travis-ci.org/andretietz/retroauth)
 ## Dependencies
-* [Retrofit](https://github.com/square/retrofit) 2.0.0
+* [Retrofit](https://github.com/square/retrofit) 2.0.2
 
-Min SDK Version: 9
+Min SDK Version: 14
 
 ## Example:
 Your services using retrofit:
 ``` java
 public interface SomeService {
     @GET("/some/path")
-    Call<ResultObject> someRxJavaCall();
+    Call<ResultObject> someRequest();
 }
 ```
 Your services using retroauth:
@@ -18,7 +18,7 @@ Your services using retroauth:
 public interface SomeService {
     @Authenticated({"account-type", "token-type"})
     @GET("/some/path")
-    Call<ResultObject> someAuthenticatedRxJavaCall();
+    Call<ResultObject> someRequest();
 }
 
 ```
@@ -37,20 +37,12 @@ Add it as dependency:
 compile 'com.andretietz:retroauth:2.0.0'
 ```
 
+Define 3
+
 ### 1. Create 3 strings in your strings.xml
-i.e.
-``` xml
-<resources>
-    ...
-	<!-- String for the account type you want to use in your app -->
-	<string name="auth_account_type">eu.unicate.retroauth.demo.account</string>
-	<!-- String for the type of token you're using. -->
-	<string name="auth_token_type">eu.unicate.retroauth.demo.token</string>
-	<!-- String for the Action to open the activity to login if necessary -->
-	<string name="authentication_action">eu.unicate.auth.action.AUTH</string>
-	...
-</resources>
-```
+
+
+
 ### 2. Create an Activity (or use one you already have) where the user can login. This Activity must extend from AuthenticationActivity and call finalizeAuthentication when the authentication finished
 i.e. (see Demo for an example)
 
