@@ -18,6 +18,8 @@ import retrofit2.Retrofit;
  */
 public class ProviderGoogle implements Provider<Account, AndroidTokenType, AndroidToken> {
 
+    private Retrofit retrofit;
+
     @Override
     public Request authenticateRequest(Request request, AndroidToken androidToken) {
         return request.newBuilder()
@@ -26,7 +28,7 @@ public class ProviderGoogle implements Provider<Account, AndroidTokenType, Andro
     }
 
     @Override
-    public boolean retryRequired(int count, Retrofit retrofit, Response response, TokenStorage<Account, AndroidTokenType, AndroidToken> tokenStorage, Account account, AndroidTokenType androidTokenType, AndroidToken androidToken) {
+    public boolean retryRequired(int count, Response response, TokenStorage<Account, AndroidTokenType, AndroidToken> tokenStorage, Account account, AndroidTokenType androidTokenType, AndroidToken androidToken) {
         if (!response.isSuccessful()) {
             if (response.code() == 401) {
                 tokenStorage.removeToken(account, androidTokenType, androidToken);
@@ -52,5 +54,9 @@ public class ProviderGoogle implements Provider<Account, AndroidTokenType, Andro
             return true;
         }
         return false;
+    }
+
+    public void setRetrofit(Retrofit retrofit) {
+        this.retrofit = retrofit;
     }
 }

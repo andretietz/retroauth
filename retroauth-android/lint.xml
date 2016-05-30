@@ -4,7 +4,7 @@
     see here for more details: https://github.com/square/okio/issues/58 -->
     <issue id="InvalidPackage">
         <warning regexp="okio-1.6.0.jar"/>
-        <warning regexp="retrofit-2.0.1.jar"/>
+        <warning regexp="retrofit-2.0.2.jar"/>
     </issue>
     <!-- This warning should be ignored, since I don't want to add this service to the manifest
     of the library -->

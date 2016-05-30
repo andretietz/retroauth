@@ -47,11 +47,13 @@ public class MainActivity extends AppCompatActivity {
                 .addInterceptor(interceptor)
                 .build();
 
+        ProviderGoogle provider = new ProviderGoogle();
+
         /**
          * Create an instance of the {@link AndroidAuthenticationHandler}
          */
         AndroidAuthenticationHandler authHandler =
-                new AndroidAuthenticationHandler(this, new ProviderGoogle());
+                new AndroidAuthenticationHandler(this, provider);
 
 
         /**
@@ -62,6 +64,8 @@ public class MainActivity extends AppCompatActivity {
                 .client(httpClient)
                 .addConverterFactory(MoshiConverterFactory.create())
                 .build();
+
+        provider.setRetrofit(retrofit);
 
         /**
          * Create your API Service
