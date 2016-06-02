@@ -9,8 +9,6 @@ buildscript {
         classpath 'net.saliman:gradle-properties-plugin:1.4.5'
         // for jfrog publishing
         classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.0.0'
-        // checkstyle & co
-        classpath 'com.noveogroup.android:check:1.2.3'
         // android plugin
         classpath 'com.android.tools.build:gradle:2.1.0'
         // publish android aar to maven

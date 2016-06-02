@@ -31,17 +31,34 @@ android {
     }
 }
 
-check {
-    abortOnError true
-    checkstyle {
-        config project.file('../checkstyle.xml')
-    }
+apply plugin: 'checkstyle'
 
-    findbugs {
-        skip true
-    }
-    pmd {
-        skip true
+checkstyle {
+    toolVersion '6.0'
+}
+
+
+task checkstyle(type: Checkstyle) {
+    group 'verification'
+    configFile rootProject.file('checkstyle.xml')
+    source = ['src/main/java', 'src/test/java']
+
+    ignoreFailures false
+    showViolations true
+    include '**/*.java'
+    exclude '**/R.java'
+    exclude '**/BuildConfig.java'
+
+    classpath = files()
+    configProperties = [
+            'proj.module.dir'      : projectDir.absolutePath,
+            'checkstyle.cache.file': './build/cache/checkstyle-cache'
+    ]
+}
+
+afterEvaluate {
+    if (project.tasks.findByName('check')) {
+        check.dependsOn('checkstyle')
     }
 }
 

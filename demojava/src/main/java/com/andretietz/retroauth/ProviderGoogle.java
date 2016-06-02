@@ -13,6 +13,8 @@ import retrofit2.Retrofit;
  */
 public class ProviderGoogle implements Provider<String, String, OAuth2AccessToken> {
 
+    private Retrofit retrofit;
+
     @Override
     public Request authenticateRequest(Request request, OAuth2AccessToken accessToken) {
         return request.newBuilder()
@@ -21,7 +23,7 @@ public class ProviderGoogle implements Provider<String, String, OAuth2AccessToke
     }
 
     @Override
-    public boolean retryRequired(int count, Retrofit retrofit, Response response, TokenStorage<String, String, OAuth2AccessToken> tokenStorage, String account, String androidTokenType, OAuth2AccessToken androidToken) {
+    public boolean retryRequired(int count, Response response, TokenStorage<String, String, OAuth2AccessToken> tokenStorage, String account, String androidTokenType, OAuth2AccessToken androidToken) {
         if (!response.isSuccessful()) {
             if (response.code() == 401) {
                 tokenStorage.removeToken(account, androidTokenType, androidToken);
@@ -46,5 +48,9 @@ public class ProviderGoogle implements Provider<String, String, OAuth2AccessToke
             }
         }
         return false;
+    }
+
+    public void setRetrofit(Retrofit retrofit) {
+        this.retrofit = retrofit;
     }
 }

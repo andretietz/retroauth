@@ -63,9 +63,11 @@ public class Demo extends Application {
 
         XMLTokenStorage xmlTokenStorage = new XMLTokenStorage(helper);
 
+        ProviderGoogle provider = new ProviderGoogle();
+
         AuthenticationHandler<String, String, OAuth2AccessToken> authHandler = new AuthenticationHandler<>(
                 new MethodCache.DefaultMethodCache<>(),
-                new SimpleOwnerManager(), xmlTokenStorage, new ProviderGoogle()
+                new SimpleOwnerManager(), xmlTokenStorage, provider
         );
 
         Retrofit retrofit = new Retroauth.Builder<>(authHandler)
@@ -74,10 +76,11 @@ public class Demo extends Application {
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .addConverterFactory(MoshiConverterFactory.create())
                 .build();
+        provider.setRetrofit(retrofit);
         this.service = retrofit.create(Google.class);
 
         text = new Text();
-        Button button = new Button("Request Emails");
+        Button button = new Button("Request name");
         button.setOnAction(event ->
                 service.getEmails()
                         .subscribeOn(Schedulers.io())
