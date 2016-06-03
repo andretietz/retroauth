@@ -17,7 +17,7 @@ public class TestProvider implements Provider<String, String, String> {
     }
 
     @Override
-    public boolean retryRequired(int count, Retrofit retrofit, Response response,
+    public boolean retryRequired(int count, Response response,
                                  TokenStorage<String, String, String> tokenStorage, String s, String s2, String s3) {
         return false;
     }
