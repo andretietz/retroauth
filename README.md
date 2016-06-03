@@ -38,20 +38,59 @@ compile 'com.andretietz:retroauth-core:2.0.0'
 ```
 
 This library provides you a special Builder for your Retrofit Object. This Builder requires you to implement an AuthenticationHander, which contains out of 4 classes to control the authentication.
+For the Android-Case most of the following classes are implemented already.
 
 
 1. A Method-Cache
-The method-cache is a map, in which you can store information of an annotated request. In case of the android implementation this is an account-type and a token-type). You can use a default class if not required different.
+    The method-cache is a map, in which you can store information of an annotated request. In case of the android implementation this is an account-type and a token-type). You can use a default class if not required different.
+    
+    ``` java
+     methodCache = new MethodCache.DefaultMethodCache<>();
+    ```
 
 2. An OwnerManager
-Usually Tokens and other methods required for an authenticated request, belong to a user/owner. The interface requires you to implement a single method which returns the owner by a type of authentication. In case of android this is an Account stored by the account manager. In the java demo I am returning the same string all the time, which means that there
-s only 1 owner.
+    Usually Tokens and other methods required for an authenticated request, belong to a user/owner. The interface requires you to implement a single method which returns the owner by a type of authentication. In case of android this is an Account stored by the account manager. In the java demo I am returning the same string all the time, which means that there
+    s only 1 owner.
+    
+    ``` java
+        public class SimpleOwnerManager implements OwnerManager<String, String> {
+            @Override
+            public String getOwner(String tokenType) throws ChooseOwnerCanceledException {
+                // since we don't care about multiuser here, we return the same thing
+                return "retroauth";
+            }
+        }
+    ```
 
 3. A Token-Storage
-This is an interface which requires you to implement a storage for tokens or similar authentication data to be able to authenticate a request.
+    This is an interface which requires you to implement a storage for tokens or similar authentication data to be able to authenticate a request.
+    
+    ``` java
+        new TokenStorage<String, String, OAuth2AccessToken>() {
+            @Override
+            public String createType(String[] annotationValues) {
+                return null;
+            }
+    
+            @Override
+            public OAuth2AccessToken getToken(String owner, String tokenType) throws AuthenticationCanceledException {
+                return null;
+            }
+    
+            @Override
+            public void removeToken(String owner, String tokenType, OAuth2AccessToken token) {
+    
+            }
+    
+            @Override
+            public void storeToken(String owner, String tokenType, OAuth2AccessToken token) {
+    
+            }
+        }
+    ```
 
 4. A Provider
-Since every provider can have a different approach of authenticating it's requests (i.e. HTTP header, url extension) you can decide how this should be done by implementing this provider specific
+    Since every provider can have a different approach of authenticating it's requests (i.e. HTTP header, url extension) you can decide how this should be done by implementing this provider specific
 
 Wrap all of the together into the AuthenticationHandler and create your retrofit object
 
