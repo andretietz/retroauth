@@ -22,144 +22,53 @@ public interface SomeService {
 }
 
 ```
-## What does it do?
-If you call a request method, annotated with the authenticated annotation, it'll do the following steps:
-* Step 1: Checks if there already is an account in the Android AccountManager. If not, it'll open a LoginActivity (you choose which). If there already is an account, go on with step 2, If there's more than one account open an Dialog to pick an account.
-* Step 2: Tries to get the authentication token from the (choosen) account to add it to the request header. If there is no valid token, your LoginActivity could open with the pre-filled accounts username. After login go to Step 1.
-* Step 3: Sends the actual request
-* Step 4: If the request fails with an 401 (by default, but changeable) it invalidates the used token in the Android AccountManager and continues with step 1.
+## About
+This project was initially created for android. Since retrofit is plain java, you can use this project in plain java too.
+
+Android Developers can go directly to the android subproject.
+
+
 
 Sequence Diagrams can be found in the DIAGRAMS.md file
 
 ## How to use it?
 Add it as dependency:
 ```groovy
-compile 'com.andretietz:retroauth:2.0.0'
+compile 'com.andretietz:retroauth-core:2.0.0'
 ```
 
-Define 3
-
-### 1. Create 3 strings in your strings.xml
+This library provides you a special Builder for your Retrofit Object. This Builder requires you to implement an AuthenticationHander, which contains out of 4 classes to control the authentication.
 
 
+1. A Method-Cache
+The method-cache is a map, in which you can store information of an annotated request. In case of the android implementation this is an account-type and a token-type). You can use a default class if not required different.
 
-### 2. Create an Activity (or use one you already have) where the user can login. This Activity must extend from AuthenticationActivity and call finalizeAuthentication when the authentication finished
-i.e. (see Demo for an example)
+2. An OwnerManager
+Usually Tokens and other methods required for an authenticated request, belong to a user/owner. The interface requires you to implement a single method which returns the owner by a type of authentication. In case of android this is an Account stored by the account manager. In the java demo I am returning the same string all the time, which means that there
+s only 1 owner.
 
-```java
-public class LoginActivity extends AuthenticationActivity {
-   ...
-   private void someLoginMethod() {
-        String user;
-        String token;
-        ... // do login work here and make sure, that you provide at least a user and a token String
-        // the Token type is the one you defined in Step 1
-        Account account = createOrGetAccount(user);
-        storeToken(account, getString(R.string.auth_token_type), token);
-        // add multiple tokens: storeToken(account, getString(R.string.auth_token_type2), token2);
-        // store some additional userdata (optionally)
-        storeUserData(account, "key_for_some_user_data", "very-important-userdata");
-        // finishes the activity and set this account to the "current-active" one
-        finalizeAuthentication(account);
-   }
-   ...
-}
-```
-Make sure your LoginActivity has the intent filter in the manifest:
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<manifest>
-...
-       <activity android:name=".LoginActivity">
-           <intent-filter>
-               <!-- THIS MUST BE THE SAME STRING AS DEFINED IN STEP 1 (sadly the resource string cannot be used for that) -->
-               <action android:name="eu.unicate.auth.action.AUTH"/>
-               <category android:name="android.intent.category.DEFAULT"/>
-           </intent-filter>
-       </activity>
-...
-</manifest>
-```
-### 3. Implement a very basic AuthenticationService
-```java
-public class SomeAuthenticationService extends AuthenticationService {
-	@Override
-	public String getLoginAction(Context context) {
-	    // this is used only to provide the action for the LoginActivity to open
-		return context.getString(R.string.authentication_action); // <=  This is the String provided in Step 1
-	}
-}
-```
-Provide a authenticator.xml:
-```xml
-<account-authenticator xmlns:android="http://schemas.android.com/apk/res/android"
-					   android:accountType="@string/auth_account_type"  <= This is the String provided in Step 1
-					   android:icon="@mipmap/ic_launcher"
-					   android:smallIcon="@mipmap/ic_launcher"
-					   android:label="@string/app_name" />
+3. A Token-Storage
+This is an interface which requires you to implement a storage for tokens or similar authentication data to be able to authenticate a request.
+
+4. A Provider
+Since every provider can have a different approach of authenticating it's requests (i.e. HTTP header, url extension) you can decide how this should be done by implementing this provider specific
+
+Wrap all of the together into the AuthenticationHandler and create your retrofit object
+
+``` java
+    AuthenticationHandler<String, String, OAuth2AccessToken> authHandler = new AuthenticationHandler<>(
+            new MethodCache.DefaultMethodCache<>(),
+            new SimpleOwnerManager(), xmlTokenStorage, provider
+    );
+
+    Retrofit retrofit = new Retroauth.Builder<>(authHandler)
+            .baseUrl(<some-base-url>)
+            .build();
+
 ```
 
-Add the Service to the Manifest:
 
-```xml
-        ...
-        <service
-            android:name=".SomeAuthenticationService"
-            android:process=":auth"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.accounts.AccountAuthenticator"/>
-            </intent-filter>
-            <meta-data
-                android:name="android.accounts.AccountAuthenticator"
-                android:resource="@xml/authenticator"/>
-        </service>
-        ...
-    </application>
-</manifest>
-```
-### 4. Create your REST interface
-* Add authentication information to it:
-
-```java
-@Authentication(accountType = R.string.auth_account_type, tokenType = R.string.auth_token_type)
-public interface SomeAuthenticatedService {
-    @GET("/some/path")
-    Observable<ResultObject> someUnauthenticatedCall();
-
-    @Authenticated
-    @GET("/some/path")
-    Observable<ResultObject> someAuthenticatedRxJavaCall();
-
-    // or
-    @Authenticated
-    @GET("/some/path")
-    JsonElement someAuthenticatedBlockingCall();
-
-    // or
-    @Authenticated
-    @GET("/some/path")
-    void someAuthenticatedAsyncCall(Callback<JsonElement> callback);
-}
-```
-### 5. Create your Service
-```java
-// create your RestAdapter just use AuthRestAdapter instead of RestAdapter
-// it provides all functionality as the original one
-AuthRestAdapter restAdapter = new AuthRestAdapter.Builder()
-   .setEndpoint("http://some.api.endpoint")
-   .setLogLevel(RestAdapter.LogLevel.FULL)
-   .build();
-...
-service = restAdapter.create(context, TokenInterceptor.BEARER_TOKENINTERCEPTOR, SomeAuthenticatedService.class);
-// If you want the Login to open, make sure your context is an activity. If you're calling this
-// from a service with a Service-context or even with the application context, the login won't open.
-// This is because the addAccount Method requires an Activity to be able to open the (Login)Activity
-```
-
-## That's it.
-
-Have fun with it!
+Take a look at the Java8 Demo implementation, which uses java-scribe to authenticate against the google-apis
 
 ## Pull requests are welcome
 Since I am the only one working on that, I would like to know your opinion and/or your suggestions.

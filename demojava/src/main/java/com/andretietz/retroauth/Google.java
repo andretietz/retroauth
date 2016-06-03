@@ -1,6 +1,5 @@
 package com.andretietz.retroauth;
 
-import com.andretietz.retroauth.Authenticated;
 import com.squareup.moshi.Json;
 
 import retrofit2.Call;
@@ -10,9 +9,6 @@ import retrofit2.http.GET;
 import retrofit2.http.POST;
 import rx.Observable;
 
-/**
- * Created by andre on 14.04.2016.
- */
 public interface Google {
     String TOKEN_TYPE = "com.andretietz.retroauth.demo.TOKEN";
 
