@@ -107,7 +107,10 @@ final class CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN> implements Intercept
             }
             lock.lock.lock();
             if (wasWaiting) {
-                throw lock.errorContainer.get();
+                Exception exception = lock.errorContainer.get();
+                if (exception != null) {
+                    throw exception;
+                }
             }
         }
     }
