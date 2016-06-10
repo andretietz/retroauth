@@ -50,7 +50,7 @@ public class CredentialInterceptorTest {
 
         // only request2 is authenticated
         AuthenticationHandler<String, String, String> authHandler = getAuthenticationHandler(request2);
-        CredentialInterceptor<String, String, String> interceptor = new CredentialInterceptor<>(authHandler);
+        CredentialInterceptor<String, String, String> interceptor = new CredentialInterceptor<>(authHandler, true);
 
         TestInterceptorChain interceptorChain = new TestInterceptorChain();
 

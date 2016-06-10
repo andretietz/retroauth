@@ -99,15 +99,12 @@ final class CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN> implements Intercept
         return lock;
     }
 
-    private void lock(TOKEN_TYPE type) throws Exception {
+    private synchronized void lock(TOKEN_TYPE type) throws Exception {
         if (lockable) {
             AccountTokenLock lock = getLock(type);
-            boolean wasWaiting = !lock.lock.tryLock();
-            if (wasWaiting) {
+            if (!lock.lock.tryLock()) {
                 lock.waitCounter.incrementAndGet();
-            }
-            lock.lock.lock();
-            if (wasWaiting) {
+                lock.lock.lock();
                 Exception exception = lock.errorContainer.get();
                 if (exception != null) {
                     throw exception;
@@ -116,11 +113,12 @@ final class CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN> implements Intercept
         }
     }
 
-    private void unlock(TOKEN_TYPE type) {
+    private synchronized void unlock(TOKEN_TYPE type) {
         if (lockable) {
             AccountTokenLock lock = getLock(type);
             if (lock.waitCounter.decrementAndGet() <= 0) {
                 lock.errorContainer.set(null);
+                lock.waitCounter.set(0);
             }
             lock.lock.unlock();
         }
