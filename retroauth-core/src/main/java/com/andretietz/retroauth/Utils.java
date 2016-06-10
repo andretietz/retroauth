@@ -19,7 +19,7 @@ package com.andretietz.retroauth;
 import okhttp3.Request;
 
 /**
- * This util class is only used to create a unique identifier for a request.
+ * This util class is only used to create an identifier for a request.
  */
 final class Utils {
 
@@ -27,6 +27,12 @@ final class Utils {
         throw new RuntimeException("no instance allowed!");
     }
 
+    /**
+     * Creates an identifier, which can identify the request by itself
+     *
+     * @param request request to create the identifier for
+     * @return an identifier
+     */
     public static int createUniqueIdentifier(Request request) {
         return (request.url() + request.method()).hashCode();
     }

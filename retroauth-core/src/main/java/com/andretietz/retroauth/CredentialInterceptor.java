@@ -82,11 +82,12 @@ final class CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN> implements Intercept
         return response;
     }
 
-    private void storeAndThrowError(TOKEN_TYPE type, Exception e) throws IOException {
+    private void storeAndThrowError(TOKEN_TYPE type, Exception exception) throws IOException {
+        //noinspection ThrowableResultOfMethodCallIgnored
         if (lockable && getLock(type).errorContainer.get() == null) {
-            getLock(type).errorContainer.set(e);
+            getLock(type).errorContainer.set(exception);
         }
-        throw new AuthenticationCanceledException(e);
+        throw new AuthenticationCanceledException(exception);
     }
 
     private AccountTokenLock getLock(TOKEN_TYPE type) {

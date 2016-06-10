@@ -34,7 +34,7 @@ public interface TokenStorage<OWNER, TOKEN_TYPE, TOKEN> {
      * authenticating your user.
      *
      * @param owner The owner type of the token you want to get
-     * @param type the type of the token you want to get
+     * @param type  the type of the token you want to get
      * @return the token to authenticate your request or {@code null}
      * @throws AuthenticationCanceledException
      */
@@ -44,7 +44,7 @@ public interface TokenStorage<OWNER, TOKEN_TYPE, TOKEN> {
      * Removes the token of a specific type and owner from the token storage.
      *
      * @param owner Owner of the token
-     * @param type Type of the token
+     * @param type  Type of the token
      * @param token Token to remove
      */
     void removeToken(OWNER owner, TOKEN_TYPE type, TOKEN token);
@@ -53,7 +53,7 @@ public interface TokenStorage<OWNER, TOKEN_TYPE, TOKEN> {
      * Stores a token of a specific type and owner to the token storage.
      *
      * @param owner Owner of the token
-     * @param type Type of the token
+     * @param type  Type of the token
      * @param token Token to store
      */
     void storeToken(OWNER owner, TOKEN_TYPE type, TOKEN token);

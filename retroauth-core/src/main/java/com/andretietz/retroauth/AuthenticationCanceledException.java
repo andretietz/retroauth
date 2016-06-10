@@ -26,9 +26,11 @@ public class AuthenticationCanceledException extends IOException {
     public AuthenticationCanceledException(String detailMessage) {
         super(detailMessage);
     }
+
     public AuthenticationCanceledException(String detailMessage, Throwable throwable) {
         super(detailMessage, throwable);
     }
+
     public AuthenticationCanceledException(Throwable throwable) {
         super(throwable);
     }

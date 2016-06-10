@@ -79,7 +79,7 @@ final class RetroauthCallAdapterFactory<OWNER, TOKEN_TYPE, TOKEN> extends CallAd
      * This {@link CallAdapter} is a wrapper adapter. After registering the request as an
      * authenticated request, it executes the given {@link CallAdapter#adapt(Call)} call
      *
-     * @param <TOKEN_TYPE> Type of Token to use
+     * @param <TOKEN_TYPE>  Type of Token to use
      * @param <RETURN_TYPE> Return type of the call
      */
     static final class RetroauthCallAdapter<TOKEN_TYPE, RETURN_TYPE>

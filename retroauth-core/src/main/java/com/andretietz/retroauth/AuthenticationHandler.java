@@ -27,10 +27,10 @@ public class AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> {
     public final TokenStorage<OWNER, TOKEN_TYPE, TOKEN> tokenStorage;
     public final Provider<OWNER, TOKEN_TYPE, TOKEN> provider;
 
-    protected AuthenticationHandler(MethodCache<TOKEN_TYPE> methodCache,
-                                    OwnerManager<OWNER, TOKEN_TYPE> ownerManager,
-                                    TokenStorage<OWNER, TOKEN_TYPE, TOKEN> tokenStorage,
-                                    Provider<OWNER, TOKEN_TYPE, TOKEN> provider) {
+    public AuthenticationHandler(MethodCache<TOKEN_TYPE> methodCache,
+                                 OwnerManager<OWNER, TOKEN_TYPE> ownerManager,
+                                 TokenStorage<OWNER, TOKEN_TYPE, TOKEN> tokenStorage,
+                                 Provider<OWNER, TOKEN_TYPE, TOKEN> provider) {
 
         this.methodCache = methodCache;
         this.ownerManager = ownerManager;

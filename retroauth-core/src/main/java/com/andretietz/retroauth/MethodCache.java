@@ -19,8 +19,6 @@ package com.andretietz.retroauth;
 import java.util.HashMap;
 
 /**
- * TODO: This class is likely to change in future releases
- * <p/>
  * This cache stores the unique hash of a request to identify it later on when
  * authenticating the request itself. The identifier is created right now
  * in {@link Utils#createUniqueIdentifier}, this may change.
