@@ -23,23 +23,30 @@ public class ProviderGoogle implements Provider<String, String, OAuth2AccessToke
     }
 
     @Override
-    public boolean retryRequired(int count, Response response, TokenStorage<String, String, OAuth2AccessToken> tokenStorage, String account, String androidTokenType, OAuth2AccessToken androidToken) {
+    public boolean retryRequired(int count, Response response, TokenStorage<String, String, OAuth2AccessToken> tokenStorage, String account, String tokenType, OAuth2AccessToken oauthToken) {
+        // if request was not successful
         if (!response.isSuccessful()) {
+            // request was unauthorized
             if (response.code() == 401) {
-                tokenStorage.removeToken(account, androidTokenType, androidToken);
-                if (androidToken.getRefreshToken() != null) {
+                // remove the token used for this request
+                tokenStorage.removeToken(account, tokenType, oauthToken);
+                // check if there is a refresh token to use
+                if (oauthToken.getRefreshToken() != null) {
                     Google googleService = retrofit.create(Google.class);
                     try {
+                        // try refreshing the token
                         retrofit2.Response<Google.RefreshToken> refreshResponse = googleService.refreshToken(
-                                androidToken.getRefreshToken(),
+                                oauthToken.getRefreshToken(),
                                 // as soon as there will be any trouble I will deactivate this demo project
                                 "329078189044-q3g29v14uhnrbb5vsaj8d34j26vh4fb4.apps.googleusercontent.com",
                                 "HOePqkgIemKIcNhfRt8_jpfF"
-
                         ).execute();
+                        // if refreshing was successful
                         if (refreshResponse.isSuccessful()) {
                             Google.RefreshToken token = refreshResponse.body();
-                            tokenStorage.storeToken(account, androidTokenType, new OAuth2AccessToken(token.accessToken, token.tokenType, token.expiresIn, androidToken.getRefreshToken(), androidToken.getScope(),refreshResponse.raw().message()));
+                            // store new token
+                            tokenStorage.storeToken(account, tokenType, new OAuth2AccessToken(token.accessToken, token.tokenType, token.expiresIn, oauthToken.getRefreshToken(), oauthToken.getScope(),refreshResponse.raw().message()));
+                            // retry the actual request
                             return true;
                         }
                     } catch (IOException e) {
@@ -51,6 +58,9 @@ public class ProviderGoogle implements Provider<String, String, OAuth2AccessToke
         return false;
     }
 
+    /**
+     * This is a not too nice implementation but it keeps the example simple
+     */
     public void setRetrofit(Retrofit retrofit) {
         this.retrofit = retrofit;
     }
