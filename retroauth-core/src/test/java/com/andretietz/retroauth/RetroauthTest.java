@@ -17,9 +17,12 @@ import java.io.IOException;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import retrofit2.Response;
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava.HttpException;
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.moshi.MoshiConverterFactory;
+import rx.observers.TestSubscriber;
+import rx.schedulers.Schedulers;
 
 
 /**
@@ -28,15 +31,15 @@ import retrofit2.converter.moshi.MoshiConverterFactory;
 @RunWith(MockitoJUnitRunner.class)
 public class RetroauthTest {
 
-
     private MockWebServer server;
     private TestInterface service;
+    private TestTokenStorage tokenStorage;
 
     @Before
     public void prepare() throws IOException {
         server = new MockWebServer();
         server.start();
-        TestTokenStorage tokenStorage = new TestTokenStorage();
+        tokenStorage = new TestTokenStorage();
         MethodCache.DefaultMethodCache<String> methodCache = new MethodCache.DefaultMethodCache<>();
         AuthenticationHandler<String, String, String> authHandler =
                 new AuthenticationHandler<>(
@@ -48,6 +51,8 @@ public class RetroauthTest {
 
         Retrofit retrofit = new Retroauth.Builder<>(authHandler)
                 .baseUrl(server.url("/"))
+                .lockPerToken(true)
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .addConverterFactory(MoshiConverterFactory.create())
                 .build();
 
@@ -62,16 +67,88 @@ public class RetroauthTest {
     @Test
     public void simpleHappyCase() throws IOException {
         // test very simple case
-        server.enqueue(new MockResponse().setBody("{ \"value\" : 1 }"));
-        Response<TestResponse> response = service.authenticatedMethod().execute();
-        Assert.assertEquals(1, response.body().value);
+        server.enqueue(new MockResponse().setBody(TestInterface.TEST_BODY));
+        TestResponse response = service.authenticatedMethod().toBlocking().single();
+        Assert.assertEquals(1, response.value);
+
+        server.enqueue(new MockResponse().setBody(TestInterface.TEST_BODY));
+        response = service.unauthenticatedMethod().toBlocking().single();
+        Assert.assertEquals(1, response.value);
+
     }
 
     @Test
     public void simpleErrorCase() throws IOException {
+        TestSubscriber<TestResponse> subscriber = TestSubscriber.create();
         // test simple error case
         server.enqueue(new MockResponse().setResponseCode(400));
-        Response<TestResponse> response = service.authenticatedMethod().execute();
-        Assert.assertEquals(400, response.code());
+        service.authenticatedMethod().subscribe(subscriber);
+        subscriber.awaitTerminalEvent();
+        subscriber.assertNoValues();
+        subscriber.assertError(HttpException.class);
+
+        subscriber = TestSubscriber.create();
+        server.enqueue(new MockResponse().setResponseCode(400));
+        service.unauthenticatedMethod().subscribe(subscriber);
+        subscriber.awaitTerminalEvent();
+        subscriber.assertNoValues();
+        subscriber.assertError(HttpException.class);
+    }
+
+    @Test
+    public void userCanceledAuthentication() throws IOException, InterruptedException {
+        tokenStorage.setTestBehaviour(new TestTokenStorage.TestBehaviour() {
+            @Override
+            public String getToken(String owner, String tokenType) throws AuthenticationCanceledException {
+                throw new AuthenticationCanceledException("userCanceledAuthentication");
+            }
+        });
+
+        TestSubscriber<TestResponse> subscriber = TestSubscriber.create();
+
+        service.authenticatedMethod().subscribe(subscriber);
+        subscriber.awaitTerminalEvent();
+        subscriber.assertNoValues();
+        subscriber.assertError(AuthenticationCanceledException.class);
+
+        subscriber = TestSubscriber.create();
+        server.enqueue(new MockResponse().setBody(TestInterface.TEST_BODY));
+        service.unauthenticatedMethod().subscribe(subscriber);
+        subscriber.awaitTerminalEvent();
+        subscriber.assertNoErrors();
+        subscriber.assertValueCount(1);
+
+        tokenStorage.setTestBehaviour(null);
+    }
+
+    /**
+     * This test should fail, if you're not using {@link Retroauth.Builder#lockPerToken(boolean)}
+     * with the value <code>true</code>
+     */
+    @Test
+    public void blockingErrorCaseTest() {
+        int THREAD_COUNT = 100;
+        TestSubscriber<TestResponse> subscribers[] = new TestSubscriber[THREAD_COUNT];
+        // create a lot of requests
+        for (int i = 0; i < THREAD_COUNT; i++) {
+            subscribers[i] = TestSubscriber.create();
+            service.authenticatedMethod()
+                    .subscribeOn(Schedulers.newThread())
+                    .subscribe(subscribers[i]);
+        }
+        // create possible failing responses
+        for (int i = 0; i < THREAD_COUNT; i++) {
+            server.enqueue(new MockResponse().setResponseCode(401));
+        }
+
+        // catch responses
+        for (int i = 0; i < THREAD_COUNT; i++) {
+            subscribers[i].awaitTerminalEvent();
+            subscribers[i].assertNoValues();
+            subscribers[i].assertError(Exception.class);
+        }
+        // ensure that only one request has been executed
+        Assert.assertEquals(1, server.getRequestCount());
+
     }
 }

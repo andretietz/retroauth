@@ -9,17 +9,17 @@ import com.andretietz.retroauth.TokenStorage;
 public class TestTokenStorage implements TokenStorage<String, String, String> {
 
     public static final String TEST_TOKEN = "token";
-    private boolean canceled = false;
+    private TestBehaviour behaviour;
 
     @Override
     public String createType(String[] annotationValues) {
-        return "tokenType";
+        return annotationValues.length>0?"tokenType":null;
     }
 
     @Override
     public String getToken(String owner, String tokenType) throws AuthenticationCanceledException {
-        if(canceled) {
-            throw new AuthenticationCanceledException("foo");
+        if(behaviour != null) {
+            return behaviour.getToken(owner, tokenType);
         }
         return TEST_TOKEN;
     }
@@ -34,7 +34,11 @@ public class TestTokenStorage implements TokenStorage<String, String, String> {
 
     }
 
-    public void userCanceled(boolean error) {
-        this.canceled = error;
+    public void setTestBehaviour(TestBehaviour behaviour) {
+        this.behaviour = behaviour;
+    }
+
+    public interface TestBehaviour {
+        String getToken(String owner, String tokenType) throws AuthenticationCanceledException ;
     }
 }

@@ -40,7 +40,7 @@ final class CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN> implements Intercept
     private final HashMap<TOKEN_TYPE, AccountTokenLock> tokenTypeLockMap = new HashMap<>();
     private final boolean lockable;
 
-    public CredentialInterceptor(AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler, boolean lockPerToken) {
+    CredentialInterceptor(AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler, boolean lockPerToken) {
         this.authHandler = authHandler;
         this.lockable = lockPerToken;
     }
@@ -54,8 +54,9 @@ final class CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN> implements Intercept
 
         // if the request does require authentication
         if (type != null) {
+            boolean wasWaiting = false;
             try {
-                lock(type);
+                wasWaiting = lock(type);
                 TOKEN token;
                 OWNER owner;
                 int tryCount = 0;
@@ -73,7 +74,7 @@ final class CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN> implements Intercept
             } catch (Exception e) {
                 storeAndThrowError(type, e);
             } finally {
-                unlock(type);
+                unlock(type, wasWaiting);
             }
         } else {
             // no authentication required, proceed as usual
@@ -90,7 +91,7 @@ final class CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN> implements Intercept
         throw new AuthenticationCanceledException(exception);
     }
 
-    private AccountTokenLock getLock(TOKEN_TYPE type) {
+    private synchronized AccountTokenLock getLock(TOKEN_TYPE type) {
         AccountTokenLock lock = tokenTypeLockMap.get(type);
         if (lock == null) {
             lock = new AccountTokenLock();
@@ -99,38 +100,38 @@ final class CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN> implements Intercept
         return lock;
     }
 
-    private synchronized void lock(TOKEN_TYPE type) throws Exception {
+    private boolean lock(TOKEN_TYPE type) throws Exception {
         if (lockable) {
             AccountTokenLock lock = getLock(type);
             if (!lock.lock.tryLock()) {
-                lock.waitCounter.incrementAndGet();
                 lock.lock.lock();
                 Exception exception = lock.errorContainer.get();
                 if (exception != null) {
                     throw exception;
                 }
+                return true;
             }
         }
+        return false;
     }
 
-    private synchronized void unlock(TOKEN_TYPE type) {
+    private void unlock(TOKEN_TYPE type, boolean wasWaiting) {
         if (lockable) {
             AccountTokenLock lock = getLock(type);
-            if (lock.waitCounter.decrementAndGet() <= 0) {
+            if (wasWaiting && lock.waitCounter.decrementAndGet() <= 0) {
                 lock.errorContainer.set(null);
-                lock.waitCounter.set(0);
             }
             lock.lock.unlock();
         }
     }
 
     private static class AccountTokenLock {
-        public final Lock lock;
-        public final AtomicReference<Exception> errorContainer;
-        public final AtomicInteger waitCounter;
+        final Lock lock;
+        final AtomicReference<Exception> errorContainer;
+        final AtomicInteger waitCounter;
 
-        public AccountTokenLock() {
-            this.lock = new ReentrantLock();
+        AccountTokenLock() {
+            this.lock = new ReentrantLock(true);
             this.errorContainer = new AtomicReference<>();
             this.waitCounter = new AtomicInteger();
         }
