@@ -1,6 +1,6 @@
 package com.andretietz.retroauth;
 
-import com.andretietz.retroauth.stub.TestTokenStorage;
+import com.andretietz.retroauth.testimpl.TestTokenStorage;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -15,7 +15,6 @@ import okhttp3.Interceptor;
 import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
-import retrofit2.Retrofit;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CredentialInterceptorTest {

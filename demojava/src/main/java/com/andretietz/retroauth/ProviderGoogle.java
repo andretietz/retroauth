@@ -40,7 +40,9 @@ public class ProviderGoogle implements Provider<String, String, OAuth2AccessToke
                                 // as soon as there will be any trouble I will deactivate this demo project
                                 "329078189044-q3g29v14uhnrbb5vsaj8d34j26vh4fb4.apps.googleusercontent.com",
                                 "HOePqkgIemKIcNhfRt8_jpfF"
-                        ).execute();
+                        )
+                                // since this method should be called in the background anyways, we can do it blocking here
+                                .execute();
                         // if refreshing was successful
                         if (refreshResponse.isSuccessful()) {
                             Google.RefreshToken token = refreshResponse.body();

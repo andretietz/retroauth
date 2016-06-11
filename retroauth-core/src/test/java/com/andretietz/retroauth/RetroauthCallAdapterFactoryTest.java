@@ -1,7 +1,8 @@
 package com.andretietz.retroauth;
 
-import com.andretietz.retroauth.stub.TestTokenStorage;
-import com.andretietz.retroauth.stub.TestProvider;
+import com.andretietz.retroauth.testimpl.TestInterface;
+import com.andretietz.retroauth.testimpl.TestTokenStorage;
+import com.andretietz.retroauth.testimpl.TestProvider;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -18,7 +19,6 @@ import java.util.List;
 
 import retrofit2.CallAdapter;
 import retrofit2.Retrofit;
-import retrofit2.http.GET;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RetroauthCallAdapterFactoryTest {
@@ -62,14 +62,5 @@ public class RetroauthCallAdapterFactoryTest {
                 Assert.assertFalse(callAdapter instanceof RetroauthCallAdapterFactory.RetroauthCallAdapter);
             }
         }
-    }
-
-    interface TestInterface {
-        @Authenticated({"some", "token", "type"})
-        @GET("some/path")
-        void authenticatedMethod();
-
-        @GET("some/path")
-        void unauthenticatedMethod();
     }
 }

@@ -1,11 +1,10 @@
-package com.andretietz.retroauth.stub;
+package com.andretietz.retroauth.testimpl;
 
 import com.andretietz.retroauth.Provider;
 import com.andretietz.retroauth.TokenStorage;
 
 import okhttp3.Request;
 import okhttp3.Response;
-import retrofit2.Retrofit;
 
 /**
  * Created by andre on 02.05.2016.
@@ -13,7 +12,7 @@ import retrofit2.Retrofit;
 public class TestProvider implements Provider<String, String, String> {
     @Override
     public Request authenticateRequest(Request request, String s) {
-        return null;
+        return request;
     }
 
     @Override
