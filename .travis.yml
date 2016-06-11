@@ -12,4 +12,4 @@ android:
     - extra-android-m2repository
 
 script:
-  - ./gradlew :retroauth:build
+  - ./gradlew :retroauth-core:build :retroauth-android:build

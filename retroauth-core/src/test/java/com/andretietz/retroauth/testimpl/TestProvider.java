@@ -18,7 +18,7 @@ public class TestProvider implements Provider<String, String, String> {
     @Override
     public boolean retryRequired(int count, Response response,
                                  TokenStorage<String, String, String> tokenStorage, String s, String s2, String s3) {
-        if(response.code() == 401)
+        if (response.code() == 401)
             throw new RuntimeException("foo");
         return false;
     }

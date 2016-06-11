@@ -21,7 +21,8 @@ package com.andretietz.retroauth;
  * canceled choosing the right one
  */
 public class ChooseAccountCanceledException extends Exception {
-    public ChooseAccountCanceledException() {}
+    public ChooseAccountCanceledException() {
+    }
 
     public ChooseAccountCanceledException(String detailMessage) {
         super(detailMessage);

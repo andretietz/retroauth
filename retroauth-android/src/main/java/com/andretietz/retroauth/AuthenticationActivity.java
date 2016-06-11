@@ -28,8 +28,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
-import okhttp3.Response;
-import retrofit2.Retrofit;
 
 
 /**
@@ -37,7 +35,7 @@ import retrofit2.Retrofit;
  * It'll provide functionality to {@link #storeToken(Account, String, String)} and
  * {@link #storeUserData(Account, String, String)} when logging in. In case your service is providing a refresh token,
  * use {@link #storeToken(Account, String, String, String)}. This will additionally store a refresh token that can be used
- * in {@link Provider#retryRequired(int, Retrofit, Response, TokenStorage, Object, Object, Object)} to update the access
+ * in {@link Provider#retryRequired(int, Response, TokenStorage, Object, Object, Object)} to update the access
  * token
  */
 public abstract class AuthenticationActivity extends AppCompatActivity {
@@ -49,6 +47,22 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
     private Bundle resultBundle = null;
 
     private AccountManager accountManager;
+
+    /**
+     * Creates an intent to call if you need a login in your app
+     *
+     * @param action      The action you provided in the manifest to start the login
+     * @param accountType the account type you want to create an account for
+     * @param tokenType   the type of token you want to create
+     * @return an intent to start the login
+     */
+    public static Intent createLoginIntent(@NonNull String action, @NonNull String accountType,
+                                           @Nullable String tokenType) {
+        Intent intent = new Intent(action);
+        intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, accountType);
+        intent.putExtra(AccountAuthenticator.KEY_TOKEN_TYPE, tokenType);
+        return intent;
+    }
 
     /**
      * Retrieves the AccountAuthenticatorResponse from either the intent of the icicle, if the
@@ -137,7 +151,6 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
         finish();
     }
 
-
     /**
      * Tries finding an existing account with the given name.
      * It creates a new Account if it couldn't find it
@@ -165,7 +178,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
      * @param account to remove
      */
     protected void removeAccount(@NonNull Account account) {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
             accountManager.removeAccount(account, null, null, null);
         } else {
             accountManager.removeAccount(account, null, null);
@@ -226,22 +239,6 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
     @SuppressWarnings("unused")
     protected String getRequestedTokenType() {
         return tokenType;
-    }
-
-
-    /**
-     * Creates an intent to call if you need a login in your app
-     *
-     * @param action The action you provided in the manifest to start the login
-     * @param accountType the account type you want to create an account for
-     * @param tokenType   the type of token you want to create
-     * @return an intent to start the login
-     */
-    public static Intent createLoginIntent(@NonNull String action, @NonNull String accountType, @Nullable String tokenType) {
-        Intent intent = new Intent(action);
-        intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, accountType);
-        intent.putExtra(AccountAuthenticator.KEY_TOKEN_TYPE, tokenType);
-        return intent;
     }
 
 

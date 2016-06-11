@@ -13,12 +13,12 @@ public class TestTokenStorage implements TokenStorage<String, String, String> {
 
     @Override
     public String createType(String[] annotationValues) {
-        return annotationValues.length>0?"tokenType":null;
+        return annotationValues.length > 0 ? "tokenType" : null;
     }
 
     @Override
     public String getToken(String owner, String tokenType) throws AuthenticationCanceledException {
-        if(behaviour != null) {
+        if (behaviour != null) {
             return behaviour.getToken(owner, tokenType);
         }
         return TEST_TOKEN;
@@ -39,6 +39,6 @@ public class TestTokenStorage implements TokenStorage<String, String, String> {
     }
 
     public interface TestBehaviour {
-        String getToken(String owner, String tokenType) throws AuthenticationCanceledException ;
+        String getToken(String owner, String tokenType) throws AuthenticationCanceledException;
     }
 }

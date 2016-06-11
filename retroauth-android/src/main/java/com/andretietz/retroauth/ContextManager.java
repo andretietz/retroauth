@@ -16,14 +16,11 @@
 
 package com.andretietz.retroauth;
 
-import android.accounts.Account;
-import android.accounts.AccountManagerCallback;
 import android.app.Activity;
 import android.app.Application;
 import android.app.Application.ActivityLifecycleCallbacks;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;

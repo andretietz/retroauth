@@ -44,7 +44,7 @@ public final class Retroauth {
         private final List<CallAdapter.Factory> callAdapterFactories;
         private OkHttpClient okHttpClient;
         private Executor executor;
-        private boolean lockPerToken;
+        private boolean enableLocking = false;
 
         public Builder(AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler) {
             builder = new Retrofit.Builder();
@@ -122,10 +122,10 @@ public final class Retroauth {
          * request when using this option, since the thread will be blocked until it can be executed. By default this option
          * is set to <code>false</code>.
          *
-         * @param lockPerToken locking the request until it's finished executing
+         * @param enableLocking locking the request until it's finished executing
          */
-        public Builder<OWNER, TOKEN_TYPE, TOKEN> lockPerToken(boolean lockPerToken) {
-            this.lockPerToken = lockPerToken;
+        public Builder<OWNER, TOKEN_TYPE, TOKEN> enableLocking(boolean enableLocking) {
+            this.enableLocking = enableLocking;
             return this;
         }
 
@@ -148,7 +148,8 @@ public final class Retroauth {
             OkHttpClient.Builder builder = (okHttpClient != null) ? okHttpClient.newBuilder() : new OkHttpClient.Builder();
 
             // create the okhttp interceptor to intercept requests
-            CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN> interceptor = new CredentialInterceptor<>(authHandler, lockPerToken);
+            CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN> interceptor =
+                    new CredentialInterceptor<>(authHandler, enableLocking);
 
             // add it as the first interceptor to be used
             builder.interceptors().add(0, interceptor);

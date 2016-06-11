@@ -51,7 +51,7 @@ public class RetroauthTest {
 
         Retrofit retrofit = new Retroauth.Builder<>(authHandler)
                 .baseUrl(server.url("/"))
-                .lockPerToken(true)
+                .enableLocking(true)
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .addConverterFactory(MoshiConverterFactory.create())
                 .build();
@@ -122,27 +122,27 @@ public class RetroauthTest {
     }
 
     /**
-     * This test should fail, if you're not using {@link Retroauth.Builder#lockPerToken(boolean)}
+     * This test should fail, if you're not using {@link Retroauth.Builder#enableLocking(boolean)}
      * with the value <code>true</code>
      */
     @Test
     public void blockingErrorCaseTest() {
-        int THREAD_COUNT = 100;
-        TestSubscriber<TestResponse> subscribers[] = new TestSubscriber[THREAD_COUNT];
+        int requestCount = 100;
+        TestSubscriber<TestResponse>[] subscribers = new TestSubscriber[requestCount];
         // create a lot of requests
-        for (int i = 0; i < THREAD_COUNT; i++) {
+        for (int i = 0; i < requestCount; i++) {
             subscribers[i] = TestSubscriber.create();
             service.authenticatedMethod()
                     .subscribeOn(Schedulers.newThread())
                     .subscribe(subscribers[i]);
         }
         // create possible failing responses
-        for (int i = 0; i < THREAD_COUNT; i++) {
+        for (int i = 0; i < requestCount; i++) {
             server.enqueue(new MockResponse().setResponseCode(401));
         }
 
         // catch responses
-        for (int i = 0; i < THREAD_COUNT; i++) {
+        for (int i = 0; i < requestCount; i++) {
             subscribers[i].awaitTerminalEvent();
             subscribers[i].assertNoValues();
             subscribers[i].assertError(Exception.class);

@@ -1,3 +1,9 @@
+# A simple way of calling authenticated requests using retrofit in android
+[![Build Status](https://travis-ci.org/andretietz/retroauth.svg?branch=master)](https://travis-ci.org/andretietz/retroauth)
+## Dependencies
+* [Retrofit](https://github.com/square/retrofit) 2.0.2
+appcompat-v7:23.4.0
+
 ## What does it do?
 If you call a request method, annotated with the authenticated annotation, it'll do the following steps:
 * Step 1: Checks if there already is an account in the Android AccountManager. If not, it'll open a LoginActivity (you choose which). If there already is an account, go on with step 2, If there's more than one account open an Dialog to pick an account.
