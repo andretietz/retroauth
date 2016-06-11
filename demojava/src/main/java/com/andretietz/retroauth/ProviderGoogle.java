@@ -32,6 +32,7 @@ public class ProviderGoogle implements Provider<String, String, OAuth2AccessToke
                     try {
                         retrofit2.Response<Google.RefreshToken> refreshResponse = googleService.refreshToken(
                                 androidToken.getRefreshToken(),
+                                // as soon as there will be any trouble I will deactivate this demo project
                                 "329078189044-q3g29v14uhnrbb5vsaj8d34j26vh4fb4.apps.googleusercontent.com",
                                 "HOePqkgIemKIcNhfRt8_jpfF"
 

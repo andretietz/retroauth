@@ -15,7 +15,7 @@ dependencies {
     compile "com.squareup.retrofit2:adapter-rxjava:$retrofitVersion"
     compile 'com.squareup.okhttp3:logging-interceptor:3.2.0'
 
-    compile 'org.simpleframework:simple-xml:2.7.+'
+    compile 'org.simpleframework:simple-xml:2.7.1'
     compile 'io.reactivex:rxjava:1.1.2'
     compile 'io.reactivex:rxjavafx:0.0.5'
     compile 'com.github.scribejava:scribejava-apis:2.5.2'

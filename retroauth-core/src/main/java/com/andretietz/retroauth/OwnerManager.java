@@ -24,10 +24,10 @@ public interface OwnerManager<OWNER, TOKEN_TYPE> {
      * This method should be used to figure out which user should be authenticate a request.
      * If you're on multi-user systems, you should ask the user to choose which owner
      * he wants to use to authenticate requests. if the user cancels to choose the owner, throw
-     * {@link ChooseOwnerCanceledException}
+     * {@link ChooseOwnerCanceledException}, if there's no owner return <code>null</code>
      *
      * @param type type of the token
-     * @return the owner of the token of the give token type.
+     * @return the owner of the token of the give token type or <code>null</code>
      * @throws ChooseOwnerCanceledException when the user cancels to choose the owner
      */
     OWNER getOwner(TOKEN_TYPE type) throws ChooseOwnerCanceledException;

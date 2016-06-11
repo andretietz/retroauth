@@ -1,9 +1,7 @@
-# The simple way of calling authenticated requests in retrofit style
+# A simple way of calling authenticated requests using retrofit
 [![Build Status](https://travis-ci.org/andretietz/retroauth.svg?branch=master)](https://travis-ci.org/andretietz/retroauth)
 ## Dependencies
 * [Retrofit](https://github.com/square/retrofit) 2.0.2
-
-Min SDK Version: 14
 
 ## Example:
 Your services using retrofit:
@@ -22,82 +20,83 @@ public interface SomeService {
 }
 
 ```
-## About
-This project was initially created for android. Since retrofit is plain java, you can use this project in plain java too.
+If you're an Android Developer feel free to go directly to the [android project](retroauth-android/).
+## How to use it (Java)?
 
-Android Developers can go directly to the android subproject.
-
-
-
-Sequence Diagrams can be found in the DIAGRAMS.md file
-
-## How to use it?
 Add it as dependency:
 ```groovy
 compile 'com.andretietz:retroauth-core:2.0.0'
 ```
 
-This library provides you a special Builder for your Retrofit Object. This Builder requires you to implement an AuthenticationHander, which contains out of 4 classes to control the authentication.
-For the Android-Case most of the following classes are implemented already.
+An Authentication with this library requires 3 generic classes, which you should aware of, before implementing. You can use whatever you want, for explanation reasons I'll use their generic names
+
+ * A class: TOKEN_TYPE - you will generate this class out of the information, the Annotation on the method provides you
+ * A class: TOKEN - This is a Token which you'll need to authenticate your requests with
+ * A class: OWNER - The owner that owns the Token after the login. 
+
+A common scenario: every OWNER owns mulitple TOKENs of multiple TOKEN_TYPEs
+ 
+### 1. Implement an OwnerManager
+
+``` java
+public interface OwnerManager<OWNER, TOKEN_TYPE> {
+    OWNER getOwner(TOKEN_TYPE type) throws ChooseOwnerCanceledException;
+}
+```
+ * If the owner does not exist, return null. 
+ * If there are multiple owners ask the user to choose one.
+   * throw an ChooseOwnerCanceledException when the user canceled choosing.
 
 
-1. A Method-Cache
-    The method-cache is a map, in which you can store information of an annotated request. In case of the android implementation this is an account-type and a token-type). You can use a default class if not required different.
-    
-    ``` java
-     methodCache = new MethodCache.DefaultMethodCache<>();
-    ```
+### 2. Implement a TokenStorage
+``` java
+public interface TokenStorage<OWNER, TOKEN_TYPE, TOKEN> {
+    TOKEN_TYPE createType(String[] annotationValues);
+    TOKEN getToken(OWNER owner, TOKEN_TYPE type) throws AuthenticationCanceledException;
+    void storeToken(OWNER owner, TOKEN_TYPE type, TOKEN token);
+    void removeToken(OWNER owner, TOKEN_TYPE type, TOKEN token);
+}
+```
+ * "createType" - create your custom token type out of the values you're using in the annotation
+ * "getToken" - get the token
+   * When owner doesn't exist, create one
+   * When token doesn't exist, request one
+ * "storeToken" - store a token of a token type
+ * "removeToken" - remove the token of a token type
 
-2. An OwnerManager
-    Usually Tokens and other methods required for an authenticated request, belong to a user/owner. The interface requires you to implement a single method which returns the owner by a type of authentication. In case of android this is an Account stored by the account manager. In the java demo I am returning the same string all the time, which means that there
-    s only 1 owner.
-    
-    ``` java
-        public class SimpleOwnerManager implements OwnerManager<String, String> {
-            @Override
-            public String getOwner(String tokenType) throws ChooseOwnerCanceledException {
-                // since we don't care about multiuser here, we return the same thing
-                return "retroauth";
-            }
-        }
-    ```
 
-3. A Token-Storage
-    This is an interface which requires you to implement a storage for tokens or similar authentication data to be able to authenticate a request.
-    
-    ``` java
-        new TokenStorage<String, String, OAuth2AccessToken>() {
-            @Override
-            public String createType(String[] annotationValues) {
-                return null;
-            }
-    
-            @Override
-            public OAuth2AccessToken getToken(String owner, String tokenType) throws AuthenticationCanceledException {
-                return null;
-            }
-    
-            @Override
-            public void removeToken(String owner, String tokenType, OAuth2AccessToken token) {
-    
-            }
-    
-            @Override
-            public void storeToken(String owner, String tokenType, OAuth2AccessToken token) {
-    
-            }
-        }
-    ```
+### 3. Implement a MethodCache (optional)
 
-4. A Provider
-    Since every provider can have a different approach of authenticating it's requests (i.e. HTTP header, url extension) you can decide how this should be done by implementing this provider specific
+``` java
+public interface MethodCache<TOKEN_TYPE> {
+    void register(int requestIdentifier, TOKEN_TYPE type);
+    TOKEN_TYPE getTokenType(int requestIdentifier);
+}
+```
+This should be a simple key value store. If you don't want implement this by yourself, use the default implementation.
+
+
+### 4. Implement a Provider
+``` java
+public interface Provider<OWNER, TOKEN_TYPE, TOKEN> {
+    Request authenticateRequest(Request request, TOKEN token);
+    boolean retryRequired(int count, Response response,
+                          TokenStorage<OWNER, TOKEN_TYPE, TOKEN> tokenStorage, OWNER owner, TOKEN_TYPE type, TOKEN token);
+}
+```
+
+* "authenticateRequest" - implement the provider specific modification of the request to authenticate your request ([okhttp3.Request](https://github.com/square/okhttp/blob/master/okhttp/src/main/java/okhttp3/Request.java))
+* "retryRequired" - take a look onto the response and decide by yourself if you want the request to be retried or not
+  * This method is a perfect place for refreshing tokens if required.
+    * Example: You get a 401 response, you can use the TokenStorage object to remove the current Token (cause it's invalid), call a token refresh endpoint and store the new token also using the TokenStorage.
+    return true to retry the whole request and it shouldn't return a 401 anymore. For details see the [sample implementation](demojava/src/main/java/com/andretietz/retroauth/ProviderGoogle.java).
 
 Wrap all of the together into the AuthenticationHandler and create your retrofit object
 
 ``` java
-    AuthenticationHandler<String, String, OAuth2AccessToken> authHandler = new AuthenticationHandler<>(
+    AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler = new AuthenticationHandler<>(
             new MethodCache.DefaultMethodCache<>(),
-            new SimpleOwnerManager(), xmlTokenStorage, provider
+            new MyOwnerManager(), myTokenStorage, myCustomProvider
     );
 
     Retrofit retrofit = new Retroauth.Builder<>(authHandler)
@@ -111,11 +110,11 @@ Take a look at the Java8 Demo implementation, which uses java-scribe to authenti
 
 ## Pull requests are welcome
 Since I am the only one working on that, I would like to know your opinion and/or your suggestions.
-Please feel free to create Pull requests!
+Please feel free to create Pull-Requests!
 
 ## LICENSE
 ```
-Copyrights 2015 André Tietz
+Copyrights 2016 André Tietz
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
