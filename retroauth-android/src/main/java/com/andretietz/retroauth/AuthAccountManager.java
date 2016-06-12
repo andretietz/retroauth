@@ -33,11 +33,11 @@ public final class AuthAccountManager {
 
     static final String RETROAUTH_ACCOUNTNAME_KEY = "com.andretietz.retroauth.ACTIVE_ACCOUNT";
     private final AccountManager accountManager;
-    private final Context context;
+    private final ContextManager contextManager;
 
-    public AuthAccountManager(@NonNull Context context) {
-        this.context = context;
-        this.accountManager = AccountManager.get(context);
+    public AuthAccountManager() {
+        this.contextManager = ContextManager.get();
+        this.accountManager = AccountManager.get(contextManager.getContext());
     }
 
     /**
@@ -48,7 +48,7 @@ public final class AuthAccountManager {
      */
     @Nullable
     public String getActiveAccountName(@NonNull String accountType) {
-        SharedPreferences preferences = context.getSharedPreferences(accountType, Context.MODE_PRIVATE);
+        SharedPreferences preferences = contextManager.getContext().getSharedPreferences(accountType, Context.MODE_PRIVATE);
         return preferences.getString(RETROAUTH_ACCOUNTNAME_KEY, null);
     }
 
@@ -112,7 +112,7 @@ public final class AuthAccountManager {
      */
     @Nullable
     public Account setActiveAccount(@NonNull String accountType, @NonNull String accountName) {
-        SharedPreferences preferences = context.getSharedPreferences(accountType, Context.MODE_PRIVATE);
+        SharedPreferences preferences = contextManager.getContext().getSharedPreferences(accountType, Context.MODE_PRIVATE);
         preferences.edit().putString(RETROAUTH_ACCOUNTNAME_KEY, accountName).apply();
         return getAccountByName(accountType, accountName);
     }
@@ -124,7 +124,7 @@ public final class AuthAccountManager {
      * @param accountType accountType to reset
      */
     public void resetActiveAccount(@NonNull String accountType) {
-        SharedPreferences preferences = context.getSharedPreferences(accountType, Context.MODE_PRIVATE);
+        SharedPreferences preferences = contextManager.getContext().getSharedPreferences(accountType, Context.MODE_PRIVATE);
         preferences.edit().remove(RETROAUTH_ACCOUNTNAME_KEY).apply();
     }
 

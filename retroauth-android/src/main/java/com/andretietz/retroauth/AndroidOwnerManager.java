@@ -35,9 +35,9 @@ final class AndroidOwnerManager implements OwnerManager<Account, AndroidTokenTyp
     private final AuthAccountManager accountManager;
     private final ContextManager contextManager;
 
-    public AndroidOwnerManager(AuthAccountManager accountManager, ContextManager contextManager) {
+    public AndroidOwnerManager(AuthAccountManager accountManager) {
         this.accountManager = accountManager;
-        this.contextManager = contextManager;
+        this.contextManager = ContextManager.get();
     }
 
     @Override

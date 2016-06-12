@@ -50,16 +50,9 @@ public class MainActivity extends AppCompatActivity {
         ProviderGoogle provider = new ProviderGoogle();
 
         /**
-         * Create an instance of the {@link AndroidAuthenticationHandler}
-         */
-        AndroidAuthenticationHandler authHandler =
-                new AndroidAuthenticationHandler(this, provider);
-
-
-        /**
          * Create your Retrofit Object using the {@link Retroauth.Builder}
          */
-        Retrofit retrofit = new Retroauth.Builder<>(authHandler)
+        Retrofit retrofit = new Retroauth.Builder<>(new AndroidAuthenticationHandler(provider))
                 .baseUrl("https://www.googleapis.com/")
                 .client(httpClient)
                 .addConverterFactory(MoshiConverterFactory.create())
@@ -97,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        authAccountManager = new AuthAccountManager(this);
+        authAccountManager = new AuthAccountManager();
 
 
         buttonInvalidateToken.setOnClickListener(new OnClickListener() {

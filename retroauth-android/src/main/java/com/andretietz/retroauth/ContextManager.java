@@ -50,34 +50,11 @@ final class ContextManager {
         application.registerActivityLifecycleCallbacks(handler);
     }
 
-    private ContextManager(@NonNull Activity activity) {
-        applicationContext = activity.getApplicationContext();
-        handler = new LifecycleHandler(activity);
-        if (applicationContext instanceof Application) {
-            ((Application) applicationContext).registerActivityLifecycleCallbacks(handler);
-        }
-    }
-
-    /**
-     * @param activity some {@link Activity} to be able to create the instance
-     * @return a singleton instance of the {@link ContextManager}.
-     */
-    public static ContextManager get(@NonNull Activity activity) {
-        if (instance == null) {
-            synchronized (ContextManager.class) {
-                if (instance == null) {
-                    instance = new ContextManager(activity);
-                }
-            }
-        }
-        return instance;
-    }
-
     /**
      * @param application some {@link Activity} to be able to create the instance
      * @return a singleton instance of the {@link ContextManager}.
      */
-    public static ContextManager get(@NonNull Application application) {
+    static ContextManager get(@NonNull Application application) {
         if (instance == null) {
             synchronized (ContextManager.class) {
                 if (instance == null) {
@@ -86,6 +63,13 @@ final class ContextManager {
             }
         }
         return instance;
+    }
+
+    static ContextManager get() {
+        if(instance != null) {
+            return instance;
+        }
+        throw new IllegalStateException("ContextManager has not been initialized!");
     }
 
     /**
@@ -105,7 +89,7 @@ final class ContextManager {
         synchronized (this) {
             Activity current = handler.getCurrent();
             if (current == null) {
-                Log.w(TAG, "Requesting activity when it is null");
+                Log.w(TAG, "Requesting activity, when there is no active one");
             }
             return current;
         }
@@ -164,6 +148,7 @@ final class ContextManager {
         public void onActivityDestroyed(Activity activity) {
         }
 
+        @Nullable
         Activity getCurrent() {
             return activityStack.peek().get();
         }

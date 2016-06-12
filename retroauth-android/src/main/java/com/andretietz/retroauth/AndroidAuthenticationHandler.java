@@ -17,9 +17,6 @@
 package com.andretietz.retroauth;
 
 import android.accounts.Account;
-import android.app.Activity;
-import android.app.Application;
-import android.support.annotation.NonNull;
 
 /**
  * The {@link AndroidAuthenticationHandler} wraps all Android specific implementations ({@link AndroidMethodCache},
@@ -27,25 +24,8 @@ import android.support.annotation.NonNull;
  * make your life easier.
  */
 public final class AndroidAuthenticationHandler extends AuthenticationHandler<Account, AndroidTokenType, AndroidToken> {
-
-
-    public AndroidAuthenticationHandler(@NonNull Application application,
-                                        Provider<Account, AndroidTokenType, AndroidToken> provider) {
-        super(new AndroidMethodCache(),
-                new AndroidOwnerManager(
-                        new AuthAccountManager(application),
-                        ContextManager.get(application)),
-                new AndroidTokenStorage(ContextManager.get(application)),
-                provider
-        );
-    }
-
-    public AndroidAuthenticationHandler(Activity activity, Provider<Account, AndroidTokenType, AndroidToken> provider) {
-        super(
-                new AndroidMethodCache(),
-                new AndroidOwnerManager(
-                        new AuthAccountManager(activity.getApplicationContext()),
-                        ContextManager.get(activity)),
-                new AndroidTokenStorage(ContextManager.get(activity)), provider);
+    public AndroidAuthenticationHandler(Provider<Account, AndroidTokenType, AndroidToken> provider) {
+        super(new AndroidMethodCache(), new AndroidOwnerManager(new AuthAccountManager()),
+                new AndroidTokenStorage(), provider);
     }
 }

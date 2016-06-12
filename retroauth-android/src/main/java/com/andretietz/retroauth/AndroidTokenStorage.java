@@ -37,8 +37,8 @@ final class AndroidTokenStorage implements TokenStorage<Account, AndroidTokenTyp
     private final AccountManager accountManager;
     private final ContextManager contextManager;
 
-    public AndroidTokenStorage(@NonNull ContextManager contextManager) {
-        this.contextManager = contextManager;
+    public AndroidTokenStorage() {
+        this.contextManager = ContextManager.get();
         this.accountManager = AccountManager.get(contextManager.getContext());
     }
 
