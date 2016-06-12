@@ -35,10 +35,10 @@ public final class RetroauthAuthenticationService extends AuthenticationService 
         action = getString(R.string.com_andretietz_retroauth_authentication_ACTION);
         if (TextUtils.isEmpty(action)) {
             throw new RuntimeException(String.format(
-                  "When using the %s you need to define an action string <string " +
-                          "name=\"com.andretietz.retroauth.authentication.ACTION\" " +
-                          "translatable=\"false\">your action</string>",
-                  RetroauthAuthenticationService.class.getSimpleName()));
+                    "When using the %s you need to define an action string <string "
+                            + "name=\"com.andretietz.retroauth.authentication.ACTION\" "
+                            + "translatable=\"false\">your action</string>",
+                    RetroauthAuthenticationService.class.getSimpleName()));
         }
     }
 

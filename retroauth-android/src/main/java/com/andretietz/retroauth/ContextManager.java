@@ -66,7 +66,7 @@ final class ContextManager {
     }
 
     static ContextManager get() {
-        if(instance != null) {
+        if (instance != null) {
             return instance;
         }
         throw new IllegalStateException("ContextManager has not been initialized!");
