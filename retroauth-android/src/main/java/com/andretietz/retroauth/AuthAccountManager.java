@@ -143,7 +143,7 @@ public final class AuthAccountManager {
     /**
      * Adds a new account for the given account type. The tokenType is optional. you can request this type in the login
      * {@link Activity} calling {@link AuthenticationActivity#getRequestedTokenType()}. This value will not be available
-     * when you're creating an account from Android->Settings->Accounts->Add Account
+     * when you're creating an account from Android-Settings-Accounts-Add Account
      *
      * @param activity    must be provided in order to open the login activity
      * @param accountType the account type you want to create an account for

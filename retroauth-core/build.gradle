@@ -36,4 +36,5 @@ dependencies {
  * ./gradlew :retroauth-core:clean :retroauth-core:build :retroauth-core:artifactoryPublish
  * /
  apply from: 'jfrog-publish.gradle'
+ apply from: 'bintray-publish.gradle'
  //*/
