@@ -13,12 +13,11 @@ If you call a request method, annotated with the authenticated annotation, it'll
 
 ### 1. You need to deal with at least 3 different strings
 1. An action string which will be used to start your Login 
-   
-    (recommended: use your applicationId for example and add: ".ACTION")
+ * (recommended: use your applicationId for example and add: ".ACTION")
 2. An Account-Type string. This should be a unique string! 
-    (recommended: use your applicationId for example and add: ".ACCOUNT")
+ * (recommended: use your applicationId for example and add: ".ACCOUNT")
 3. A Token-Type string. It should be a unique string too. 
-    (recommended: use your applicationId for example and add: ".TOKEN")
+ * (recommended: use your applicationId for example and add: ".TOKEN")
 4. (Optional) Create as many Token-Type Strings as you need.
  
 ### 2. Create an Activity (or use one you already have) where the user can login. This Activity must extend from AuthenticationActivity and call finalizeAuthentication when the authentication finished
@@ -30,8 +29,9 @@ public class LoginActivity extends AuthenticationActivity {
 private void someLoginMethod() {
      String user;
      String token;
-     ... // do login work here and make sure, that you provide at least a user and a token String
-     // the Token type is the one you defined in Step 1
+     ... 
+     // do login work here and make sure, that you provide at least a user and a token String
+     ...
      Account account = createOrGetAccount(user);
      storeToken(account, "<your-TOKEN-string-defined-in-step-1>", token);
      // or optional
@@ -147,8 +147,20 @@ public class MyProvider implements Provider<Account, AndroidTokenType, AndroidTo
 
  @Override
  public boolean retryRequired(int count, Response response, TokenStorage<Account, AndroidTokenType, AndroidToken> tokenStorage, Account account, AndroidTokenType androidTokenType, AndroidToken androidToken) {
-    // implementing this is optional
-     return false;
+        // this is an optional (sample) implementation
+        if (!response.isSuccessful()) {
+            if (response.code() == 401) {
+                tokenStorage.removeToken(account, androidTokenType, androidToken);
+                ...
+                // refresh your token using androidToken.refreshToken
+                ...
+                // store the refreshed token
+                tokenStorage.storeToken(account, androidTokenType, new AndroidToken(newAccessToken, newRefreshToken));
+                // retry
+                return true;
+            }
+        }
+        return false;
  }
 }
 ```
