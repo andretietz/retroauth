@@ -29,9 +29,9 @@ private void someLoginMethod() {
      ... // do login work here and make sure, that you provide at least a user and a token String
      // the Token type is the one you defined in Step 1
      Account account = createOrGetAccount(user);
-     storeToken(account, "<your-TOKEN-string-defined-in-step-1>"), token);
+     storeToken(account, "<your-TOKEN-string-defined-in-step-1>", token);
      // or optional
-     storeToken(account, getString(R.string.auth_token_type), token, refreshToken);
+     storeToken(account, "<your-TOKEN-string-defined-in-step-1>", token, refreshToken);
      // add multiple tokens: storeToken(account, "<your-TOKEN-string-defined-in-step-X>", token2);
      // store some additional userdata (optionally)
      storeUserData(account, "key_for_some_user_data", "very-important-userdata");
