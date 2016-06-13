@@ -56,110 +56,113 @@ private void someLoginMethod() {
  </manifest>
  ```
 ### 3. Setup an AuthenticationService
- There are multiple ways of doing that:
+There are multiple ways of doing that:
  
- * Option 1:
- Extend the AuthenticationService and provide the ACTION-string.
- ```java
- public class SomeAuthenticationService extends AuthenticationService {
- 	@Override
- 	public String getLoginAction(Context context) {
- 	    // this is used only to provide the action for the LoginActivity to open
- 		return "<your-ACTION-string-defined-in-step-1>"; // use context.getString instead if you like
- 	}
- }
- ```
- * Option 2.  
- Instead of creating you own Service feel free to use the "RetroauthAuthenticationService"
- Make sure you define a new string:
+* Option 1:
+Extend the AuthenticationService and provide the ACTION-string.
  
-     <string name="com.andretietz.retroauth.authentication.ACTION" translatable="false"><your-ACTION-string-defined-in-step-1></string>
- the key of your ACTION-string defined in step 1 is: "com.andretietz.retroauth.authentication.ACTION"
+```java
+public class SomeAuthenticationService extends AuthenticationService {
+@Override
+public String getLoginAction(Context context) {
+    // this is used only to provide the action for the LoginActivity to open
+    return "<your-ACTION-string-defined-in-step-1>"; // use context.getString instead if you like
+}
+}
+```
+* Option 2.  
+Instead of creating you own Service feel free to use the "RetroauthAuthenticationService"
+Make sure you define a new string:
+```xml
+<string name="com.andretietz.retroauth.authentication.ACTION" translatable="false"><your-ACTION-string-defined-in-step-1></string>
+```
+the key of your ACTION-string defined in step 1 is: "com.andretietz.retroauth.authentication.ACTION"
  
- In both cases:
- Provide a authenticator.xml:
-  ```xml
-  <account-authenticator xmlns:android="http://schemas.android.com/apk/res/android"
-  					   android:accountType="<your-ACCOUNT-string-defined-in-step-1>"
-  					   android:icon="@mipmap/ic_launcher"
-  					   android:smallIcon="@mipmap/ic_launcher"
-  					   android:label="@string/app_name" />
-  ```
+In both cases:
+Provide a authenticator.xml:
+```xml
+<account-authenticator xmlns:android="http://schemas.android.com/apk/res/android"
+                   android:accountType="<your-ACCOUNT-string-defined-in-step-1>"
+                   android:icon="@mipmap/ic_launcher"
+                   android:smallIcon="@mipmap/ic_launcher"
+                   android:label="@string/app_name" />
+```
  
- Add the Service to the Manifest:
- If you choose 
- * Option 1: provide the Service you created in the manifest
- ```xml
-         ...
-         <service
-             android:name=".SomeAuthenticationService"
-             android:process=":auth"
-             android:exported="false">
-             <intent-filter>
-                 <action android:name="android.accounts.AccountAuthenticator"/>
-             </intent-filter>
-             <meta-data
-                 android:name="android.accounts.AccountAuthenticator"
-                 android:resource="@xml/authenticator"/>
-         </service>
-         ...
-     </application>
- </manifest>
- ```
-  * Option 2: provide the RetroauthAuthenticationService in the manifest
-  ```xml
-          ...
-          <service
-              android:name="com.andretietz.retroauth.RetroauthAuthenticationService"
-              android:process=":auth"
-              android:exported="false">
-              <intent-filter>
-                  <action android:name="android.accounts.AccountAuthenticator"/>
-              </intent-filter>
-              <meta-data
-                  android:name="android.accounts.AccountAuthenticator"
-                  android:resource="@xml/authenticator"/>
-          </service>
-          ...
-      </application>
-  </manifest>
-  ```
+Add the Service to the Manifest:
+If you choose 
+* Option 1: provide the Service you created in the manifest
+```xml
+     ...
+     <service
+         android:name=".SomeAuthenticationService"
+         android:process=":auth"
+         android:exported="false">
+         <intent-filter>
+             <action android:name="android.accounts.AccountAuthenticator"/>
+         </intent-filter>
+         <meta-data
+             android:name="android.accounts.AccountAuthenticator"
+             android:resource="@xml/authenticator"/>
+     </service>
+     ...
+ </application>
+</manifest>
+```
+* Option 2: provide the RetroauthAuthenticationService in the manifest
+```xml
+      ...
+      <service
+          android:name="com.andretietz.retroauth.RetroauthAuthenticationService"
+          android:process=":auth"
+          android:exported="false">
+          <intent-filter>
+              <action android:name="android.accounts.AccountAuthenticator"/>
+          </intent-filter>
+          <meta-data
+              android:name="android.accounts.AccountAuthenticator"
+              android:resource="@xml/authenticator"/>
+      </service>
+      ...
+  </application>
+</manifest>
+```
 ### 4. Create a Provider implementation
- Since every Provider may have a different way of authenticating their request, you have to tell how this should work
+Since every Provider may have a different way of authenticating their request, you have to tell how this should work
  
-  ```java
- public class MyProvider implements Provider<Account, AndroidTokenType, AndroidToken> {
- 
-     @Override
-     public Request authenticateRequest(Request request, AndroidToken androidToken) {
-         // this is an example of adding the token to the header of a request 
-         return request.newBuilder()
-                 .header("Authorization", "Bearer " + androidToken.token)
-                 .build();
-     }
- 
-     @Override
-     public boolean retryRequired(int count, Response response, TokenStorage<Account, AndroidTokenType, AndroidToken> tokenStorage, Account account, AndroidTokenType androidTokenType, AndroidToken androidToken) {
-        // implementing this is optional
-         return false;
-     }
+```java
+public class MyProvider implements Provider<Account, AndroidTokenType, AndroidToken> {
+
+ @Override
+ public Request authenticateRequest(Request request, AndroidToken androidToken) {
+     // this is an example of adding the token to the header of a request 
+     return request.newBuilder()
+             .header("Authorization", "Bearer " + androidToken.token)
+             .build();
  }
- ```
+
+ @Override
+ public boolean retryRequired(int count, Response response, TokenStorage<Account, AndroidTokenType, AndroidToken> tokenStorage, Account account, AndroidTokenType androidTokenType, AndroidToken androidToken) {
+    // implementing this is optional
+     return false;
+ }
+}
+```
  
 ### 5. Create your REST interface
  * Add authentication information to it:
  
- ```java
- public interface SomeAuthenticatedService {
-     @GET("/some/path")
-     Call<ResultObject> someUnauthenticatedCall();
+```java
+public interface SomeAuthenticatedService {
+ @GET("/some/path")
+ Call<ResultObject> someUnauthenticatedCall();
+
+ @Authenticated({"<your-account-type>", "<token-required-for-this-call>"})
+ @GET("/some/other/path")
+ Call<ResultObject> someAuthenticatedCall();
+}
+```
  
-     @Authenticated({"<your-account-type>", "<token-required-for-this-call>"})
-     @GET("/some/other/path")
-     Call<ResultObject> someAuthenticatedCall();
- }
- ```
- ### 5. Create your Retrofit Object and your calls
+ * Create the Retrofit object and instantiate it
 ```java
 Retrofit retrofit = new Retroauth.Builder<>(new AndroidAuthenticationHandler(new MyProvider()))
         .baseUrl("https://api.awesome.com/")
