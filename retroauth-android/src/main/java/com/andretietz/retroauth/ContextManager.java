@@ -46,7 +46,7 @@ final class ContextManager {
 
     private ContextManager(@NonNull Application application) {
         applicationContext = application;
-        handler = new LifecycleHandler(null);
+        handler = new LifecycleHandler();
         application.registerActivityLifecycleCallbacks(handler);
     }
 
@@ -103,14 +103,8 @@ final class ContextManager {
         private static final String TAG = LifecycleHandler.class.getSimpleName();
         private final Stack<WeakReference<Activity>> activityStack;
 
-        LifecycleHandler(Activity activity) {
+        LifecycleHandler() {
             this.activityStack = new Stack<>();
-            if (activity != null) {
-                Log.i(TAG, String.format("Contructor: %s", activity.getClass().getSimpleName()));
-                activityStack.push(new WeakReference<>(activity));
-            } else {
-                Log.w(TAG, "Initializing with null!");
-            }
         }
 
         @Override

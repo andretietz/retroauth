@@ -38,17 +38,21 @@ public final class RetroauthInitProvider extends ContentProvider {
         if (providerInfo == null) {
             throw new NullPointerException("RetroauthInitProvider ProviderInfo cannot be null.");
         }
+        if ("com.andretietz.retroauth.retroauthinitializer".equals(providerInfo.authority)) {
+            throw new IllegalStateException("Incorrect provider authority in manifest. Most likely due to a "
+                    + "missing applicationId variable in application\'s build.gradle.");
+        }
         super.attachInfo(context, providerInfo);
     }
 
     @Override
     public boolean onCreate() {
-        Context context = getContext().getApplicationContext();
+        Context context = getContext();
         if (context instanceof Application) {
             ContextManager.get((Application) context);
             return false;
         }
-        throw new IllegalStateException("Retroauth could not get initialized!");
+        throw new IllegalStateException("Retroauth couldn't get initialized!");
     }
 
     @Nullable
