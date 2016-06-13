@@ -6,6 +6,7 @@
   * added retroauth-android library (for android accountmanager needs)
   * added java demo (google, javafx)
   * added android demo (google, webview)
+  * No Context required for creating the Retrofit object
 
 
 ## 1.0.4 (2015-11-02)

@@ -10,6 +10,7 @@
         <provider
             android:authorities="${applicationId}.retroauthinitializer"
             android:exported="false"
+            android:enabled="true"
             android:name=".RetroauthInitProvider" />
     </application>
 
