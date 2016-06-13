@@ -17,30 +17,30 @@ If you call a request method, annotated with the authenticated annotation, it'll
 3. A Token-Type string. It should be a unique string too. (recommended: use your applicationId for example and add: ".TOKEN")
 4. (Optional) Create as many Token-Type Strings as you need.
  
- ### 2. Create an Activity (or use one you already have) where the user can login. This Activity must extend from AuthenticationActivity and call finalizeAuthentication when the authentication finished
+### 2. Create an Activity (or use one you already have) where the user can login. This Activity must extend from AuthenticationActivity and call finalizeAuthentication when the authentication finished
  i.e. (see Demo for an example)
  
- ```java
- public class LoginActivity extends AuthenticationActivity {
-    ...
-    private void someLoginMethod() {
-         String user;
-         String token;
-         ... // do login work here and make sure, that you provide at least a user and a token String
-         // the Token type is the one you defined in Step 1
-         Account account = createOrGetAccount(user);
-         storeToken(account, getString(R.string.auth_token_type), token);
-         // or optional
-         storeToken(account, getString(R.string.auth_token_type), token, refreshToken);
-         // add multiple tokens: storeToken(account, getString(R.string.auth_token_type2), token2);
-         // store some additional userdata (optionally)
-         storeUserData(account, "key_for_some_user_data", "very-important-userdata");
-         // finishes the activity and set this account to the "current-active" one
-         finalizeAuthentication(account);
-    }
-    ...
- }
- ```
+```java
+public class LoginActivity extends AuthenticationActivity {
+...
+private void someLoginMethod() {
+     String user;
+     String token;
+     ... // do login work here and make sure, that you provide at least a user and a token String
+     // the Token type is the one you defined in Step 1
+     Account account = createOrGetAccount(user);
+     storeToken(account, "<your-TOKEN-string-defined-in-step-1>"), token);
+     // or optional
+     storeToken(account, getString(R.string.auth_token_type), token, refreshToken);
+     // add multiple tokens: storeToken(account, "<your-TOKEN-string-defined-in-step-X>", token2);
+     // store some additional userdata (optionally)
+     storeUserData(account, "key_for_some_user_data", "very-important-userdata");
+     // finishes the activity and set this account to the "current-active" one
+     finalizeAuthentication(account);
+}
+...
+}
+```
  Make sure your LoginActivity has the intent filter in the manifest:
  ```xml
  <?xml version="1.0" encoding="utf-8"?>
@@ -55,10 +55,10 @@ If you call a request method, annotated with the authenticated annotation, it'll
  ...
  </manifest>
  ```
- ### 3. Setup an AuthenticationService
+### 3. Setup an AuthenticationService
  There are multiple ways of doing that:
  
- Option 1:
+ * Option 1:
  Extend the AuthenticationService and provide the ACTION-string.
  ```java
  public class SomeAuthenticationService extends AuthenticationService {
@@ -69,7 +69,7 @@ If you call a request method, annotated with the authenticated annotation, it'll
  	}
  }
  ```
- Option 2.  
+ * Option 2.  
  Instead of creating you own Service feel free to use the "RetroauthAuthenticationService"
  Make sure you define a new string:
  
@@ -124,7 +124,7 @@ If you call a request method, annotated with the authenticated annotation, it'll
       </application>
   </manifest>
   ```
- ### 4. Create a Provider implementation
+### 4. Create a Provider implementation
  Since every Provider may have a different way of authenticating their request, you have to tell how this should work
  
   ```java
@@ -146,7 +146,7 @@ If you call a request method, annotated with the authenticated annotation, it'll
  }
  ```
  
- ### 5. Create your REST interface
+### 5. Create your REST interface
  * Add authentication information to it:
  
  ```java
