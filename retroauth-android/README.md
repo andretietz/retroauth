@@ -12,9 +12,13 @@ If you call a request method, annotated with the authenticated annotation, it'll
 * Step 4: By implementing a Provider you can check the response (i.e. a 401 you will be able to refresh the token) and decide if you want to retry the request or not.
 
 ### 1. You need to deal with at least 3 different strings
-1. An action string which will be used to start your Login (recommended: use your applicationId for example and add: ".ACTION")
-2. An Account-Type string. This should be a unique string! (recommended: use your applicationId for example and add: ".ACCOUNT")
-3. A Token-Type string. It should be a unique string too. (recommended: use your applicationId for example and add: ".TOKEN")
+1. An action string which will be used to start your Login 
+   
+    (recommended: use your applicationId for example and add: ".ACTION")
+2. An Account-Type string. This should be a unique string! 
+    (recommended: use your applicationId for example and add: ".ACCOUNT")
+3. A Token-Type string. It should be a unique string too. 
+    (recommended: use your applicationId for example and add: ".TOKEN")
 4. (Optional) Create as many Token-Type Strings as you need.
  
 ### 2. Create an Activity (or use one you already have) where the user can login. This Activity must extend from AuthenticationActivity and call finalizeAuthentication when the authentication finished
@@ -56,7 +60,7 @@ private void someLoginMethod() {
  </manifest>
  ```
 ### 3. Setup an AuthenticationService
-There are multiple ways of doing that:
+There are two ways of doing that:
  
 * Option 1:
 Extend the AuthenticationService and provide the ACTION-string.
@@ -89,7 +93,8 @@ Provide a authenticator.xml:
 ```
  
 Add the Service to the Manifest:
-If you choose 
+If you choose
+
 * Option 1: provide the Service you created in the manifest
 ```xml
      ...
