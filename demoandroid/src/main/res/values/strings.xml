@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Retroauth Demo</string>
+    <string name="com.andretietz.retroauth.authentication.ACTION" translatable="false">com.andretietz.retroauth.demo.ACTION</string>
+</resources>
