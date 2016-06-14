@@ -125,7 +125,7 @@ public class RetroauthTest {
      * This test should fail, if you're not using {@link Retroauth.Builder#enableLocking(boolean)}
      * with the value <code>true</code>
      */
-    //@Test
+    @Test
     public void blockingErrorCaseTest() {
         int requestCount = 100;
         TestSubscriber<TestResponse>[] subscribers = new TestSubscriber[requestCount];
