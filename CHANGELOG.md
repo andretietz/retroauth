@@ -1,3 +1,14 @@
+## 2.0.0 ()
+
+* Complete rebuild, to be able to work with retrofit2
+  * Removed rxjava as dependency
+  * Works as well with plain java
+  * added retroauth-android library (for android accountmanager needs)
+  * added java demo (google, javafx)
+  * added android demo (google, webview)
+  * No Context required for creating the Retrofit object
+
+
 ## 1.0.4 (2015-11-02)
 
 * Demo App:
