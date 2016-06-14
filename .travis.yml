@@ -7,9 +7,9 @@ branches:
 android:
   components:
     - tools
-    - build-tools-23.0.2
+    - build-tools-23.0.3
     - android-23
     - extra-android-m2repository
 
 script:
-  - ./gradlew :retroauth:build
+  - ./gradlew :retroauth-core:build :retroauth-android:build
