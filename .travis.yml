@@ -1,4 +1,5 @@
 language: android
+
 branches:
   only:
     - master
@@ -6,10 +7,17 @@ branches:
 
 android:
   components:
-    - tools
-    - build-tools-23.0.3
-    - android-23
-    - extra-android-m2repository
+   - tools
+   - platform-tools
+   - build-tools-23.0.3
+   - android-23
+   - extra-android-m2repository
 
 script:
   - ./gradlew :retroauth-core:build :retroauth-android:build
+
+after_failure:
+  - "cat /home/travis/build/andretietz/retroauth/retroauth-core/build/reports/tests/index.html"
+  - "cat /home/travis/build/andretietz/retroauth/retroauth-android/build/reports/tests/index.html"
+  - "cat /home/travis/build/andretietz/retroauth/retroauth-core/build/outputs/lint-results-debug.xml"
+  - "cat /home/travis/build/andretietz/retroauth/retroauth-android/build/outputs/lint-results-debug.xml"
