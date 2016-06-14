@@ -14,4 +14,8 @@ android:
 script:
   - ./gradlew :retroauth-core:build :retroauth-android:build
 
-after_failure: "cat /home/travis/build/andretietz/retroauth/retroauth-android/build/outputs/lint-results-debug.xml"
+after_failure:
+  - "cat /home/travis/build/andretietz/retroauth/retroauth-core/build/reports/tests/index.html"
+  - "cat /home/travis/build/andretietz/retroauth/retroauth-android/build/reports/tests/index.html"
+  - "cat /home/travis/build/andretietz/retroauth/retroauth-core/build/outputs/lint-results-debug.xml"
+  - "cat /home/travis/build/andretietz/retroauth/retroauth-android/build/outputs/lint-results-debug.xml"
