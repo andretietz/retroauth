@@ -1,4 +1,6 @@
 language: android
+jdk: oraclejdk8
+
 branches:
   only:
     - master
@@ -6,10 +8,11 @@ branches:
 
 android:
   components:
-    - tools
-    - build-tools-23.0.3
-    - android-23
-    - extra-android-m2repository
+   - tools
+   - platform-tools
+   - build-tools-23.0.3
+   - android-23
+   - extra-android-m2repository
 
 script:
   - ./gradlew :retroauth-core:build :retroauth-android:build
