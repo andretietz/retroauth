@@ -24,6 +24,7 @@ android {
     }
 
     lintOptions {
+        disable 'NewApi'
         abortOnError true
         absolutePaths false
         lintConfig file("lint.xml")
