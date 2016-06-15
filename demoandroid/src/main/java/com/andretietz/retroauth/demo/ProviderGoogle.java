@@ -18,7 +18,7 @@ import retrofit2.Retrofit;
  */
 public class ProviderGoogle implements Provider<Account, AndroidTokenType, AndroidToken> {
 
-    private Retrofit retrofit;
+    private GoogleService googleService;
 
     @Override
     public Request authenticateRequest(Request request, AndroidToken androidToken) {
@@ -33,7 +33,6 @@ public class ProviderGoogle implements Provider<Account, AndroidTokenType, Andro
             if (response.code() == 401) {
                 tokenStorage.removeToken(account, androidTokenType, androidToken);
                 if (androidToken.refreshToken != null) {
-                    GoogleService googleService = retrofit.create(GoogleService.class);
                     try {
                         retrofit2.Response<GoogleService.RefreshToken> refreshResponse = googleService.refreshToken(
                                 androidToken.refreshToken,
@@ -56,7 +55,7 @@ public class ProviderGoogle implements Provider<Account, AndroidTokenType, Andro
         return false;
     }
 
-    public void setRetrofit(Retrofit retrofit) {
-        this.retrofit = retrofit;
+    public void onRetrofitCreated(Retrofit retrofit) {
+        this.googleService = retrofit.create(GoogleService.class);
     }
 }
