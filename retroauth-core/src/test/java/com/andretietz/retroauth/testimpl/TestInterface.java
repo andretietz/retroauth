@@ -11,9 +11,12 @@ import rx.Observable;
 
 public interface TestInterface {
 
+    int OWNER_TYPE = 1;
+    int TOKEN_TYPE = 2;
+
     String TEST_BODY = "{ \"value\" : 1 }";
 
-    @Authenticated({"some", "token", "type"})
+    @Authenticated({OWNER_TYPE, TOKEN_TYPE})
     @GET("some/authenticated/path")
     Observable<TestResponse> authenticatedMethod();
 
