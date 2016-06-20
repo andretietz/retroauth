@@ -1,7 +1,7 @@
 # A simple way of calling authenticated requests using retrofit
 [![Build Status](https://travis-ci.org/andretietz/retroauth.svg?branch=master)](https://travis-ci.org/andretietz/retroauth)
 ## Dependencies
-* [Retrofit](https://github.com/square/retrofit) 2.0.2
+* [Retrofit](https://github.com/square/retrofit) 2.1.0
 
 ## Example:
 Your services using retrofit:

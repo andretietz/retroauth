@@ -48,11 +48,11 @@ public class Demo extends Application {
             System.exit(0);
         });
         OAuth20Service helper = new ServiceBuilder()
-                .apiKey("329078189044-q3g29v14uhnrbb5vsaj8d34j26vh4fb4.apps.googleusercontent.com")
-                .apiSecret("HOePqkgIemKIcNhfRt8_jpfF")
+                .apiKey(ProviderGoogle.GOOGLE_CLIENT_ID)
+                .apiSecret(ProviderGoogle.GOOGLE_CLIENT_SECRET)
                 .scope("profile")
                 .state("secret" + new Random().nextInt(999_999))
-                .callback("http://localhost:8000/accounts/google/login/callback/")
+                .callback(ProviderGoogle.GOOGLE_CLIENT_CALLBACK)
                 .build(GoogleApi20.instance());
 
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();

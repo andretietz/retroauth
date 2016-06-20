@@ -1,8 +1,8 @@
 # A simple way of calling authenticated requests using retrofit in android
 [![Build Status](https://travis-ci.org/andretietz/retroauth.svg?branch=master)](https://travis-ci.org/andretietz/retroauth)
 ## Dependencies
-* [Retrofit](https://github.com/square/retrofit) 2.0.2
-* appcompat-v7 23.4.0
+* [Retrofit](https://github.com/square/retrofit) 2.1.0
+* appcompat-v7 24.0.0
 
 ## What does it do?
 If you call a request method, annotated with the authenticated annotation, it'll do the following steps:
