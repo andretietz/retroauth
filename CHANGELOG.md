@@ -2,6 +2,8 @@
 * Update dependencies
   * retrofit 2.1.0
   * appcompat 24.0.0
+* Demo
+  * removed preconfigured google id (was pointless)
 
 ## 2.0.0 (2016-06-15)
 

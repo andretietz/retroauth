@@ -13,6 +13,10 @@ import retrofit2.Retrofit;
  */
 public class ProviderGoogle implements Provider<String, String, OAuth2AccessToken> {
 
+    public static final String GOOGLE_CLIENT_ID = "<your-client-id>";
+    public static final String GOOGLE_CLIENT_SECRET = "<your-client-secret>";
+    public static final String GOOGLE_CLIENT_CALLBACK = "<your-client-callback>";
+
     private Retrofit retrofit;
 
     @Override
@@ -37,12 +41,10 @@ public class ProviderGoogle implements Provider<String, String, OAuth2AccessToke
                         // try refreshing the token
                         retrofit2.Response<Google.RefreshToken> refreshResponse = googleService.refreshToken(
                                 oauthToken.getRefreshToken(),
-                                // as soon as there will be any trouble I will deactivate this demo project
-                                "329078189044-q3g29v14uhnrbb5vsaj8d34j26vh4fb4.apps.googleusercontent.com",
-                                "HOePqkgIemKIcNhfRt8_jpfF"
-                        )
-                                // since this method should be called in the background anyways, we can do it blocking here
-                                .execute();
+                                GOOGLE_CLIENT_ID,
+                                GOOGLE_CLIENT_SECRET
+
+                        ).execute();
                         // if refreshing was successful
                         if (refreshResponse.isSuccessful()) {
                             Google.RefreshToken token = refreshResponse.body();
