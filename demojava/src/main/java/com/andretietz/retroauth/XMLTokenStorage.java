@@ -47,8 +47,8 @@ public class XMLTokenStorage implements TokenStorage<String, String, OAuth2Acces
     }
 
     @Override
-    public String createType(String[] annotationValues) {
-        return annotationValues[0];
+    public String createType(int[] annotationValues) {
+        return "token_type_" + annotationValues[0];
     }
 
     @Override

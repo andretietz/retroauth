@@ -43,8 +43,10 @@ final class AndroidTokenStorage implements TokenStorage<Account, AndroidTokenTyp
     }
 
     @Override
-    public AndroidTokenType createType(String[] annotationValues) {
-        return new AndroidTokenType(annotationValues[0], annotationValues[1]);
+    public AndroidTokenType createType(int[] annotationValues) {
+        String accountType = contextManager.getContext().getString(annotationValues[0]);
+        String tokenType = contextManager.getContext().getString(annotationValues[1]);
+        return new AndroidTokenType(accountType, tokenType);
     }
 
     @Override
