@@ -18,6 +18,10 @@ import retrofit2.Retrofit;
  */
 public class ProviderGoogle implements Provider<Account, AndroidTokenType, AndroidToken> {
 
+    public static final String GOOGLE_CLIENT_ID = "<your-client-id>";
+    public static final String GOOGLE_CLIENT_SECRET = "<your-client-secret>";
+    public static final String GOOGLE_CLIENT_CALLBACK = "<your-client-callback>";
+
     private GoogleService googleService;
 
     @Override
@@ -36,8 +40,8 @@ public class ProviderGoogle implements Provider<Account, AndroidTokenType, Andro
                     try {
                         retrofit2.Response<GoogleService.RefreshToken> refreshResponse = googleService.refreshToken(
                                 androidToken.refreshToken,
-                                "329078189044-q3g29v14uhnrbb5vsaj8d34j26vh4fb4.apps.googleusercontent.com",
-                                "HOePqkgIemKIcNhfRt8_jpfF"
+                                GOOGLE_CLIENT_ID,
+                                GOOGLE_CLIENT_SECRET
 
                         ).execute();
                         if (refreshResponse.isSuccessful()) {

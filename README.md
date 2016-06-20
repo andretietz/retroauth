@@ -4,9 +4,9 @@
 
 I split the project into two separate ones. 
 
- * [Java](retroauth-core/)
+ * [retroauth-core](retroauth-core/)
   This is the base implementation, to be used in plain java.
- * [Android](retroauth-android/)
+ * [retroauth-android](retroauth-android/)
   On top of the Java implementation there's the Android implementation, which makes use of the
 Android AccountManager.
 

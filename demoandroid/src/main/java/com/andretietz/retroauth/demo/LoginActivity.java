@@ -40,12 +40,19 @@ public class LoginActivity extends AuthenticationActivity {
         // I do trust you here! usually you don't hand out the applicationId or the secret
         // as soon as I feel like it, I'll deactivate the demo on providers.
 
+        // Go to:
+        // https://console.developers.google.com/
+        // create a Web client id and provide the client id and it's secret here:
+        // ProviderGoogle.GOOGLE_CLIENT_ID
+        // ProviderGoogle.GOOGLE_CLIENT_SECRET
+        // ProviderGoogle.GOOGLE_CLIENT_CALLBACK
+
         helper = new ServiceBuilder()
-                .apiKey("329078189044-q3g29v14uhnrbb5vsaj8d34j26vh4fb4.apps.googleusercontent.com")
-                .apiSecret("HOePqkgIemKIcNhfRt8_jpfF")
+                .apiKey(ProviderGoogle.GOOGLE_CLIENT_ID)
+                .apiSecret(ProviderGoogle.GOOGLE_CLIENT_SECRET)
                 .scope("profile")
                 .state("secret" + new Random().nextInt(999_999))
-                .callback("http://localhost:8000/accounts/google/login/callback/")
+                .callback(ProviderGoogle.GOOGLE_CLIENT_CALLBACK)
                 .build(GoogleApi20.instance());
 
         final Map<String, String> additionalParams = new HashMap<>();

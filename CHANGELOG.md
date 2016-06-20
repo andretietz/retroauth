@@ -1,4 +1,9 @@
-## 2.0.0 ()
+## 2.0.1 ()
+* Update dependencies
+  * retrofit 2.1.0
+  * appcompat 24.0.0
+
+## 2.0.0 (2016-06-15)
 
 * Complete rebuild, to be able to work with retrofit2
   * Removed rxjava as dependency
