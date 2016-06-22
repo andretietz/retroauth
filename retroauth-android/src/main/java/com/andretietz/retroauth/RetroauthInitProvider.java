@@ -34,6 +34,7 @@ public final class RetroauthInitProvider extends ContentProvider {
     public RetroauthInitProvider() {
     }
 
+    @Override
     public void attachInfo(Context context, ProviderInfo providerInfo) {
         if (providerInfo == null) {
             throw new NullPointerException("RetroauthInitProvider ProviderInfo cannot be null.");

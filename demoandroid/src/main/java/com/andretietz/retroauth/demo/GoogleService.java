@@ -11,7 +11,8 @@ import retrofit2.http.POST;
 
 public interface GoogleService {
 
-    @Authenticated({R.string.com_andretietz_retroauth_authentication_ACCOUNT, R.string.com_andretietz_retroauth_authentication_TOKEN})
+    @Authenticated({R.string.com_andretietz_retroauth_authentication_ACCOUNT,
+            R.string.com_andretietz_retroauth_authentication_TOKEN})
     @GET("/oauth2/v1/userinfo")
     Call<Info> getUserInfo();
 
