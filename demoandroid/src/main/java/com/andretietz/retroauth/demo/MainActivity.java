@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
                 .addConverterFactory(MoshiConverterFactory.create())
                 .build();
 
-        provider.setRetrofit(retrofit);
+        provider.onRetrofitCreated(retrofit);
 
         /**
          * Create your API Service
@@ -96,20 +96,22 @@ public class MainActivity extends AppCompatActivity {
         buttonInvalidateToken.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Account activeAccount = authAccountManager.getActiveAccount(GoogleService.ACCOUNT_TYPE);
+                Account activeAccount = authAccountManager.getActiveAccount(getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT));
                 if (activeAccount != null) {
-                    AccountManager.get(MainActivity.this).setAuthToken(activeAccount, GoogleService.TOKEN_TYPE, "some-invalid-token");
+                    AccountManager.get(MainActivity.this).setAuthToken(activeAccount,
+                            getString(R.string.com_andretietz_retroauth_authentication_TOKEN), "some-invalid-token");
                 }
             }
         });
         buttonInvalidateRefreshToken.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Account activeAccount = authAccountManager.getActiveAccount(GoogleService.ACCOUNT_TYPE);
+                Account activeAccount = authAccountManager.getActiveAccount(getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT));
                 if (activeAccount != null) {
                     AccountManager.get(MainActivity.this)
                             .setAuthToken(activeAccount,
-                                    String.format("%s_refresh", GoogleService.TOKEN_TYPE),
+                                    String.format("%s_refresh",
+                                            getString(R.string.com_andretietz_retroauth_authentication_TOKEN)),
                                     "some-invalid-token");
                 }
             }
@@ -118,14 +120,16 @@ public class MainActivity extends AppCompatActivity {
         buttonResetPrefAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                authAccountManager.resetActiveAccount(GoogleService.ACCOUNT_TYPE);
+                authAccountManager.resetActiveAccount(getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT));
             }
         });
 
         buttonAddAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                authAccountManager.addAccount(MainActivity.this, GoogleService.ACCOUNT_TYPE, GoogleService.TOKEN_TYPE);
+                authAccountManager.addAccount(
+                        getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT),
+                        getString(R.string.com_andretietz_retroauth_authentication_TOKEN));
             }
         });
     }
