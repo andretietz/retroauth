@@ -24,7 +24,6 @@ android {
     }
 
     lintOptions {
-        disable 'NewApi'
         abortOnError true
         absolutePaths false
         lintConfig file("lint.xml")
@@ -61,8 +60,6 @@ afterEvaluate {
         check.dependsOn('checkstyle')
     }
 }
-
-configurations.all { resolutionStrategy.cacheChangingModulesFor 0, 'seconds' }
 
 dependencies {
     compile 'com.android.support:appcompat-v7:24.0.0'

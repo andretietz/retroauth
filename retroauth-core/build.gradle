@@ -1,6 +1,5 @@
 apply plugin: 'java'
 apply plugin: 'checkstyle'
-apply plugin: 'net.saliman.properties'
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
