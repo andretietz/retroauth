@@ -3,7 +3,8 @@
   * Switching from String[] to int[], which is easier to handle on library levels
 * Update dependencies
   * retrofit 2.1.0
-  * appcompat 24.0.0
+  * appcompat 24.1.0
+  * rxjava 1.1.7
 * Demo
   * removed preconfigured google id (was pointless)
 

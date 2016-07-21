@@ -8,7 +8,7 @@ repositories {
 
 android {
     compileSdkVersion 24
-    buildToolsVersion "24.0.0"
+    buildToolsVersion "24.0.1"
 
     defaultConfig {
         minSdkVersion 14
@@ -62,7 +62,7 @@ afterEvaluate {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:24.0.0'
+    compile 'com.android.support:appcompat-v7:24.1.0'
     compile "com.andretietz.retroauth:retroauth-core:$libraryVersion"
 
     testCompile 'junit:junit:4.12'
@@ -75,7 +75,7 @@ dependencies {
  * - make sure the core project is not in release mode
  * gradlew.bat :retroauth-android:clean :retroauth-android:build :retroauth-android:artifactoryPublish
  * ./gradlew :retroauth-android:clean :retroauth-android:build :retroauth-android:artifactoryPublish
- * /
+ */
 apply from: 'jfrog-publish.gradle'
-apply from: 'bintray-publish.gradle'
+//apply from: 'bintray-publish.gradle'
 //*/
