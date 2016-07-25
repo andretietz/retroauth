@@ -14,6 +14,14 @@ If you call a request method, annotated with the authenticated annotation, it'll
 * Step 3: Sends the actual request
 * Step 4: By implementing a Provider you can check the response (i.e. a 401 you will be able to refresh the token) and decide if you want to retry the request or not.
 
+## How to use it on Android
+
+Add it as dependency:
+```groovy
+compile 'com.andretietz:retroauth-android:2.1.0'
+```
+
+
 ### 1. You need to deal with at least 3 different strings
 1. An action string which will be used to start your Login 
  * (recommended: use your applicationId for example and add: ".ACTION")
