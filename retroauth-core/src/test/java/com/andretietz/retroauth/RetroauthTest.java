@@ -127,7 +127,7 @@ public class RetroauthTest {
      */
     @Test
     public void blockingErrorCaseTest() {
-        int requestCount = 100;
+        int requestCount = 50;
         TestSubscriber<TestResponse>[] subscribers = new TestSubscriber[requestCount];
         // create a lot of requests
         for (int i = 0; i < requestCount; i++) {
