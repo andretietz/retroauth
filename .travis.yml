@@ -4,6 +4,7 @@ branches:
   only:
     - master
     - develop
+    - feature/types_to_int
 
 android:
   components:
