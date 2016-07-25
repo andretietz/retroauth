@@ -2,7 +2,9 @@
 [![Build Status](https://travis-ci.org/andretietz/retroauth.svg?branch=master)](https://travis-ci.org/andretietz/retroauth)
 ## Dependencies
 * [Retrofit](https://github.com/square/retrofit) 2.1.0
-* appcompat-v7 24.0.0
+* appcompat-v7 24.1.1
+
+Method-Count: 205
 
 ## What does it do?
 If you call a request method, annotated with the authenticated annotation, it'll do the following steps:

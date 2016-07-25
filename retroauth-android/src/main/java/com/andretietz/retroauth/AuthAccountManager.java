@@ -26,7 +26,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 /**
- * This class wraps the Android AccountManager and adds some retroauth specific
+ * This class wraps the Android {@link android.accounts.AccountManager} and adds some retroauth specific
  * functionality.
  */
 public final class AuthAccountManager {
@@ -80,11 +80,14 @@ public final class AuthAccountManager {
     }
 
     /**
+     * Don't use this method anymore! It'll be deleted in a future release
+     *
      * @param accountType of which you want to get the active account
      * @param tokenType   of the token you want to get
      * @return the token of the tokenType of the currently active user
      */
     @Nullable
+    @Deprecated
     public String getActiveUserToken(@NonNull String accountType, @NonNull String tokenType) {
         Account activeAccount = getActiveAccount(accountType);
         if (activeAccount == null) return null;
