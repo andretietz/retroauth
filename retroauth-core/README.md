@@ -14,7 +14,9 @@ public interface SomeService {
 Your services using retroauth:
 ``` java
 public interface SomeService {
-    @Authenticated({"account-type", "token-type"})
+    int ACCOUNT_TYPE = 1;
+    int TOKEN_TYPE = 2;
+    @Authenticated({ACCOUNT_TYPE, TOKEN_TYPE})
     @GET("/some/path")
     Call<ResultObject> someRequest();
 }
@@ -51,7 +53,7 @@ public interface OwnerManager<OWNER, TOKEN_TYPE> {
 ### 2. Implement a TokenStorage
 ``` java
 public interface TokenStorage<OWNER, TOKEN_TYPE, TOKEN> {
-    TOKEN_TYPE createType(String[] annotationValues);
+    TOKEN_TYPE createType(int[] annotationValues);
     TOKEN getToken(OWNER owner, TOKEN_TYPE type) throws AuthenticationCanceledException;
     void storeToken(OWNER owner, TOKEN_TYPE type, TOKEN token);
     void removeToken(OWNER owner, TOKEN_TYPE type, TOKEN token);

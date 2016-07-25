@@ -4,6 +4,7 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Toast;
@@ -22,6 +23,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = MainActivity.class.getSimpleName();
     private GoogleService service;
     private AuthAccountManager authAccountManager;
 
@@ -31,12 +33,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        View buttonRequestEmail = findViewById(R.id.buttonRequestEmail);
-        View buttonInvalidateToken = findViewById(R.id.buttonInvalidateToken);
-        View buttonInvalidateRefreshToken = findViewById(R.id.buttonInvalidateRefreshToken);
-        View buttonResetPrefAccount = findViewById(R.id.buttonResetPrefAccount);
-        View buttonAddAccount = findViewById(R.id.buttonAddAccount);
 
+        authAccountManager = new AuthAccountManager();
 
         /**
          * Optional: create your own OkHttpClient
@@ -58,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
                 .addConverterFactory(MoshiConverterFactory.create())
                 .build();
 
-        provider.setRetrofit(retrofit);
+        provider.onRetrofitCreated(retrofit);
 
         /**
          * Create your API Service
@@ -66,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
         service = retrofit.create(GoogleService.class);
 
 
-        buttonRequestEmail.setOnClickListener(new OnClickListener() {
+        findViewById(R.id.buttonRequestEmail).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 /**
@@ -76,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(Call<GoogleService.Info> call, Response<GoogleService.Info> response) {
                         if (response.isSuccessful()) {
-                            show("Hallo: " + response.body().name);
+                            show("Hello: " + response.body().name);
                         } else {
                             show("Error: " + response.message());
                         }
@@ -90,42 +88,48 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        authAccountManager = new AuthAccountManager();
 
-
-        buttonInvalidateToken.setOnClickListener(new OnClickListener() {
+        findViewById(R.id.buttonInvalidateToken).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Account activeAccount = authAccountManager.getActiveAccount(GoogleService.ACCOUNT_TYPE);
+                Account activeAccount = authAccountManager
+                        .getActiveAccount(getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT));
                 if (activeAccount != null) {
-                    AccountManager.get(MainActivity.this).setAuthToken(activeAccount, GoogleService.TOKEN_TYPE, "some-invalid-token");
+                    // This is for demo purposes only. We're "manually" setting some-invalid-token.
+                    AccountManager.get(MainActivity.this).setAuthToken(activeAccount,
+                            getString(R.string.com_andretietz_retroauth_authentication_TOKEN), "some-invalid-token");
                 }
             }
         });
-        buttonInvalidateRefreshToken.setOnClickListener(new OnClickListener() {
+        findViewById(R.id.buttonInvalidateRefreshToken).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Account activeAccount = authAccountManager.getActiveAccount(GoogleService.ACCOUNT_TYPE);
+                Account activeAccount = authAccountManager
+                        .getActiveAccount(getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT));
                 if (activeAccount != null) {
+                    // This is for demo purposes only. We're "manually" setting some-invalid-token. (refresh token)
                     AccountManager.get(MainActivity.this)
                             .setAuthToken(activeAccount,
-                                    String.format("%s_refresh", GoogleService.TOKEN_TYPE),
+                                    String.format("%s_refresh",
+                                            getString(R.string.com_andretietz_retroauth_authentication_TOKEN)),
                                     "some-invalid-token");
                 }
             }
         });
 
-        buttonResetPrefAccount.setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.buttonResetPrefAccount).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                authAccountManager.resetActiveAccount(GoogleService.ACCOUNT_TYPE);
+                authAccountManager.resetActiveAccount(getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT));
             }
         });
 
-        buttonAddAccount.setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.buttonAddAccount).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                authAccountManager.addAccount(MainActivity.this, GoogleService.ACCOUNT_TYPE, GoogleService.TOKEN_TYPE);
+                authAccountManager.addAccount(
+                        getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT),
+                        getString(R.string.com_andretietz_retroauth_authentication_TOKEN));
             }
         });
     }
@@ -135,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showError(Throwable error) {
-        error.printStackTrace();
+        Log.e(TAG, "An error occured: ", error);
         show(error.toString());
     }
 }

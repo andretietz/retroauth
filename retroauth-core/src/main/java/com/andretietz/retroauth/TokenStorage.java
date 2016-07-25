@@ -27,7 +27,7 @@ public interface TokenStorage<OWNER, TOKEN_TYPE, TOKEN> {
      * @param annotationValues The values from the {@link Authenticated} annotation
      * @return a token type.
      */
-    TOKEN_TYPE createType(String[] annotationValues);
+    TOKEN_TYPE createType(int[] annotationValues);
 
     /**
      * This method returns an authentication token. If there's no token, you should try

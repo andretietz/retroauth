@@ -13,9 +13,9 @@ import retrofit2.Retrofit;
  */
 public class ProviderGoogle implements Provider<String, String, OAuth2AccessToken> {
 
-    public static final String GOOGLE_CLIENT_ID = "<your-client-id>";
-    public static final String GOOGLE_CLIENT_SECRET = "<your-client-secret>";
-    public static final String GOOGLE_CLIENT_CALLBACK = "<your-client-callback>";
+    public static final String GOOGLE_CLIENT_ID = "329078189044-q3g29v14uhnrbb5vsaj8d34j26vh4fb4.apps.googleusercontent.com";
+    public static final String GOOGLE_CLIENT_SECRET = "HOePqkgIemKIcNhfRt8_jpfF";
+    public static final String GOOGLE_CLIENT_CALLBACK = "http://localhost:8000/accounts/google/login/callback/";
 
     private Retrofit retrofit;
 

@@ -26,7 +26,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 /**
- * This class wraps the Android AccountManager and adds some retroauth specific
+ * This class wraps the Android {@link android.accounts.AccountManager} and adds some retroauth specific
  * functionality.
  */
 public final class AuthAccountManager {
@@ -80,11 +80,14 @@ public final class AuthAccountManager {
     }
 
     /**
+     * Don't use this method anymore! It'll be deleted in a future release
+     *
      * @param accountType of which you want to get the active account
      * @param tokenType   of the token you want to get
      * @return the token of the tokenType of the currently active user
      */
     @Nullable
+    @Deprecated
     public String getActiveUserToken(@NonNull String accountType, @NonNull String tokenType) {
         Account activeAccount = getActiveAccount(accountType);
         if (activeAccount == null) return null;
@@ -131,11 +134,22 @@ public final class AuthAccountManager {
 
     /**
      * Adds a new account for the given account type. This method is a shortcut for
+     * {@link #addAccount(String, String)}
+     *
+     * @param accountType the account type you want to create an account for
+     */
+    public void addAccount(@NonNull String accountType) {
+        addAccount(accountType, null);
+    }
+
+    /**
+     * Adds a new account for the given account type. This method is a shortcut for
      * {@link #addAccount(Activity, String, String)}
      *
      * @param activity    must be provided in order to open the login activity
      * @param accountType the account type you want to create an account for
      */
+    @Deprecated
     public void addAccount(@NonNull Activity activity, @NonNull String accountType) {
         addAccount(activity, accountType, null);
     }
@@ -149,8 +163,30 @@ public final class AuthAccountManager {
      * @param accountType the account type you want to create an account for
      * @param tokenType   the type of token you want to create
      */
+    @Deprecated
     public void addAccount(@Nullable Activity activity, @NonNull String accountType, @Nullable String tokenType) {
         accountManager.addAccount(accountType, tokenType, null, null, activity, null, null);
+    }
+
+    /**
+     * Adds a new account for the given account type. The tokenType is optional. you can request this type in the login
+     * {@link Activity} calling {@link AuthenticationActivity#getRequestedTokenType()}. This value will not be available
+     * when you're creating an account from Android-Settings-Accounts-Add Account
+     *
+     * @param accountType the account type you want to create an account for
+     * @param tokenType   the type of token you want to create
+     */
+    public void addAccount(@NonNull String accountType, @Nullable String tokenType) {
+        accountManager.addAccount(accountType, tokenType, null, null, contextManager.getActivity(), null, null);
+    }
+
+    /**
+     * @param accountType AccountType which you want to know the amount of
+     * @return number of existing accounts of this type. Depending on which accountType you're requesting this could
+     * require additional permissions
+     */
+    public int accountAmount(@NonNull String accountType) {
+        return accountManager.getAccountsByType(accountType).length;
     }
 
     /**

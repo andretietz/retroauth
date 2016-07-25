@@ -12,7 +12,7 @@ public class TestTokenStorage implements TokenStorage<String, String, String> {
     private TestBehaviour behaviour;
 
     @Override
-    public String createType(String[] annotationValues) {
+    public String createType(int[] annotationValues) {
         return annotationValues.length > 0 ? "tokenType" : null;
     }
 

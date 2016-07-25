@@ -10,10 +10,9 @@ import retrofit2.http.GET;
 import retrofit2.http.POST;
 
 public interface GoogleService {
-    String ACCOUNT_TYPE = "com.andretietz.retroauth.demo.ACCOUNT";
-    String TOKEN_TYPE = "com.andretietz.retroauth.demo.TOKEN";
 
-    @Authenticated({ACCOUNT_TYPE, TOKEN_TYPE})
+    @Authenticated({R.string.com_andretietz_retroauth_authentication_ACCOUNT,
+            R.string.com_andretietz_retroauth_authentication_TOKEN})
     @GET("/oauth2/v1/userinfo")
     Call<Info> getUserInfo();
 

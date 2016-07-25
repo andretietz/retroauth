@@ -1,20 +1,27 @@
 language: android
 
+jdk:
+  - oraclejdk8
+  
 branches:
   only:
     - master
     - develop
+    - feature/types_to_int
 
 android:
   components:
    - tools
    - platform-tools
-   - build-tools-23.0.3
-   - android-23
+   - build-tools-24.0.1
+   - android-24
    - extra-android-m2repository
 
 script:
   - ./gradlew :retroauth-core:build :retroauth-android:build
+
+before_script:
+  - echo "include ':retroauth-core', ':retroauth-android'" > settings.gradle
 
 after_failure:
   - "cat /home/travis/build/andretietz/retroauth/retroauth-core/build/reports/tests/index.html"
