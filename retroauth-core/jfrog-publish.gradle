@@ -1,6 +1,5 @@
 apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'maven-publish'
-apply plugin: 'net.saliman.properties'
 
 group = libraryGroup
 version = libraryVersion
@@ -20,7 +19,7 @@ artifactory {
         repository {
             repoKey = 'oss-snapshot-local' // The Artifactory repository key to publish to
             username = bintrayUser // The publisher user name
-            password = bintrayPass // The publisher password
+            password = bintrayKey // The publisher password
             maven = true
         }
         defaults {

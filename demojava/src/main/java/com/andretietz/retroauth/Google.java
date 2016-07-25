@@ -10,7 +10,7 @@ import retrofit2.http.POST;
 import rx.Observable;
 
 public interface Google {
-    String TOKEN_TYPE = "com.andretietz.retroauth.demo.TOKEN";
+    int TOKEN_TYPE = 1;
 
     @Authenticated({TOKEN_TYPE})
     @GET("/oauth2/v1/userinfo")

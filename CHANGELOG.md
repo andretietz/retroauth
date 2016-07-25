@@ -1,4 +1,17 @@
-## 2.0.0 ()
+## 2.1.0 (2016-07-25)
+* retroauth-core:
+  * breaking improvement
+    * Switching from String[] to int[], which is easier to handle on library levels
+* retroauth-android:
+  * Some of the methods of the AuthAccountManager don't need a Context anymore
+  * removed method "getActiveUserToken" from AuthAccountManager, 'cause it's not necessary anymore
+* Update dependencies
+  * retrofit 2.1.0 (retroauth-core)
+  * appcompat 24.1.1 (retroauth-android)
+* Demo
+  * removed preconfigured google id (was pointless)
+
+## 2.0.0 (2016-06-15)
 
 * Complete rebuild, to be able to work with retrofit2
   * Removed rxjava as dependency

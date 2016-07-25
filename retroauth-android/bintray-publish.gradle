@@ -1,6 +1,5 @@
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
-apply plugin: 'net.saliman.properties'
 
 group = 'com.andretietz.retroauth'
 version = libraryVersion
@@ -29,7 +28,7 @@ def bintrayLicenses = ['Apache-2.0']
 
 bintray {
     user = bintrayUser
-    key = bintrayPass
+    key = bintrayKey
 
     configurations = ['archives'] //When uploading configuration files
     pkg {

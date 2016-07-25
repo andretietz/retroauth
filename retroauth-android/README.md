@@ -1,8 +1,11 @@
 # A simple way of calling authenticated requests using retrofit in android
 [![Build Status](https://travis-ci.org/andretietz/retroauth.svg?branch=master)](https://travis-ci.org/andretietz/retroauth)
 ## Dependencies
-* [Retrofit](https://github.com/square/retrofit) 2.0.2
-* appcompat-v7 23.4.0
+* [Retrofit](https://github.com/square/retrofit) 2.1.0
+* appcompat-v7 24.1.1
+
+Method-Count: 205
+Field-Count:  49
 
 ## What does it do?
 If you call a request method, annotated with the authenticated annotation, it'll do the following steps:
@@ -10,6 +13,14 @@ If you call a request method, annotated with the authenticated annotation, it'll
 * Step 2: Tries to get the authentication token from the (choosen) account for authorizing the request. If there is no valid token, your LoginActivity will open. After login go to Step 1.
 * Step 3: Sends the actual request
 * Step 4: By implementing a Provider you can check the response (i.e. a 401 you will be able to refresh the token) and decide if you want to retry the request or not.
+
+## How to use it on Android
+
+Add it as dependency:
+```groovy
+compile 'com.andretietz:retroauth-android:2.1.0'
+```
+
 
 ### 1. You need to deal with at least 3 different strings
 1. An action string which will be used to start your Login 
@@ -19,6 +30,18 @@ If you call a request method, annotated with the authenticated annotation, it'll
 3. A Token-Type string. It should be a unique string too. 
  * (recommended: use your applicationId for example and add: ".TOKEN")
 4. (Optional) Create as many Token-Type Strings as you need.
+
+add them to your strings.xml
+
+```xml
+<string name="authentication_ACTION" translatable="false">com.andretietz.retroauth.demo.ACTION</string>
+<string name="authentication_ACCOUNT" translatable="false">com.andretietz.retroauth.demo.ACCOUNT</string>
+<string name="authentication_TOKEN" translatable="false">com.andretietz.retroauth.demo.TOKEN</string>
+... other tokens
+```
+
+Change the String keys as you like, but remember renaming them in all the other places too!
+
  
 ### 2. Create an Activity (or use one you already have) where the user can login. This Activity must extend from AuthenticationActivity and call finalizeAuthentication when the authentication finished
  i.e. (see Demo for an example)
@@ -33,10 +56,10 @@ private void someLoginMethod() {
      // do login work here and make sure, that you provide at least a user and a token String
      ...
      Account account = createOrGetAccount(user);
-     storeToken(account, "<your-TOKEN-string-defined-in-step-1>", token);
+     storeToken(account, getString(R.string.authentication_TOKEN), token);
      // or optional
-     storeToken(account, "<your-TOKEN-string-defined-in-step-1>", token, refreshToken);
-     // add multiple tokens: storeToken(account, "<your-TOKEN-string-defined-in-step-X>", token2);
+     storeToken(account, getString(R.string.authentication_TOKEN), token, refreshToken);
+     // add multiple tokens: storeToken(account, getString(R.string.authentication_TOKEN_X), token2);
      // store some additional userdata (optionally)
      storeUserData(account, "key_for_some_user_data", "very-important-userdata");
      // finishes the activity and set this account to the "current-active" one
@@ -70,7 +93,7 @@ public class SomeAuthenticationService extends AuthenticationService {
 @Override
 public String getLoginAction(Context context) {
     // this is used only to provide the action for the LoginActivity to open
-    return "<your-ACTION-string-defined-in-step-1>"; // use context.getString instead if you like
+    return context.getString(R.string.authentication_ACTION);
 }
 }
 ```
@@ -78,7 +101,7 @@ public String getLoginAction(Context context) {
 Instead of creating you own Service feel free to use the "RetroauthAuthenticationService"
 Make sure you define a new string:
 ```xml
-<string name="com.andretietz.retroauth.authentication.ACTION" translatable="false"><your-ACTION-string-defined-in-step-1></string>
+<string name="com.andretietz.retroauth.authentication.ACTION" translatable="false">@string/authentication_ACTION</string>
 ```
 the key of your ACTION-string defined in step 1 is: "com.andretietz.retroauth.authentication.ACTION"
  
@@ -86,7 +109,7 @@ In both cases:
 Provide a authenticator.xml:
 ```xml
 <account-authenticator xmlns:android="http://schemas.android.com/apk/res/android"
-                   android:accountType="<your-ACCOUNT-string-defined-in-step-1>"
+                   android:accountType="@string/authentication_ACCOUNT"
                    android:icon="@mipmap/ic_launcher"
                    android:smallIcon="@mipmap/ic_launcher"
                    android:label="@string/app_name" />
@@ -173,7 +196,7 @@ public interface SomeAuthenticatedService {
  @GET("/some/path")
  Call<ResultObject> someUnauthenticatedCall();
 
- @Authenticated({"<your-account-type>", "<token-required-for-this-call>"})
+ @Authenticated({R.string.accountType, R.string.tokenType})
  @GET("/some/other/path")
  Call<ResultObject> someAuthenticatedCall();
 }

@@ -152,7 +152,7 @@ public final class Retroauth {
                     new CredentialInterceptor<>(authHandler, enableLocking);
 
             // add it as the first interceptor to be used
-            builder.interceptors().add(0, interceptor);
+            builder.interceptors().add(interceptor);
 
             // add the newly created okhttpclient as callFactory
             this.builder.callFactory(builder.build());

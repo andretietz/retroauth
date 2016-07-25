@@ -7,12 +7,12 @@ repositories {
 }
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    compileSdkVersion 24
+    buildToolsVersion "24.0.1"
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 23
+        targetSdkVersion 24
         versionCode 1
         versionName libraryVersion
     }
@@ -24,7 +24,6 @@ android {
     }
 
     lintOptions {
-        disable 'NewApi'
         abortOnError true
         absolutePaths false
         lintConfig file("lint.xml")
@@ -62,16 +61,16 @@ afterEvaluate {
     }
 }
 
-configurations.all { resolutionStrategy.cacheChangingModulesFor 0, 'seconds' }
-
 dependencies {
-    compile 'com.android.support:appcompat-v7:23.4.0'
+    compile 'com.android.support:appcompat-v7:24.1.1'
     compile "com.andretietz.retroauth:retroauth-core:$libraryVersion"
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-core:2.0.31-beta'
 
 }
+apply plugin: 'com.getkeepsafe.dexcount'
+
 /**
  * Before release:
  * - remove gradle.properties speed up config (pom is not generated otherwise for some reason)
@@ -79,6 +78,6 @@ dependencies {
  * gradlew.bat :retroauth-android:clean :retroauth-android:build :retroauth-android:artifactoryPublish
  * ./gradlew :retroauth-android:clean :retroauth-android:build :retroauth-android:artifactoryPublish
  * /
-apply from: 'jfrog-publish.gradle'
-apply from: 'bintray-publish.gradle'
+//apply from: 'jfrog-publish.gradle'
+//apply from: 'bintray-publish.gradle'
 //*/

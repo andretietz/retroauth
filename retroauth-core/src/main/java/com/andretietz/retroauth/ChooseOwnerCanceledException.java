@@ -16,7 +16,7 @@
 
 package com.andretietz.retroauth;
 
-public class ChooseOwnerCanceledException extends Exception {
+public final class ChooseOwnerCanceledException extends Exception {
     public ChooseOwnerCanceledException(String detailMessage) {
         super(detailMessage);
     }

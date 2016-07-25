@@ -18,7 +18,11 @@ import retrofit2.Retrofit;
  */
 public class ProviderGoogle implements Provider<Account, AndroidTokenType, AndroidToken> {
 
-    private Retrofit retrofit;
+    public static final String GOOGLE_CLIENT_ID = "329078189044-q3g29v14uhnrbb5vsaj8d34j26vh4fb4.apps.googleusercontent.com";
+    public static final String GOOGLE_CLIENT_SECRET = "HOePqkgIemKIcNhfRt8_jpfF";
+    public static final String GOOGLE_CLIENT_CALLBACK = "http://localhost:8000/accounts/google/login/callback/";
+
+    private GoogleService googleService;
 
     @Override
     public Request authenticateRequest(Request request, AndroidToken androidToken) {
@@ -33,12 +37,11 @@ public class ProviderGoogle implements Provider<Account, AndroidTokenType, Andro
             if (response.code() == 401) {
                 tokenStorage.removeToken(account, androidTokenType, androidToken);
                 if (androidToken.refreshToken != null) {
-                    GoogleService googleService = retrofit.create(GoogleService.class);
                     try {
                         retrofit2.Response<GoogleService.RefreshToken> refreshResponse = googleService.refreshToken(
                                 androidToken.refreshToken,
-                                "329078189044-q3g29v14uhnrbb5vsaj8d34j26vh4fb4.apps.googleusercontent.com",
-                                "HOePqkgIemKIcNhfRt8_jpfF"
+                                GOOGLE_CLIENT_ID,
+                                GOOGLE_CLIENT_SECRET
 
                         ).execute();
                         if (refreshResponse.isSuccessful()) {
@@ -56,7 +59,7 @@ public class ProviderGoogle implements Provider<Account, AndroidTokenType, Andro
         return false;
     }
 
-    public void setRetrofit(Retrofit retrofit) {
-        this.retrofit = retrofit;
+    public void onRetrofitCreated(Retrofit retrofit) {
+        this.googleService = retrofit.create(GoogleService.class);
     }
 }

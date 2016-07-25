@@ -1,10 +1,9 @@
-apply plugin: 'net.saliman.properties'
 apply plugin: 'com.jfrog.bintray'
 apply plugin: 'maven-publish'
 
 bintray {
     user = bintrayUser
-    key = bintrayPass
+    key = bintrayKey
     publications = ['MyPublication']
     pkg {
         repo = 'java'

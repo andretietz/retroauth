@@ -1,7 +1,7 @@
 # A simple way of calling authenticated requests using retrofit
 [![Build Status](https://travis-ci.org/andretietz/retroauth.svg?branch=master)](https://travis-ci.org/andretietz/retroauth)
 ## Dependencies
-* [Retrofit](https://github.com/square/retrofit) 2.0.2
+* [Retrofit](https://github.com/square/retrofit) 2.1.0
 
 ## Example:
 Your services using retrofit:
@@ -14,7 +14,9 @@ public interface SomeService {
 Your services using retroauth:
 ``` java
 public interface SomeService {
-    @Authenticated({"account-type", "token-type"})
+    int ACCOUNT_TYPE = 1;
+    int TOKEN_TYPE = 2;
+    @Authenticated({ACCOUNT_TYPE, TOKEN_TYPE})
     @GET("/some/path")
     Call<ResultObject> someRequest();
 }
@@ -25,7 +27,7 @@ If you're an Android Developer feel free to go directly to the [android project]
 
 Add it as dependency:
 ```groovy
-compile 'com.andretietz:retroauth-core:2.0.0'
+compile 'com.andretietz:retroauth-core:2.1.0'
 ```
 
 An Authentication with this library requires 3 generic classes, which you should aware of, before implementing. You can use whatever you want, for explanation reasons I'll use their generic names
@@ -51,7 +53,7 @@ public interface OwnerManager<OWNER, TOKEN_TYPE> {
 ### 2. Implement a TokenStorage
 ``` java
 public interface TokenStorage<OWNER, TOKEN_TYPE, TOKEN> {
-    TOKEN_TYPE createType(String[] annotationValues);
+    TOKEN_TYPE createType(int[] annotationValues);
     TOKEN getToken(OWNER owner, TOKEN_TYPE type) throws AuthenticationCanceledException;
     void storeToken(OWNER owner, TOKEN_TYPE type, TOKEN token);
     void removeToken(OWNER owner, TOKEN_TYPE type, TOKEN token);

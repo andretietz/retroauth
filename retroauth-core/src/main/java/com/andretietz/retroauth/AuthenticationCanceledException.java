@@ -22,7 +22,7 @@ import java.io.IOException;
  * This Exception is thrown, when the user cancels the Authentication or
  * some other error happens. The Reason can be read, on calling {@link AuthenticationCanceledException#getCause()}
  */
-public class AuthenticationCanceledException extends IOException {
+public final class AuthenticationCanceledException extends IOException {
     public AuthenticationCanceledException(String detailMessage) {
         super(detailMessage);
     }
