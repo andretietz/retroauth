@@ -18,7 +18,7 @@ script:
   - ./gradlew :retroauth-core:build :retroauth-android:build
 
 before_script:
-  - echo "include \':retroauth-core\', \':retroauth-android\'" > settings.gradle
+  - echo "include ':retroauth-core', ':retroauth-android'" > settings.gradle
 
 after_failure:
   - "cat /home/travis/build/andretietz/retroauth/retroauth-core/build/reports/tests/index.html"
