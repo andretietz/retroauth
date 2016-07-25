@@ -5,6 +5,7 @@
 * appcompat-v7 24.1.1
 
 Method-Count: 205
+Field-Count:  49
 
 ## What does it do?
 If you call a request method, annotated with the authenticated annotation, it'll do the following steps:
