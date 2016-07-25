@@ -1,4 +1,4 @@
-## 2.1.0 ()
+## 2.1.0 (2016-07-25)
 * retroauth-core:
   * breaking improvement
     * Switching from String[] to int[], which is easier to handle on library levels

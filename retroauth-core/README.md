@@ -27,7 +27,7 @@ If you're an Android Developer feel free to go directly to the [android project]
 
 Add it as dependency:
 ```groovy
-compile 'com.andretietz:retroauth-core:2.0.0'
+compile 'com.andretietz:retroauth-core:2.1.0'
 ```
 
 An Authentication with this library requires 3 generic classes, which you should aware of, before implementing. You can use whatever you want, for explanation reasons I'll use their generic names
