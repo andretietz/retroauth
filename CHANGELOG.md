@@ -8,8 +8,6 @@
 * Update dependencies
   * retrofit 2.1.0 (retroauth-core)
   * appcompat 24.1.1 (retroauth-android)
-* Demo
-  * removed preconfigured google id (was pointless)
 
 ## 2.0.0 (2016-06-15)
 
