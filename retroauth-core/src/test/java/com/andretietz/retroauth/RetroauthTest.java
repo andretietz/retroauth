@@ -126,8 +126,8 @@ public class RetroauthTest {
      * with the value <code>true</code>
      */
     @Test
-    public void blockingErrorCaseTest() {
-        int requestCount = 50;
+    public void blockingErrorCaseTest() throws InterruptedException {
+        int requestCount = 500;
         TestSubscriber<TestResponse>[] subscribers = new TestSubscriber[requestCount];
         // create a lot of requests
         for (int i = 0; i < requestCount; i++) {
@@ -136,6 +136,8 @@ public class RetroauthTest {
                     .subscribeOn(Schedulers.newThread())
                     .subscribe(subscribers[i]);
         }
+        // wait until all subscribers are ready
+        Thread.sleep(250);
         // create possible failing responses
         for (int i = 0; i < requestCount; i++) {
             server.enqueue(new MockResponse().setResponseCode(401));
