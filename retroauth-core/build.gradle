@@ -29,3 +29,4 @@ dependencies {
 }
 apply from: 'jfrog-publish.gradle'
 apply from: 'bintray-publish.gradle'
+apply plugin: 'com.github.ben-manes.versions'
