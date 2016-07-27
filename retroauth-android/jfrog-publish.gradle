@@ -6,10 +6,6 @@ group = 'com.andretietz.retroauth'
 version = libraryVersion
 
 
-configurations {
-    published
-}
-
 task sourceJar(type: Jar) {
     classifier = 'sources'
     from android.sourceSets.main.java.srcDirs
@@ -19,8 +15,25 @@ artifactoryPublish {
     dependsOn sourceJar
 }
 
-artifacts {
-    published sourceJar
+publishing {
+    publications {
+        retroauth(MavenPublication) {
+            groupId group
+            artifactId project.name
+            version = libraryVersion
+
+            artifact "${project.buildDir}/outputs/aar/${project.name}-release.aar"
+            artifact sourceJar
+
+            pom.withXml {
+                def root = asNode()
+                def license = root.appendNode('licenses').appendNode('license')
+                license.appendNode('name', 'The Apache Software License, Version 2.0')
+                license.appendNode('url', 'http://www.apache.org/licenses/LICENSE-2.0.txt')
+                license.appendNode('distribution', 'repo')
+            }
+        }
+    }
 }
 
 configure(install.repositories.mavenInstaller) {
@@ -42,15 +55,18 @@ artifactory {
             repoKey = 'oss-snapshot-local' // The Artifactory repository key to publish to
             username = project.hasProperty('bintrayUser') ? project.bintrayUser : System.getenv('BINTRAY_USER')
             password = project.hasProperty('bintrayKey') ? project.bintrayKey : System.getenv('BINTRAY_PASSWORD')
+            maven = true
         }
         defaults {
-            publishConfigs('archives', 'published')
-            properties = ['build.status': "$it.project.status".toString()]
+            publishArtifacts = true
+            publications('retroauth')
             publishPom = true //Publish generated POM files to Artifactory (true by default)
             publishIvy = false //Publish generated Ivy descriptor files to Artifactory (true by default)
         }
     }
     resolve {
-        repoKey = 'jcenter'
+        repository {
+            repoKey = 'jcenter'
+        }
     }
 }

@@ -2,11 +2,12 @@ buildscript {
     repositories {
         jcenter()
         mavenCentral()
+        maven { url "https://oss.jfrog.org/oss-snapshot-local" }
         mavenLocal()
     }
     dependencies {
         // for jfrog publishing
-        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.0.0'
+        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.1.1'
         // android plugin
         classpath 'com.android.tools.build:gradle:2.1.0'
         // publish android aar to maven
