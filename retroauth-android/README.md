@@ -19,7 +19,7 @@ If you call a request method, annotated with the authenticated annotation, it'll
 
 Add it as dependency:
 ```groovy
-compile 'com.andretietz:retroauth-android:2.1.1'
+compile 'com.andretietz.retroauth:retroauth-android:2.1.1'
 ```
 
 
