@@ -27,8 +27,8 @@ def bintrayLicenses = ['Apache-2.0']
 
 
 bintray {
-    user = bintrayUser
-    key = bintrayKey
+    user = project.hasProperty('bintrayUser') ? project.bintrayUser : System.getenv('BINTRAY_USER')
+    key = project.hasProperty('bintrayKey') ? project.bintrayKey : System.getenv('BINTRAY_PASSWORD')
 
     configurations = ['archives'] //When uploading configuration files
     pkg {

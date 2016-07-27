@@ -43,13 +43,6 @@ final class AndroidTokenStorage implements TokenStorage<Account, AndroidTokenTyp
     }
 
     @Override
-    public AndroidTokenType createType(int[] annotationValues) {
-        String accountType = contextManager.getContext().getString(annotationValues[0]);
-        String tokenType = contextManager.getContext().getString(annotationValues[1]);
-        return new AndroidTokenType(accountType, tokenType);
-    }
-
-    @Override
     public AndroidToken getToken(Account account, AndroidTokenType type) throws AuthenticationCanceledException {
         try {
             AndroidToken token;

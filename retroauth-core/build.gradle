@@ -18,22 +18,15 @@ checkstyle {
 }
 
 dependencies {
-    compile "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    compile "com.squareup.retrofit2:retrofit:2.1.0"
 
     testCompile 'junit:junit:4.12'
     testCompile 'com.squareup.okhttp3:mockwebserver:3.3.1'
-    testCompile "com.squareup.retrofit2:converter-moshi:$retrofitVersion"
-    testCompile "com.squareup.retrofit2:adapter-rxjava:$retrofitVersion"
+    testCompile "com.squareup.retrofit2:converter-moshi:2.1.0"
+    testCompile "com.squareup.retrofit2:adapter-rxjava:2.1.0"
     testCompile 'io.reactivex:rxjava:1.1.8'
     testCompile 'org.mockito:mockito-core:2.0.31-beta'
 }
-/**
- * Before release:
- * - remove gradle.properties speed up config (pom is not generated otherwise for some reason)
- * - make sure the android project is not in release mode
- * gradlew.bat :retroauth-core:clean :retroauth-core:build :retroauth-core:artifactoryPublish
- * ./gradlew :retroauth-core:clean :retroauth-core:build :retroauth-core:artifactoryPublish
- * /
- apply from: 'jfrog-publish.gradle'
- apply from: 'bintray-publish.gradle'
- //*/
+apply from: 'jfrog-publish.gradle'
+apply from: 'bintray-publish.gradle'
+apply plugin: 'com.github.ben-manes.versions'

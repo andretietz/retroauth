@@ -2,7 +2,7 @@ apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'maven-publish'
 apply plugin: 'android-maven'
 
-group = libraryGroup
+group = 'com.andretietz.retroauth'
 version = libraryVersion
 
 
@@ -40,8 +40,8 @@ artifactory {
     publish {
         repository {
             repoKey = 'oss-snapshot-local' // The Artifactory repository key to publish to
-            username = bintrayUser // The publisher user name
-            password = bintrayKey // The publisher password
+            username = project.hasProperty('bintrayUser') ? project.bintrayUser : System.getenv('BINTRAY_USER')
+            password = project.hasProperty('bintrayKey') ? project.bintrayKey : System.getenv('BINTRAY_PASSWORD')
         }
         defaults {
             publishConfigs('archives', 'published')

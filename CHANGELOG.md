@@ -1,15 +1,18 @@
+## 2.1.1 (2016-07-27)
+* retroauth-core:
+  * Removed method "createType" from TokenStorage
+  * Created TokenTypeFactory, which can be passed optionally into the AuthenticationHandler
+
 ## 2.1.0 (2016-07-25)
 * retroauth-core:
   * breaking improvement
-    * Switching from String[] to int[], which is easier to handle on library levels
+    * Switching from String[] to int[], which is easier to handle on android
 * retroauth-android:
   * Some of the methods of the AuthAccountManager don't need a Context anymore
   * removed method "getActiveUserToken" from AuthAccountManager, 'cause it's not necessary anymore
 * Update dependencies
   * retrofit 2.1.0 (retroauth-core)
   * appcompat 24.1.1 (retroauth-android)
-* Demo
-  * removed preconfigured google id (was pointless)
 
 ## 2.0.0 (2016-06-15)
 

@@ -31,4 +31,23 @@ public final class AndroidTokenType {
         this.accountType = accountType;
         this.tokenType = tokenType;
     }
+
+    public static final class Factory implements TokenTypeFactory<AndroidTokenType> {
+        private final ContextManager contextManager;
+
+        private Factory() {
+            this.contextManager = ContextManager.get();
+        }
+
+        public static Factory create() {
+            return new Factory();
+        }
+
+        @Override
+        public AndroidTokenType create(int[] annotationValues) {
+            String accountType = contextManager.getContext().getString(annotationValues[0]);
+            String tokenType = contextManager.getContext().getString(annotationValues[1]);
+            return new AndroidTokenType(accountType, tokenType);
+        }
+    }
 }
