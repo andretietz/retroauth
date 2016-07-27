@@ -1,7 +1,8 @@
 # A simple way of calling authenticated requests using retrofit in android
-[![Build Status](https://travis-ci.org/andretietz/retroauth.svg?branch=master)](https://travis-ci.org/andretietz/retroauth)
+[![Build Status](https://www.bitrise.io/app/d4189e3709bdf16d.svg?token=KpeuDTgCOEWgfL4RoZaVLQ&branch=master)](https://www.bitrise.io/app/d4189e3709bdf16d)
+[![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-retroauth-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/2195)
 ## Dependencies
-* [Retrofit](https://github.com/square/retrofit) 2.1.0
+* [Retrofit](https://github.com/square/retrofit) 2.1.0 (transitive)
 * appcompat-v7 24.1.1
 
 Method-Count: 205
