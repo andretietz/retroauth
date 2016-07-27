@@ -77,7 +77,7 @@ apply plugin: 'com.getkeepsafe.dexcount'
  * - make sure the core project is not in release mode
  * gradlew.bat :retroauth-android:clean :retroauth-android:build :retroauth-android:artifactoryPublish
  * ./gradlew :retroauth-android:clean :retroauth-android:build :retroauth-android:artifactoryPublish
- * /
-//apply from: 'jfrog-publish.gradle'
+ */
+apply from: 'jfrog-publish.gradle'
 //apply from: 'bintray-publish.gradle'
 //*/
