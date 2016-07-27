@@ -5,7 +5,6 @@ apply plugin: 'android-maven'
 group = 'com.andretietz.retroauth'
 version = libraryVersion
 
-
 task sourceJar(type: Jar) {
     classifier = 'sources'
     from android.sourceSets.main.java.srcDirs
