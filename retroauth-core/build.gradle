@@ -33,7 +33,6 @@ dependencies {
  * - make sure the android project is not in release mode
  * gradlew.bat :retroauth-core:clean :retroauth-core:build :retroauth-core:artifactoryPublish
  * ./gradlew :retroauth-core:clean :retroauth-core:build :retroauth-core:artifactoryPublish
- * /
+ */
  apply from: 'jfrog-publish.gradle'
  apply from: 'bintray-publish.gradle'
- //*/

@@ -32,7 +32,7 @@ import java.io.IOException;
 /**
  * This is the implementation of a {@link TokenStorage} in Android using the Android {@link AccountManager}
  */
-class AndroidTokenStorage implements TokenStorage<Account, AndroidTokenType, AndroidToken> {
+final class AndroidTokenStorage implements TokenStorage<Account, AndroidTokenType, AndroidToken> {
 
     private final AccountManager accountManager;
     private final ContextManager contextManager;
@@ -40,13 +40,6 @@ class AndroidTokenStorage implements TokenStorage<Account, AndroidTokenType, And
     public AndroidTokenStorage() {
         this.contextManager = ContextManager.get();
         this.accountManager = AccountManager.get(contextManager.getContext());
-    }
-
-    @Override
-    public AndroidTokenType createType(int[] annotationValues) {
-        String accountType = contextManager.getContext().getString(annotationValues[0]);
-        String tokenType = contextManager.getContext().getString(annotationValues[1]);
-        return new AndroidTokenType(accountType, tokenType);
     }
 
     @Override

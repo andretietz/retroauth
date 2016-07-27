@@ -1,6 +1,7 @@
 package com.andretietz.retroauth;
 
 import com.andretietz.retroauth.testimpl.TestTokenStorage;
+import com.andretietz.retroauth.testimpl.TestTokenTypeFactory;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -21,26 +22,6 @@ public class CredentialInterceptorTest {
 
 
     public static final String AUTHENTICATION_HEADER_KEY = "auth";
-
-    static class TestInterceptorChain implements Interceptor.Chain {
-        private Request request;
-        public void setupRequest(Request request) {
-            this.request = request;
-        }
-        @Override
-        public Request request() {
-            return request;
-        }
-        @Override
-        public Response proceed(Request request) throws IOException {
-            return new Response.Builder().request(request).code(200).protocol(Protocol.HTTP_1_1).build();
-        }
-        @Override
-        public Connection connection() {
-            return null;
-        }
-    }
-
 
     @Test
     public void intercept() throws IOException {
@@ -86,8 +67,32 @@ public class CredentialInterceptorTest {
                                                  String s, String s2, String s3) {
                         return false;
                     }
-                }
+                },
+                new TestTokenTypeFactory()
         );
+    }
+
+    static class TestInterceptorChain implements Interceptor.Chain {
+        private Request request;
+
+        public void setupRequest(Request request) {
+            this.request = request;
+        }
+
+        @Override
+        public Request request() {
+            return request;
+        }
+
+        @Override
+        public Response proceed(Request request) throws IOException {
+            return new Response.Builder().request(request).code(200).protocol(Protocol.HTTP_1_1).build();
+        }
+
+        @Override
+        public Connection connection() {
+            return null;
+        }
     }
 
 }

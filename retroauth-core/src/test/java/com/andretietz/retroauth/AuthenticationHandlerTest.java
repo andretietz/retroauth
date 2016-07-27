@@ -17,14 +17,17 @@ public class AuthenticationHandlerTest {
     TokenStorage<String, String, String> tokenStorage;
     @Mock
     Provider<String, String, String> provider;
+    @Mock
+    TokenTypeFactory<String> typeFactory;
 
     @Test
     public void allocate() {
         AuthenticationHandler<String, String, String> authHandler =
-                new AuthenticationHandler<>(methodCache, ownerManager, tokenStorage, provider);
+                new AuthenticationHandler<>(methodCache, ownerManager, tokenStorage, provider, typeFactory);
         Assert.assertNotNull(authHandler.methodCache);
         Assert.assertNotNull(authHandler.ownerManager);
         Assert.assertNotNull(authHandler.tokenStorage);
         Assert.assertNotNull(authHandler.provider);
+        Assert.assertNotNull(authHandler.typeFactory);
     }
 }

@@ -12,11 +12,6 @@ public class TestTokenStorage implements TokenStorage<String, String, String> {
     private TestBehaviour behaviour;
 
     @Override
-    public String createType(int[] annotationValues) {
-        return annotationValues.length > 0 ? "tokenType" : null;
-    }
-
-    @Override
     public String getToken(String owner, String tokenType) throws AuthenticationCanceledException {
         if (behaviour != null) {
             return behaviour.getToken(owner, tokenType);

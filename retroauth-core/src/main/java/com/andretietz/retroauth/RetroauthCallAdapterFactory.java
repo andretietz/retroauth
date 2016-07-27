@@ -35,7 +35,6 @@ final class RetroauthCallAdapterFactory<OWNER, TOKEN_TYPE, TOKEN> extends CallAd
      * registered {@link retrofit2.CallAdapter.Factory}s.
      */
     private final List<CallAdapter.Factory> callAdapterFactories;
-
     private final AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler;
 
     RetroauthCallAdapterFactory(List<CallAdapter.Factory> callAdapterFactories,
@@ -51,7 +50,7 @@ final class RetroauthCallAdapterFactory<OWNER, TOKEN_TYPE, TOKEN> extends CallAd
             CallAdapter<?> adapter = callAdapterFactories.get(i).get(returnType, annotations, retrofit);
             if (adapter != null) {
                 if (auth != null) {
-                    TOKEN_TYPE tokenType = authHandler.tokenStorage.createType(auth.value());
+                    TOKEN_TYPE tokenType = authHandler.typeFactory.create(auth.value());
                     return new RetroauthCallAdapter<>(adapter, tokenType, authHandler.methodCache);
                 }
                 return adapter;
