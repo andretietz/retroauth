@@ -2,8 +2,8 @@ apply plugin: 'com.jfrog.bintray'
 apply plugin: 'maven-publish'
 
 bintray {
-    user = bintrayUser
-    key = bintrayKey
+    user = project.hasProperty('bintrayUser') ? project.bintrayUser : System.getenv('BINTRAY_USER')
+    key = project.hasProperty('bintrayKey') ? project.bintrayKey : System.getenv('BINTRAY_PASSWORD')
     publications = ['core']
     pkg {
         repo = 'java'
