@@ -1,14 +1,14 @@
 apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'maven-publish'
 
-group = libraryGroup
-version = libraryVersion + "-SNAPSHOT"
+group = 'com.andretietz.retroauth'
+version = libraryVersion
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
             from components.java
-            groupId = libraryGroup
+            groupId = group
         }
     }
 }

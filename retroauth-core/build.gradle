@@ -18,12 +18,12 @@ checkstyle {
 }
 
 dependencies {
-    compile "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    compile "com.squareup.retrofit2:retrofit:2.1.0"
 
     testCompile 'junit:junit:4.12'
     testCompile 'com.squareup.okhttp3:mockwebserver:3.3.1'
-    testCompile "com.squareup.retrofit2:converter-moshi:$retrofitVersion"
-    testCompile "com.squareup.retrofit2:adapter-rxjava:$retrofitVersion"
+    testCompile "com.squareup.retrofit2:converter-moshi:2.1.0"
+    testCompile "com.squareup.retrofit2:adapter-rxjava:2.1.0"
     testCompile 'io.reactivex:rxjava:1.1.8'
     testCompile 'org.mockito:mockito-core:2.0.31-beta'
 }
