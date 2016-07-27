@@ -67,7 +67,8 @@ public class Demo extends Application {
 
         AuthenticationHandler<String, String, OAuth2AccessToken> authHandler = new AuthenticationHandler<>(
                 new MethodCache.DefaultMethodCache<>(),
-                new SimpleOwnerManager(), xmlTokenStorage, provider
+                new SimpleOwnerManager(), xmlTokenStorage, provider,
+                xmlTokenStorage
         );
 
         Retrofit retrofit = new Retroauth.Builder<>(authHandler)
@@ -87,7 +88,7 @@ public class Demo extends Application {
                         .observeOn(JavaFxScheduler.getInstance())
                         .subscribe(emails -> {
                             text.setText("Hello: " + emails.name);
-                        }));
+                        }, Throwable::printStackTrace));
 
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);

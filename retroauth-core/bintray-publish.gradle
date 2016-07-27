@@ -2,9 +2,9 @@ apply plugin: 'com.jfrog.bintray'
 apply plugin: 'maven-publish'
 
 bintray {
-    user = bintrayUser
-    key = bintrayKey
-    publications = ['MyPublication']
+    user = project.hasProperty('bintrayUser') ? project.bintrayUser : System.getenv('BINTRAY_USER')
+    key = project.hasProperty('bintrayKey') ? project.bintrayKey : System.getenv('BINTRAY_PASSWORD')
+    publications = ['core']
     pkg {
         repo = 'java'
         name = 'retroauth-core'
@@ -18,7 +18,7 @@ bintray {
 
 publishing {
     publications {
-        MyPublication(MavenPublication) {
+        core(MavenPublication) {
             from components.java
             groupId 'com.andretietz.retroauth'
             artifactId 'retroauth-core'

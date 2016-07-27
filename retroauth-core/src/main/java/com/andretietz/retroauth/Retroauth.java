@@ -47,7 +47,7 @@ public final class Retroauth {
         private boolean enableLocking = false;
 
         public Builder(AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler) {
-            builder = new Retrofit.Builder();
+            this.builder = new Retrofit.Builder();
             this.authHandler = authHandler;
             this.callAdapterFactories = new LinkedList<>();
         }
@@ -66,7 +66,7 @@ public final class Retroauth {
          */
         @SuppressWarnings("unused")
         public Builder<OWNER, TOKEN_TYPE, TOKEN> baseUrl(HttpUrl baseUrl) {
-            builder.baseUrl(baseUrl);
+            this.builder.baseUrl(baseUrl);
             return this;
         }
 
@@ -75,7 +75,7 @@ public final class Retroauth {
          */
         @SuppressWarnings("unused")
         public Builder<OWNER, TOKEN_TYPE, TOKEN> baseUrl(String baseUrl) {
-            builder.baseUrl(baseUrl);
+            this.builder.baseUrl(baseUrl);
             return this;
         }
 
@@ -84,7 +84,7 @@ public final class Retroauth {
          */
         @SuppressWarnings("unused")
         public Builder<OWNER, TOKEN_TYPE, TOKEN> addConverterFactory(Converter.Factory factory) {
-            builder.addConverterFactory(factory);
+            this.builder.addConverterFactory(factory);
             return this;
         }
 
@@ -93,7 +93,7 @@ public final class Retroauth {
          */
         @SuppressWarnings("unused")
         public Builder<OWNER, TOKEN_TYPE, TOKEN> addCallAdapterFactory(CallAdapter.Factory factory) {
-            callAdapterFactories.add(factory);
+            this.callAdapterFactories.add(factory);
             return this;
         }
 
@@ -103,7 +103,7 @@ public final class Retroauth {
         @SuppressWarnings("unused")
         public Builder<OWNER, TOKEN_TYPE, TOKEN> callbackExecutor(Executor executor) {
             this.executor = executor;
-            builder.callbackExecutor(executor);
+            this.builder.callbackExecutor(executor);
             return this;
         }
 
@@ -112,7 +112,7 @@ public final class Retroauth {
          */
         @SuppressWarnings("unused")
         public Builder<OWNER, TOKEN_TYPE, TOKEN> validateEagerly(boolean validateEagerly) {
-            builder.validateEagerly(validateEagerly);
+            this.builder.validateEagerly(validateEagerly);
             return this;
         }
 
@@ -143,7 +143,7 @@ public final class Retroauth {
                     new RetroauthCallAdapterFactory<>(callAdapterFactories, authHandler);
 
             // use this callAdapter to create the retrofit object
-            builder.addCallAdapterFactory(callAdapter);
+            this.builder.addCallAdapterFactory(callAdapter);
 
             OkHttpClient.Builder builder = (okHttpClient != null) ? okHttpClient.newBuilder() : new OkHttpClient.Builder();
 

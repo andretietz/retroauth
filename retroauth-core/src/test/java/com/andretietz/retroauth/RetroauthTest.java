@@ -4,6 +4,7 @@ import com.andretietz.retroauth.testimpl.TestInterface;
 import com.andretietz.retroauth.testimpl.TestProvider;
 import com.andretietz.retroauth.testimpl.TestResponse;
 import com.andretietz.retroauth.testimpl.TestTokenStorage;
+import com.andretietz.retroauth.testimpl.TestTokenTypeFactory;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -46,7 +47,8 @@ public class RetroauthTest {
                         methodCache,
                         Mockito.mock(OwnerManager.class),
                         tokenStorage,
-                        new TestProvider()
+                        new TestProvider(),
+                        new TestTokenTypeFactory()
                 );
 
         Retrofit retrofit = new Retroauth.Builder<>(authHandler)
