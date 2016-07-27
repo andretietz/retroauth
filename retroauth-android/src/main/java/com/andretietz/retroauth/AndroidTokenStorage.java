@@ -32,7 +32,7 @@ import java.io.IOException;
 /**
  * This is the implementation of a {@link TokenStorage} in Android using the Android {@link AccountManager}
  */
-final class AndroidTokenStorage implements TokenStorage<Account, AndroidTokenType, AndroidToken> {
+class AndroidTokenStorage implements TokenStorage<Account, AndroidTokenType, AndroidToken> {
 
     private final AccountManager accountManager;
     private final ContextManager contextManager;
