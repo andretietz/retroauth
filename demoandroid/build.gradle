@@ -1,9 +1,3 @@
-repositories {
-    mavenLocal()
-    maven { url("https://oss.jfrog.org/artifactory/oss-snapshot-local/") }
-    jcenter()
-    mavenCentral()
-}
 apply plugin: 'com.android.application'
 
 android {
@@ -36,7 +30,7 @@ dependencies {
     compile "com.squareup.retrofit2:adapter-rxjava:2.1.0"
     compile 'com.squareup.okhttp3:logging-interceptor:3.3.1'
 
-    compile 'com.github.scribejava:scribejava-apis:2.5.2'
+    compile 'com.github.scribejava:scribejava-apis:3.0.0'
 
     compile project(':retroauth-android')
 }
