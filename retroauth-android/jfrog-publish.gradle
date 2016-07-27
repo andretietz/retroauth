@@ -2,7 +2,7 @@ apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'maven-publish'
 apply plugin: 'android-maven'
 
-group = libraryGroup
+group = 'com.andretietz.retroauth'
 version = libraryVersion
 
 
