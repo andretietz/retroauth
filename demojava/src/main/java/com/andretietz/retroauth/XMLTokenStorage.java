@@ -26,7 +26,7 @@ import javafx.stage.Stage;
  * This is a very optimistic and completely unsecured implementation of
  * storing a token! It's only supposed to show the effect of the retroauth library
  */
-public class XMLTokenStorage implements TokenStorage<String, String, OAuth2AccessToken> {
+public class XMLTokenStorage implements TokenStorage<String, String, OAuth2AccessToken>, TokenTypeFactory<String> {
 
     private final OAuth20Service service;
 
@@ -47,7 +47,7 @@ public class XMLTokenStorage implements TokenStorage<String, String, OAuth2Acces
     }
 
     @Override
-    public String createType(int[] annotationValues) {
+    public String create(int[] annotationValues) {
         return "token_type_" + annotationValues[0];
     }
 
@@ -59,7 +59,7 @@ public class XMLTokenStorage implements TokenStorage<String, String, OAuth2Acces
             XMLAuthToken xmlAuthToken = serializer.read(XMLAuthToken.class, file);
             return new OAuth2AccessToken(xmlAuthToken.token, tokenType, 0, xmlAuthToken.refreshToken, "", "");
         } catch (Exception e) {
-            e.printStackTrace();
+            //
         }
         return new LoginHelper(owner, tokenType, this, service).call();
     }

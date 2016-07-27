@@ -24,6 +24,8 @@ public class RetroauthBuilderTest {
     OwnerManager<String, String> ownerManager;
     @Mock
     TokenStorage<String, String, String> tokenStorage;
+    @Mock
+    TokenTypeFactory<String> typeFactory;
 
     @Test
     public void builder() {
@@ -32,7 +34,8 @@ public class RetroauthBuilderTest {
                         methodCache,
                         ownerManager,
                         tokenStorage,
-                        provider
+                        provider,
+                        typeFactory
                 );
 
         HttpUrl url = HttpUrl.parse("https://github.com/andretietz/retroauth/");

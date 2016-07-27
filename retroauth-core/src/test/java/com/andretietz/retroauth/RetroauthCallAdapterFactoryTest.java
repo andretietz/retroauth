@@ -3,6 +3,7 @@ package com.andretietz.retroauth;
 import com.andretietz.retroauth.testimpl.TestInterface;
 import com.andretietz.retroauth.testimpl.TestTokenStorage;
 import com.andretietz.retroauth.testimpl.TestProvider;
+import com.andretietz.retroauth.testimpl.TestTokenTypeFactory;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -44,7 +45,8 @@ public class RetroauthCallAdapterFactoryTest {
                         methodCache,
                         Mockito.mock(OwnerManager.class),
                         new TestTokenStorage(),
-                        new TestProvider()
+                        new TestProvider(),
+                        new TestTokenTypeFactory()
                 );
 
         RetroauthCallAdapterFactory adapterFactory =

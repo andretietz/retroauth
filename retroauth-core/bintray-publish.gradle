@@ -4,7 +4,7 @@ apply plugin: 'maven-publish'
 bintray {
     user = bintrayUser
     key = bintrayKey
-    publications = ['MyPublication']
+    publications = ['core']
     pkg {
         repo = 'java'
         name = 'retroauth-core'
@@ -18,7 +18,7 @@ bintray {
 
 publishing {
     publications {
-        MyPublication(MavenPublication) {
+        core(MavenPublication) {
             from components.java
             groupId 'com.andretietz.retroauth'
             artifactId 'retroauth-core'
