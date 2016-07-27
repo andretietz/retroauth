@@ -71,13 +71,5 @@ dependencies {
 }
 apply plugin: 'com.getkeepsafe.dexcount'
 
-/**
- * Before release:
- * - remove gradle.properties speed up config (pom is not generated otherwise for some reason)
- * - make sure the core project is not in release mode
- * gradlew.bat :retroauth-android:clean :retroauth-android:build :retroauth-android:artifactoryPublish
- * ./gradlew :retroauth-android:clean :retroauth-android:build :retroauth-android:artifactoryPublish
- */
 apply from: 'jfrog-publish.gradle'
-//apply from: 'bintray-publish.gradle'
-//*/
+apply from: 'bintray-publish.gradle'
