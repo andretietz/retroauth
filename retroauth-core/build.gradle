@@ -4,12 +4,6 @@ apply plugin: 'checkstyle'
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
-project(":retroauth-core") {
-    repositories {
-        jcenter()
-    }
-}
-
 checkstyle {
     toolVersion '6.0'
     configFile = new File(rootDir, "checkstyle.xml")

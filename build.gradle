@@ -1,8 +1,8 @@
 buildscript {
     repositories {
-        mavenLocal()
         jcenter()
         mavenCentral()
+        mavenLocal()
     }
     dependencies {
         // for jfrog publishing
@@ -16,6 +16,15 @@ buildscript {
         // dexcount
         classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.5.5'
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.13.0'
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+        mavenCentral()
+        maven { url('https://oss.jfrog.org/artifactory/oss-snapshot-local/') }
+        mavenLocal()
     }
 }
 

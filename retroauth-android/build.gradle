@@ -1,11 +1,5 @@
 apply plugin: 'com.android.library'
 
-repositories {
-    mavenLocal()
-    jcenter()
-    maven { url('https://oss.jfrog.org/artifactory/oss-snapshot-local/') }
-}
-
 android {
     compileSdkVersion 24
     buildToolsVersion "24.0.1"
