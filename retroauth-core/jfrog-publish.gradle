@@ -4,9 +4,10 @@ apply plugin: 'maven-publish'
 group = 'com.andretietz.retroauth'
 version = libraryVersion
 
+
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        retroauth(MavenPublication) {
             from components.java
             groupId = group
         }
@@ -23,11 +24,8 @@ artifactory {
             maven = true
         }
         defaults {
-            publications('mavenJava')
+            publications('retroauth')
             publishArtifacts = true
-            // Properties to be attached to the published artifacts.
-            properties = ['qa.level': 'basic', 'dev.team' : 'core']
-            // Publish generated POM files to Artifactory (true by default)
             publishPom = true
             publishIvy = false
         }
