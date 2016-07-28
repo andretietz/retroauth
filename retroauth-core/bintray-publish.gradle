@@ -5,6 +5,7 @@ bintray {
     user = project.hasProperty('bintrayUser') ? project.bintrayUser : System.getenv('BINTRAY_USER')
     key = project.hasProperty('bintrayKey') ? project.bintrayKey : System.getenv('BINTRAY_PASSWORD')
     publications = ['core']
+    publish = true
     pkg {
         repo = 'java'
         name = 'retroauth-core'

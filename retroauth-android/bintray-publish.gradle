@@ -4,9 +4,6 @@ apply plugin: 'com.jfrog.bintray'
 group = 'com.andretietz.retroauth'
 version = libraryVersion
 
-// Before deploying your project to maven central the first time, you have to create a jira ticket for the project
-// https://issues.sonatype.org/secure/CreateIssue.jspa?issuetype=21&pid=10134
-
 def siteUrl = 'https://github.com/andretietz/retroauth'
 def codeRepositoryUrl = 'https://github.com/andretietz/retroauth.git'
 def issuesUrl = 'https://github.com/andretietz/retroauth/issues'
@@ -29,8 +26,8 @@ def bintrayLicenses = ['Apache-2.0']
 bintray {
     user = project.hasProperty('bintrayUser') ? project.bintrayUser : System.getenv('BINTRAY_USER')
     key = project.hasProperty('bintrayKey') ? project.bintrayKey : System.getenv('BINTRAY_PASSWORD')
-
-    configurations = ['archives'] //When uploading configuration files
+    publish = true
+    configurations = ['archives']
     pkg {
         repo = bintrayRepository
         name = project.name
