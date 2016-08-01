@@ -25,9 +25,6 @@ import android.accounts.Account;
  */
 public final class AndroidAuthenticationHandler extends AuthenticationHandler<Account, AndroidTokenType, AndroidToken> {
 
-    /**
-     * This constructor will be private in the next breaking release (2.2.X). Use {@link #create(Provider)} instead.
-     */
     private AndroidAuthenticationHandler(Provider<Account, AndroidTokenType, AndroidToken> provider,
                                          TokenTypeFactory<AndroidTokenType> typeFactory) {
         super(new AndroidMethodCache(), new AndroidOwnerManager(new AuthAccountManager()),

@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         /**
          * Create your Retrofit Object using the {@link Retroauth.Builder}
          */
-        Retrofit retrofit = new Retroauth.Builder<>(new AndroidAuthenticationHandler(provider))
+        Retrofit retrofit = new Retroauth.Builder<>(AndroidAuthenticationHandler.create(provider))
                 .baseUrl("https://www.googleapis.com/")
                 .client(httpClient)
                 .addConverterFactory(MoshiConverterFactory.create())
