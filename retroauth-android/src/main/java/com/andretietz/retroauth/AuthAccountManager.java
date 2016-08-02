@@ -27,7 +27,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 /**
  * This class wraps the Android {@link android.accounts.AccountManager} and adds some retroauth specific
@@ -211,22 +210,36 @@ public final class AuthAccountManager {
      * Removes the currently active account
      *
      * @param accountType the account type of which you want to delete the active user from
+     * @param callback    callback returns, when account was deleted.
      */
-    public void removeActiveAccount(@NonNull String accountType) {
+    public void removeActiveAccount(@NonNull String accountType, @Nullable AccountCallback callback) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            accountManager.removeAccount(getActiveAccount(accountType), null, null, null);
+            RemoveLollipopAccountCallback rac = (callback != null) ? new RemoveLollipopAccountCallback(callback) : null;
+            accountManager.removeAccount(getActiveAccount(accountType), null, rac, null);
         } else {
-            accountManager.removeAccount(getActiveAccount(accountType), null, null);
+            RemoveAccountCallback rac = (callback != null) ? new RemoveAccountCallback(callback) : null;
+            accountManager.removeAccount(getActiveAccount(accountType), rac, null);
         }
         resetActiveAccount(accountType);
+    }
+
+    /**
+     * Removes the currently active account
+     *
+     * @param accountType the account type of which you want to delete the active user from
+     */
+    public void removeActiveAccount(@NonNull String accountType) {
+        removeActiveAccount(accountType, null);
     }
 
     public interface AccountCallback {
         void done(boolean success);
     }
 
-    private static class CreateAccountCallback implements AccountManagerCallback<Bundle> {
-
+    /**
+     * Callback wrapper for adding an account
+     */
+    private static final class CreateAccountCallback implements AccountManagerCallback<Bundle> {
         private final AccountCallback callback;
 
         CreateAccountCallback(AccountCallback callback) {
@@ -238,6 +251,46 @@ public final class AuthAccountManager {
             try {
                 String accountName = accountManagerFuture.getResult().getString(AccountManager.KEY_ACCOUNT_NAME);
                 callback.done(accountName != null);
+            } catch (Exception e) {
+                callback.done(false);
+            }
+        }
+    }
+
+    /**
+     * Callback wrapper for account removing on >= lollipop (22) devices
+     */
+    private static final class RemoveLollipopAccountCallback implements AccountManagerCallback<Bundle> {
+        private final AccountCallback callback;
+
+        private RemoveLollipopAccountCallback(AccountCallback callback) {
+            this.callback = callback;
+        }
+
+        @Override
+        public void run(AccountManagerFuture<Bundle> accountManagerFuture) {
+            try {
+                callback.done(accountManagerFuture.getResult().getBoolean(AccountManager.KEY_BOOLEAN_RESULT));
+            } catch (Exception e) {
+                callback.done(false);
+            }
+        }
+    }
+
+    /**
+     * Callback wrapper for account removing on prelollipop (22) devices
+     */
+    private static final class RemoveAccountCallback implements AccountManagerCallback<Boolean> {
+        private final AccountCallback callback;
+
+        private RemoveAccountCallback(AccountCallback callback) {
+            this.callback = callback;
+        }
+
+        @Override
+        public void run(AccountManagerFuture<Boolean> accountManagerFuture) {
+            try {
+                callback.done(accountManagerFuture.getResult());
             } catch (Exception e) {
                 callback.done(false);
             }
