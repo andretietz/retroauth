@@ -132,6 +132,13 @@ public class MainActivity extends AppCompatActivity {
                         getString(R.string.com_andretietz_retroauth_authentication_TOKEN));
             }
         });
+
+        findViewById(R.id.buttonRemoveAccount).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                authAccountManager.removeActiveAccount(getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT));
+            }
+        });
     }
 
     private void show(String toShow) {

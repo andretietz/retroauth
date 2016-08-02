@@ -38,5 +38,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Add a new Account"/>
+    <Button
+        android:id="@+id/buttonRemoveAccount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Remove active Account"/>
 
 </LinearLayout>
