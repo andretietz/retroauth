@@ -18,12 +18,16 @@ package com.andretietz.retroauth;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 /**
  * This class wraps the Android {@link android.accounts.AccountManager} and adds some retroauth specific
@@ -175,9 +179,23 @@ public final class AuthAccountManager {
      *
      * @param accountType the account type you want to create an account for
      * @param tokenType   the type of token you want to create
+     * @param callback    which is called when the account has been created or account creation was canceled.
+     */
+    public void addAccount(@NonNull String accountType, @Nullable String tokenType, @Nullable AccountCallback callback) {
+        CreateAccountCallback cac = (callback != null) ? new CreateAccountCallback(callback) : null;
+        accountManager.addAccount(accountType, tokenType, null, null, contextManager.getActivity(), cac, null);
+    }
+
+    /**
+     * Adds a new account for the given account type. The tokenType is optional. you can request this type in the login
+     * {@link Activity} calling {@link AuthenticationActivity#getRequestedTokenType()}. This value will not be available
+     * when you're creating an account from Android-Settings-Accounts-Add Account
+     *
+     * @param accountType the account type you want to create an account for
+     * @param tokenType   the type of token you want to create
      */
     public void addAccount(@NonNull String accountType, @Nullable String tokenType) {
-        accountManager.addAccount(accountType, tokenType, null, null, contextManager.getActivity(), null, null);
+        addAccount(accountType, tokenType, null);
     }
 
     /**
@@ -201,5 +219,28 @@ public final class AuthAccountManager {
             accountManager.removeAccount(getActiveAccount(accountType), null, null);
         }
         resetActiveAccount(accountType);
+    }
+
+    public interface AccountCallback {
+        void done(boolean success);
+    }
+
+    private static class CreateAccountCallback implements AccountManagerCallback<Bundle> {
+
+        private final AccountCallback callback;
+
+        CreateAccountCallback(AccountCallback callback) {
+            this.callback = callback;
+        }
+
+        @Override
+        public void run(AccountManagerFuture<Bundle> accountManagerFuture) {
+            try {
+                String accountName = accountManagerFuture.getResult().getString(AccountManager.KEY_ACCOUNT_NAME);
+                callback.done(accountName != null);
+            } catch (Exception e) {
+                callback.done(false);
+            }
+        }
     }
 }
