@@ -29,14 +29,13 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
 
-
 /**
  * Your activity that's supposed to create the account (i.e. Login{@link android.app.Activity}) has to implement this.
  * It'll provide functionality to {@link #storeToken(Account, String, String)} and
  * {@link #storeUserData(Account, String, String)} when logging in. In case your service is providing a refresh token,
  * use {@link #storeToken(Account, String, String, String)}. This will additionally store a refresh token that can be used
- * in {@link Provider#retryRequired(int, Response, TokenStorage, Object, Object, Object)} to update the access
- * token
+ * in {@link Provider#retryRequired(int, okhttp3.Response, TokenStorage, Object, Object, Object)}
+ * to update the access-token
  */
 public abstract class AuthenticationActivity extends AppCompatActivity {
 
@@ -136,19 +135,35 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
     }
 
     /**
+     * This method will finish the login process. Depending on the finishActivity flag, the activity will be finished or not
+     * The account which is reached into this method will be set as
+     * "current-active" account. Use {@link AuthAccountManager#resetActiveAccount(String)} to
+     * reset this if required
+     *
+     * @param account        Account you want to set as current active
+     * @param finishActivity when {@code true}, the activity will be finished after finalization.
+     */
+    @SuppressWarnings("unused")
+    protected void finalizeAuthentication(@NonNull Account account, boolean finishActivity) {
+        resultBundle.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
+        SharedPreferences preferences = getSharedPreferences(accountType, Context.MODE_PRIVATE);
+        preferences.edit().putString(AuthAccountManager.RETROAUTH_ACCOUNTNAME_KEY, account.name).apply();
+        if (finishActivity) {
+            finish();
+        }
+    }
+
+    /**
      * This method will finish the login process, close the login activity.
      * The account which is reached into this method will be set as
      * "current-active" account. Use {@link AuthAccountManager#resetActiveAccount(String)} to
-     * reset this if necessary
+     * reset this if required
      *
      * @param account Account you want to set as current active
      */
     @SuppressWarnings("unused")
     protected void finalizeAuthentication(@NonNull Account account) {
-        resultBundle.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
-        SharedPreferences preferences = getSharedPreferences(accountType, Context.MODE_PRIVATE);
-        preferences.edit().putString(AuthAccountManager.RETROAUTH_ACCOUNTNAME_KEY, account.name).apply();
-        finish();
+        finalizeAuthentication(account, true);
     }
 
     /**
