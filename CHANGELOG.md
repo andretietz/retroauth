@@ -1,3 +1,8 @@
+## 2.1.2 ()
+* retroauth-android:
+  * Authentication can be finalized without finishing the activity itself
+  * Adding and removing accounts using the AuthAccountManager can have some optional callbacks, which notifies you, when the system created/removed the account
+
 ## 2.1.1 (2016-07-27)
 * retroauth-core:
   * Removed method "createType" from TokenStorage

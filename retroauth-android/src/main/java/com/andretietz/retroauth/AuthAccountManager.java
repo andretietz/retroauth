@@ -18,10 +18,13 @@ package com.andretietz.retroauth;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -66,12 +69,17 @@ public final class AuthAccountManager {
     }
 
     /**
+     * When calling this method make sure you have the correct permission to read this accountType. Since you
+     * propably want to read your own account number, no permission is required for this.
+     * If not, you need GET_ACCOUNTS permission
+     *
      * @param accountType of which you want to get the active account
      * @param accountName account name you're searching for
      * @return the account if found. {@code null} if not
      */
     @Nullable
     public Account getAccountByName(@NonNull String accountType, @NonNull String accountName) {
+        @SuppressWarnings("MissingPermission")
         Account[] accounts = accountManager.getAccountsByType(accountType);
         for (Account account : accounts) {
             if (accountName.equals(account.name)) return account;
@@ -175,18 +183,55 @@ public final class AuthAccountManager {
      *
      * @param accountType the account type you want to create an account for
      * @param tokenType   the type of token you want to create
+     * @param callback    which is called when the account has been created or account creation was canceled.
      */
-    public void addAccount(@NonNull String accountType, @Nullable String tokenType) {
-        accountManager.addAccount(accountType, tokenType, null, null, contextManager.getActivity(), null, null);
+    public void addAccount(@NonNull String accountType, @Nullable String tokenType, @Nullable AccountCallback callback) {
+        CreateAccountCallback cac = (callback != null) ? new CreateAccountCallback(callback) : null;
+        accountManager.addAccount(accountType, tokenType, null, null, contextManager.getActivity(), cac, null);
     }
 
     /**
+     * Adds a new account for the given account type. The tokenType is optional. you can request this type in the login
+     * {@link Activity} calling {@link AuthenticationActivity#getRequestedTokenType()}. This value will not be available
+     * when you're creating an account from Android-Settings-Accounts-Add Account
+     *
+     * @param accountType the account type you want to create an account for
+     * @param tokenType   the type of token you want to create
+     */
+    public void addAccount(@NonNull String accountType, @Nullable String tokenType) {
+        addAccount(accountType, tokenType, null);
+    }
+
+    /**
+     * When calling this method make sure you have the correct permission to read this accountType. Since you
+     * propably want to read your own account number, no permission is required for this.
+     * If not, you need GET_ACCOUNTS permission
+     *
      * @param accountType AccountType which you want to know the amount of
      * @return number of existing accounts of this type. Depending on which accountType you're requesting this could
      * require additional permissions
      */
     public int accountAmount(@NonNull String accountType) {
+        //noinspection MissingPermission
         return accountManager.getAccountsByType(accountType).length;
+    }
+
+    /**
+     * Removes the currently active account
+     *
+     * @param accountType the account type of which you want to delete the active user from
+     * @param callback    callback returns, when account was deleted.
+     */
+    public void removeActiveAccount(@NonNull String accountType, @Nullable AccountCallback callback) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            RemoveLollipopAccountCallback rac = (callback != null) ? new RemoveLollipopAccountCallback(callback) : null;
+            accountManager.removeAccount(getActiveAccount(accountType), null, rac, null);
+        } else {
+            RemoveAccountCallback rac = (callback != null) ? new RemoveAccountCallback(callback) : null;
+            //noinspection deprecation
+            accountManager.removeAccount(getActiveAccount(accountType), rac, null);
+        }
+        resetActiveAccount(accountType);
     }
 
     /**
@@ -195,11 +240,71 @@ public final class AuthAccountManager {
      * @param accountType the account type of which you want to delete the active user from
      */
     public void removeActiveAccount(@NonNull String accountType) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            accountManager.removeAccount(getActiveAccount(accountType), null, null, null);
-        } else {
-            accountManager.removeAccount(getActiveAccount(accountType), null, null);
+        removeActiveAccount(accountType, null);
+    }
+
+    public interface AccountCallback {
+        void done(boolean success);
+    }
+
+    /**
+     * Callback wrapper for adding an account
+     */
+    private static final class CreateAccountCallback implements AccountManagerCallback<Bundle> {
+        private final AccountCallback callback;
+
+        CreateAccountCallback(AccountCallback callback) {
+            this.callback = callback;
         }
-        resetActiveAccount(accountType);
+
+        @Override
+        public void run(AccountManagerFuture<Bundle> accountManagerFuture) {
+            try {
+                String accountName = accountManagerFuture.getResult().getString(AccountManager.KEY_ACCOUNT_NAME);
+                callback.done(accountName != null);
+            } catch (Exception e) {
+                callback.done(false);
+            }
+        }
+    }
+
+    /**
+     * Callback wrapper for account removing on >= lollipop (22) devices
+     */
+    private static final class RemoveLollipopAccountCallback implements AccountManagerCallback<Bundle> {
+        private final AccountCallback callback;
+
+        private RemoveLollipopAccountCallback(AccountCallback callback) {
+            this.callback = callback;
+        }
+
+        @Override
+        public void run(AccountManagerFuture<Bundle> accountManagerFuture) {
+            try {
+                callback.done(accountManagerFuture.getResult().getBoolean(AccountManager.KEY_BOOLEAN_RESULT));
+            } catch (Exception e) {
+                callback.done(false);
+            }
+        }
+    }
+
+    /**
+     * Callback wrapper for account removing on prelollipop (22) devices
+     */
+    private static final class RemoveAccountCallback implements AccountManagerCallback<Boolean> {
+        private final AccountCallback callback;
+
+        private RemoveAccountCallback(AccountCallback callback) {
+            this.callback = callback;
+        }
+
+        @Override
+        public void run(AccountManagerFuture<Boolean> accountManagerFuture) {
+            try {
+                callback.done(accountManagerFuture.getResult());
+            } catch (Exception e) {
+                callback.done(false);
+            }
+        }
     }
 }
