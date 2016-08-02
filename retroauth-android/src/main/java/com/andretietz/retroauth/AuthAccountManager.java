@@ -69,12 +69,17 @@ public final class AuthAccountManager {
     }
 
     /**
+     * When calling this method make sure you have the correct permission to read this accountType. Since you
+     * propably want to read your own account number, no permission is required for this.
+     * If not, you need GET_ACCOUNTS permission
+     *
      * @param accountType of which you want to get the active account
      * @param accountName account name you're searching for
      * @return the account if found. {@code null} if not
      */
     @Nullable
     public Account getAccountByName(@NonNull String accountType, @NonNull String accountName) {
+        @SuppressWarnings("MissingPermission")
         Account[] accounts = accountManager.getAccountsByType(accountType);
         for (Account account : accounts) {
             if (accountName.equals(account.name)) return account;
@@ -198,11 +203,16 @@ public final class AuthAccountManager {
     }
 
     /**
+     * When calling this method make sure you have the correct permission to read this accountType. Since you
+     * propably want to read your own account number, no permission is required for this.
+     * If not, you need GET_ACCOUNTS permission
+     *
      * @param accountType AccountType which you want to know the amount of
      * @return number of existing accounts of this type. Depending on which accountType you're requesting this could
      * require additional permissions
      */
     public int accountAmount(@NonNull String accountType) {
+        //noinspection MissingPermission
         return accountManager.getAccountsByType(accountType).length;
     }
 
@@ -218,6 +228,7 @@ public final class AuthAccountManager {
             accountManager.removeAccount(getActiveAccount(accountType), null, rac, null);
         } else {
             RemoveAccountCallback rac = (callback != null) ? new RemoveAccountCallback(callback) : null;
+            //noinspection deprecation
             accountManager.removeAccount(getActiveAccount(accountType), rac, null);
         }
         resetActiveAccount(accountType);
