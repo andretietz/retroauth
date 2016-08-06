@@ -173,7 +173,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
      * @return The account if found, or a newly created one
      */
     @NonNull
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "MissingPermission"})
     protected Account createOrGetAccount(@NonNull String accountName) {
         // if this is a relogin
         Account[] accountList = accountManager.getAccountsByType(accountType);
@@ -192,6 +192,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
      *
      * @param account to remove
      */
+    @SuppressWarnings("deprecation")
     protected void removeAccount(@NonNull Account account) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
             accountManager.removeAccount(account, null, null, null);

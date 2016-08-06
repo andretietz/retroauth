@@ -26,6 +26,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.lang.ref.WeakReference;
+import java.util.EmptyStackException;
 import java.util.Stack;
 
 /**
@@ -33,19 +34,20 @@ import java.util.Stack;
  * already. It registers {@link ActivityLifecycleCallbacks} to be able to know if there's an active {@link Activity}
  * or not. The {@link Activity} is required in case the user calls an {@link Authenticated} request
  * and there are not tokens provided, to be able to open the {@link Activity} for login, using the
- * {@link android.accounts.AccountManager#getAuthToken(Account, String, Bundle, Activity, AccountManagerCallback, Handler)}.
- * If you don't provide an {@link Activity} there, the login screen wont open. So in case you're calling an
- * {@link Authenticated} request from a {@link android.app.Service} there will be no Login if required.
+ * {@link android.accounts.AccountManager#getAuthToken(android.accounts.Account, String, Bundle, Activity,
+ * android.accounts.AccountManagerCallback, android.os.Handler)}. If you don't provide an {@link Activity} there, the
+ * login screen wont open. So in case you're calling an {@link Authenticated} request from a {@link android.app.Service}
+ * there will be no Login if required.
  */
 final class ContextManager {
 
     private static final String TAG = ContextManager.class.getSimpleName();
     private static ContextManager instance;
-    private final Context applicationContext;
+    private final Application application;
     private final LifecycleHandler handler;
 
     private ContextManager(@NonNull Application application) {
-        applicationContext = application;
+        this.application = application;
         handler = new LifecycleHandler();
         application.registerActivityLifecycleCallbacks(handler);
     }
@@ -77,7 +79,7 @@ final class ContextManager {
      */
     @NonNull
     public Context getContext() {
-        return applicationContext;
+        return application;
     }
 
 
@@ -144,7 +146,11 @@ final class ContextManager {
 
         @Nullable
         Activity getCurrent() {
-            return activityStack.peek().get();
+            try {
+                return activityStack.peek().get();
+            } catch (EmptyStackException e) {
+                return null;
+            }
         }
     }
 }

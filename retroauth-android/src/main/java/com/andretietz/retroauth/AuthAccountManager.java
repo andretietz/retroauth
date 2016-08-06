@@ -211,8 +211,8 @@ public final class AuthAccountManager {
      * @return number of existing accounts of this type. Depending on which accountType you're requesting this could
      * require additional permissions
      */
+    @SuppressWarnings("MissingPermission")
     public int accountAmount(@NonNull String accountType) {
-        //noinspection MissingPermission
         return accountManager.getAccountsByType(accountType).length;
     }
 
