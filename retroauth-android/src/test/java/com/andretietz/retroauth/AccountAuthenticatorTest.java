@@ -1,7 +1,10 @@
 package com.andretietz.retroauth;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
+import android.accounts.AccountAuthenticatorResponse;
+import android.accounts.NetworkErrorException;
+import android.content.Context;
+import android.os.Bundle;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -10,33 +13,44 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
-import static com.andretietz.retroauth.testhelper.Helper.setMember;
+import static com.andretietz.retroauth.testhelper.Helper.getMember;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 23)
 public class AccountAuthenticatorTest {
 
-    private AuthAccountManager accountManager;
+    private AccountAuthenticator authenticator;
 
     @Before
     public void setup() {
         ContextManager.get(RuntimeEnvironment.application);
-        accountManager = new AuthAccountManager();
+        authenticator = new AccountAuthenticator(mock(Context.class), "some-action");
     }
 
-    @SuppressWarnings("MissingPermission")
     @Test
-    public void accountAmount() throws NoSuchFieldException, IllegalAccessException {
-        AccountManager accountManager = mock(AccountManager.class);
-        setMember(this.accountManager, "accountManager", accountManager);
+    public void constructor() throws NoSuchFieldException, IllegalAccessException {
+        AccountAuthenticator authenticator = new AccountAuthenticator(mock(Context.class), "some-action");
+        String action = getMember(authenticator, "action", String.class);
+        assertNotNull(action);
+        assertEquals("some-action", action);
+    }
 
-        when(accountManager.getAccountsByType(anyString()))
-                .thenReturn(new Account[]{mock(Account.class)});
 
-        assertEquals(this.accountManager.accountAmount("asd"), 1);
+    @Test
+    public void hasFeatures() throws NetworkErrorException {
+        Bundle bundle = authenticator
+                .hasFeatures(mock(AccountAuthenticatorResponse.class), mock(Account.class), new String[]{});
+        assertNull(bundle);
+    }
+    @Test
+    public void updateCredentials() throws NetworkErrorException {
+        Bundle bundle = authenticator
+                .updateCredentials(mock(AccountAuthenticatorResponse.class), mock(Account.class), "token-type",
+                        mock(Bundle.class));
+        assertNull(bundle);
     }
 }

@@ -14,6 +14,14 @@ public final class Helper {
         declaredField.set(object, value);
     }
 
+    public static <T> T getMember(Object object, String member, Class<T> klass)
+            throws NoSuchFieldException, IllegalAccessException {
+        Field field = getField(object.getClass(), member);
+        field.setAccessible(true);
+        return (T)field.get(object);
+    }
+
+
     public static Field getField(Class<?> klass, String member) throws NoSuchFieldException {
         try {
             return klass.getDeclaredField(member);
