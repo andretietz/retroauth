@@ -16,6 +16,7 @@
 
 package com.andretietz.retroauth;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Application;
 import android.app.Application.ActivityLifecycleCallbacks;
@@ -39,9 +40,11 @@ import java.util.Stack;
  * login screen wont open. So in case you're calling an {@link Authenticated} request from a {@link android.app.Service}
  * there will be no Login if required.
  */
+@SuppressWarnings("Singleton")
 final class ContextManager {
 
     private static final String TAG = ContextManager.class.getSimpleName();
+    @SuppressLint("StaticFieldLeak")
     private static ContextManager instance;
     private final Application application;
     private final LifecycleHandler handler;
