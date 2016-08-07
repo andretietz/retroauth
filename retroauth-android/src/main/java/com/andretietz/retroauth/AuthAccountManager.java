@@ -158,6 +158,7 @@ public final class AuthAccountManager {
      * @param accountType the account type you want to create an account for
      */
     @Deprecated
+    @SuppressWarnings("deprecation")
     public void addAccount(@NonNull Activity activity, @NonNull String accountType) {
         addAccount(activity, accountType, null);
     }
