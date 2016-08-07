@@ -2,7 +2,6 @@ package com.andretietz.retroauth;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.content.Context;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -12,7 +11,10 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import static com.andretietz.retroauth.testhelper.Helper.setMember;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -22,12 +24,15 @@ import static org.mockito.Mockito.when;
 public class AuthAccountManagerTest {
 
 
-    private AuthAccountManager accountManager;
+    private AuthAccountManager authAccountManager;
+    private AccountManager accountManager;
 
     @Before
-    public void setup() {
+    public void setup() throws NoSuchFieldException, IllegalAccessException {
         ContextManager.get(RuntimeEnvironment.application);
-        accountManager = new AuthAccountManager();
+        accountManager = mock(AccountManager.class);
+        authAccountManager = new AuthAccountManager();
+        setMember(authAccountManager, "accountManager", accountManager);
     }
 
 
@@ -35,82 +40,72 @@ public class AuthAccountManagerTest {
     @Test
     public void accountAmount() throws NoSuchFieldException, IllegalAccessException {
         AccountManager accountManager = mock(AccountManager.class);
-        setMember(this.accountManager, "accountManager", accountManager);
+        setMember(this.authAccountManager, "accountManager", accountManager);
 
         when(accountManager.getAccountsByType(anyString()))
                 .thenReturn(new Account[]{mock(Account.class)});
 
-        assertEquals(this.accountManager.accountAmount("asd"), 1);
+        assertEquals(this.authAccountManager.accountAmount("asd"), 1);
     }
 
     @Test
-    public void getActiveAccountName() throws Exception {
-
+    public void getActiveAccountFailing() {
+        authAccountManager.resetActiveAccount("accountType");
+        Account account = authAccountManager.getActiveAccount("accountType");
+        assertNull(account);
     }
 
+    @SuppressWarnings("MissingPermission")
     @Test
-    public void getActiveAccount() throws Exception {
+    public void getActiveAccountSuccess() {
+        when(accountManager.getAccountsByType(anyString()))
+                .thenReturn(new Account[]{new Account("accountName", "accountType")});
+        Account activeAccount = authAccountManager
+                .setActiveAccount("accountType", "accountName");
 
+        Account account = authAccountManager.getActiveAccount("accountType");
+
+
+        assertNotNull(account);
+        assertEquals("accountType", account.type);
+        assertEquals("accountName", account.name);
+        assertEquals(activeAccount, account);
     }
 
+    @SuppressWarnings("MissingPermission")
     @Test
-    public void getAccountByName() throws Exception {
+    public void getAccountByNameSuccess() {
+        Account testAccount = new Account("accountName", "accountType");
+        when(accountManager.getAccountsByType(anyString()))
+                .thenReturn(new Account[]{testAccount});
+        Account account = authAccountManager.getAccountByName("accountType", "accountName");
 
+        assertNotNull(account);
+        assertEquals(testAccount, account);
+    }
+    @SuppressWarnings("MissingPermission")
+    @Test
+    public void getAccountByNameFail() {
+        Account testAccount = new Account("accountName", "accountType");
+        when(accountManager.getAccountsByType(anyString()))
+                .thenReturn(new Account[]{});
+        Account account = authAccountManager.getAccountByName("accountType", "accountName");
+
+        assertNull(account);
     }
 
+    @SuppressWarnings("MissingPermission")
     @Test
-    public void getActiveUserToken() throws Exception {
+    public void getActiveUserData() {
+        Account testAccount = new Account("accountName", "accountType");
+        when(accountManager.getAccountsByType(anyString()))
+                .thenReturn(new Account[]{testAccount});
+        when(accountManager.getUserData(any(Account.class), anyString()))
+                .thenReturn("value");
 
-    }
-
-    @Test
-    public void getActiveUserData() throws Exception {
-
-    }
-
-    @Test
-    public void setActiveAccount() throws Exception {
-
-    }
-
-    @Test
-    public void resetActiveAccount() throws Exception {
-
-    }
-
-    @Test
-    public void addAccount() throws Exception {
-
-    }
-
-    @Test
-    public void addAccount1() throws Exception {
-
-    }
-
-    @Test
-    public void addAccount2() throws Exception {
-
-    }
-
-    @Test
-    public void addAccount3() throws Exception {
-
-    }
-
-    @Test
-    public void addAccount4() throws Exception {
-
-    }
-
-    @Test
-    public void removeActiveAccount() throws Exception {
-
-    }
-
-    @Test
-    public void removeActiveAccount1() throws Exception {
-
+        String data = authAccountManager.getActiveUserData("accountType", "key");
+        assertNotNull(data);
+        assertEquals("value", data);
     }
 
 }

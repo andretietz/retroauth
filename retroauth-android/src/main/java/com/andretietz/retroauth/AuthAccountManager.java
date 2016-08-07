@@ -78,8 +78,8 @@ public final class AuthAccountManager {
      * @return the account if found. {@code null} if not
      */
     @Nullable
+    @SuppressWarnings("MissingPermission")
     public Account getAccountByName(@NonNull String accountType, @NonNull String accountName) {
-        @SuppressWarnings("MissingPermission")
         Account[] accounts = accountManager.getAccountsByType(accountType);
         for (Account account : accounts) {
             if (accountName.equals(account.name)) return account;
@@ -123,9 +123,11 @@ public final class AuthAccountManager {
      */
     @Nullable
     public Account setActiveAccount(@NonNull String accountType, @NonNull String accountName) {
+        Account account = getAccountByName(accountType, accountName);
+        if (account == null) return null;
         SharedPreferences preferences = contextManager.getContext().getSharedPreferences(accountType, Context.MODE_PRIVATE);
         preferences.edit().putString(RETROAUTH_ACCOUNTNAME_KEY, accountName).apply();
-        return getAccountByName(accountType, accountName);
+        return account;
     }
 
     /**
