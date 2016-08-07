@@ -6,12 +6,9 @@ import android.accounts.AccountManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
-
-import java.lang.reflect.Field;
 
 import static com.andretietz.retroauth.testhelper.Helper.setMember;
 import static org.junit.Assert.assertEquals;

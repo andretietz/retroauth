@@ -60,6 +60,7 @@ dependencies {
     compile "com.andretietz.retroauth:retroauth-core:$libraryVersion"
 
     testCompile 'junit:junit:4.12'
+    testCompile 'org.khronos:opengl-api:gl1.1-android-2.1_r1'
     testCompile "org.robolectric:robolectric:3.1.2"
     testCompile 'org.mockito:mockito-core:2.0.90-beta'
 

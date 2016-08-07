@@ -80,11 +80,12 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
         }
         accountType = intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE);
         if (accountType == null)
-            throw new RuntimeException(
+            throw new IllegalStateException(
                     String.format(
-                            "This Activity cannot be started without the \"%s\" extra in the intent!",
-                            AccountManager.KEY_ACCOUNT_TYPE));
-        accountName = intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+                            "This Activity cannot be started without the \"%s\" extra in the intent! "
+                                    + "Use the \"addAccount\"-Method of the \"%s\" for opening the Login manually.",
+                            AccountManager.KEY_ACCOUNT_TYPE, AuthAccountManager.class.getSimpleName()));
+        //accountName = intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
         tokenType = intent.getStringExtra(AccountAuthenticator.KEY_TOKEN_TYPE);
         accountManager = AccountManager.get(this);
 
@@ -148,9 +149,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
         resultBundle.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
         SharedPreferences preferences = getSharedPreferences(accountType, Context.MODE_PRIVATE);
         preferences.edit().putString(AuthAccountManager.RETROAUTH_ACCOUNTNAME_KEY, account.name).apply();
-        if (finishActivity) {
-            finish();
-        }
+        if (finishActivity) finish();
     }
 
     /**
@@ -234,6 +233,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
      * @return account name of the user
      */
     @Nullable
+    @Deprecated
     @SuppressWarnings("unused")
     protected String getAccountName() {
         return accountName;

@@ -2,14 +2,26 @@ package com.andretietz.retroauth.testhelper;
 
 import java.lang.reflect.Field;
 
-/**
- * Created by andre on 06.08.2016.
- */
+public final class Helper {
 
-public class Helper {
-    public static void setMember(Object object, String memberName, Object value) throws NoSuchFieldException, IllegalAccessException {
-        Field declaredField = object.getClass().getDeclaredField(memberName);
+    private Helper() {
+    }
+
+    public static void setMember(Object object, String memberName, Object value)
+            throws IllegalAccessException, NoSuchFieldException {
+        Field declaredField = getField(object.getClass(), memberName);
         declaredField.setAccessible(true);
         declaredField.set(object, value);
+    }
+
+    public static Field getField(Class<?> klass, String member) throws NoSuchFieldException {
+        try {
+            return klass.getDeclaredField(member);
+        } catch (NoSuchFieldException e) {
+            if (klass.getSuperclass() != null)
+                return getField(klass.getSuperclass(), member);
+            else
+                throw new NoSuchFieldException(String.format("Class does not contain member %s!", member));
+        }
     }
 }
