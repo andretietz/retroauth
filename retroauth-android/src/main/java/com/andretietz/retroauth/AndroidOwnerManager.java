@@ -41,6 +41,7 @@ final class AndroidOwnerManager implements OwnerManager<Account, AndroidTokenTyp
     }
 
     @Override
+    @SuppressWarnings("MissingPermission")
     public Account getOwner(AndroidTokenType type) throws ChooseOwnerCanceledException {
         // get active account name
         String accountName = accountManager.getActiveAccountName(type.accountType);
@@ -64,6 +65,7 @@ final class AndroidOwnerManager implements OwnerManager<Account, AndroidTokenTyp
      * @param canAddAccount if <code>true</code> the user has the option to add an account
      * @return the accounts the user chooses from
      */
+    @SuppressWarnings("MissingPermission")
     private String showAccountPickerDialog(String accountType, boolean canAddAccount) throws ChooseOwnerCanceledException {
         if (Looper.myLooper() == Looper.getMainLooper()) {
             throw new RuntimeException("Method was called from the wrong thread!");
