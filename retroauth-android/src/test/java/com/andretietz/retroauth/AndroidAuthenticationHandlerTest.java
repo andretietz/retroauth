@@ -7,7 +7,7 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
 
 @RunWith(RobolectricTestRunner.class)
@@ -29,6 +29,7 @@ public class AndroidAuthenticationHandlerTest {
         assertNotNull(authenticationHandler.tokenStorage);
         assertNotNull(authenticationHandler.typeFactory);
     }
+
     @Test
     public void createWithTokenTyypeFactory() throws Exception {
         Provider provider = mock(Provider.class);

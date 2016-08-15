@@ -16,5 +16,4 @@ public class AndroidTokenTest {
         assertEquals("token", androidToken.token);
         assertEquals("refresh", androidToken.refreshToken);
     }
-
 }

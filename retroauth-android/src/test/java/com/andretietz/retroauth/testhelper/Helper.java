@@ -18,7 +18,7 @@ public final class Helper {
             throws NoSuchFieldException, IllegalAccessException {
         Field field = getField(object.getClass(), member);
         field.setAccessible(true);
-        return (T)field.get(object);
+        return (T) field.get(object);
     }
 
 

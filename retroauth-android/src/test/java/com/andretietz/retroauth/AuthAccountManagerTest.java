@@ -83,6 +83,7 @@ public class AuthAccountManagerTest {
         assertNotNull(account);
         assertEquals(testAccount, account);
     }
+
     @SuppressWarnings("MissingPermission")
     @Test
     public void getAccountByNameFail() {
@@ -107,5 +108,4 @@ public class AuthAccountManagerTest {
         assertNotNull(data);
         assertEquals("value", data);
     }
-
 }
