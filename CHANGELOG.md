@@ -1,4 +1,9 @@
-## 2.1.2 ()
+## 2.1.3 ()
+* retroauth-android
+  * added robolectric to enhance test coverage
+  * bugfix in ContextManager 
+
+## 2.1.2 (2016-08-02)
 * retroauth-android:
   * Authentication can be finalized without finishing the activity itself
   * Adding and removing accounts using the AuthAccountManager can have some optional callbacks, which notifies you, when the system created/removed the account
