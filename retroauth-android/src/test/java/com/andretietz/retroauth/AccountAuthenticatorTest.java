@@ -61,7 +61,7 @@ public class AccountAuthenticatorTest {
     public void getAuthToken() throws NetworkErrorException {
         AccountAuthenticatorResponse response = mock(AccountAuthenticatorResponse.class);
         Account account = new Account("accountName", "accountType");
-        Bundle bundle = authenticator.getAuthToken(response, account, "tokenType",mock(Bundle.class));
+        Bundle bundle = authenticator.getAuthToken(response, account, "tokenType", mock(Bundle.class));
 
         assertNotNull(bundle);
         Intent intent = bundle.getParcelable(AccountManager.KEY_INTENT);
@@ -106,7 +106,7 @@ public class AccountAuthenticatorTest {
     @Test
     public void confirmCredentials() throws NetworkErrorException {
         Bundle bundle = authenticator
-                .confirmCredentials(mock(AccountAuthenticatorResponse.class), mock(Account.class),mock(Bundle.class));
+                .confirmCredentials(mock(AccountAuthenticatorResponse.class), mock(Account.class), mock(Bundle.class));
         assertNull(bundle);
     }
 }
