@@ -2,7 +2,6 @@ package com.andretietz.retroauth;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.content.Context;
 
 import org.junit.Before;
 import org.junit.Test;
