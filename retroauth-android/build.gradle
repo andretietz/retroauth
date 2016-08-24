@@ -1,12 +1,12 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 24
+    compileSdkVersion 22
     buildToolsVersion "24.0.1"
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 24
+        targetSdkVersion 22
         versionCode 1
         versionName libraryVersion
     }
@@ -56,13 +56,12 @@ afterEvaluate {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:24.1.1'
+    compile 'com.android.support:appcompat-v7:22.1.0'
     compile "com.andretietz.retroauth:retroauth-core:$libraryVersion"
-
     testCompile 'junit:junit:4.12'
     testCompile 'org.khronos:opengl-api:gl1.1-android-2.1_r1'
     testCompile "org.robolectric:robolectric:3.1.2"
-    testCompile 'org.mockito:mockito-core:2.0.90-beta'
+    testCompile 'org.mockito:mockito-core:2.0.111-beta'
 
 }
 apply plugin: 'com.getkeepsafe.dexcount'

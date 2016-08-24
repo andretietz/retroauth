@@ -1,8 +1,8 @@
 # A simple way of calling authenticated requests using retrofit in android
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-retroauth-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/2195)
 ## Dependencies
-* [Retrofit](https://github.com/square/retrofit) 2.1.0 (transitive)
-* appcompat-v7 24.1.1
+* [Retrofit](https://github.com/square/retrofit) 2.1.0 (transitive from retroauth-core)
+* appcompat-v7 22.1.0 and higher
 
 Method-Count: 224
 Field-Count:  53
@@ -18,7 +18,12 @@ If you call a request method, annotated with the authenticated annotation, it'll
 
 Add it as dependency:
 ```groovy
-compile 'com.andretietz.retroauth:retroauth-android:2.1.2'
+compile 'com.andretietz.retroauth:retroauth-android:2.1.4'
+```
+Make sure you're overriding the appcompat dependency if required!
+i.e.:
+```groovy
+compile 'com.android.support:appcompat-v7:24.2.0'
 ```
 
 

@@ -9,7 +9,7 @@ buildscript {
         // for jfrog publishing
         classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.1.1'
         // android plugin
-        classpath 'com.android.tools.build:gradle:2.2.0-beta1'
+        classpath 'com.android.tools.build:gradle:2.2.0-beta2'
         // publish android aar to maven
         classpath 'com.github.dcendents:android-maven-gradle-plugin:1.4.1'
         // publish to bintray
