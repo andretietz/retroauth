@@ -2,6 +2,7 @@ package com.andretietz.retroauth;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.content.Context;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -103,6 +104,8 @@ public class AuthAccountManagerTest {
                 .thenReturn(new Account[]{testAccount});
         when(accountManager.getUserData(any(Account.class), anyString()))
                 .thenReturn("value");
+        authAccountManager
+                .setActiveAccount("accountType", "accountName");
 
         String data = authAccountManager.getActiveUserData("accountType", "key");
         assertNotNull(data);
