@@ -1,6 +1,6 @@
 ## 2.1.4 (2016-08-24)
 * retroauth-android
-  * set version range on appcompat
+  * set fixed appcompat minimum version to 22.1.0
 
 ## 2.1.3 (2016-08-16)
 * retroauth-android
