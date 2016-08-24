@@ -1,4 +1,8 @@
-## 2.1.3 ()
+## 2.1.4 (2016-08-24)
+* retroauth-android
+  * set version range on appcompat
+
+## 2.1.3 (2016-08-16)
 * retroauth-android
   * added robolectric to enhance test coverage
   * bugfix in ContextManager 
