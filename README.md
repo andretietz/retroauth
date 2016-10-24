@@ -1,6 +1,7 @@
 # A simple way of calling authenticated requests using retrofit
 
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-retroauth-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/2195)
+[![Android Weekly](http://img.shields.io/badge/Android%20Weekly-%23163-2CB3E5.svg?style=flat)](http://androidweekly.net/issues/issue-163)
 [![Build Status](https://www.bitrise.io/app/d4189e3709bdf16d.svg?token=KpeuDTgCOEWgfL4RoZaVLQ&branch=master)](https://www.bitrise.io/app/d4189e3709bdf16d)
 
 I split the project into two separate ones. 
