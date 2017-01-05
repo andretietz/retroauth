@@ -56,7 +56,7 @@ final class WeakActivityStack {
 
 
     protected Integer getIdentifier(Activity item) {
-        return item.getTaskId();
+        return item.hashCode();
     }
 
 }
