@@ -26,9 +26,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import java.lang.ref.WeakReference;
 import java.util.EmptyStackException;
-import java.util.Stack;
 
 /**
  * The {@link ContextManager} provides an application {@link Context} as well as an {@link Activity} if this was not stopped
@@ -106,10 +104,9 @@ final class ContextManager {
      */
     private static class LifecycleHandler implements ActivityLifecycleCallbacks {
         private static final String TAG = LifecycleHandler.class.getSimpleName();
-        private final Stack<WeakReference<Activity>> activityStack;
+        private final WeakActivityStack activityStack = new WeakActivityStack();
 
         LifecycleHandler() {
-            this.activityStack = new Stack<>();
         }
 
         @Override
@@ -127,16 +124,12 @@ final class ContextManager {
 
         @Override
         public void onActivityStarted(Activity activity) {
-            synchronized (this) {
-                activityStack.push(new WeakReference<>(activity));
-            }
+            activityStack.push(activity);
         }
 
         @Override
         public void onActivityStopped(Activity activity) {
-            synchronized (this) {
-                activityStack.pop();
-            }
+            activityStack.remove(activity);
         }
 
         @Override
@@ -150,7 +143,7 @@ final class ContextManager {
         @Nullable
         Activity getCurrent() {
             try {
-                return activityStack.peek().get();
+                return activityStack.peek();
             } catch (EmptyStackException e) {
                 return null;
             }
