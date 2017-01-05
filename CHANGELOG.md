@@ -1,3 +1,6 @@
+## 2.1.5 (2017-01-05)
+* Fixed a bug in the ContextManager. Activity Stack was used a bit "optimistic"
+
 ## 2.1.4 (2016-08-24)
 * retroauth-android
   * set fixed appcompat minimum version to 22.1.0

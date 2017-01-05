@@ -4,8 +4,8 @@
 * [Retrofit](https://github.com/square/retrofit) 2.1.0 (transitive from retroauth-core)
 * appcompat-v7 22.1.0 and higher
 
-Method-Count: 224
-Field-Count:  53
+Method-Count: 237
+Field-Count:  55
 
 ## What does it do?
 If you call a request method, annotated with the authenticated annotation, it'll do the following steps:
@@ -18,7 +18,7 @@ If you call a request method, annotated with the authenticated annotation, it'll
 
 Add it as dependency:
 ```groovy
-compile 'com.andretietz.retroauth:retroauth-android:2.1.4'
+compile 'com.andretietz.retroauth:retroauth-android:2.1.5'
 ```
 Make sure you're overriding the appcompat dependency if required!
 i.e.:
