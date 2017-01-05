@@ -26,8 +26,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import java.util.EmptyStackException;
-
 /**
  * The {@link ContextManager} provides an application {@link Context} as well as an {@link Activity} if this was not stopped
  * already. It registers {@link ActivityLifecycleCallbacks} to be able to know if there's an active {@link Activity}
@@ -142,11 +140,7 @@ final class ContextManager {
 
         @Nullable
         Activity getCurrent() {
-            try {
-                return activityStack.peek();
-            } catch (EmptyStackException e) {
-                return null;
-            }
+            return activityStack.peek();
         }
     }
 }
