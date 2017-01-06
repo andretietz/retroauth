@@ -261,6 +261,7 @@ public final class AuthAccountManager {
      *                    thrown
      * @return an Intent which you can start for result to open an account chooser.
      */
+    @NonNull
     @SuppressWarnings("MissingPermission")
     @RequiresPermission(Manifest.permission.GET_ACCOUNTS)
     public Intent newChooseAccountIntent(@NonNull String accountType) {
