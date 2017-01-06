@@ -2,6 +2,7 @@ package com.andretietz.retroauth.demo;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -24,6 +25,8 @@ import retrofit2.converter.moshi.MoshiConverterFactory;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+
+    private static final int RC_ACCOUNT_CHOOSER = 123;
     private GoogleService service;
     private AuthAccountManager authAccountManager;
 
@@ -117,10 +120,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.buttonResetPrefAccount).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.buttonSwitchAccount).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                authAccountManager.resetActiveAccount(getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT));
+                // warning can be ignored when using own account type
+                Intent intent = authAccountManager.newChooseAccountIntent(
+                        getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT)
+                );
+                startActivityForResult(intent, RC_ACCOUNT_CHOOSER);
             }
         });
 
@@ -148,5 +155,16 @@ public class MainActivity extends AppCompatActivity {
     private void showError(Throwable error) {
         Log.e(TAG, "An error occured: ", error);
         show(error.toString());
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            if (requestCode == RC_ACCOUNT_CHOOSER) {
+                String accountType = data.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE);
+                String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+                authAccountManager.setActiveAccount(accountType, accountName);
+            }
+        }
     }
 }

@@ -28,10 +28,10 @@
         android:text="Invalidate Refresh-Token"/>
 
     <Button
-        android:id="@+id/buttonResetPrefAccount"
+        android:id="@+id/buttonSwitchAccount"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Reset active Account"/>
+        android:text="Switch Account"/>
 
     <Button
         android:id="@+id/buttonAddAccount"

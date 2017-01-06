@@ -16,17 +16,24 @@
 
 package com.andretietz.retroauth;
 
+import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresPermission;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * This class wraps the Android {@link android.accounts.AccountManager} and adds some retroauth specific
@@ -244,6 +251,31 @@ public final class AuthAccountManager {
      */
     public void removeActiveAccount(@NonNull String accountType) {
         removeActiveAccount(accountType, null);
+    }
+
+    /**
+     * Returns an intent to open an account chooser
+     *
+     * @param accountType Make sure this is your account type or you requested the permission for
+     *                    {@link Manifest.permission#GET_ACCOUNTS}, otherwise there will be a {@link SecurityException}
+     *                    thrown
+     * @return an Intent which you can start for result to open an account chooser.
+     */
+    @SuppressWarnings("MissingPermission")
+    @RequiresPermission(Manifest.permission.GET_ACCOUNTS)
+    public Intent newChooseAccountIntent(@NonNull String accountType) {
+        List<Account> accounts = Arrays.asList(accountManager.getAccountsByType(accountType));
+        Account account = getActiveAccount(accountType);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return AccountManager.newChooseAccountIntent(account, accounts,
+                    new String[]{accountType}, null, null,
+                    null, null);
+        } else {
+            return AccountManager.newChooseAccountIntent(account,
+                    (accounts instanceof ArrayList) ? (ArrayList<Account>) accounts : new ArrayList<>(accounts),
+                    new String[]{accountType}, false, null, null,
+                    null, null);
+        }
     }
 
     public interface AccountCallback {

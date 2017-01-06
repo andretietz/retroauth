@@ -102,7 +102,7 @@ public String getLoginAction(Context context) {
 }
 }
 ```
-* Option 2.  
+* Option 2.
 Instead of creating you own Service feel free to use the "RetroauthAuthenticationService"
 Make sure you define a new string:
 ```xml
