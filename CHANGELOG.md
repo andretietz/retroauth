@@ -1,4 +1,4 @@
-## 2.1.6 (2017-01-??)
+## 2.1.6 (2017-01-09)
 * Added functionalities to switch accounts easily
 
 ## 2.1.5 (2017-01-05)
