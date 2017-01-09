@@ -1,3 +1,6 @@
+## 2.1.6 (2017-01-??)
+* Added functionalities to switch accounts easily
+
 ## 2.1.5 (2017-01-05)
 * Fixed a bug in the ContextManager. Activity Stack was used a bit "optimistic"
 
