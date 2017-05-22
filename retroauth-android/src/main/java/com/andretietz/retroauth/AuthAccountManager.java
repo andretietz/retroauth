@@ -21,7 +21,6 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -147,8 +146,8 @@ public final class AuthAccountManager {
 
     /**
      * Adds a new account for the given account type. The tokenType is optional. you can request this type in the login
-     * {@link Activity} calling {@link AuthenticationActivity#getRequestedTokenType()}. This value will not be available
-     * when you're creating an account from Android-Settings-Accounts-Add Account
+     * {@link android.support.v7.app.AppCompatActivity} calling {@link AuthenticationActivity#getRequestedTokenType()}.
+     * This value will not be available when you're creating an account from Android-Settings-Accounts-Add Account
      *
      * @param accountType the account type you want to create an account for
      * @param tokenType   the type of token you want to create
@@ -161,8 +160,8 @@ public final class AuthAccountManager {
 
     /**
      * Adds a new account for the given account type. The tokenType is optional. you can request this type in the login
-     * {@link Activity} calling {@link AuthenticationActivity#getRequestedTokenType()}. This value will not be available
-     * when you're creating an account from Android-Settings-Accounts-Add Account
+     * {@link android.support.v7.app.AppCompatActivity} calling {@link AuthenticationActivity#getRequestedTokenType()}.
+     * This value will not be available when you're creating an account from Android-Settings-Accounts-Add Account
      *
      * @param accountType the account type you want to create an account for
      * @param tokenType   the type of token you want to create

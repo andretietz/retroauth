@@ -1,3 +1,7 @@
+## 2.2.0 (2017-05-22)
+* Removed Deprecated Methods
+* Changes in the CallAdapter implementation update to retrofit 2.3.0
+
 ## 2.1.6 (2017-01-09)
 * Added functionalities to switch accounts easily
 
