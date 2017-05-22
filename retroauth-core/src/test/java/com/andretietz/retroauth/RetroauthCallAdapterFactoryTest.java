@@ -35,7 +35,7 @@ public class RetroauthCallAdapterFactoryTest {
         List<CallAdapter.Factory> factories = new ArrayList<>();
         factories.add(new CallAdapter.Factory() {
             @Override
-            public CallAdapter<?> get(Type returnType, Annotation[] annotations, Retrofit retrofit) {
+            public CallAdapter<?, ?> get(Type returnType, Annotation[] annotations, Retrofit retrofit) {
                 return callAdapter;
             }
         });

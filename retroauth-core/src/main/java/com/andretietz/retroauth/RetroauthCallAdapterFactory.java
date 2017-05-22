@@ -43,32 +43,33 @@ final class RetroauthCallAdapterFactory<OWNER, TOKEN_TYPE, TOKEN> extends CallAd
         this.authHandler = authHandler;
     }
 
-    @Override
-    public CallAdapter<?> get(Type returnType, Annotation[] annotations, Retrofit retrofit) {
-        Authenticated auth = isAuthenticated(annotations);
-        for (int i = 0; i < callAdapterFactories.size(); i++) {
-            CallAdapter<?> adapter = callAdapterFactories.get(i).get(returnType, annotations, retrofit);
-            if (adapter != null) {
-                if (auth != null) {
-                    TOKEN_TYPE tokenType = authHandler.typeFactory.create(auth.value());
-                    return new RetroauthCallAdapter<>(adapter, tokenType, authHandler.methodCache);
-                }
-                return adapter;
-            }
-        }
-        return null;
-    }
-
     /**
      * checks if an {@link Authenticated} annotation exists on this request.
      *
      * @param annotations annotations to check
      * @return if the {@link Authenticated} annotation exists it returns it, otherwise {@code null}
      */
-    private Authenticated isAuthenticated(Annotation[] annotations) {
+    private static Authenticated isAuthenticated(Annotation[] annotations) {
         for (Annotation annotation : annotations) {
             if (Authenticated.class == annotation.annotationType()) {
                 return (Authenticated) annotation;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public CallAdapter<?, ?> get(Type returnType, Annotation[] annotations, Retrofit retrofit) {
+        Authenticated auth = isAuthenticated(annotations);
+        for (int i = 0; i < callAdapterFactories.size(); i++) {
+            CallAdapter<?, ?> adapter = callAdapterFactories.get(i).get(returnType, annotations, retrofit);
+            if (adapter != null) {
+                if (auth != null) {
+                    TOKEN_TYPE tokenType = authHandler.typeFactory.create(auth.value());
+                    return new RetroauthCallAdapter<>((CallAdapter<Object, Object>) adapter,
+                            tokenType, authHandler.methodCache);
+                }
+                return adapter;
             }
         }
         return null;
@@ -82,13 +83,13 @@ final class RetroauthCallAdapterFactory<OWNER, TOKEN_TYPE, TOKEN> extends CallAd
      * @param <RETURN_TYPE> Return type of the call
      */
     static final class RetroauthCallAdapter<TOKEN_TYPE, RETURN_TYPE>
-            implements CallAdapter<RETURN_TYPE> {
+            implements CallAdapter<Object, RETURN_TYPE> {
 
-        private final CallAdapter<RETURN_TYPE> adapter;
+        private final CallAdapter<Object, RETURN_TYPE> adapter;
         private final TOKEN_TYPE type;
         private final MethodCache<TOKEN_TYPE> registration;
 
-        RetroauthCallAdapter(CallAdapter<RETURN_TYPE> adapter, TOKEN_TYPE type, MethodCache<TOKEN_TYPE> reg) {
+        RetroauthCallAdapter(CallAdapter<Object, RETURN_TYPE> adapter, TOKEN_TYPE type, MethodCache<TOKEN_TYPE> reg) {
             this.adapter = adapter;
             this.type = type;
             this.registration = reg;
@@ -100,7 +101,7 @@ final class RetroauthCallAdapterFactory<OWNER, TOKEN_TYPE, TOKEN> extends CallAd
         }
 
         @Override
-        public <R> RETURN_TYPE adapt(Call<R> call) {
+        public RETURN_TYPE adapt(Call<Object> call) {
             Request request = call.request();
             registration.register(Utils.createUniqueIdentifier(request), type);
             return adapter.adapt(call);
