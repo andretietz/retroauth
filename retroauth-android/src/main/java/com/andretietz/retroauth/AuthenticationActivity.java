@@ -170,7 +170,6 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
      * It creates a new Account if it couldn't find it
      *
      * @param accountName Name of the account you're searching for
-     *
      * @return The account if found, or a newly created one
      */
     @NonNull
@@ -226,19 +225,6 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
             }
         }
         super.finish();
-    }
-
-    /**
-     * When the login token is not valid anymore, but the account already exists
-     * this will return the account name of the user.
-     *
-     * @return account name of the user
-     */
-    @Nullable
-    @Deprecated
-    @SuppressWarnings("unused")
-    protected String getAccountName() {
-        return accountName;
     }
 
     /**

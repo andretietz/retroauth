@@ -95,21 +95,6 @@ public final class AuthAccountManager {
     }
 
     /**
-     * Don't use this method anymore! It'll be deleted in a future release
-     *
-     * @param accountType of which you want to get the active account
-     * @param tokenType   of the token you want to get
-     * @return the token of the tokenType of the currently active user
-     */
-    @Nullable
-    @Deprecated
-    public String getActiveUserToken(@NonNull String accountType, @NonNull String tokenType) {
-        Account activeAccount = getActiveAccount(accountType);
-        if (activeAccount == null) return null;
-        return accountManager.peekAuthToken(activeAccount, tokenType);
-    }
-
-    /**
      * @param accountType of which you want to get the active account
      * @param key         in which you stored userdata using
      *                    {@link AuthenticationActivity#storeUserData(Account, String, String)}
@@ -159,32 +144,6 @@ public final class AuthAccountManager {
         addAccount(accountType, null);
     }
 
-    /**
-     * Adds a new account for the given account type. This method is a shortcut for
-     * {@link #addAccount(Activity, String, String)}
-     *
-     * @param activity    must be provided in order to open the login activity
-     * @param accountType the account type you want to create an account for
-     */
-    @Deprecated
-    @SuppressWarnings("deprecation")
-    public void addAccount(@NonNull Activity activity, @NonNull String accountType) {
-        addAccount(activity, accountType, null);
-    }
-
-    /**
-     * Adds a new account for the given account type. The tokenType is optional. you can request this type in the login
-     * {@link Activity} calling {@link AuthenticationActivity#getRequestedTokenType()}. This value will not be available
-     * when you're creating an account from Android-Settings-Accounts-Add Account
-     *
-     * @param activity    must be provided in order to open the login activity
-     * @param accountType the account type you want to create an account for
-     * @param tokenType   the type of token you want to create
-     */
-    @Deprecated
-    public void addAccount(@Nullable Activity activity, @NonNull String accountType, @Nullable String tokenType) {
-        accountManager.addAccount(accountType, tokenType, null, null, activity, null, null);
-    }
 
     /**
      * Adds a new account for the given account type. The tokenType is optional. you can request this type in the login
