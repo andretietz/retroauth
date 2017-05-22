@@ -31,19 +31,6 @@ public final class AndroidAuthenticationHandler extends AuthenticationHandler<Ac
                 new AndroidTokenStorage(), provider, typeFactory);
     }
 
-    /**
-     * This constructor will be private in the next breaking release (2.2.X). Use {@link #create(Provider)} instead.
-     */
-    @Deprecated
-    public AndroidAuthenticationHandler(Provider<Account, AndroidTokenType, AndroidToken> provider) {
-        super(new AndroidMethodCache(), new AndroidOwnerManager(new AuthAccountManager()),
-                new AndroidTokenStorage(), provider, AndroidTokenType.Factory.create());
-    }
-
-    public static AndroidAuthenticationHandler create(Provider<Account, AndroidTokenType, AndroidToken> provider) {
-        return new AndroidAuthenticationHandler(provider);
-    }
-
     public static AndroidAuthenticationHandler create(Provider<Account, AndroidTokenType, AndroidToken> provider,
                                                       TokenTypeFactory<AndroidTokenType> typeFactory) {
         return new AndroidAuthenticationHandler(provider, typeFactory);

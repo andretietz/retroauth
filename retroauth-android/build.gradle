@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 24
-    buildToolsVersion "24.0.3"
+    buildToolsVersion "25.0.3"
 
     defaultConfig {
         minSdkVersion 14
@@ -57,6 +57,7 @@ afterEvaluate {
 
 dependencies {
     compile 'com.android.support:appcompat-v7:24.2.1'
+//    compile project(':retroauth-core')
     compile "com.andretietz.retroauth:retroauth-core:$libraryVersion"
     testCompile 'junit:junit:4.12'
     testCompile 'org.khronos:opengl-api:gl1.1-android-2.1_r1'
@@ -64,7 +65,7 @@ dependencies {
     testCompile 'org.mockito:mockito-core:2.0.111-beta'
 
 }
-apply plugin: 'com.getkeepsafe.dexcount'
+//apply plugin: 'com.getkeepsafe.dexcount'
 apply plugin: 'com.github.ben-manes.versions'
 apply from: 'jfrog-publish.gradle'
 apply from: 'bintray-publish.gradle'

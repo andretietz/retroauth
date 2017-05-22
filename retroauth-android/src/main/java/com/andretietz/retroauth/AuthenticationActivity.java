@@ -169,6 +169,8 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
      * Tries finding an existing account with the given name.
      * It creates a new Account if it couldn't find it
      *
+     * @param accountName Name of the account you're searching for
+     *
      * @return The account if found, or a newly created one
      */
     @NonNull

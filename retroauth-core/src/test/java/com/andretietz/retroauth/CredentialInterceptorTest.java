@@ -86,7 +86,12 @@ public class CredentialInterceptorTest {
 
         @Override
         public Response proceed(Request request) throws IOException {
-            return new Response.Builder().request(request).code(200).protocol(Protocol.HTTP_1_1).build();
+            return new Response.Builder()
+                    .request(request)
+                    .code(200)
+                    .protocol(Protocol.HTTP_1_1)
+                    .message("required message")
+                    .build();
         }
 
         @Override

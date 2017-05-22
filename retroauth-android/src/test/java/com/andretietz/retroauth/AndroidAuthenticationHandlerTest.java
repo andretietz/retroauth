@@ -20,18 +20,7 @@ public class AndroidAuthenticationHandlerTest {
     }
 
     @Test
-    public void createWithoutTokenTyypeFactory() throws Exception {
-        Provider provider = mock(Provider.class);
-        AndroidAuthenticationHandler authenticationHandler = AndroidAuthenticationHandler.create(provider);
-        assertNotNull(authenticationHandler.methodCache);
-        assertNotNull(authenticationHandler.ownerManager);
-        assertNotNull(authenticationHandler.provider);
-        assertNotNull(authenticationHandler.tokenStorage);
-        assertNotNull(authenticationHandler.typeFactory);
-    }
-
-    @Test
-    public void createWithTokenTyypeFactory() throws Exception {
+    public void createWithTokenTypeFactory() throws Exception {
         Provider provider = mock(Provider.class);
         TokenTypeFactory typeFactory = mock(TokenTypeFactory.class);
         AndroidAuthenticationHandler authenticationHandler = AndroidAuthenticationHandler.create(provider, typeFactory);

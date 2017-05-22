@@ -7,13 +7,13 @@ buildscript {
         // for jfrog publishing
         classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.1.1'
         // android plugin
-        classpath 'com.android.tools.build:gradle:2.2.3'
+        classpath 'com.android.tools.build:gradle:2.3.2'
         // publish android aar to maven
         classpath 'com.github.dcendents:android-maven-gradle-plugin:1.4.1'
         // publish to bintray
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7'
         // dexcount
-        classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.5.5'
+//        classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.5.5'
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.13.0'
     }
 }

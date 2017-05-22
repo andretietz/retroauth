@@ -11,6 +11,7 @@ import android.view.View.OnClickListener;
 import android.widget.Toast;
 
 import com.andretietz.retroauth.AndroidAuthenticationHandler;
+import com.andretietz.retroauth.AndroidTokenType;
 import com.andretietz.retroauth.AuthAccountManager;
 import com.andretietz.retroauth.Retroauth;
 
@@ -53,7 +54,8 @@ public class MainActivity extends AppCompatActivity {
         /**
          * Create your Retrofit Object using the {@link Retroauth.Builder}
          */
-        Retrofit retrofit = new Retroauth.Builder<>(AndroidAuthenticationHandler.create(provider))
+        Retrofit retrofit = new Retroauth.Builder<>(AndroidAuthenticationHandler.create(provider,
+                AndroidTokenType.Factory.create()))
                 .baseUrl("https://www.googleapis.com/")
                 .client(httpClient)
                 .addConverterFactory(MoshiConverterFactory.create())

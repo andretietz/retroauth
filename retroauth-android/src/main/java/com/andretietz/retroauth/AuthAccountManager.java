@@ -262,7 +262,7 @@ public final class AuthAccountManager {
      * @return an Intent which you can start for result to open an account chooser.
      */
     @NonNull
-    @SuppressWarnings("MissingPermission")
+    @SuppressWarnings({"MissingPermission", "deprecation"})
     @RequiresPermission(Manifest.permission.GET_ACCOUNTS)
     public Intent newChooseAccountIntent(@NonNull String accountType) {
         List<Account> accounts = Arrays.asList(accountManager.getAccountsByType(accountType));
