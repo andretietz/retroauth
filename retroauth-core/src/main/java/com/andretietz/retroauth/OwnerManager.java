@@ -19,7 +19,7 @@ package com.andretietz.retroauth;
 /**
  * Since every token belongs to a specific user, this users have to be managed.
  */
-public interface OwnerManager<OWNER, TOKEN_TYPE> {
+public interface OwnerManager<OWNER, TOKEN_TYPE extends TokenType> {
     /**
      * This method should be used to figure out which user should be authenticate a request.
      * If you're on multi-user systems, you should ask the user to choose which owner

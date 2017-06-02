@@ -19,7 +19,7 @@ package com.andretietz.retroauth;
 /**
  * This is the interface of a token storage.
  */
-public interface TokenStorage<OWNER, TOKEN_TYPE, TOKEN> {
+public interface TokenStorage<OWNER, TOKEN_TYPE extends TokenType, TOKEN> {
 
     /**
      * This method returns an authentication token. If there's no token, you should try
@@ -28,7 +28,7 @@ public interface TokenStorage<OWNER, TOKEN_TYPE, TOKEN> {
      * @param owner The owner type of the token you want to get
      * @param type  the type of the token you want to get
      * @return the token to authenticate your request or {@code null}
-     * @throws AuthenticationCanceledException
+     * @throws AuthenticationCanceledException when the user canceled the authentication
      */
     TOKEN getToken(OWNER owner, TOKEN_TYPE type) throws AuthenticationCanceledException;
 

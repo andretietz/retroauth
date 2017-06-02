@@ -23,7 +23,7 @@ import okhttp3.Response;
  * The Provider interface is a very specific provider endpoint dependent implementation,
  * to authenticate your request and defines when or if to retry.
  */
-public interface Provider<OWNER, TOKEN_TYPE, TOKEN> {
+public interface Provider<OWNER, TOKEN_TYPE extends TokenType, TOKEN> {
 
     /**
      * Authenticates a {@link Request}.

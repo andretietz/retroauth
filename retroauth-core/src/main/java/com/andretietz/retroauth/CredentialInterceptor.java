@@ -35,9 +35,9 @@ import okhttp3.Response;
  * @param <OWNER>      a type that represents the owner of a token. Since there could be multiple users on one client.
  * @param <TOKEN_TYPE> type of the token that should be added to the request
  */
-final class CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN> implements Interceptor {
+final class CredentialInterceptor<OWNER, TOKEN_TYPE extends TokenType, TOKEN> implements Interceptor {
     private final AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler;
-    private final HashMap<TOKEN_TYPE, AccountTokenLock> tokenTypeLockMap = new HashMap<>();
+    private final static HashMap<TokenType, AccountTokenLock> TOKENTYPE_LOCKERS = new HashMap<>();
     private final boolean lockable;
 
     CredentialInterceptor(AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler, boolean lockPerToken) {
@@ -92,10 +92,10 @@ final class CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN> implements Intercept
     }
 
     private synchronized AccountTokenLock getLock(TOKEN_TYPE type) {
-        AccountTokenLock lock = tokenTypeLockMap.get(type);
+        AccountTokenLock lock = TOKENTYPE_LOCKERS.get(type);
         if (lock == null) {
             lock = new AccountTokenLock();
-            tokenTypeLockMap.put(type, lock);
+            TOKENTYPE_LOCKERS.put(type, lock);
         }
         return lock;
     }

@@ -1,6 +1,6 @@
 package com.andretietz.retroauth;
 
-public interface TokenTypeFactory<TOKEN_TYPE> {
+public interface TokenTypeFactory<TOKEN_TYPE extends TokenType> {
     /**
      * Creates a token type object. This doe
      *

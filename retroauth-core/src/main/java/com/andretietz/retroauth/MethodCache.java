@@ -23,7 +23,7 @@ import java.util.HashMap;
  * authenticating the request itself. The identifier is created right now
  * in {@link Utils#createUniqueIdentifier}, this may change.
  */
-public interface MethodCache<TOKEN_TYPE> {
+public interface MethodCache<TOKEN_TYPE extends TokenType> {
 
     /**
      * Registers a token type with a specific identifier.
@@ -45,7 +45,7 @@ public interface MethodCache<TOKEN_TYPE> {
      *
      * @param <TOKEN_TYPE>
      */
-    class DefaultMethodCache<TOKEN_TYPE> implements MethodCache<TOKEN_TYPE> {
+    class DefaultMethodCache<TOKEN_TYPE extends TokenType> implements MethodCache<TOKEN_TYPE> {
         private final HashMap<Integer, TOKEN_TYPE> map = new HashMap<>();
 
         @Override
