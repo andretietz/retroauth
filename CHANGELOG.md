@@ -1,3 +1,6 @@
+## 2.2.1 (2017-06-06)
+* If Request-Locking is enabled, it's locking (only one request at once) requests over multiple retroauth instances.
+
 ## 2.2.0 (2017-05-22)
 * Removed Deprecated Methods
 * Changes in the CallAdapter implementation update to retrofit 2.3.0

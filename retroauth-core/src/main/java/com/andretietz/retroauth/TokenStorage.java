@@ -28,7 +28,7 @@ public interface TokenStorage<OWNER, TOKEN_TYPE, TOKEN> {
      * @param owner The owner type of the token you want to get
      * @param type  the type of the token you want to get
      * @return the token to authenticate your request or {@code null}
-     * @throws AuthenticationCanceledException
+     * @throws AuthenticationCanceledException when the user canceled the authentication
      */
     TOKEN getToken(OWNER owner, TOKEN_TYPE type) throws AuthenticationCanceledException;
 
