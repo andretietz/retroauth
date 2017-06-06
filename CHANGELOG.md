@@ -1,4 +1,4 @@
-## 2.3.0 (2017-06-02)
+## 2.2.1 (2017-06-06)
 * Token-Type must implement empty interface TokenType
 * If Request-Locking is enabled, it's locking (only one request at once) requests over multiple retroauth instances.
 

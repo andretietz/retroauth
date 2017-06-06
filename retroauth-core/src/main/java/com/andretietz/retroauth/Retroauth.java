@@ -37,7 +37,7 @@ public final class Retroauth {
     }
 
 
-    public static final class Builder<OWNER, TOKEN_TYPE extends TokenType, TOKEN> {
+    public static final class Builder<OWNER, TOKEN_TYPE, TOKEN> {
 
         private final Retrofit.Builder builder;
         private final AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler;

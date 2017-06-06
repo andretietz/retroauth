@@ -20,7 +20,7 @@ package com.andretietz.retroauth;
  * The {@link AuthenticationHandler} is a class that collapses a {@link MethodCache}, an {@link OwnerManager}, a
  * {@link TokenStorage} and a {@link Provider} into one single immutable object.
  */
-public class AuthenticationHandler<OWNER, TOKEN_TYPE extends TokenType, TOKEN> {
+public class AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> {
 
     public final MethodCache<TOKEN_TYPE> methodCache;
     public final OwnerManager<OWNER, TOKEN_TYPE> ownerManager;

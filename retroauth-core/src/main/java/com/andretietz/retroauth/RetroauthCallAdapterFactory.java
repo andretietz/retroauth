@@ -29,7 +29,7 @@ import retrofit2.Retrofit;
  * This is a {@link retrofit2.CallAdapter.Factory} implementation for handling annotated
  * requests using retrofit2.
  */
-final class RetroauthCallAdapterFactory<OWNER, TOKEN_TYPE extends TokenType, TOKEN> extends CallAdapter.Factory {
+final class RetroauthCallAdapterFactory<OWNER, TOKEN_TYPE, TOKEN> extends CallAdapter.Factory {
 
     /**
      * registered {@link retrofit2.CallAdapter.Factory}s.
@@ -82,7 +82,7 @@ final class RetroauthCallAdapterFactory<OWNER, TOKEN_TYPE extends TokenType, TOK
      * @param <TOKEN_TYPE>  Type of Token to use
      * @param <RETURN_TYPE> Return type of the call
      */
-    static final class RetroauthCallAdapter<TOKEN_TYPE extends TokenType, RETURN_TYPE>
+    static final class RetroauthCallAdapter<TOKEN_TYPE, RETURN_TYPE>
             implements CallAdapter<Object, RETURN_TYPE> {
 
         private final CallAdapter<Object, RETURN_TYPE> adapter;

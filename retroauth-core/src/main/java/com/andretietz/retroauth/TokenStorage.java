@@ -19,7 +19,7 @@ package com.andretietz.retroauth;
 /**
  * This is the interface of a token storage.
  */
-public interface TokenStorage<OWNER, TOKEN_TYPE extends TokenType, TOKEN> {
+public interface TokenStorage<OWNER, TOKEN_TYPE, TOKEN> {
 
     /**
      * This method returns an authentication token. If there's no token, you should try
