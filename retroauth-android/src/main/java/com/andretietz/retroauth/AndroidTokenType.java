@@ -32,6 +32,22 @@ public final class AndroidTokenType {
         this.tokenType = tokenType;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AndroidTokenType that = (AndroidTokenType) o;
+        if (!tokenType.equals(that.tokenType)) return false;
+        return accountType.equals(that.accountType);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = tokenType.hashCode();
+        result = 31 * result + accountType.hashCode();
+        return result;
+    }
+
     public static final class Factory implements TokenTypeFactory<AndroidTokenType> {
         private final ContextManager contextManager;
 
