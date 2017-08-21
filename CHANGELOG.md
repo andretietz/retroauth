@@ -1,3 +1,6 @@
+## 2.2.2 (2017-08-21)
+* Adding the hashCode method for the AndroidTokenType, so that the locking is actually working.
+
 ## 2.2.1 (2017-06-06)
 * If Request-Locking is enabled, it's locking (only one request at once) requests over multiple retroauth instances.
 
