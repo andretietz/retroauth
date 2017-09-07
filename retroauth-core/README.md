@@ -1,7 +1,7 @@
 # A simple way of calling authenticated requests using retrofit
 [![Build Status](https://www.bitrise.io/app/d4189e3709bdf16d.svg?token=KpeuDTgCOEWgfL4RoZaVLQ&branch=master)](https://www.bitrise.io/app/d4189e3709bdf16d)
 ## Dependencies
-* [Retrofit](https://github.com/square/retrofit) 2.1.0
+* [Retrofit](https://github.com/square/retrofit) 2.3.0
 
 ## Example:
 Your services using retrofit:
@@ -27,7 +27,7 @@ If you're an Android Developer feel free to go directly to the [android project]
 
 Add it as dependency:
 ```groovy
-compile 'com.andretietz.retroauth:retroauth-core:2.2.2'
+compile 'com.andretietz.retroauth:retroauth-core:2.3.0'
 ```
 
 An Authentication with this library requires 3 generic classes, which you should aware of, before implementing. You can use whatever you want, for explanation reasons I'll use their generic names
