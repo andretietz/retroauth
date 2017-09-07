@@ -36,7 +36,7 @@ import android.util.Log;
  * there will be no Login if required.
  */
 @SuppressWarnings("Singleton")
-final class ActivityManager {
+public final class ActivityManager {
 
     private static final String TAG = ActivityManager.class.getSimpleName();
     @SuppressLint("StaticFieldLeak")
@@ -55,7 +55,7 @@ final class ActivityManager {
      * @return a singleton instance of the {@link ActivityManager}.
      */
     @NonNull
-    static ActivityManager get(@NonNull Application application) {
+    public static ActivityManager get(@NonNull Application application) {
         if (instance == null) {
             synchronized (ActivityManager.class) {
                 if (instance == null) {
