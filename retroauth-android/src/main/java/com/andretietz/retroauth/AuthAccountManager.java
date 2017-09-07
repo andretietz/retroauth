@@ -21,6 +21,7 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -42,11 +43,13 @@ public final class AuthAccountManager {
 
     static final String RETROAUTH_ACCOUNTNAME_KEY = "com.andretietz.retroauth.ACTIVE_ACCOUNT";
     private final AccountManager accountManager;
-    private final ContextManager contextManager;
+    private final ActivityManager activityManager;
+    private final Application application;
 
-    public AuthAccountManager() {
-        this.contextManager = ContextManager.get();
-        this.accountManager = AccountManager.get(contextManager.getContext());
+    public AuthAccountManager(Application application) {
+        this.activityManager = ActivityManager.get(application);
+        this.accountManager = AccountManager.get(application);
+        this.application = application;
     }
 
     /**
@@ -57,7 +60,7 @@ public final class AuthAccountManager {
      */
     @Nullable
     public String getActiveAccountName(@NonNull String accountType) {
-        SharedPreferences preferences = contextManager.getContext().getSharedPreferences(accountType, Context.MODE_PRIVATE);
+        SharedPreferences preferences = application.getSharedPreferences(accountType, Context.MODE_PRIVATE);
         return preferences.getString(RETROAUTH_ACCOUNTNAME_KEY, null);
     }
 
@@ -116,7 +119,7 @@ public final class AuthAccountManager {
     public Account setActiveAccount(@NonNull String accountType, @NonNull String accountName) {
         Account account = getAccountByName(accountType, accountName);
         if (account == null) return null;
-        SharedPreferences preferences = contextManager.getContext().getSharedPreferences(accountType, Context.MODE_PRIVATE);
+        SharedPreferences preferences = application.getSharedPreferences(accountType, Context.MODE_PRIVATE);
         preferences.edit().putString(RETROAUTH_ACCOUNTNAME_KEY, accountName).apply();
         return account;
     }
@@ -128,7 +131,7 @@ public final class AuthAccountManager {
      * @param accountType accountType to reset
      */
     public void resetActiveAccount(@NonNull String accountType) {
-        SharedPreferences preferences = contextManager.getContext().getSharedPreferences(accountType, Context.MODE_PRIVATE);
+        SharedPreferences preferences = application.getSharedPreferences(accountType, Context.MODE_PRIVATE);
         preferences.edit().remove(RETROAUTH_ACCOUNTNAME_KEY).apply();
     }
 
@@ -155,7 +158,7 @@ public final class AuthAccountManager {
      */
     public void addAccount(@NonNull String accountType, @Nullable String tokenType, @Nullable AccountCallback callback) {
         CreateAccountCallback cac = (callback != null) ? new CreateAccountCallback(callback) : null;
-        accountManager.addAccount(accountType, tokenType, null, null, contextManager.getActivity(), cac, null);
+        accountManager.addAccount(accountType, tokenType, null, null, activityManager.getActivity(), cac, null);
     }
 
     /**

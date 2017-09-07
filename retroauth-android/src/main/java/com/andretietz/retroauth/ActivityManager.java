@@ -20,16 +20,15 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Application;
 import android.app.Application.ActivityLifecycleCallbacks;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 /**
- * The {@link ContextManager} provides an application {@link Context} as well as an {@link Activity} if this was not stopped
- * already. It registers {@link ActivityLifecycleCallbacks} to be able to know if there's an active {@link Activity}
- * or not. The {@link Activity} is required in case the user calls an {@link Authenticated} request
+ * The {@link ActivityManager} provides an application {@link android.content.Context} as well as an {@link Activity} if
+ * this was not stopped already. It registers {@link ActivityLifecycleCallbacks} to be able to know if there's an active
+ * {@link Activity} or not. The {@link Activity} is required in case the user calls an {@link Authenticated} request
  * and there are not tokens provided, to be able to open the {@link Activity} for login, using the
  * {@link android.accounts.AccountManager#getAuthToken(android.accounts.Account, String, Bundle, Activity,
  * android.accounts.AccountManagerCallback, android.os.Handler)}. If you don't provide an {@link Activity} there, the
@@ -37,15 +36,15 @@ import android.util.Log;
  * there will be no Login if required.
  */
 @SuppressWarnings("Singleton")
-final class ContextManager {
+public final class ActivityManager {
 
-    private static final String TAG = ContextManager.class.getSimpleName();
+    private static final String TAG = ActivityManager.class.getSimpleName();
     @SuppressLint("StaticFieldLeak")
-    private static ContextManager instance;
+    private static ActivityManager instance;
     private final Application application;
     private final LifecycleHandler handler;
 
-    private ContextManager(@NonNull Application application) {
+    private ActivityManager(@NonNull Application application) {
         this.application = application;
         handler = new LifecycleHandler();
         application.registerActivityLifecycleCallbacks(handler);
@@ -53,34 +52,19 @@ final class ContextManager {
 
     /**
      * @param application some {@link Activity} to be able to create the instance
-     * @return a singleton instance of the {@link ContextManager}.
+     * @return a singleton instance of the {@link ActivityManager}.
      */
-    static ContextManager get(@NonNull Application application) {
+    @NonNull
+    public static ActivityManager get(@NonNull Application application) {
         if (instance == null) {
-            synchronized (ContextManager.class) {
+            synchronized (ActivityManager.class) {
                 if (instance == null) {
-                    instance = new ContextManager(application);
+                    instance = new ActivityManager(application);
                 }
             }
         }
         return instance;
     }
-
-    static ContextManager get() {
-        if (instance != null) {
-            return instance;
-        }
-        throw new IllegalStateException("ContextManager has not been initialized!");
-    }
-
-    /**
-     * @return the Application Context
-     */
-    @NonNull
-    public Context getContext() {
-        return application;
-    }
-
 
     /**
      * @return an {@link Activity} if there's one available. If not this method returns {@code null}

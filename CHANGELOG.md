@@ -1,3 +1,7 @@
+## 2.3.0 (2017-09-07)
+* Renaming ContextManager to ActivityManager and focusing on providing a Nullable Activity. No Context will be provided anymore! Due to this change this is a breaking change.
+* Doesn't use ContentProvider workaround for getting the Application Object. It seemed nice but was difficult when using multiple processes.
+
 ## 2.2.2 (2017-08-21)
 * Adding the hashCode method for the AndroidTokenType, so that the locking is actually working.
 

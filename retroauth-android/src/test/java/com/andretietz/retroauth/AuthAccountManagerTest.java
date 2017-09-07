@@ -29,9 +29,8 @@ public class AuthAccountManagerTest {
 
     @Before
     public void setup() throws NoSuchFieldException, IllegalAccessException {
-        ContextManager.get(RuntimeEnvironment.application);
         accountManager = mock(AccountManager.class);
-        authAccountManager = new AuthAccountManager();
+        authAccountManager = new AuthAccountManager(RuntimeEnvironment.application);
         setMember(authAccountManager, "accountManager", accountManager);
     }
 

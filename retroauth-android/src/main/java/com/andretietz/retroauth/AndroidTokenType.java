@@ -17,6 +17,7 @@
 
 package com.andretietz.retroauth;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 
 /**
@@ -49,20 +50,20 @@ public final class AndroidTokenType {
     }
 
     public static final class Factory implements TokenTypeFactory<AndroidTokenType> {
-        private final ContextManager contextManager;
+        private final Context context;
 
-        private Factory() {
-            this.contextManager = ContextManager.get();
+        private Factory(@NonNull Context context) {
+            this.context = context;
         }
 
-        public static Factory create() {
-            return new Factory();
+        public static Factory create(@NonNull Context context) {
+            return new Factory(context);
         }
 
         @Override
         public AndroidTokenType create(int[] annotationValues) {
-            String accountType = contextManager.getContext().getString(annotationValues[0]);
-            String tokenType = contextManager.getContext().getString(annotationValues[1]);
+            String accountType = context.getString(annotationValues[0]);
+            String tokenType = context.getString(annotationValues[1]);
             return new AndroidTokenType(accountType, tokenType);
         }
     }
