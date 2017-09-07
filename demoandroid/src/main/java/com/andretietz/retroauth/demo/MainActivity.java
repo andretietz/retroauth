@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
-        authAccountManager = new AuthAccountManager();
+        authAccountManager = new AuthAccountManager(getApplication());
 
         /**
          * Optional: create your own OkHttpClient
@@ -54,8 +54,9 @@ public class MainActivity extends AppCompatActivity {
         /**
          * Create your Retrofit Object using the {@link Retroauth.Builder}
          */
-        Retrofit retrofit = new Retroauth.Builder<>(AndroidAuthenticationHandler.create(provider,
-                AndroidTokenType.Factory.create()))
+        Retrofit retrofit = new Retroauth.Builder<>(
+                AndroidAuthenticationHandler.create(getApplication(), provider,
+                        AndroidTokenType.Factory.create(getApplicationContext())))
                 .baseUrl("https://www.googleapis.com/")
                 .client(httpClient)
                 .addConverterFactory(MoshiConverterFactory.create())
