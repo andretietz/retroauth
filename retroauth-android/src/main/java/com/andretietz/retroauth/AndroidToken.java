@@ -17,6 +17,9 @@
 
 package com.andretietz.retroauth;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 /**
  * The default android token represents a token string and a refresh token
  */
@@ -25,9 +28,27 @@ public class AndroidToken {
     public final String token;
     public final String refreshToken;
 
-    public AndroidToken(String token, String refreshToken) {
+    public AndroidToken(@NonNull String token, @Nullable String refreshToken) {
         this.token = token;
         this.refreshToken = refreshToken;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        AndroidToken that = (AndroidToken) o;
+
+        if (!token.equals(that.token)) return false;
+        return refreshToken != null ? refreshToken.equals(that.refreshToken) : that.refreshToken == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = token.hashCode();
+        result = 31 * result + (refreshToken != null ? refreshToken.hashCode() : 0);
+        return result;
+    }
 }

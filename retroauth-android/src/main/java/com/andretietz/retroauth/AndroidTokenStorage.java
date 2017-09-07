@@ -23,6 +23,7 @@ import android.accounts.AccountManagerFuture;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.app.Activity;
+import android.app.Application;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -35,18 +36,18 @@ import java.io.IOException;
 final class AndroidTokenStorage implements TokenStorage<Account, AndroidTokenType, AndroidToken> {
 
     private final AccountManager accountManager;
-    private final ContextManager contextManager;
+    private final ActivityManager activityManager;
 
-    public AndroidTokenStorage() {
-        this.contextManager = ContextManager.get();
-        this.accountManager = AccountManager.get(contextManager.getContext());
+    public AndroidTokenStorage(Application application) {
+        this.activityManager = ActivityManager.get(application);
+        this.accountManager = AccountManager.get(application);
     }
 
     @Override
     public AndroidToken getToken(Account account, AndroidTokenType type) throws AuthenticationCanceledException {
         try {
             AndroidToken token;
-            Activity activity = contextManager.getActivity();
+            Activity activity = activityManager.getActivity();
             if (account == null) {
                 token = createAccountAndGetToken(activity, type);
             } else {

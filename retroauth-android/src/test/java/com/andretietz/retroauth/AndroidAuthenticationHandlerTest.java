@@ -1,6 +1,5 @@
 package com.andretietz.retroauth;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
@@ -14,16 +13,12 @@ import static org.mockito.Mockito.mock;
 @Config(constants = BuildConfig.class, sdk = 23)
 public class AndroidAuthenticationHandlerTest {
 
-    @Before
-    public void setup() {
-        ContextManager.get(RuntimeEnvironment.application);
-    }
-
     @Test
     public void createWithTokenTypeFactory() throws Exception {
         Provider provider = mock(Provider.class);
         TokenTypeFactory typeFactory = mock(TokenTypeFactory.class);
-        AndroidAuthenticationHandler authenticationHandler = AndroidAuthenticationHandler.create(provider, typeFactory);
+        AndroidAuthenticationHandler authenticationHandler = AndroidAuthenticationHandler
+                .create(RuntimeEnvironment.application, provider, typeFactory);
         assertNotNull(authenticationHandler.methodCache);
         assertNotNull(authenticationHandler.ownerManager);
         assertNotNull(authenticationHandler.provider);

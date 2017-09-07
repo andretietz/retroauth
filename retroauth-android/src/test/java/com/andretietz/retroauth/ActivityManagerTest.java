@@ -12,29 +12,24 @@ import static org.junit.Assert.assertNull;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(constants = BuildConfig.class, sdk = 23)
-public class ContextManagerTest {
+public class ActivityManagerTest {
 
 
     @Before
     public void setup() {
-        ContextManager.get(RuntimeEnvironment.application);
+        ActivityManager.get(RuntimeEnvironment.application);
     }
 
     @Test
     public void initializing() throws Exception {
-        ContextManager contextManager = ContextManager.get(RuntimeEnvironment.application);
-        assertNotNull(contextManager);
+        ActivityManager activityManager = ActivityManager.get(RuntimeEnvironment.application);
+        assertNotNull(activityManager);
 
-    }
-
-    @Test
-    public void getContext() {
-        assertNotNull(ContextManager.get().getContext());
     }
 
     @Test
     public void getActivityFailing() {
-        assertNull(ContextManager.get().getActivity());
+        assertNull(ActivityManager.get(RuntimeEnvironment.application).getActivity());
     }
 
 }

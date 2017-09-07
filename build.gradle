@@ -30,3 +30,8 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.1'
+    distributionType = Wrapper.DistributionType.ALL
+}

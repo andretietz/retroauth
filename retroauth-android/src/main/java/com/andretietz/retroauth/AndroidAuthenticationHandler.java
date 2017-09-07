@@ -17,6 +17,7 @@
 package com.andretietz.retroauth;
 
 import android.accounts.Account;
+import android.app.Application;
 
 /**
  * The {@link AndroidAuthenticationHandler} wraps all Android specific implementations ({@link AndroidMethodCache},
@@ -25,15 +26,17 @@ import android.accounts.Account;
  */
 public final class AndroidAuthenticationHandler extends AuthenticationHandler<Account, AndroidTokenType, AndroidToken> {
 
-    private AndroidAuthenticationHandler(Provider<Account, AndroidTokenType, AndroidToken> provider,
+    private AndroidAuthenticationHandler(Application application,
+                                         Provider<Account, AndroidTokenType, AndroidToken> provider,
                                          TokenTypeFactory<AndroidTokenType> typeFactory) {
-        super(new AndroidMethodCache(), new AndroidOwnerManager(new AuthAccountManager()),
-                new AndroidTokenStorage(), provider, typeFactory);
+        super(new AndroidMethodCache(), new AndroidOwnerManager(application, new AuthAccountManager(application)),
+                new AndroidTokenStorage(application), provider, typeFactory);
     }
 
-    public static AndroidAuthenticationHandler create(Provider<Account, AndroidTokenType, AndroidToken> provider,
+    public static AndroidAuthenticationHandler create(Application application,
+                                                      Provider<Account, AndroidTokenType, AndroidToken> provider,
                                                       TokenTypeFactory<AndroidTokenType> typeFactory) {
-        return new AndroidAuthenticationHandler(provider, typeFactory);
+        return new AndroidAuthenticationHandler(application, provider, typeFactory);
     }
 
 }

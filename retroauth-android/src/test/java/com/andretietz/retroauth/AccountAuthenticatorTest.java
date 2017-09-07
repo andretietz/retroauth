@@ -29,7 +29,7 @@ public class AccountAuthenticatorTest {
 
     @Before
     public void setup() {
-        ContextManager.get(RuntimeEnvironment.application);
+        ActivityManager.get(RuntimeEnvironment.application);
         authenticator = new AccountAuthenticator(mock(Context.class), "some-action");
     }
 

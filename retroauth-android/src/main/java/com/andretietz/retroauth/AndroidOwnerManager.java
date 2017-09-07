@@ -20,6 +20,8 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Application;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Looper;
 
@@ -33,11 +35,13 @@ import java.util.concurrent.locks.ReentrantLock;
 final class AndroidOwnerManager implements OwnerManager<Account, AndroidTokenType> {
 
     private final AuthAccountManager accountManager;
-    private final ContextManager contextManager;
+    private final ActivityManager activityManager;
+    private final Application application;
 
-    public AndroidOwnerManager(AuthAccountManager accountManager) {
+    public AndroidOwnerManager(Application application, AuthAccountManager accountManager) {
         this.accountManager = accountManager;
-        this.contextManager = ContextManager.get();
+        this.activityManager = ActivityManager.get(application);
+        this.application = application;
     }
 
     @Override
@@ -70,20 +74,20 @@ final class AndroidOwnerManager implements OwnerManager<Account, AndroidTokenTyp
         if (Looper.myLooper() == Looper.getMainLooper()) {
             throw new RuntimeException("Method was called from the wrong thread!");
         }
-        Account[] accounts = AccountManager.get(contextManager.getContext()).getAccountsByType(accountType);
+        Account[] accounts = AccountManager.get(application).getAccountsByType(accountType);
         if (accounts.length == 0) return null;
         String[] accountList = new String[canAddAccount ? accounts.length + 1 : accounts.length];
         for (int i = 0; i < accounts.length; i++) {
             accountList[i] = accounts[i].name;
         }
         if (canAddAccount) {
-            accountList[accounts.length] = contextManager.getContext().getString(R.string.add_account_button_label);
+            accountList[accounts.length] = application.getString(R.string.add_account_button_label);
         }
         ReentrantLock lock = new ReentrantLock();
         Condition condition = lock.newCondition();
-        Activity activity = contextManager.getActivity();
+        Activity activity = activityManager.getActivity();
         // show the account chooser
-        ShowAccountChooser showDialog = new ShowAccountChooser(contextManager, accountList, lock, condition);
+        ShowAccountChooser showDialog = new ShowAccountChooser(application, activityManager, accountList, lock, condition);
         if (activity != null) {
             activity.runOnUiThread(showDialog);
             lock.lock();
@@ -110,22 +114,25 @@ final class AndroidOwnerManager implements OwnerManager<Account, AndroidTokenTyp
         private final Condition condition;
         private final String[] options;
         private final Lock lock;
-        private final ContextManager contextManager;
+        private final ActivityManager activityManager;
+        private final Context context;
         boolean canceled = false;
         private String selectedOption;
 
-        ShowAccountChooser(ContextManager contextManager, String[] options, Lock lock, Condition condition) {
+        ShowAccountChooser(Context context, ActivityManager activityManager, String[] options, Lock lock,
+                           Condition condition) {
+            this.context = context;
             this.options = options;
             this.condition = condition;
             this.lock = lock;
             this.selectedOption = options[0];
-            this.contextManager = contextManager;
+            this.activityManager = activityManager;
         }
 
         @Override
         public void run() {
-            AlertDialog.Builder builder = new AlertDialog.Builder(contextManager.getActivity());
-            builder.setTitle(contextManager.getContext().getString(R.string.choose_account_label));
+            AlertDialog.Builder builder = new AlertDialog.Builder(activityManager.getActivity());
+            builder.setTitle(context.getString(R.string.choose_account_label));
             builder.setCancelable(false);
             builder.setSingleChoiceItems(options, 0, new DialogInterface.OnClickListener() {
                 @Override
