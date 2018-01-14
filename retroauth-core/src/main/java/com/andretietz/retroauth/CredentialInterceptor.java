@@ -36,8 +36,8 @@ import okhttp3.Response;
  * @param <TOKEN_TYPE> type of the token that should be added to the request
  */
 final class CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN> implements Interceptor {
-    private final AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler;
     private static final HashMap<Object, AccountTokenLock> TOKENTYPE_LOCKERS = new HashMap<>();
+    private final AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler;
     private final boolean lockable;
 
     CredentialInterceptor(AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler, boolean lockPerToken) {
@@ -84,11 +84,12 @@ final class CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN> implements Intercept
     }
 
     private void storeAndThrowError(TOKEN_TYPE type, Exception exception) throws IOException {
-        //noinspection ThrowableResultOfMethodCallIgnored
         if (lockable && getLock(type).errorContainer.get() == null) {
             getLock(type).errorContainer.set(exception);
         }
-        throw new AuthenticationCanceledException(exception);
+        if (exception instanceof IOException) throw (IOException) exception;
+        throw new IOException(exception);
+
     }
 
     private synchronized AccountTokenLock getLock(TOKEN_TYPE type) {
