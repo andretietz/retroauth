@@ -1,14 +1,13 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "25.0.3"
+    compileSdkVersion 27
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 23
+        targetSdkVersion 27
         versionCode 1
-        versionName libraryVersion
+        versionName VERSION_NAME
     }
     buildTypes {
         release {
@@ -57,16 +56,14 @@ afterEvaluate {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:23.0.0'
-//    compile project(':retroauth-core')
-    compile "com.andretietz.retroauth:retroauth-core:$libraryVersion"
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.khronos:opengl-api:gl1.1-android-2.1_r1'
-    testCompile "org.robolectric:robolectric:3.1.2"
-    testCompile 'org.mockito:mockito-core:2.0.111-beta'
+    implementation 'com.android.support:appcompat-v7:27.0.2'
+    implementation project(':retroauth-core')
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.khronos:opengl-api:gl1.1-android-2.1_r1'
+    testImplementation "org.robolectric:robolectric:3.1.2"
+    testImplementation 'org.mockito:mockito-core:2.0.111-beta'
 
 }
 apply plugin: 'com.getkeepsafe.dexcount'
 apply plugin: 'com.github.ben-manes.versions'
-apply from: 'jfrog-publish.gradle'
-apply from: 'bintray-publish.gradle'
+apply from: rootProject.file('gradle/publish.gradle')

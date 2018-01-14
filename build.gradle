@@ -1,17 +1,12 @@
 buildscript {
     repositories {
         jcenter()
+        google()
         mavenCentral()
     }
     dependencies {
-        // for jfrog publishing
-        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.1.1'
         // android plugin
-        classpath 'com.android.tools.build:gradle:2.3.3'
-        // publish android aar to maven
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.4.1'
-        // publish to bintray
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7'
+        classpath 'com.android.tools.build:gradle:3.0.1'
         // dexcount
         classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.6.4'
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.13.0'
@@ -21,17 +16,13 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
+        google()
         mavenCentral()
-        maven { url('https://oss.jfrog.org/artifactory/oss-snapshot-local/') }
         mavenLocal()
     }
 }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
-
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.1'
+    gradleVersion = '4.4.1'
     distributionType = Wrapper.DistributionType.ALL
 }
