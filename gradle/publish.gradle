@@ -30,7 +30,7 @@ def getRepositoryUsername() {
 }
 
 def getRepositoryPassword() {
-    return project.hasProperty('bintrayKey') ? project.bintrayKey : System.getenv("BINTRAY_KEY") ?: ""
+    return project.hasProperty('bintrayKey') ? project.bintrayKey : System.getenv("BINTRAY_PASSWORD") ?: ""
 }
 
 afterEvaluate { project ->
@@ -43,11 +43,11 @@ afterEvaluate { project ->
                 pom.artifactId = POM_ARTIFACT_ID
                 pom.version = VERSION_NAME
 
-                repository(url: "https://api.bintray.com/maven/unicate/android-tools/auth/;publish=1") {
+                repository(url: "https://api.bintray.com/maven/unicate/android/retroauth/;publish=1") {
                     authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
                 }
-                snapshotRepository(url: "file://" + System.getProperty("user.home") + "/.m2/repository/") {
-//                snapshotRepository(url: "https://oss.jfrog.org/artifactory/oss-snapshot-local/") {
+//                snapshotRepository(url: "file://" + System.getProperty("user.home") + "/.m2/repository/") {
+                snapshotRepository(url: "https://oss.jfrog.org/artifactory/oss-snapshot-local/") {
                     authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
                 }
 
