@@ -1,3 +1,8 @@
+## 2.3.1 (2018-01-15)
+* Updating release script
+* Fixing Exception when Exception is thrown during the actual call (was always AuthenticationCanceledException)
+* Renamed core project to retroauth instead of retroauth-core
+
 ## 2.3.0 (2017-09-07)
 * Renaming ContextManager to ActivityManager and focusing on providing a Nullable Activity. No Context will be provided anymore! Due to this change this is a breaking change.
 * Doesn't use ContentProvider workaround for getting the Application Object. It seemed nice but was difficult when using multiple processes.

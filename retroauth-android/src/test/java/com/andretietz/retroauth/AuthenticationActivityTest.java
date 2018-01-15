@@ -6,15 +6,15 @@ import android.accounts.AccountManager;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 
-import com.andretietz.retroauth.testhelper.RetroauthRobolectricRunner;
 import com.andretietz.retroauth.testhelper.RetroauthTestLoginActivity;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
+import org.robolectric.RobolectricTestRunner;
+import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
-import org.robolectric.util.ActivityController;
 
 import static com.andretietz.retroauth.testhelper.Helper.setMember;
 import static org.junit.Assert.assertEquals;
@@ -27,8 +27,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(RetroauthRobolectricRunner.class)
-@Config(constants = BuildConfig.class, sdk = 23, manifest = "src/test/AndroidManifest.xml")
+@RunWith(RobolectricTestRunner.class)
+@Config(manifest = Config.NONE, constants = BuildConfig.class)
 public class AuthenticationActivityTest {
 
     private ActivityController<RetroauthTestLoginActivity> activityController;
@@ -36,7 +36,7 @@ public class AuthenticationActivityTest {
     @Before
     public void setup() {
         Intent intent = AuthenticationActivity.createLoginIntent("action", "account", "token");
-        activityController = Robolectric.buildActivity(RetroauthTestLoginActivity.class).withIntent(intent).setup();
+        activityController = Robolectric.buildActivity(RetroauthTestLoginActivity.class, intent).setup();
     }
 
 
@@ -57,7 +57,7 @@ public class AuthenticationActivityTest {
     @Test
     public void startActivitySuccess() {
         Intent intent = AuthenticationActivity.createLoginIntent("action", "account", "token");
-        Robolectric.buildActivity(RetroauthTestLoginActivity.class).withIntent(intent).setup();
+        Robolectric.buildActivity(RetroauthTestLoginActivity.class, intent).setup();
     }
 
     @Test

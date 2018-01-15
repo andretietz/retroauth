@@ -6,7 +6,7 @@
 
 I split the project into two separate ones. 
 
- * [retroauth-core](retroauth-core/)
+ * [retroauth](retroauth)
   This is the base implementation, to be used in plain java.
  * [retroauth-android](retroauth-android/)
   On top of the Java implementation there's the Android implementation, which makes use of the
