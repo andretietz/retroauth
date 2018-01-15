@@ -1,11 +1,11 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 23
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 27
+        targetSdkVersion 23
         versionCode 1
         versionName VERSION_NAME
     }
@@ -67,7 +67,7 @@ afterEvaluate {
 }
 
 dependencies {
-    implementation 'com.android.support:appcompat-v7:27.0.2'
+    implementation 'com.android.support:appcompat-v7:23.0.0'
     api project(':retroauth')
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.khronos:opengl-api:gl1.1-android-2.1_r1'
