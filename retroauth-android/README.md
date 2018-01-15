@@ -2,10 +2,10 @@
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-retroauth-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/2195)
 ## Dependencies
 * [Retrofit](https://github.com/square/retrofit) 2.3.0 (transitive from retroauth-core)
-* appcompat-v7 23.0.0 and higher
+* appcompat-v7 23.0.0
 
-Method-Count: 236
-Field-Count:  55
+Method-Count: 229
+Field-Count:  56
 
 ## What does it do?
 If you call a request method, annotated with the authenticated annotation, it'll do the following steps:
