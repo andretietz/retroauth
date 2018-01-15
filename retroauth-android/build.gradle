@@ -27,6 +27,12 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
 }
 
 apply plugin: 'checkstyle'
@@ -62,10 +68,10 @@ afterEvaluate {
 
 dependencies {
     implementation 'com.android.support:appcompat-v7:27.0.2'
-    api project(':retroauth-core')
+    api project(':retroauth')
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.khronos:opengl-api:gl1.1-android-2.1_r1'
-    testImplementation "org.robolectric:robolectric:3.1.2"
+    testImplementation "org.robolectric:robolectric:3.6"
     testImplementation 'org.mockito:mockito-core:2.0.111-beta'
 
 }

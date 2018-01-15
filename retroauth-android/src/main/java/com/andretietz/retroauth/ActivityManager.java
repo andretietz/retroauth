@@ -28,12 +28,13 @@ import android.util.Log;
 /**
  * The {@link ActivityManager} provides an application {@link android.content.Context} as well as an {@link Activity} if
  * this was not stopped already. It registers {@link ActivityLifecycleCallbacks} to be able to know if there's an active
- * {@link Activity} or not. The {@link Activity} is required in case the user calls an {@link Authenticated} request
- * and there are not tokens provided, to be able to open the {@link Activity} for login, using the
+ * {@link Activity} or not. The {@link Activity} is required in case the user calls an
+ * {@link com.andretietz.retroauth.Authenticated} request and there are not tokens provided, to be able to open the
+ * {@link Activity} for login, using the
  * {@link android.accounts.AccountManager#getAuthToken(android.accounts.Account, String, Bundle, Activity,
  * android.accounts.AccountManagerCallback, android.os.Handler)}. If you don't provide an {@link Activity} there, the
- * login screen wont open. So in case you're calling an {@link Authenticated} request from a {@link android.app.Service}
- * there will be no Login if required.
+ * login screen wont open. So in case you're calling an {@link com.andretietz.retroauth.Authenticated} request from a
+ * {@link android.app.Service} there will be no Login if required.
  */
 @SuppressWarnings("Singleton")
 public final class ActivityManager {
@@ -41,11 +42,9 @@ public final class ActivityManager {
     private static final String TAG = ActivityManager.class.getSimpleName();
     @SuppressLint("StaticFieldLeak")
     private static ActivityManager instance;
-    private final Application application;
     private final LifecycleHandler handler;
 
     private ActivityManager(@NonNull Application application) {
-        this.application = application;
         handler = new LifecycleHandler();
         application.registerActivityLifecycleCallbacks(handler);
     }

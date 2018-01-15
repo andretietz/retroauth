@@ -18,7 +18,7 @@ If you call a request method, annotated with the authenticated annotation, it'll
 
 Add it as dependency:
 ```groovy
-compile 'com.andretietz.retroauth:retroauth-android:2.3.0'
+compile 'com.andretietz.retroauth:retroauth-android:2.3.1'
 ```
 Make sure you're overriding the appcompat dependency if required!
 i.e.:
