@@ -4,66 +4,46 @@ import android.accounts.Account;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
-import android.util.Pair;
 import android.webkit.CookieManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.andretietz.retroauth.AuthenticationActivity;
-import com.github.scribejava.apis.GoogleApi20;
+import com.github.scribejava.apis.GitHubApi;
 import com.github.scribejava.core.builder.ServiceBuilder;
 import com.github.scribejava.core.model.OAuth2AccessToken;
 import com.github.scribejava.core.model.OAuth2Authorization;
-import com.github.scribejava.core.model.OAuthRequest;
-import com.github.scribejava.core.model.Verb;
 import com.github.scribejava.core.oauth.OAuth20Service;
-import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.Moshi;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.Callable;
 
-import rx.Observable;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
+import io.reactivex.Single;
+import io.reactivex.schedulers.Schedulers;
+import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import retrofit2.converter.moshi.MoshiConverterFactory;
 
 public class LoginActivity extends AuthenticationActivity {
 
-    private OAuth20Service helper;
+    private final OAuth20Service helper = new ServiceBuilder(ProviderGithub.CLIENT_ID)
+            .apiSecret(ProviderGithub.CLIENT_SECRET)
+            .callback(ProviderGithub.CLIENT_CALLBACK)
+            .build(GitHubApi.instance());
+
+    private final GithubService api = new Retrofit.Builder()
+            .baseUrl("http://api.github.com/")
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+            .addConverterFactory(MoshiConverterFactory.create())
+            .build().create(GithubService.class);
 
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(R.layout.activity_login);
-        // I do trust you here! usually you don't hand out the applicationId or the secret
-        // as soon as I feel like it, I'll deactivate the demo on providers.
-
-        // Go to:
-        // https://console.developers.google.com/
-        // create a Web client id and provide the client id and it's secret here:
-        // ProviderGoogle.GOOGLE_CLIENT_ID
-        // ProviderGoogle.GOOGLE_CLIENT_SECRET
-        // ProviderGoogle.GOOGLE_CLIENT_CALLBACK
-
-        helper = new ServiceBuilder()
-                .apiKey(ProviderGoogle.GOOGLE_CLIENT_ID)
-                .apiSecret(ProviderGoogle.GOOGLE_CLIENT_SECRET)
-                .scope("profile")
-                .state("secret" + new Random().nextInt(999_999))
-                .callback(ProviderGoogle.GOOGLE_CLIENT_CALLBACK)
-                .build(GoogleApi20.instance());
-
-        final Map<String, String> additionalParams = new HashMap<>();
-        additionalParams.put("access_type", "offline");
-        //force to reget refresh token (if usera are asked not the first time)
-        additionalParams.put("prompt", "consent");
 
 
-        WebView webView = (WebView) findViewById(R.id.webView);
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.loadUrl(helper.getAuthorizationUrl(additionalParams));
+        WebView webView = findViewById(R.id.webView);
+        webView.loadUrl(helper.getAuthorizationUrl());
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -72,22 +52,17 @@ public class LoginActivity extends AuthenticationActivity {
                 if (code == null) {
                     view.loadUrl(url);
                 } else {
-                    Observable.fromCallable(new TokenVerifier(helper, code))
+                    Single.fromCallable(new TokenVerifier(helper, code))
                             .subscribeOn(Schedulers.io())
-                            .subscribe(new Action1<Pair<OAuth2AccessToken, String>>() {
-                                           @Override
-                                           public void call(Pair<OAuth2AccessToken, String> pair) {
-                                               Account account = createOrGetAccount(pair.second);
-                                               storeToken(account, getRequestedTokenType(), pair.first.getAccessToken(), pair.first.getRefreshToken());
-                                               finalizeAuthentication(account);
-                                           }
-                                       },
-                                    new Action1<Throwable>() {
-                                        @Override
-                                        public void call(Throwable throwable) {
-                                            throwable.printStackTrace();
-                                        }
-                                    });
+                            .subscribe(token -> {
+                                        Account account = createOrGetAccount(pair.second);
+                                        storeToken(
+                                                account,
+                                                getRequestedTokenType(),
+                                                token.getAccessToken());
+                                        finalizeAuthentication(account);
+                                    },
+                                    Throwable::printStackTrace);
                 }
                 return true;
             }
@@ -106,7 +81,7 @@ public class LoginActivity extends AuthenticationActivity {
         super.finish();
     }
 
-    private static class TokenVerifier implements Callable<Pair<OAuth2AccessToken, String>> {
+    private static class TokenVerifier implements Callable<OAuth2AccessToken> {
 
         private final OAuth20Service service;
         private final String code;
@@ -117,20 +92,8 @@ public class LoginActivity extends AuthenticationActivity {
         }
 
         @Override
-        public Pair<OAuth2AccessToken, String> call() throws Exception {
-            OAuth2AccessToken accessToken = service.getAccessToken(code);
-            OAuthRequest request = new OAuthRequest(Verb.GET, "https://www.googleapis.com/oauth2/v1/userinfo", service);
-            service.signRequest(accessToken, request);
-            Moshi moshi = new Moshi.Builder().build();
-            JsonAdapter<Profile> jsonAdapter = moshi.adapter(Profile.class);
-            String body = request.send().getBody();
-            System.out.println(body);
-            Profile profile = jsonAdapter.fromJson(body);
-            return Pair.create(accessToken, profile.name);
-        }
-
-        static class Profile {
-            String name;
+        public OAuth2AccessToken call() throws Exception {
+            return service.getAccessToken(code);
         }
     }
 }
