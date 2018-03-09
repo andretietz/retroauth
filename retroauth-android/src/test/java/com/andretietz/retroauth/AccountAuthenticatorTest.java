@@ -13,7 +13,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 
 import static com.andretietz.retroauth.testhelper.Helper.getMember;
 import static org.junit.Assert.assertEquals;
@@ -22,7 +21,6 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 
 @RunWith(RobolectricTestRunner.class)
-@Config(constants = BuildConfig.class, sdk = 23)
 public class AccountAuthenticatorTest {
 
     private AccountAuthenticator authenticator;
