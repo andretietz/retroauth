@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package com.andretietz.retroauth;
+package com.andretietz.retroauth
 
-import java.util.HashMap;
+import java.util.HashMap
 
 /**
  * This cache stores the unique hash of a request to identify it later on when
  * authenticating the request itself. The identifier is created right now
- * in {@link Utils#createUniqueIdentifier}, this may change.
+ * in [Utils.createUniqueIdentifier], this may change.
  */
-public interface MethodCache<TOKEN_TYPE> {
+interface MethodCache<TOKEN_TYPE> {
 
     /**
      * Registers a token type with a specific identifier.
@@ -31,31 +31,29 @@ public interface MethodCache<TOKEN_TYPE> {
      * @param requestIdentifier to identify the request later on
      * @param type              type of token to bind to the requestIdentifier
      */
-    void register(int requestIdentifier, TOKEN_TYPE type);
+    fun register(requestIdentifier: Int, type: TOKEN_TYPE)
 
     /**
      * @param requestIdentifier the request identifier
      * @return the token type to authenticate the request
      */
-    TOKEN_TYPE getTokenType(int requestIdentifier);
+    fun getTokenType(requestIdentifier: Int): TOKEN_TYPE
 
 
     /**
-     * The default implementation of the {@link MethodCache}.
+     * The default implementation of the [MethodCache].
      *
      * @param <TOKEN_TYPE>
      */
-    class DefaultMethodCache<TOKEN_TYPE> implements MethodCache<TOKEN_TYPE> {
-        private final HashMap<Integer, TOKEN_TYPE> map = new HashMap<>();
+    class DefaultMethodCache<TOKEN_TYPE> : MethodCache<TOKEN_TYPE> {
+        private val map = HashMap<Int, TOKEN_TYPE>()
 
-        @Override
-        public void register(int hash, TOKEN_TYPE type) {
-            map.put(hash, type);
+        override fun register(requestIdentifier: Int, type: TOKEN_TYPE) {
+            map[requestIdentifier] = type
         }
 
-        @Override
-        public TOKEN_TYPE getTokenType(int hashCode) {
-            return map.get(hashCode);
+        override fun getTokenType(requestIdentifier: Int): TOKEN_TYPE {
+            return map[requestIdentifier]!!
         }
     }
 }

@@ -14,28 +14,23 @@
  * limitations under the License.
  */
 
-package retrofit2;
+package com.andretietz.retroauth
 
-import java.util.concurrent.Executor;
-
-import retrofit2.CallAdapter.Factory;
+import okhttp3.Request
 
 /**
- * This helper gets some os dependent information from retrofit.
+ * This util class is only used to create an identifier for a request.
  */
-public final class Retrofit2Platform {
+internal object Utils {
 
-    private Retrofit2Platform() {
-    }
-
-    public static Factory defaultCallAdapterFactory(Executor executor) {
-        if (executor == null) {
-            executor = defaultCallbackExecutor();
-        }
-        return Platform.get().defaultCallAdapterFactory(executor);
-    }
-
-    public static Executor defaultCallbackExecutor() {
-        return Platform.get().defaultCallbackExecutor();
+    /**
+     * Creates an identifier, which can identify the request by itself
+     *
+     * @param request request to create the identifier for
+     * @return an identifier
+     */
+    @JvmStatic
+    fun createUniqueIdentifier(request: Request): Int {
+        return (request.url().toString() + request.method()).hashCode()
     }
 }

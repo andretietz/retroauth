@@ -17,10 +17,10 @@ public class AndroidAuthenticationHandlerTest {
         TokenTypeFactory typeFactory = mock(TokenTypeFactory.class);
         AndroidAuthenticationHandler authenticationHandler = AndroidAuthenticationHandler.Companion
                 .create(RuntimeEnvironment.application, provider, typeFactory);
-        assertNotNull(authenticationHandler.methodCache);
-        assertNotNull(authenticationHandler.ownerManager);
-        assertNotNull(authenticationHandler.provider);
-        assertNotNull(authenticationHandler.tokenStorage);
-        assertNotNull(authenticationHandler.typeFactory);
+        assertNotNull(authenticationHandler.getMethodCache());
+        assertNotNull(authenticationHandler.getOwnerManager());
+        assertNotNull(authenticationHandler.getProvider());
+        assertNotNull(authenticationHandler.getTokenStorage());
+        assertNotNull(authenticationHandler.getTypeFactory());
     }
 }

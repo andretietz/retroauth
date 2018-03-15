@@ -73,7 +73,6 @@ afterEvaluate {
 
 dependencies {
     implementation 'com.android.support:appcompat-v7:23.0.0'
-    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
     api project(':retroauth')
     api "com.jakewharton.timber:timber:4.6.1"
     testImplementation 'junit:junit:4.12'

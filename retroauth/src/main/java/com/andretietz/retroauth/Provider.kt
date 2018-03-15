@@ -14,25 +14,25 @@
  * limitations under the License.
  */
 
-package com.andretietz.retroauth;
+package com.andretietz.retroauth
 
-import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.Request
+import okhttp3.Response
 
 /**
  * The Provider interface is a very specific provider endpoint dependent implementation,
  * to authenticate your request and defines when or if to retry.
  */
-public interface Provider<OWNER, TOKEN_TYPE, TOKEN> {
+interface Provider<OWNER, TOKEN_TYPE, TOKEN> {
 
     /**
-     * Authenticates a {@link Request}.
+     * Authenticates a [Request].
      *
      * @param request request to authenticate
      * @param token   Token to authenticate
      * @return a modified version of the incoming request, which is authenticated
      */
-    Request authenticateRequest(Request request, TOKEN token);
+    fun authenticateRequest(request: Request, token: TOKEN): Request
 
     /**
      * Checks if the retry of an request is required or not. If your provider provides a refresh token
@@ -44,8 +44,12 @@ public interface Provider<OWNER, TOKEN_TYPE, TOKEN> {
      * @param owner        owner of the token used
      * @param type         type of the token used
      * @param token        token used for the last execution of the request
-     * @return {@code true} if a retry is required, {@code false} if not
+     * @return `true` if a retry is required, `false` if not
      */
-    boolean retryRequired(int count, Response response,
-                          TokenStorage<OWNER, TOKEN_TYPE, TOKEN> tokenStorage, OWNER owner, TOKEN_TYPE type, TOKEN token);
+    fun retryRequired(count: Int,
+                      response: Response,
+                      tokenStorage: TokenStorage<OWNER, TOKEN_TYPE, TOKEN>,
+                      owner: OWNER,
+                      type: TOKEN_TYPE,
+                      token: TOKEN): Boolean
 }

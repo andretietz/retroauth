@@ -14,21 +14,16 @@
  * limitations under the License.
  */
 
-package com.andretietz.retroauth;
+package com.andretietz.retroauth
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import java.io.IOException
 
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * This is the annotation you can use to add authentication handling onto your request.
+ * This Exception is thrown, when the user cancels the Authentication or
+ * some other error happens. The Reason can be read, on calling [AuthenticationCanceledException.getCause]
  */
-@Documented
-@Target(METHOD)
-@Retention(RUNTIME)
-public @interface Authenticated {
-    int[] value() default 0;
-}
+internal class AuthenticationCanceledException @JvmOverloads constructor(
+        detailMessage: String? = null,
+        throwable: Throwable? = null)
+    : IOException(detailMessage, throwable)

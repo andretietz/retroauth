@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-package com.andretietz.retroauth;
+package com.andretietz.retroauth
 
 /**
  * Since every token belongs to a specific user, this users have to be managed.
  */
-public interface OwnerManager<OWNER, TOKEN_TYPE> {
+interface OwnerManager<out OWNER, in TOKEN_TYPE> {
     /**
      * This method should be used to figure out which user should be authenticate a request.
      * If you're on multi-user systems, you should ask the user to choose which owner
      * he wants to use to authenticate requests. if the user cancels to choose the owner, throw
-     * {@link ChooseOwnerCanceledException}, if there's no owner return <code>null</code>
+     * [ChooseOwnerCanceledException], if there's no owner return `null`
      *
      * @param type type of the token
-     * @return the owner of the token of the give token type or <code>null</code>
+     * @return the owner of the token of the give token type or `null`
      * @throws ChooseOwnerCanceledException when the user cancels to choose the owner
      */
-    OWNER getOwner(TOKEN_TYPE type) throws ChooseOwnerCanceledException;
+    fun getOwner(type: TOKEN_TYPE): OWNER
 }

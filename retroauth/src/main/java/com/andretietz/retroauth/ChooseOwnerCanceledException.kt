@@ -14,26 +14,11 @@
  * limitations under the License.
  */
 
-package com.andretietz.retroauth;
+package com.andretietz.retroauth
 
-import okhttp3.Request;
+import java.io.IOException
 
-/**
- * This util class is only used to create an identifier for a request.
- */
-final class Utils {
-
-    private Utils() {
-        throw new RuntimeException("no instance allowed!");
-    }
-
-    /**
-     * Creates an identifier, which can identify the request by itself
-     *
-     * @param request request to create the identifier for
-     * @return an identifier
-     */
-    public static int createUniqueIdentifier(Request request) {
-        return (request.url() + request.method()).hashCode();
-    }
-}
+internal class ChooseOwnerCanceledException @JvmOverloads constructor(
+        detailMessage: String? = null,
+        throwable: Throwable? = null)
+    : IOException(detailMessage, throwable)

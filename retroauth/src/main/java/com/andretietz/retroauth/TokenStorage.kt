@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.andretietz.retroauth;
+package com.andretietz.retroauth
 
 /**
  * This is the interface of a token storage.
  */
-public interface TokenStorage<OWNER, TOKEN_TYPE, TOKEN> {
+interface TokenStorage<in OWNER, in TOKEN_TYPE, TOKEN> {
 
     /**
      * This method returns an authentication token. If there's no token, you should try
@@ -27,10 +27,10 @@ public interface TokenStorage<OWNER, TOKEN_TYPE, TOKEN> {
      *
      * @param owner The owner type of the token you want to get
      * @param type  the type of the token you want to get
-     * @return the token to authenticate your request or {@code null}
+     * @return the token to authenticate your request or `null`
      * @throws AuthenticationCanceledException when the user canceled the authentication
      */
-    TOKEN getToken(OWNER owner, TOKEN_TYPE type) throws AuthenticationCanceledException;
+    fun getToken(owner: OWNER, type: TOKEN_TYPE): TOKEN
 
     /**
      * Removes the token of a specific type and owner from the token storage.
@@ -39,7 +39,7 @@ public interface TokenStorage<OWNER, TOKEN_TYPE, TOKEN> {
      * @param type  Type of the token
      * @param token Token to remove
      */
-    void removeToken(OWNER owner, TOKEN_TYPE type, TOKEN token);
+    fun removeToken(owner: OWNER, type: TOKEN_TYPE, token: TOKEN)
 
     /**
      * Stores a token of a specific type and owner to the token storage.
@@ -48,5 +48,5 @@ public interface TokenStorage<OWNER, TOKEN_TYPE, TOKEN> {
      * @param type  Type of the token
      * @param token Token to store
      */
-    void storeToken(OWNER owner, TOKEN_TYPE type, TOKEN token);
+    fun storeToken(owner: OWNER, type: TOKEN_TYPE, token: TOKEN)
 }

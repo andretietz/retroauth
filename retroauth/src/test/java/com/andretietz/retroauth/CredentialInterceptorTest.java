@@ -50,7 +50,7 @@ public class CredentialInterceptorTest {
 
     private AuthenticationHandler<String, String, String> getAuthenticationHandler(Request request) {
         MethodCache.DefaultMethodCache<String> methodCache = new MethodCache.DefaultMethodCache<>();
-        methodCache.register(Utils.createUniqueIdentifier(request), "token-type");
+        methodCache.register(Utils.Companion.createUniqueIdentifier(request), "token-type");
         return new AuthenticationHandler<>(
                 methodCache,
                 Mockito.mock(OwnerManager.class),

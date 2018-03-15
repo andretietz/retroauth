@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-package com.andretietz.retroauth;
+package retrofit2
 
-import java.io.IOException;
+import retrofit2.CallAdapter.Factory
+import java.util.concurrent.Executor
 
-public final class ChooseOwnerCanceledException extends IOException {
-    public ChooseOwnerCanceledException(String detailMessage) {
-        super(detailMessage);
-    }
-
-    public ChooseOwnerCanceledException(String detailMessage, Throwable throwable) {
-        super(detailMessage, throwable);
-    }
-
-    public ChooseOwnerCanceledException(Throwable throwable) {
-        super(throwable);
-    }
+/**
+ * This helper gets some os dependent information from retrofit.
+ */
+internal object Retrofit2Platform {
+    @JvmStatic
+    fun defaultCallAdapterFactory(executor: Executor?): Factory =
+            Platform.get().defaultCallAdapterFactory(executor)
 }

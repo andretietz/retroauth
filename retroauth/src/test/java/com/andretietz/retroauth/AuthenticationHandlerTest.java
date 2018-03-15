@@ -24,10 +24,10 @@ public class AuthenticationHandlerTest {
     public void allocate() {
         AuthenticationHandler<String, String, String> authHandler =
                 new AuthenticationHandler<>(methodCache, ownerManager, tokenStorage, provider, typeFactory);
-        Assert.assertNotNull(authHandler.methodCache);
-        Assert.assertNotNull(authHandler.ownerManager);
-        Assert.assertNotNull(authHandler.tokenStorage);
-        Assert.assertNotNull(authHandler.provider);
-        Assert.assertNotNull(authHandler.typeFactory);
+        Assert.assertNotNull(authHandler.getMethodCache());
+        Assert.assertNotNull(authHandler.getOwnerManager());
+        Assert.assertNotNull(authHandler.getTokenStorage());
+        Assert.assertNotNull(authHandler.getProvider());
+        Assert.assertNotNull(authHandler.getTypeFactory());
     }
 }
