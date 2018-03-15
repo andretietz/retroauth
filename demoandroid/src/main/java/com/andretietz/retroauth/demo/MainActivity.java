@@ -6,8 +6,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.Toast;
 
 import com.andretietz.retroauth.AndroidAuthenticationHandler;
@@ -15,12 +13,11 @@ import com.andretietz.retroauth.AndroidTokenType;
 import com.andretietz.retroauth.AuthAccountManager;
 import com.andretietz.retroauth.Retroauth;
 
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.moshi.MoshiConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
@@ -49,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
                 .addInterceptor(interceptor)
                 .build();
 
-        ProviderGoogle provider = new ProviderGoogle();
+        ProviderGithub provider = new ProviderGithub();
 
         /**
          * Create your Retrofit Object using the {@link Retroauth.Builder}
@@ -57,12 +54,13 @@ public class MainActivity extends AppCompatActivity {
         Retrofit retrofit = new Retroauth.Builder<>(
                 AndroidAuthenticationHandler.create(getApplication(), provider,
                         AndroidTokenType.Factory.create(getApplicationContext())))
-                .baseUrl("https://www.googleapis.com/")
+                .baseUrl("http://api.github.com/")
                 .client(httpClient)
                 .addConverterFactory(MoshiConverterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
 
-        provider.onRetrofitCreated(retrofit);
+//        provider.onRetrofitCreated(retrofit);
 
         /**
          * Create your API Service
@@ -70,85 +68,52 @@ public class MainActivity extends AppCompatActivity {
         service = retrofit.create(GithubService.class);
 
 
-        findViewById(R.id.buttonRequestEmail).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                /**
-                 * Use it!
-                 */
-                service.getUserInfo().enqueue(new Callback<GithubService.Info>() {
-                    @Override
-                    public void onResponse(Call<GithubService.Info> call, Response<GithubService.Info> response) {
-                        if (response.isSuccessful()) {
-                            show("Hello: " + response.body().name);
-                        } else {
-                            show("Error: " + response.message());
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<GithubService.Info> call, Throwable t) {
-                        showError(t);
-                    }
-                });
-            }
+        findViewById(R.id.buttonRequestEmail).setOnClickListener(v -> {
+            /**
+             * Use it!
+             */
+            service.getEmails()
+                    .subscribeOn(Schedulers.io())
+                    .subscribe(item -> show(item.toString()));
         });
 
 
-        findViewById(R.id.buttonInvalidateToken).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Account activeAccount = authAccountManager
-                        .getActiveAccount(getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT));
-                if (activeAccount != null) {
-                    // This is for demo purposes only. We're "manually" setting some-invalid-token.
-                    AccountManager.get(MainActivity.this).setAuthToken(activeAccount,
-                            getString(R.string.com_andretietz_retroauth_authentication_TOKEN), "some-invalid-token");
-                }
+        findViewById(R.id.buttonInvalidateToken).setOnClickListener(v -> {
+            Account activeAccount = authAccountManager
+                    .getActiveAccount(getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT));
+            if (activeAccount != null) {
+                // This is for demo purposes only. We're "manually" setting some-invalid-token.
+                AccountManager.get(MainActivity.this).setAuthToken(activeAccount,
+                        getString(R.string.com_andretietz_retroauth_authentication_TOKEN), "some-invalid-token");
             }
         });
-        findViewById(R.id.buttonInvalidateRefreshToken).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Account activeAccount = authAccountManager
-                        .getActiveAccount(getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT));
-                if (activeAccount != null) {
-                    // This is for demo purposes only. We're "manually" setting some-invalid-token. (refresh token)
-                    AccountManager.get(MainActivity.this)
-                            .setAuthToken(activeAccount,
-                                    String.format("%s_refresh",
-                                            getString(R.string.com_andretietz_retroauth_authentication_TOKEN)),
-                                    "some-invalid-token");
-                }
+        findViewById(R.id.buttonInvalidateRefreshToken).setOnClickListener(v -> {
+            Account activeAccount = authAccountManager
+                    .getActiveAccount(getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT));
+            if (activeAccount != null) {
+                // This is for demo purposes only. We're "manually" setting some-invalid-token. (refresh token)
+                AccountManager.get(MainActivity.this)
+                        .setAuthToken(activeAccount,
+                                String.format("%s_refresh",
+                                        getString(R.string.com_andretietz_retroauth_authentication_TOKEN)),
+                                "some-invalid-token");
             }
         });
 
-        findViewById(R.id.buttonSwitchAccount).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // warning can be ignored when using own account type
-                Intent intent = authAccountManager.newChooseAccountIntent(
-                        getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT)
-                );
-                startActivityForResult(intent, RC_ACCOUNT_CHOOSER);
-            }
+        findViewById(R.id.buttonSwitchAccount).setOnClickListener(v -> {
+            // warning can be ignored when using own account type
+            Intent intent = authAccountManager.newChooseAccountIntent(
+                    getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT)
+            );
+            startActivityForResult(intent, RC_ACCOUNT_CHOOSER);
         });
 
-        findViewById(R.id.buttonAddAccount).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                authAccountManager.addAccount(
-                        getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT),
-                        getString(R.string.com_andretietz_retroauth_authentication_TOKEN));
-            }
-        });
+        findViewById(R.id.buttonAddAccount).setOnClickListener(v -> authAccountManager.addAccount(
+                getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT),
+                getString(R.string.com_andretietz_retroauth_authentication_TOKEN)));
 
-        findViewById(R.id.buttonRemoveAccount).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                authAccountManager.removeActiveAccount(getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT));
-            }
-        });
+        findViewById(R.id.buttonRemoveAccount).setOnClickListener(view ->
+                authAccountManager.removeActiveAccount(getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT)));
     }
 
     private void show(String toShow) {

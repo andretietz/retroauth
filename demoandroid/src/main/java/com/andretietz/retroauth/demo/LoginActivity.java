@@ -22,6 +22,8 @@ import io.reactivex.schedulers.Schedulers;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.moshi.MoshiConverterFactory;
+import retrofit2.http.GET;
+import retrofit2.http.Header;
 
 public class LoginActivity extends AuthenticationActivity {
 
@@ -49,12 +51,12 @@ public class LoginActivity extends AuthenticationActivity {
                     Single.fromCallable(new TokenVerifier(helper, code))
 
                             .subscribeOn(Schedulers.io())
-                            .subscribe(token -> {
-                                        Account account = createOrGetAccount(pair.second);
+                            .subscribe(result -> {
+                                        Account account = createOrGetAccount(result.name);
                                         storeToken(
                                                 account,
                                                 getRequestedTokenType(),
-                                                token.getAccessToken());
+                                                result.token.getAccessToken());
                                         finalizeAuthentication(account);
                                     },
                                     Throwable::printStackTrace);
@@ -76,16 +78,16 @@ public class LoginActivity extends AuthenticationActivity {
         super.finish();
     }
 
-    private static class TokenVerifier implements Callable<OAuth2AccessToken> {
+    private static class TokenVerifier implements Callable<LoginResult> {
 
         private final OAuth20Service service;
         private final String code;
 
-        private final GithubService api = new Retrofit.Builder()
+        private final GithubInfoService api = new Retrofit.Builder()
                 .baseUrl("http://api.github.com/")
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(MoshiConverterFactory.create())
-                .build().create(GithubService.class);
+                .build().create(GithubInfoService.class);
 
         TokenVerifier(OAuth20Service service, String code) {
             this.service = service;
@@ -93,11 +95,29 @@ public class LoginActivity extends AuthenticationActivity {
         }
 
         @Override
-        public OAuth2AccessToken call() throws Exception {
+        public LoginResult call() throws Exception {
             OAuth2AccessToken token = service.getAccessToken(code);
-            GithubService.Info info = api.getUserInfo(token.getAccessToken()).blockingGet();
+            UserInfo info = api.getUserInfo(token.getAccessToken()).blockingGet();
+            return new LoginResult(info.login, token);
+        }
+    }
 
+    interface GithubInfoService {
+        @GET("/user")
+        Single<UserInfo> getUserInfo(@Header("Bearer") String token);
+    }
 
+    static class UserInfo {
+        public String login;
+    }
+
+    private static class LoginResult {
+        public final String name;
+        public final OAuth2AccessToken token;
+
+        LoginResult(String name, OAuth2AccessToken token) {
+            this.name = name;
+            this.token = token;
         }
     }
 }
