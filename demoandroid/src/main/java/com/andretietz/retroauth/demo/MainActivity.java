@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final int RC_ACCOUNT_CHOOSER = 123;
-    private GoogleService service;
+    private GithubService service;
     private AuthAccountManager authAccountManager;
 
     @SuppressWarnings("ConstantConditions")
@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
         /**
          * Create your API Service
          */
-        service = retrofit.create(GoogleService.class);
+        service = retrofit.create(GithubService.class);
 
 
         findViewById(R.id.buttonRequestEmail).setOnClickListener(new OnClickListener() {
@@ -76,9 +76,9 @@ public class MainActivity extends AppCompatActivity {
                 /**
                  * Use it!
                  */
-                service.getUserInfo().enqueue(new Callback<GoogleService.Info>() {
+                service.getUserInfo().enqueue(new Callback<GithubService.Info>() {
                     @Override
-                    public void onResponse(Call<GoogleService.Info> call, Response<GoogleService.Info> response) {
+                    public void onResponse(Call<GithubService.Info> call, Response<GithubService.Info> response) {
                         if (response.isSuccessful()) {
                             show("Hello: " + response.body().name);
                         } else {
@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onFailure(Call<GoogleService.Info> call, Throwable t) {
+                    public void onFailure(Call<GithubService.Info> call, Throwable t) {
                         showError(t);
                     }
                 });

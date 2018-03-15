@@ -21,15 +21,20 @@ android {
         absolutePaths false
         lintConfig rootProject.file("lint.xml")
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
     implementation 'com.android.support:appcompat-v7:27.0.2'
     implementation "com.squareup.retrofit2:converter-moshi:2.3.0"
-    implementation "com.squareup.retrofit2:adapter-rxjava:2.3.0"
+    implementation "com.squareup.retrofit2:adapter-rxjava2:2.3.0"
     implementation 'com.squareup.okhttp3:logging-interceptor:3.8.0'
 
-    implementation 'com.github.scribejava:scribejava-apis:3.0.0'
+    implementation 'com.github.scribejava:scribejava-apis:5.3.0'
+    implementation 'com.github.scribejava:scribejava-httpclient-okhttp:5.3.0'
 
     implementation project(':retroauth-android')
 }
