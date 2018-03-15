@@ -18,6 +18,7 @@ package com.andretietz.retroauth
 
 import okhttp3.Request
 import okhttp3.Response
+import retrofit2.Retrofit
 
 /**
  * The Provider interface is a very specific provider endpoint dependent implementation,
@@ -52,4 +53,6 @@ interface Provider<OWNER, TOKEN_TYPE, TOKEN> {
                       owner: OWNER,
                       type: TOKEN_TYPE,
                       token: TOKEN): Boolean
+
+    fun onRetrofitCreated(retrofit: Retrofit)
 }

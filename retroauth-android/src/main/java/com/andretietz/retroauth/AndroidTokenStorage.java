@@ -57,7 +57,7 @@ final class AndroidTokenStorage implements TokenStorage<Account, AndroidTokenTyp
             }
             return token;
         } catch (AuthenticatorException | OperationCanceledException | IOException e) {
-            throw new AuthenticationCanceledException(e);
+            throw new AuthenticationCanceledException(null, e);
         }
     }
 

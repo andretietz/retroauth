@@ -50,7 +50,7 @@ final class CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN> implements Intercept
         Response response = null;
         Request request = chain.request();
         // get the token type required by this request
-        TOKEN_TYPE type = authHandler.methodCache.getTokenType(Utils.createUniqueIdentifier(request));
+        TOKEN_TYPE type = authHandler.getMethodCache().getTokenType(Utils.createUniqueIdentifier(request));
 
         // if the request does require authentication
         if (type != null) {
@@ -62,15 +62,15 @@ final class CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN> implements Intercept
                 int tryCount = 0;
                 do {
                     // get the owner of the token
-                    owner = authHandler.ownerManager.getOwner(type);
+                    owner = authHandler.getOwnerManager().getOwner(type);
                     // get the token
-                    token = authHandler.tokenStorage.getToken(owner, type);
+                    token = authHandler.getTokenStorage().getToken(owner, type);
                     // modify the request using the token
-                    request = authHandler.provider.authenticateRequest(request, token);
+                    request = authHandler.getProvider().authenticateRequest(request, token);
                     // execute the request
                     response = chain.proceed(request);
-                } while (authHandler.provider
-                        .retryRequired(++tryCount, response, authHandler.tokenStorage, owner, type, token));
+                } while (authHandler.getProvider()
+                        .retryRequired(++tryCount, response, authHandler.getTokenStorage(), owner, type, token));
             } catch (Exception e) {
                 storeAndThrowError(type, e);
             } finally {

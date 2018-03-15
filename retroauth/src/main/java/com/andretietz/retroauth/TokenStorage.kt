@@ -30,6 +30,7 @@ interface TokenStorage<in OWNER, in TOKEN_TYPE, TOKEN> {
      * @return the token to authenticate your request or `null`
      * @throws AuthenticationCanceledException when the user canceled the authentication
      */
+    @Throws(AuthenticationCanceledException::class)
     fun getToken(owner: OWNER, type: TOKEN_TYPE): TOKEN
 
     /**

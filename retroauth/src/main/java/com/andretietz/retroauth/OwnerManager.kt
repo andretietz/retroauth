@@ -30,5 +30,6 @@ interface OwnerManager<out OWNER, in TOKEN_TYPE> {
      * @return the owner of the token of the give token type or `null`
      * @throws ChooseOwnerCanceledException when the user cancels to choose the owner
      */
+    @Throws(ChooseOwnerCanceledException::class)
     fun getOwner(type: TOKEN_TYPE): OWNER
 }
