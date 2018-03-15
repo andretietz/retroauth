@@ -13,7 +13,7 @@ public class AndroidTokenTest {
     @Test
     public void dataCheck() {
         AndroidToken androidToken = new AndroidToken("token", "refresh");
-        assertEquals("token", androidToken.token);
-        assertEquals("refresh", androidToken.refreshToken);
+        assertEquals("token", androidToken.getToken());
+        assertEquals("refresh", androidToken.getRefreshToken());
     }
 }

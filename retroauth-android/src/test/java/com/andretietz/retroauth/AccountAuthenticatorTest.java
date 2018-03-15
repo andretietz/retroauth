@@ -27,7 +27,7 @@ public class AccountAuthenticatorTest {
 
     @Before
     public void setup() {
-        ActivityManager.get(RuntimeEnvironment.application);
+        ActivityManager.Companion.get(RuntimeEnvironment.application);
         authenticator = new AccountAuthenticator(mock(Context.class), "some-action");
     }
 
@@ -53,7 +53,7 @@ public class AccountAuthenticatorTest {
                 response,
                 intent.getParcelableExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE));
         assertEquals("accountType", intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE));
-        assertEquals("tokenType", intent.getStringExtra(AccountAuthenticator.KEY_TOKEN_TYPE));
+        assertEquals("tokenType", intent.getStringExtra(AccountAuthenticator.Companion.getKEY_TOKEN_TYPE()));
     }
     @Test
     public void getAuthToken() throws NetworkErrorException {
@@ -69,7 +69,7 @@ public class AccountAuthenticatorTest {
                 response,
                 intent.getParcelableExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE));
         assertEquals("accountType", intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE));
-        assertEquals("tokenType", intent.getStringExtra(AccountAuthenticator.KEY_TOKEN_TYPE));
+        assertEquals("tokenType", intent.getStringExtra(AccountAuthenticator.Companion.getKEY_TOKEN_TYPE()));
         assertEquals("accountName", intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME));
     }
 

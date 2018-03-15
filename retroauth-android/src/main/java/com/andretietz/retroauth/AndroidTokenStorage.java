@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package com.andretietz.retroauth;
 
 import android.accounts.Account;
@@ -39,7 +38,7 @@ final class AndroidTokenStorage implements TokenStorage<Account, AndroidTokenTyp
     private final ActivityManager activityManager;
 
     public AndroidTokenStorage(Application application) {
-        this.activityManager = ActivityManager.get(application);
+        this.activityManager = ActivityManager.Companion.get(application);
         this.accountManager = AccountManager.get(application);
     }
 
@@ -66,13 +65,13 @@ final class AndroidTokenStorage implements TokenStorage<Account, AndroidTokenTyp
             throws AuthenticatorException, OperationCanceledException, IOException {
 
         AccountManagerFuture<Bundle> future = accountManager
-                .addAccount(type.accountType, type.tokenType, null, null, activity, null, null);
+                .addAccount(type.getAccountType(), type.getTokenType(), null, null, activity, null, null);
         Bundle result = future.getResult();
         String accountName = result.getString(AccountManager.KEY_ACCOUNT_NAME);
         if (accountName != null) {
             Account account = new Account(result.getString(AccountManager.KEY_ACCOUNT_NAME),
                     result.getString(AccountManager.KEY_ACCOUNT_TYPE));
-            String token = accountManager.peekAuthToken(account, type.tokenType);
+            String token = accountManager.peekAuthToken(account, type.getTokenType());
             String refreshToken = accountManager.peekAuthToken(account, getRefreshTokenType(type));
             if (token != null) return new AndroidToken(token, refreshToken);
         }
@@ -84,30 +83,30 @@ final class AndroidTokenStorage implements TokenStorage<Account, AndroidTokenTyp
         // Clear the interrupted flag
         Thread.interrupted();
         AccountManagerFuture<Bundle> future = accountManager
-                .getAuthToken(account, type.tokenType, null, activity, null, null);
+                .getAuthToken(account, type.getTokenType(), null, activity, null, null);
         Bundle result = future.getResult();
         String token = result.getString(AccountManager.KEY_AUTHTOKEN);
         String refreshToken = accountManager.peekAuthToken(account, getRefreshTokenType(type));
         if (token == null) {
-            token = accountManager.peekAuthToken(account, type.tokenType);
+            token = accountManager.peekAuthToken(account, type.getTokenType());
         }
         if (token != null) return new AndroidToken(token, refreshToken);
         return null;
     }
 
     private String getRefreshTokenType(AndroidTokenType type) {
-        return String.format("%s_refresh", type.tokenType);
+        return String.format("%s_refresh", type.getTokenType());
     }
 
     @Override
     public void removeToken(Account account, AndroidTokenType type, AndroidToken androidToken) {
-        accountManager.invalidateAuthToken(account.type, androidToken.token);
-        accountManager.invalidateAuthToken(account.type, androidToken.refreshToken);
+        accountManager.invalidateAuthToken(account.type, androidToken.getToken());
+        accountManager.invalidateAuthToken(account.type, androidToken.getRefreshToken());
     }
 
     @Override
     public void storeToken(Account account, AndroidTokenType type, AndroidToken androidToken) {
-        accountManager.setAuthToken(account, type.tokenType, androidToken.token);
-        accountManager.setAuthToken(account, getRefreshTokenType(type), androidToken.refreshToken);
+        accountManager.setAuthToken(account, type.getTokenType(), androidToken.getToken());
+        accountManager.setAuthToken(account, getRefreshTokenType(type), androidToken.getRefreshToken());
     }
 }

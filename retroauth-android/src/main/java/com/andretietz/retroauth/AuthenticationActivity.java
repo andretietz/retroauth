@@ -85,7 +85,6 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
                             "This Activity cannot be started without the \"%s\" extra in the intent! "
                                     + "Use the \"addAccount\"-Method of the \"%s\" for opening the Login manually.",
                             AccountManager.KEY_ACCOUNT_TYPE, AuthAccountManager.class.getSimpleName()));
-        //accountName = intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
         tokenType = intent.getStringExtra(AccountAuthenticator.KEY_TOKEN_TYPE);
         accountManager = AccountManager.get(this);
 

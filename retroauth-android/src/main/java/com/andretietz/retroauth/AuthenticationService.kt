@@ -14,28 +14,24 @@
  * limitations under the License.
  */
 
-package com.andretietz.retroauth;
+package com.andretietz.retroauth
 
-import android.app.Service;
-import android.content.Context;
-import android.content.Intent;
-import android.os.IBinder;
+import android.app.Service
+import android.content.Context
+import android.content.Intent
+import android.os.IBinder
 
 /**
- * You have to extend this service if you want to provide your own implementation of the {@link AuthenticationService}.
- * In most cases you can use the default implementation {@link RetroauthAuthenticationService}.
+ * You have to extend this service if you want to provide your own implementation of the [AuthenticationService].
+ * In most cases you can use the default implementation [RetroauthAuthenticationService].
  */
-public abstract class AuthenticationService extends Service {
+abstract class AuthenticationService : Service() {
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        AccountAuthenticator authenticator = new AccountAuthenticator(this, getLoginAction(this));
-        return authenticator.getIBinder();
-    }
+    override fun onBind(intent: Intent): IBinder? = AccountAuthenticator(this, getLoginAction(this)).iBinder
 
     /**
      * @param context a valid context
      * @return An Action String to open the activity to login
      */
-    public abstract String getLoginAction(Context context);
+    abstract fun getLoginAction(context: Context): String
 }

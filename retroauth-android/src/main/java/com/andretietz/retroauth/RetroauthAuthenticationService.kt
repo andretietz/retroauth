@@ -14,36 +14,31 @@
  * limitations under the License.
  */
 
-package com.andretietz.retroauth;
+package com.andretietz.retroauth
 
-import android.content.Context;
-import android.text.TextUtils;
+import android.content.Context
 
 /**
- * This is a simple implementation of an {@link AuthenticationService}. This is to avoid the need for
+ * This is a simple implementation of an [AuthenticationService]. This is to avoid the need for
  * developers to create their own.
- * The only thing required is, that you provide a string {@code retroauth_authentication_action} in you string xml's
+ * The only thing required is, that you provide a string `retroauth_authentication_action` in you string xml's
  * otherwise this class will crash on creation (runtime)
  */
-public final class RetroauthAuthenticationService extends AuthenticationService {
+class RetroauthAuthenticationService : AuthenticationService() {
 
-    private String action;
+    private lateinit var action: String
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        action = getString(R.string.com_andretietz_retroauth_authentication_ACTION);
-        if (TextUtils.isEmpty(action)) {
-            throw new RuntimeException(String.format(
+    override fun onCreate() {
+        super.onCreate()
+        action = getString(R.string.com_andretietz_retroauth_authentication_ACTION)
+        if (action.isEmpty()) {
+            throw RuntimeException(String.format(
                     "When using the %s you need to define an action string <string "
                             + "name=\"com.andretietz.retroauth.authentication.ACTION\" "
                             + "translatable=\"false\">your action</string>",
-                    RetroauthAuthenticationService.class.getSimpleName()));
+                    RetroauthAuthenticationService::class.java.simpleName))
         }
     }
 
-    @Override
-    public String getLoginAction(Context context) {
-        return action;
-    }
+    override fun getLoginAction(context: Context): String = action
 }

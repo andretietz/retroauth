@@ -40,7 +40,7 @@ final class AndroidOwnerManager implements OwnerManager<Account, AndroidTokenTyp
 
     public AndroidOwnerManager(Application application, AuthAccountManager accountManager) {
         this.accountManager = accountManager;
-        this.activityManager = ActivityManager.get(application);
+        this.activityManager = ActivityManager.Companion.get(application);
         this.application = application;
     }
 
@@ -48,15 +48,15 @@ final class AndroidOwnerManager implements OwnerManager<Account, AndroidTokenTyp
     @SuppressWarnings("MissingPermission")
     public Account getOwner(AndroidTokenType type) throws ChooseOwnerCanceledException {
         // get active account name
-        String accountName = accountManager.getActiveAccountName(type.accountType);
+        String accountName = accountManager.getActiveAccountName(type.getAccountType());
         // if this one exists, try to get the account
-        if (accountName != null) return accountManager.getAccountByName(type.accountType, accountName);
+        if (accountName != null) return accountManager.getAccountByName(type.getAccountType(), accountName);
         // if it doesn't, ask the user to pick an account
-        accountName = showAccountPickerDialog(type.accountType, true);
+        accountName = showAccountPickerDialog(type.getAccountType(), true);
         // if the user has chosen an existing account
         if (accountName != null) {
-            accountManager.setActiveAccount(type.accountType, accountName);
-            return accountManager.getAccountByName(type.accountType, accountName);
+            accountManager.setActiveAccount(type.getAccountType(), accountName);
+            return accountManager.getAccountByName(type.getAccountType(), accountName);
         }
         // if the user chose to add an account, handled by the android token storage
         return null;

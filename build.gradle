@@ -7,7 +7,7 @@ buildscript {
     dependencies {
         // android plugin
         classpath 'com.android.tools.build:gradle:3.0.1'
-        // dexcount
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.6.4'
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.13.0'
     }

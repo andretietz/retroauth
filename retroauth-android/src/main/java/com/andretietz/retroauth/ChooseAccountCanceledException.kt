@@ -14,25 +14,13 @@
  * limitations under the License.
  */
 
-package com.andretietz.retroauth;
+package com.andretietz.retroauth
 
 /**
- * Thrown in {@link OwnerManager#getOwner(Object)}, in case the system provides more than one user and the current user
+ * Thrown in [OwnerManager.getOwner], in case the system provides more than one user and the current user
  * canceled choosing the right one
  */
-public class ChooseAccountCanceledException extends Exception {
-    public ChooseAccountCanceledException() {
-    }
-
-    public ChooseAccountCanceledException(String detailMessage) {
-        super(detailMessage);
-    }
-
-    public ChooseAccountCanceledException(String detailMessage, Throwable throwable) {
-        super(detailMessage, throwable);
-    }
-
-    public ChooseAccountCanceledException(Throwable throwable) {
-        super(throwable);
-    }
-}
+internal class ChooseAccountCanceledException constructor(
+        detailMessage: String? = null,
+        throwable: Throwable? = null)
+    : Exception(detailMessage, throwable)

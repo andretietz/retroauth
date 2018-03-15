@@ -43,7 +43,7 @@ public class AuthenticationActivityTest {
         Intent intent = AuthenticationActivity.createLoginIntent("action", "account", "token");
         assertEquals("action", intent.getAction());
         assertEquals("account", intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE));
-        assertEquals("token", intent.getStringExtra(AccountAuthenticator.KEY_TOKEN_TYPE));
+        assertEquals("token", intent.getStringExtra(AccountAuthenticator.Companion.getKEY_TOKEN_TYPE()));
     }
 
 

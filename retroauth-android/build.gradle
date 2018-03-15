@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-
+apply plugin: 'kotlin-android'
 android {
     compileSdkVersion 23
 
@@ -73,7 +73,9 @@ afterEvaluate {
 
 dependencies {
     implementation 'com.android.support:appcompat-v7:23.0.0'
+    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
     api project(':retroauth')
+    api "com.jakewharton.timber:timber:4.6.1"
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.khronos:opengl-api:gl1.1-android-2.1_r1'
     testImplementation "org.robolectric:robolectric:3.6"

@@ -15,19 +15,19 @@ public class ActivityManagerTest {
 
     @Before
     public void setup() {
-        ActivityManager.get(RuntimeEnvironment.application);
+        ActivityManager.Companion.get(RuntimeEnvironment.application);
     }
 
     @Test
     public void initializing() throws Exception {
-        ActivityManager activityManager = ActivityManager.get(RuntimeEnvironment.application);
+        ActivityManager activityManager = ActivityManager.Companion.get(RuntimeEnvironment.application);
         assertNotNull(activityManager);
 
     }
 
     @Test
     public void getActivityFailing() {
-        assertNull(ActivityManager.get(RuntimeEnvironment.application).getActivity());
+        assertNull(ActivityManager.Companion.get(RuntimeEnvironment.application).getActivity());
     }
 
 }

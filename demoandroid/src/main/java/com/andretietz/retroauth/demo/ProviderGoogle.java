@@ -27,7 +27,7 @@ public class ProviderGoogle implements Provider<Account, AndroidTokenType, Andro
     @Override
     public Request authenticateRequest(Request request, AndroidToken androidToken) {
         return request.newBuilder()
-                .header("Authorization", "Bearer " + androidToken.token)
+                .header("Authorization", "Bearer " + androidToken.getToken())
                 .build();
     }
 
@@ -36,10 +36,10 @@ public class ProviderGoogle implements Provider<Account, AndroidTokenType, Andro
         if (!response.isSuccessful()) {
             if (response.code() == 401) {
                 tokenStorage.removeToken(account, androidTokenType, androidToken);
-                if (androidToken.refreshToken != null) {
+                if (androidToken.getRefreshToken() != null) {
                     try {
                         retrofit2.Response<GoogleService.RefreshToken> refreshResponse = googleService.refreshToken(
-                                androidToken.refreshToken,
+                                androidToken.getRefreshToken(),
                                 GOOGLE_CLIENT_ID,
                                 GOOGLE_CLIENT_SECRET
 
@@ -47,7 +47,7 @@ public class ProviderGoogle implements Provider<Account, AndroidTokenType, Andro
                         if (refreshResponse.isSuccessful()) {
                             GoogleService.RefreshToken token = refreshResponse.body();
                             tokenStorage.storeToken(account, androidTokenType,
-                                    new AndroidToken(token.accessToken, androidToken.refreshToken));
+                                    new AndroidToken(token.accessToken, androidToken.getRefreshToken()));
                         }
                     } catch (IOException e) {
                         e.printStackTrace();

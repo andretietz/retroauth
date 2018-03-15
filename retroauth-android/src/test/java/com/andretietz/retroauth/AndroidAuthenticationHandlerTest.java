@@ -15,7 +15,7 @@ public class AndroidAuthenticationHandlerTest {
     public void createWithTokenTypeFactory() throws Exception {
         Provider provider = mock(Provider.class);
         TokenTypeFactory typeFactory = mock(TokenTypeFactory.class);
-        AndroidAuthenticationHandler authenticationHandler = AndroidAuthenticationHandler
+        AndroidAuthenticationHandler authenticationHandler = AndroidAuthenticationHandler.Companion
                 .create(RuntimeEnvironment.application, provider, typeFactory);
         assertNotNull(authenticationHandler.methodCache);
         assertNotNull(authenticationHandler.ownerManager);

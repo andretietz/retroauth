@@ -47,7 +47,7 @@ public final class AuthAccountManager {
     private final Application application;
 
     public AuthAccountManager(Application application) {
-        this.activityManager = ActivityManager.get(application);
+        this.activityManager = ActivityManager.Companion.get(application);
         this.accountManager = AccountManager.get(application);
         this.application = application;
     }
