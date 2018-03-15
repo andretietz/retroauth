@@ -30,12 +30,6 @@ public class LoginActivity extends AuthenticationActivity {
             .callback(ProviderGithub.CLIENT_CALLBACK)
             .build(GitHubApi.instance());
 
-    private final GithubService api = new Retrofit.Builder()
-            .baseUrl("http://api.github.com/")
-            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-            .addConverterFactory(MoshiConverterFactory.create())
-            .build().create(GithubService.class);
-
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
@@ -53,6 +47,7 @@ public class LoginActivity extends AuthenticationActivity {
                     view.loadUrl(url);
                 } else {
                     Single.fromCallable(new TokenVerifier(helper, code))
+
                             .subscribeOn(Schedulers.io())
                             .subscribe(token -> {
                                         Account account = createOrGetAccount(pair.second);
@@ -86,6 +81,12 @@ public class LoginActivity extends AuthenticationActivity {
         private final OAuth20Service service;
         private final String code;
 
+        private final GithubService api = new Retrofit.Builder()
+                .baseUrl("http://api.github.com/")
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .addConverterFactory(MoshiConverterFactory.create())
+                .build().create(GithubService.class);
+
         TokenVerifier(OAuth20Service service, String code) {
             this.service = service;
             this.code = code;
@@ -93,7 +94,10 @@ public class LoginActivity extends AuthenticationActivity {
 
         @Override
         public OAuth2AccessToken call() throws Exception {
-            return service.getAccessToken(code);
+            OAuth2AccessToken token = service.getAccessToken(code);
+            GithubService.Info info = api.getUserInfo(token.getAccessToken()).blockingGet();
+
+
         }
     }
 }
