@@ -15,29 +15,38 @@ import com.github.scribejava.core.model.OAuth2AccessToken;
 import com.github.scribejava.core.model.OAuth2Authorization;
 import com.github.scribejava.core.oauth.OAuth20Service;
 
+import java.util.Locale;
 import java.util.concurrent.Callable;
 
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.moshi.MoshiConverterFactory;
+import retrofit2.http.GET;
+import retrofit2.http.Header;
+import timber.log.Timber;
 
 public class LoginActivity extends AuthenticationActivity {
 
     private final OAuth20Service helper = new ServiceBuilder(ProviderGithub.CLIENT_ID)
             .apiSecret(ProviderGithub.CLIENT_SECRET)
             .callback(ProviderGithub.CLIENT_CALLBACK)
+            .scope("user")
             .build(GitHubApi.instance());
 
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(R.layout.activity_login);
+        Timber.plant(new Timber.DebugTree());
 
 
         WebView webView = findViewById(R.id.webView);
         webView.loadUrl(helper.getAuthorizationUrl());
+        webView.getSettings().setJavaScriptEnabled(true);
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -49,12 +58,12 @@ public class LoginActivity extends AuthenticationActivity {
                     Single.fromCallable(new TokenVerifier(helper, code))
 
                             .subscribeOn(Schedulers.io())
-                            .subscribe(token -> {
-                                        Account account = createOrGetAccount(pair.second);
+                            .subscribe(result -> {
+                                        Account account = createOrGetAccount(result.name);
                                         storeToken(
                                                 account,
                                                 getRequestedTokenType(),
-                                                token.getAccessToken());
+                                                result.token.getAccessToken());
                                         finalizeAuthentication(account);
                                     },
                                     Throwable::printStackTrace);
@@ -76,16 +85,26 @@ public class LoginActivity extends AuthenticationActivity {
         super.finish();
     }
 
-    private static class TokenVerifier implements Callable<OAuth2AccessToken> {
+    private static class TokenVerifier implements Callable<LoginResult> {
 
         private final OAuth20Service service;
         private final String code;
 
-        private final GithubService api = new Retrofit.Builder()
-                .baseUrl("http://api.github.com/")
+
+        private final GithubInfoService api = new Retrofit.Builder()
+                .baseUrl("https://api.github.com/")
+                .client(client())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(MoshiConverterFactory.create())
-                .build().create(GithubService.class);
+                .build().create(GithubInfoService.class);
+
+        static OkHttpClient client() {
+            HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+            interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+            return new OkHttpClient.Builder()
+                    .addInterceptor(interceptor)
+                    .build();
+        }
 
         TokenVerifier(OAuth20Service service, String code) {
             this.service = service;
@@ -93,11 +112,30 @@ public class LoginActivity extends AuthenticationActivity {
         }
 
         @Override
-        public OAuth2AccessToken call() throws Exception {
+        public LoginResult call() throws Exception {
             OAuth2AccessToken token = service.getAccessToken(code);
-            GithubService.Info info = api.getUserInfo(token.getAccessToken()).blockingGet();
+            Timber.e("Got token %s for scope: %s", token.getAccessToken(), token.getScope());
+            UserInfo info = api.getUserInfo(String.format(Locale.US, "token %s", token.getAccessToken())).blockingGet();
+            return new LoginResult(info.login, token);
+        }
+    }
 
+    interface GithubInfoService {
+        @GET("/user")
+        Single<UserInfo> getUserInfo(@Header("Authorization") String token);
+    }
 
+    static class UserInfo {
+        public String login;
+    }
+
+    private static class LoginResult {
+        public final String name;
+        public final OAuth2AccessToken token;
+
+        LoginResult(String name, OAuth2AccessToken token) {
+            this.name = name;
+            this.token = token;
         }
     }
 }
