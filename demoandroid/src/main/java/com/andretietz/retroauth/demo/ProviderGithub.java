@@ -21,12 +21,22 @@ public class ProviderGithub implements Provider<Account, AndroidTokenType, Andro
     @Override
     public Request authenticateRequest(@NonNull Request request, AndroidToken androidToken) {
         return request.newBuilder()
-                .header("Authorization", "Bearer " + androidToken.token)
+                .header("Authorization", "token " + androidToken.token)
                 .build();
     }
 
     @Override
-    public boolean retryRequired(int count, Response response, TokenStorage<Account, AndroidTokenType, AndroidToken> tokenStorage, Account account, AndroidTokenType androidTokenType, AndroidToken androidToken) {
+    public boolean retryRequired(int count,
+                                 Response response,
+                                 TokenStorage<Account, AndroidTokenType, AndroidToken> tokenStorage,
+                                 Account account,
+                                 AndroidTokenType androidTokenType,
+                                 AndroidToken androidToken) {
+        if (response.code() == 401) {
+            // invalidate token
+            tokenStorage.removeToken(account, androidTokenType, androidToken);
+            return true;
+        }
         return false;
     }
 }

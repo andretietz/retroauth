@@ -15,31 +15,37 @@ import com.github.scribejava.core.model.OAuth2AccessToken;
 import com.github.scribejava.core.model.OAuth2Authorization;
 import com.github.scribejava.core.oauth.OAuth20Service;
 
+import java.io.IOException;
 import java.util.Locale;
 import java.util.concurrent.Callable;
 
 import io.reactivex.Single;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.moshi.MoshiConverterFactory;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
+import timber.log.Timber;
 
 public class LoginActivity extends AuthenticationActivity {
 
     private final OAuth20Service helper = new ServiceBuilder(ProviderGithub.CLIENT_ID)
             .apiSecret(ProviderGithub.CLIENT_SECRET)
             .callback(ProviderGithub.CLIENT_CALLBACK)
-            .scope("user:email")
+            .scope("user")
             .build(GitHubApi.instance());
 
     @Override
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(R.layout.activity_login);
+        Timber.plant(new Timber.DebugTree());
 
 
         WebView webView = findViewById(R.id.webView);
@@ -91,7 +97,7 @@ public class LoginActivity extends AuthenticationActivity {
 
 
         private final GithubInfoService api = new Retrofit.Builder()
-                .baseUrl("http://api.github.com/")
+                .baseUrl("https://api.github.com/")
                 .client(client())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(MoshiConverterFactory.create())
@@ -100,9 +106,19 @@ public class LoginActivity extends AuthenticationActivity {
         static OkHttpClient client() {
             HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
             interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-            return new OkHttpClient.Builder()
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .addInterceptor(new Interceptor() {
+                        @Override
+                        public Response intercept(Chain chain) throws IOException {
+                            Request request = chain.request().newBuilder()
+                                    .header("User-Agent", "Foo")
+                                    .build();
+                            return chain.proceed(request);
+                        }
+                    })
                     .addInterceptor(interceptor)
                     .build();
+            return client;
         }
 
         TokenVerifier(OAuth20Service service, String code) {
@@ -113,6 +129,7 @@ public class LoginActivity extends AuthenticationActivity {
         @Override
         public LoginResult call() throws Exception {
             OAuth2AccessToken token = service.getAccessToken(code);
+            Timber.e("Got token %s for scope: %s", token.getAccessToken(), token.getScope());
             UserInfo info = api.getUserInfo(String.format(Locale.US, "token %s", token.getAccessToken())).blockingGet();
             return new LoginResult(info.login, token);
         }

@@ -13,6 +13,7 @@ import com.andretietz.retroauth.AndroidTokenType;
 import com.andretietz.retroauth.AuthAccountManager;
 import com.andretietz.retroauth.Retroauth;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -55,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         Retrofit retrofit = new Retroauth.Builder<>(
                 AndroidAuthenticationHandler.create(getApplication(), provider,
                         AndroidTokenType.Factory.create(getApplicationContext())))
-                .baseUrl("http://api.github.com/")
+                .baseUrl("https://api.github.com/")
                 .client(httpClient)
                 .addConverterFactory(MoshiConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
@@ -75,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
              */
             service.getEmails()
                     .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(
                             item -> show(item.toString()),
                             Timber::e
