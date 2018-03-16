@@ -23,7 +23,7 @@ import java.io.IOException
  * This Exception is thrown, when the user cancels the Authentication or
  * some other error happens. The Reason can be read, on calling [AuthenticationCanceledException.getCause]
  */
-internal class AuthenticationCanceledException @JvmOverloads constructor(
+class AuthenticationCanceledException @JvmOverloads constructor(
         detailMessage: String? = null,
         throwable: Throwable? = null)
     : IOException(detailMessage, throwable)

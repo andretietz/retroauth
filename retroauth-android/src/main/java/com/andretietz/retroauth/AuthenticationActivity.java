@@ -147,7 +147,7 @@ public abstract class AuthenticationActivity extends AppCompatActivity {
     protected void finalizeAuthentication(@NonNull Account account, boolean finishActivity) {
         resultBundle.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
         SharedPreferences preferences = getSharedPreferences(accountType, Context.MODE_PRIVATE);
-        preferences.edit().putString(AuthAccountManager.RETROAUTH_ACCOUNTNAME_KEY, account.name).apply();
+        preferences.edit().putString(AuthAccountManager.RETROAUTH_ACCOUNT_NAME_KEY, account.name).apply();
         if (finishActivity) finish();
     }
 

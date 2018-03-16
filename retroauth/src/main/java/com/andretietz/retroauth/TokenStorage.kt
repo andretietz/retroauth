@@ -31,7 +31,7 @@ interface TokenStorage<in OWNER, in TOKEN_TYPE, TOKEN> {
      * @throws AuthenticationCanceledException when the user canceled the authentication
      */
     @Throws(AuthenticationCanceledException::class)
-    fun getToken(owner: OWNER, type: TOKEN_TYPE): TOKEN
+    fun getToken(owner: OWNER?, type: TOKEN_TYPE): TOKEN
 
     /**
      * Removes the token of a specific type and owner from the token storage.

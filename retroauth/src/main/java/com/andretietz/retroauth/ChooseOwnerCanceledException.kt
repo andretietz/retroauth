@@ -18,7 +18,7 @@ package com.andretietz.retroauth
 
 import java.io.IOException
 
-internal class ChooseOwnerCanceledException @JvmOverloads constructor(
+class ChooseOwnerCanceledException @JvmOverloads constructor(
         detailMessage: String? = null,
         throwable: Throwable? = null)
     : IOException(detailMessage, throwable)
