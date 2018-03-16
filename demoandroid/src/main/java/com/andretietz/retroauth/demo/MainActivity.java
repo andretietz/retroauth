@@ -19,6 +19,7 @@ import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.moshi.MoshiConverterFactory;
+import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        Timber.plant(new Timber.DebugTree());
 
         authAccountManager = new AuthAccountManager(getApplication());
 
@@ -74,7 +75,10 @@ public class MainActivity extends AppCompatActivity {
              */
             service.getEmails()
                     .subscribeOn(Schedulers.io())
-                    .subscribe(item -> show(item.toString()));
+                    .subscribe(
+                            item -> show(item.toString()),
+                            Timber::e
+                    );
         });
 
 
