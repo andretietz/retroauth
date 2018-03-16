@@ -19,6 +19,11 @@ public interface GithubService {
         public boolean verified;
         public boolean primary;
         public String visibility;
+
+        @Override
+        public String toString() {
+            return email;
+        }
     }
 }
 
