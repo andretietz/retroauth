@@ -131,7 +131,14 @@ class AuthAccountManager(private val application: Application) {
     @JvmOverloads
     fun addAccount(accountType: String, tokenType: String? = null, callback: AccountCallback? = null) {
         val cac = if (callback != null) CreateAccountCallback(callback) else null
-        accountManager.addAccount(accountType, tokenType, null, null, activityManager.activity, cac, null)
+        val activity = activityManager.activity
+        accountManager.addAccount(
+                accountType,
+                tokenType,
+                null,
+                null,
+                activity, cac,
+                null)
     }
 
     /**
