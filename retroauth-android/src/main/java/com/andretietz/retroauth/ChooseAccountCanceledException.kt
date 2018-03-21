@@ -20,7 +20,7 @@ package com.andretietz.retroauth
  * Thrown in [OwnerManager.getOwner], in case the system provides more than one user and the current user
  * canceled choosing the right one
  */
-internal class ChooseAccountCanceledException constructor(
+internal class ChooseAccountCanceledException @JvmOverloads constructor(
         detailMessage: String? = null,
         throwable: Throwable? = null)
     : Exception(detailMessage, throwable)

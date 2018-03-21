@@ -31,7 +31,7 @@ import java.io.IOException
 internal class AndroidTokenStorage(application: Application) : TokenStorage<Account, AndroidTokenType, AndroidToken> {
 
     private val accountManager: AccountManager = AccountManager.get(application)
-    private val activityManager: ActivityManager = ActivityManager[application]
+    private val activityManager: ActivityManager = ActivityManager.get(application)
 
     @Throws(AuthenticationCanceledException::class)
     override fun getToken(owner: Account?, type: AndroidTokenType): AndroidToken {

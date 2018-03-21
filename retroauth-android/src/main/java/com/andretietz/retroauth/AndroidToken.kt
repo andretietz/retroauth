@@ -20,19 +20,4 @@ package com.andretietz.retroauth
 /**
  * The default android token represents a token string and a refresh token
  */
-data class AndroidToken(val token: String, val refreshToken: String?) {
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other == null || javaClass != other.javaClass) return false
-        val that = other as AndroidToken?
-        if (token != that!!.token) return false
-        return if (refreshToken != null) refreshToken == that.refreshToken else that.refreshToken == null
-    }
-
-    override fun hashCode(): Int {
-        var result = token.hashCode()
-        result = 31 * result + (refreshToken?.hashCode() ?: 0)
-        return result
-    }
-}
+data class AndroidToken(val token: String, val refreshToken: String?)

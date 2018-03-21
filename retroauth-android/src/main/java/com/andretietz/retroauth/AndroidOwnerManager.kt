@@ -32,7 +32,7 @@ import java.util.concurrent.locks.ReentrantLock
 internal class AndroidOwnerManager(private val application: Application, private val accountManager: AuthAccountManager)
     : OwnerManager<Account, AndroidTokenType> {
 
-    private val activityManager: ActivityManager = ActivityManager[application]
+    private val activityManager: ActivityManager = ActivityManager.get(application)
 
     @Throws(ChooseOwnerCanceledException::class)
     override fun getOwner(type: AndroidTokenType): Account? {
