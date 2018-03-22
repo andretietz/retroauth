@@ -30,6 +30,8 @@ public class RetroauthCallAdapterFactoryTest {
     @Mock
     CallAdapter callAdapter;
 
+    Retrofit retrofit = new Retrofit.Builder().baseUrl("http://foo.com").build();
+
     @Test
     public void adapterFactory() {
         List<CallAdapter.Factory> factories = new ArrayList<>();
@@ -55,7 +57,7 @@ public class RetroauthCallAdapterFactoryTest {
         Method[] methods = TestInterface.class.getMethods();
 
         for (Method method : methods) {
-            CallAdapter callAdapter = adapterFactory.get(type, method.getAnnotations(), null);
+            CallAdapter callAdapter = adapterFactory.get(type, method.getAnnotations(), retrofit);
             if (method.getName().equals("authenticatedMethod")) {
                 // the authenticated method should use the RetroauthCallAdapter
                 Assert.assertTrue(callAdapter instanceof RetroauthCallAdapterFactory.RetroauthCallAdapter);

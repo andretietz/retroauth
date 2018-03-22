@@ -37,7 +37,7 @@ interface MethodCache<TOKEN_TYPE> {
      * @param requestIdentifier the request identifier
      * @return the token type to authenticate the request
      */
-    fun getTokenType(requestIdentifier: Int): TOKEN_TYPE
+    fun getTokenType(requestIdentifier: Int): TOKEN_TYPE?
 
 
     /**
@@ -52,8 +52,8 @@ interface MethodCache<TOKEN_TYPE> {
             map[requestIdentifier] = type
         }
 
-        override fun getTokenType(requestIdentifier: Int): TOKEN_TYPE {
-            return map[requestIdentifier]!!
+        override fun getTokenType(requestIdentifier: Int): TOKEN_TYPE? {
+            return map[requestIdentifier]
         }
     }
 }

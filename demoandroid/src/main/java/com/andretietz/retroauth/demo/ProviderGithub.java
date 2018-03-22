@@ -27,23 +27,13 @@ public class ProviderGithub implements Provider<Account, AndroidTokenType, Andro
                 .build();
     }
 
-//    @Override
-//    public boolean retryRequired(int count,
-//                                 Response response,
-//                                 TokenStorage<Account, AndroidTokenType, AndroidToken> tokenStorage,
-//                                 Account account,
-//                                 AndroidTokenType androidTokenType,
-//                                 AndroidToken androidToken) {
-//        if (response.code() == 401) {
-//            // invalidate token
-//            tokenStorage.removeToken(account, androidTokenType, androidToken);
-//            return true;
-//        }
-//        return false;
-//    }
-
     @Override
-    public boolean retryRequired(int count, @NotNull Response response, @NotNull TokenStorage<? super Account, ? super AndroidTokenType, AndroidToken> tokenStorage, Account account, AndroidTokenType androidTokenType, AndroidToken androidToken) {
+    public boolean retryRequired(int count,
+                                 @NotNull Response response,
+                                 @NotNull TokenStorage<Account, AndroidTokenType, AndroidToken> tokenStorage,
+                                 Account account,
+                                 AndroidTokenType androidTokenType,
+                                 AndroidToken androidToken) {
         if (response.code() == 401) {
             // invalidate token
             tokenStorage.removeToken(account, androidTokenType, androidToken);

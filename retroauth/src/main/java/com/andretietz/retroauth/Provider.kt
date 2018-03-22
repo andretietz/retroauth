@@ -49,7 +49,7 @@ interface Provider<OWNER, TOKEN_TYPE, TOKEN> {
     fun retryRequired(count: Int,
                       response: Response,
                       tokenStorage: TokenStorage<OWNER, TOKEN_TYPE, TOKEN>,
-                      owner: OWNER,
+                      owner: OWNER?,
                       type: TOKEN_TYPE,
                       token: TOKEN): Boolean
 }
