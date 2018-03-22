@@ -19,25 +19,25 @@ public class TestUtils {
         Request request = new Request.Builder()
                 .url("http://www.google.com/test/request1")
                 .build();
-        map.put(Utils.Companion.createUniqueIdentifier(request), request);
+        map.put(Utils.createUniqueIdentifier(request), request);
 
         request = new Request.Builder()
                 .method("GET", null)
                 .url("http://www.google.com/test/request1")
                 .build();
-        map.put(Utils.Companion.createUniqueIdentifier(request), request);
+        map.put(Utils.createUniqueIdentifier(request), request);
 
 
         request = new Request.Builder()
                 .url("http://www.google.com/test/request2")
                 .build();
-        map.put(Utils.Companion.createUniqueIdentifier(request), request);
+        map.put(Utils.createUniqueIdentifier(request), request);
 
         request = new Request.Builder()
                 .method("GET", null)
                 .url("http://www.google.com/test/request2")
                 .build();
-        map.put(Utils.Companion.createUniqueIdentifier(request), request);
+        map.put(Utils.createUniqueIdentifier(request), request);
 
         Assert.assertEquals(2, map.size());
 

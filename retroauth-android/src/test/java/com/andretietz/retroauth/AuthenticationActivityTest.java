@@ -43,7 +43,7 @@ public class AuthenticationActivityTest {
         Intent intent = AuthenticationActivity.createLoginIntent("action", "account", "token");
         assertEquals("action", intent.getAction());
         assertEquals("account", intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE));
-        assertEquals("token", intent.getStringExtra(AccountAuthenticator.Companion.getKEY_TOKEN_TYPE()));
+        assertEquals("token", intent.getStringExtra(AccountAuthenticator.KEY_TOKEN_TYPE));
     }
 
 
@@ -166,14 +166,6 @@ public class AuthenticationActivityTest {
     @Test
     public void finishFromAuthenticator() throws NoSuchFieldException, IllegalAccessException {
         AuthenticationActivity activity = activityController.get();
-        setMember(activity, "accountAuthenticatorResponse", mock(AccountAuthenticatorResponse.class));
-        activity.finish();
-    }
-
-    @Test
-    public void finishFromAuthenticatorUnlikelyErrorCase() throws NoSuchFieldException, IllegalAccessException {
-        AuthenticationActivity activity = activityController.get();
-        setMember(activity, "resultBundle", null);
         setMember(activity, "accountAuthenticatorResponse", mock(AccountAuthenticatorResponse.class));
         activity.finish();
     }
