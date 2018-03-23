@@ -13,7 +13,7 @@ public class AndroidAuthenticationHandlerTest {
 
     @Test
     public void createWithTokenTypeFactory() throws Exception {
-        Provider provider = mock(Provider.class);
+        TokenProvider provider = mock(TokenProvider.class);
         TokenTypeFactory typeFactory = mock(TokenTypeFactory.class);
         AndroidAuthenticationHandler authenticationHandler = AndroidAuthenticationHandler.Companion
                 .create(RuntimeEnvironment.application, provider, typeFactory);

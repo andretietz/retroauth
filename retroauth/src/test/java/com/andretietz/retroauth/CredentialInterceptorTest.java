@@ -55,7 +55,7 @@ public class CredentialInterceptorTest {
                 methodCache,
                 Mockito.mock(OwnerManager.class),
                 new TestTokenStorage(),
-                new Provider<String, String, String>() {
+                new TokenProvider<String, String, String>() {
                     @Override
                     public Request authenticateRequest(Request request, String token) {
                         return request.newBuilder().addHeader(AUTHENTICATION_HEADER_KEY, token).build();

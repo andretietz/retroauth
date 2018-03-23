@@ -20,10 +20,10 @@ import okhttp3.Request
 import okhttp3.Response
 
 /**
- * The Provider interface is a very specific provider endpoint dependent implementation,
+ * The TokenProvider interface is a very specific provider endpoint dependent implementation,
  * to authenticate your request and defines when or if to retry.
  */
-interface Provider<OWNER, TOKEN_TYPE, TOKEN> {
+interface TokenProvider<OWNER, TOKEN_TYPE, TOKEN> {
 
     /**
      * Authenticates a [Request].
@@ -49,7 +49,7 @@ interface Provider<OWNER, TOKEN_TYPE, TOKEN> {
     fun retryRequired(count: Int,
                       response: Response,
                       tokenStorage: TokenStorage<OWNER, TOKEN_TYPE, TOKEN>,
-                      owner: OWNER?,
+                      owner: OWNER,
                       type: TOKEN_TYPE,
                       token: TOKEN): Boolean
 }

@@ -18,10 +18,10 @@ package com.andretietz.retroauth
 
 /**
  * The [AuthenticationHandler] is a class that collapses a [MethodCache], an [OwnerManager], a
- * [TokenStorage] and a [Provider] into one single immutable object.
+ * [TokenStorage] and a [TokenProvider] into one single immutable object.
  */
 open class AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN>(val methodCache: MethodCache<TOKEN_TYPE>,
                                                            val ownerManager: OwnerManager<OWNER, TOKEN_TYPE>,
                                                            val tokenStorage: TokenStorage<OWNER, TOKEN_TYPE, TOKEN>,
-                                                           val provider: Provider<OWNER, TOKEN_TYPE, TOKEN>,
+                                                           val provider: TokenProvider<OWNER, TOKEN_TYPE, TOKEN>,
                                                            val typeFactory: TokenTypeFactory<TOKEN_TYPE>)

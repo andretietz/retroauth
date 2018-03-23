@@ -11,6 +11,7 @@ import com.andretietz.retroauth.AndroidAuthenticationHandler
 import com.andretietz.retroauth.AndroidTokenType
 import com.andretietz.retroauth.AuthAccountManager
 import com.andretietz.retroauth.Retroauth
+import com.andretietz.retroauth.TokenTypeFactory
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import okhttp3.OkHttpClient
@@ -47,8 +48,10 @@ class MainActivity : AppCompatActivity() {
          * Create your Retrofit Object using the [Retroauth.Builder]
          */
         val retrofit = Retroauth.Builder(
-                AndroidAuthenticationHandler.create(application, provider,
-                        AndroidTokenType.Factory.create(applicationContext)))
+                AndroidAuthenticationHandler.create(application, provider, object : TokenTypeFactory<AndroidTokenType> {
+                    override fun create(annotationValues: IntArray): AndroidTokenType =
+                            AndroidTokenType(getString(annotationValues[0]), getString(annotationValues[1]))
+                }))
                 .baseUrl("https://graph.facebook.com/")
                 .client(httpClient)
                 .addConverterFactory(MoshiConverterFactory.create())

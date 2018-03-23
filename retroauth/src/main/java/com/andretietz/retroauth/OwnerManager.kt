@@ -21,15 +21,15 @@ package com.andretietz.retroauth
  */
 interface OwnerManager<out OWNER, in TOKEN_TYPE> {
     /**
-     * This method should be used to figure out which user should be authenticate a request.
-     * If you're on multi-user systems, you should ask the user to choose which owner
-     * he wants to use to authenticate requests. if the user cancels to choose the owner, throw
-     * [ChooseOwnerCanceledException], if there's no owner return `null`
+     * This method should be used to figure out which user authenticates a request.
+     *
+     * * If there is no user on the system yet, start the login procedure, this could cause
+     * [AuthenticationCanceledException] when the user cancels the login.
+     * * If there are multiple users on the system, you should ask the user which one to take. This could cause
+     * an [AuthenticationCanceledException].
      *
      * @param type type of the token
-     * @return the owner of the token of the give token type or `null`
-     * @throws ChooseOwnerCanceledException when the user cancels to choose the owner
+     * @return the owner of the token
      */
-    @Throws(ChooseOwnerCanceledException::class)
-    fun getOwner(type: TOKEN_TYPE): OWNER?
+    fun getOwner(type: TOKEN_TYPE): OWNER
 }

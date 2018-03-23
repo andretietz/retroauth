@@ -22,16 +22,13 @@ package com.andretietz.retroauth
 interface TokenStorage<OWNER, TOKEN_TYPE, TOKEN> {
 
     /**
-     * This method returns an authentication token. If there's no token, you should try
-     * authenticating your user.
+     * This method returns an authentication token that is stored locally
      *
      * @param owner The owner type of the token you want to get
      * @param type  the type of the token you want to get
-     * @return the token to authenticate your request or `null`
-     * @throws AuthenticationCanceledException when the user canceled the authentication
+     * @return the token to authenticate your request with or {@code null}, if there's no token locally stored
      */
-    @Throws(AuthenticationCanceledException::class)
-    fun getToken(owner: OWNER?, type: TOKEN_TYPE): TOKEN
+    fun getToken(owner: OWNER, type: TOKEN_TYPE): TOKEN
 
     /**
      * Removes the token of a specific type and owner from the token storage.

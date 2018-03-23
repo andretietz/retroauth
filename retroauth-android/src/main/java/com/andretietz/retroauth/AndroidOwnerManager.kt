@@ -18,6 +18,7 @@ package com.andretietz.retroauth
 
 import android.accounts.Account
 import android.accounts.AccountManager
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.Application
 import android.content.Context
@@ -29,26 +30,47 @@ import java.util.concurrent.locks.ReentrantLock
 /**
  * This is the Android implementation of an [OwnerManager]. It does all the Android [Account] handling
  */
-internal class AndroidOwnerManager(private val application: Application, private val accountManager: AuthAccountManager)
+internal class AndroidOwnerManager(private val application: Application, private val authAccountManager: AuthAccountManager)
     : OwnerManager<Account, AndroidTokenType> {
 
     private val activityManager: ActivityManager = ActivityManager.get(application)
+    private val accountManager: AccountManager = AccountManager.get(application)
 
-    @Throws(ChooseOwnerCanceledException::class)
-    override fun getOwner(type: AndroidTokenType): Account? {
+    @Throws(AuthenticationCanceledException::class)
+    override fun getOwner(type: AndroidTokenType): Account {
         // get active account name
-        var accountName = accountManager.getActiveAccountName(type.accountType)
-        // if this one exists, try to get the account
-        if (accountName != null) return accountManager.getAccountByName(type.accountType, accountName)
-        // if it doesn't, ask the user to pick an account
-        accountName = showAccountPickerDialog(type.accountType, true)
-        // if the user has chosen an existing account
-        accountName?.let {
-            accountManager.setActiveAccount(type.accountType, it)
-            return accountManager.getAccountByName(type.accountType, it)
+        var accountName = authAccountManager.getActiveAccountName(type.accountType)
+        if (accountName == null) {
+            // if there's no active account choose one from the available once
+            accountName = showAccountPickerDialog(type.accountType, true)
         }
-        // if the user chose to add an account, handled by the android token storage
-        return null
+        val account = if (accountName != null) {
+            authAccountManager.getAccountByName(type.accountType, accountName)!!
+        } else {
+            createAccount(activityManager.activity, type)
+        }
+        authAccountManager.setActiveAccount(type.accountType, account.name)
+        return account
+    }
+
+
+    @Throws(AuthenticationCanceledException::class)
+    private fun createAccount(activity: Activity?, type: AndroidTokenType): Account {
+        val future = accountManager.addAccount(
+                type.accountType,
+                type.tokenType,
+                null,
+                null,
+                activity,
+                null,
+                null)
+        val result = future.result
+        val accountName = result.getString(AccountManager.KEY_ACCOUNT_NAME)
+        if (accountName != null) {
+            return Account(result.getString(AccountManager.KEY_ACCOUNT_NAME),
+                    result.getString(AccountManager.KEY_ACCOUNT_TYPE))
+        }
+        throw AuthenticationCanceledException()
     }
 
     /**
@@ -58,7 +80,7 @@ internal class AndroidOwnerManager(private val application: Application, private
      * @param canAddAccount if `true` the user has the option to add an account
      * @return the accounts the user chooses from
      */
-    @Throws(ChooseOwnerCanceledException::class)
+    @Throws(AuthenticationCanceledException::class)
     private fun showAccountPickerDialog(accountType: String, canAddAccount: Boolean): String? {
         if (Looper.myLooper() == Looper.getMainLooper()) {
             throw RuntimeException("Method was called from the wrong thread!")
@@ -90,7 +112,7 @@ internal class AndroidOwnerManager(private val application: Application, private
             }
         }
         if (showDialog.canceled) {
-            throw ChooseOwnerCanceledException("User canceled authentication!")
+            throw AuthenticationCanceledException("User canceled authentication!")
         }
         return showDialog.selectedOption
     }

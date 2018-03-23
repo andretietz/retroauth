@@ -17,21 +17,7 @@
 
 package com.andretietz.retroauth
 
-import android.content.Context
-
 /**
  * represents a token bound to an account
  */
-data class AndroidTokenType(val accountType: String, val tokenType: String) {
-
-    class Factory private constructor(private val context: Context) : TokenTypeFactory<AndroidTokenType> {
-        override fun create(annotationValues: IntArray): AndroidTokenType {
-            return AndroidTokenType(context.getString(annotationValues[0]), context.getString(annotationValues[1]))
-        }
-
-        companion object {
-            @JvmStatic
-            fun create(context: Context): Factory = Factory(context)
-        }
-    }
-}
+data class AndroidTokenType(val accountType: String, val tokenType: String, val dataKeys: Set<String>? = null)

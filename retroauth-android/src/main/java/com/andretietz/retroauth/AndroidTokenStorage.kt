@@ -18,12 +18,8 @@ package com.andretietz.retroauth
 
 import android.accounts.Account
 import android.accounts.AccountManager
-import android.accounts.AuthenticatorException
-import android.accounts.OperationCanceledException
-import android.app.Activity
 import android.app.Application
-
-import java.io.IOException
+import java.util.Locale
 
 /**
  * This is the implementation of a [TokenStorage] in Android using the Android [AccountManager]
@@ -33,68 +29,32 @@ internal class AndroidTokenStorage(application: Application) : TokenStorage<Acco
     private val accountManager: AccountManager = AccountManager.get(application)
     private val activityManager: ActivityManager = ActivityManager.get(application)
 
-    @Throws(AuthenticationCanceledException::class)
-    override fun getToken(owner: Account?, type: AndroidTokenType): AndroidToken {
-        try {
-            return (
-                    if (owner == null) {
-                        createAccountAndGetToken(activityManager.activity, type)
-                    } else {
-                        getToken(activityManager.activity, owner, type)
-                    }) ?: throw AuthenticationCanceledException("user canceled the login!")
-
-        } catch (e: AuthenticatorException) {
-            throw AuthenticationCanceledException(null, e)
-        } catch (e: OperationCanceledException) {
-            throw AuthenticationCanceledException(null, e)
-        } catch (e: IOException) {
-            throw AuthenticationCanceledException(null, e)
-        }
-    }
-
-    @Throws(AuthenticatorException::class, OperationCanceledException::class, IOException::class)
-    private fun createAccountAndGetToken(activity: Activity?, type: AndroidTokenType): AndroidToken? {
-
-        val future = accountManager
-                .addAccount(type.accountType, type.tokenType, null, null, activity, null, null)
+    override fun getToken(owner: Account, type: AndroidTokenType): AndroidToken {
+        var token: String?
+        val future = accountManager.getAuthToken(owner, type.tokenType, null, activityManager.activity, null, null)
         val result = future.result
-        val accountName = result.getString(AccountManager.KEY_ACCOUNT_NAME)
-        if (accountName != null) {
-            val account = Account(result.getString(AccountManager.KEY_ACCOUNT_NAME),
-                    result.getString(AccountManager.KEY_ACCOUNT_TYPE))
-            val token = accountManager.peekAuthToken(account, type.tokenType)
-            val refreshToken = accountManager.peekAuthToken(account, getRefreshTokenType(type))
-            if (token != null) return AndroidToken(token, refreshToken)
-        }
-        return null
-    }
-
-    @Throws(AuthenticatorException::class, OperationCanceledException::class, IOException::class)
-    private fun getToken(activity: Activity?, account: Account, type: AndroidTokenType): AndroidToken? {
-        // Clear the interrupted flag
-        Thread.interrupted()
-        val future = accountManager
-                .getAuthToken(account, type.tokenType, null, activity, null, null)
-        val result = future.result
-        var token = result.getString(AccountManager.KEY_AUTHTOKEN)
-        val refreshToken = accountManager.peekAuthToken(account, getRefreshTokenType(type))
+        token = result.getString(AccountManager.KEY_AUTHTOKEN)
         if (token == null) {
-            token = accountManager.peekAuthToken(account, type.tokenType)
+            token = accountManager.peekAuthToken(owner, type.tokenType)
         }
-        return if (token != null) AndroidToken(token, refreshToken) else null
-    }
-
-    private fun getRefreshTokenType(type: AndroidTokenType): String {
-        return String.format("%s_refresh", type.tokenType)
+        if (token == null) throw IllegalStateException(
+                String.format("No token found! Make sure you store the token during login using %s#storeToken()",
+                        AuthenticationActivity::class.java.simpleName)
+        )
+        return AndroidToken(token, type.dataKeys?.associateBy { accountManager.getUserData(owner, createDataKey(type, it)) })
     }
 
     override fun removeToken(owner: Account, type: AndroidTokenType, token: AndroidToken) {
         accountManager.invalidateAuthToken(owner.type, token.token)
-        accountManager.invalidateAuthToken(owner.type, token.refreshToken)
+        type.dataKeys?.forEach { accountManager.setUserData(owner, createDataKey(type, it), null) }
     }
 
     override fun storeToken(owner: Account, type: AndroidTokenType, token: AndroidToken) {
         accountManager.setAuthToken(owner, type.tokenType, token.token)
-        accountManager.setAuthToken(owner, getRefreshTokenType(type), token.refreshToken)
+        if (type.dataKeys != null && token.data != null) {
+            type.dataKeys.forEach { accountManager.setUserData(owner, createDataKey(type, it), token.data[it]) }
+        }
     }
+
+    private fun createDataKey(type: AndroidTokenType, key: String) = String.format(Locale.US, "%s_%s", type.tokenType, key)
 }

@@ -34,8 +34,7 @@ import java.util.concurrent.locks.ReentrantLock
  * @param <TOKEN_TYPE> type of the token that should be added to the request
  */
 class CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN>(
-        private val authHandler: AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN>,
-        private val lockable: Boolean
+        private val authHandler: AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN>
 ) : Interceptor {
 
     private val TOKENTYPE_LOCKERS = HashMap<Any, AccountTokenLock>()
@@ -51,15 +50,21 @@ class CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN>(
         if (type != null) {
             var wasWaiting = false
             try {
-                wasWaiting = lock(type)
                 var token: TOKEN
-                var owner: OWNER?
+                var owner: OWNER
                 var tryCount = 0
                 do {
-                    // get the owner of the token
+                    // TODO: must be locked!
+                    wasWaiting = lock(type)
+                    // get the owner of the token or opens login
                     owner = authHandler.ownerManager.getOwner(type)
                     // get the token
-                    token = authHandler.tokenStorage.getToken(owner, type)
+                    val localToken = authHandler.tokenStorage.getToken(owner, type)
+                    if (localToken == null) {
+                        authHandler.provider
+                    }
+
+                    // TODO: until here
                     // modify the request using the token
                     request = authHandler.provider.authenticateRequest(request, token)
                     // execute the request
@@ -93,28 +98,23 @@ class CredentialInterceptor<OWNER, TOKEN_TYPE, TOKEN>(
 
     @Throws(Exception::class)
     private fun lock(type: TOKEN_TYPE): Boolean {
-        if (lockable) {
-            val lock = getLock(type)
-            if (!lock.lock.tryLock()) {
-                lock.lock.lock()
-                val exception = lock.errorContainer.get()
-                if (exception != null) {
-                    throw exception
-                }
-                return true
+        val lock = getLock(type)
+        if (!lock.lock.tryLock()) {
+            lock.lock.lock()
+            val exception = lock.errorContainer.get()
+            if (exception != null) {
+                throw exception
             }
+            return true
         }
-        return false
     }
 
     private fun unlock(type: TOKEN_TYPE, wasWaiting: Boolean) {
-        if (lockable) {
-            val lock = getLock(type)
-            if (wasWaiting && lock.waitCounter.decrementAndGet() <= 0) {
-                lock.errorContainer.set(null)
-            }
-            lock.lock.unlock()
+        val lock = getLock(type)
+        if (wasWaiting && lock.waitCounter.decrementAndGet() <= 0) {
+            lock.errorContainer.set(null)
         }
+        lock.lock.unlock()
     }
 
     internal inner class AccountTokenLock {

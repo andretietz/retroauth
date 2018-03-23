@@ -16,7 +16,7 @@ public class AuthenticationHandlerTest {
     @Mock
     TokenStorage<String, String, String> tokenStorage;
     @Mock
-    Provider<String, String, String> provider;
+    TokenProvider<String, String, String> provider;
     @Mock
     TokenTypeFactory<String> typeFactory;
 
