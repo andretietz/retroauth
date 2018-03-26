@@ -23,7 +23,7 @@ import okhttp3.Response
  * The TokenProvider interface is a very specific provider endpoint dependent implementation,
  * to authenticate your request and defines when or if to retry.
  */
-interface TokenProvider<OWNER, TOKEN_TYPE, TOKEN> {
+interface TokenProvider< TOKEN : Any> {
 
     /**
      * Authenticates a [Request].
@@ -40,16 +40,20 @@ interface TokenProvider<OWNER, TOKEN_TYPE, TOKEN> {
      *
      * @param count        value contains how many times this request has been executed already
      * @param response     response to check what the result was
-     * @param tokenStorage storage to delete and store tokens if the have been refreshed
-     * @param owner        owner of the token used
-     * @param type         type of the token used
-     * @param token        token used for the last execution of the request
      * @return `true` if a retry is required, `false` if not
      */
-    fun retryRequired(count: Int,
-                      response: Response,
-                      tokenStorage: TokenStorage<OWNER, TOKEN_TYPE, TOKEN>,
-                      owner: OWNER,
-                      type: TOKEN_TYPE,
-                      token: TOKEN): Boolean
+    fun validateResponse(count: Int, response: Response): ResponseStatus {
+        if (response.isSuccessful) return ResponseStatus.OK
+        if (response.code() == 401) return ResponseStatus.RETRY_TOKEN_INVALID
+        return ResponseStatus.NO_RETRY_TOKEN_INVALID
+    }
+
+    enum class ResponseStatus {
+        /** Token was valid, request was successful */
+        OK,
+        /** Token was invalid, retry */
+        RETRY_TOKEN_INVALID,
+        /** Token was invalid, do not retry */
+        NO_RETRY_TOKEN_INVALID,
+    }
 }

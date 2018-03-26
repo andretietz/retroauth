@@ -26,7 +26,7 @@ internal class AndroidMethodCache : MethodCache<AndroidTokenType> {
 
     private val cache = SparseArray<AndroidTokenType>()
 
-    override fun register(uniqueIdentifier: Int, type: AndroidTokenType) = cache.append(uniqueIdentifier, type)
+    override fun register(requestIdentifier: Int, type: AndroidTokenType) = cache.append(requestIdentifier, type)
 
-    override fun getTokenType(uniqueIdentifier: Int): AndroidTokenType = cache.get(uniqueIdentifier)
+    override fun getTokenType(requestIdentifier: Int): AndroidTokenType = cache.get(requestIdentifier)
 }

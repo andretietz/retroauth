@@ -1,18 +1,14 @@
 package com.andretietz.retroauth.testimpl;
 
-import com.andretietz.retroauth.AuthenticationCanceledException;
 import com.andretietz.retroauth.TokenStorage;
 
-/**
- * Created by andre on 02.05.2016.
- */
 public class TestTokenStorage implements TokenStorage<String, String, String> {
 
     public static final String TEST_TOKEN = "token";
     private TestBehaviour behaviour;
 
     @Override
-    public String getToken(String owner, String tokenType) throws AuthenticationCanceledException {
+    public String getToken(String owner, String tokenType) {
         if (behaviour != null) {
             return behaviour.getToken(owner, tokenType);
         }
@@ -34,6 +30,6 @@ public class TestTokenStorage implements TokenStorage<String, String, String> {
     }
 
     public interface TestBehaviour {
-        String getToken(String owner, String tokenType) throws AuthenticationCanceledException;
+        String getToken(String owner, String tokenType);
     }
 }

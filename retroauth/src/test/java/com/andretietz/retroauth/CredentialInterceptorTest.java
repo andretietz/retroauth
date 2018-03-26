@@ -3,6 +3,7 @@ package com.andretietz.retroauth;
 import com.andretietz.retroauth.testimpl.TestTokenStorage;
 import com.andretietz.retroauth.testimpl.TestTokenTypeFactory;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,7 +31,7 @@ public class CredentialInterceptorTest {
 
         // only request2 is authenticated
         AuthenticationHandler<String, String, String> authHandler = getAuthenticationHandler(request2);
-        CredentialInterceptor<String, String, String> interceptor = new CredentialInterceptor<>(authHandler, true);
+        CredentialInterceptor<String, String, String> interceptor = new CredentialInterceptor<>(authHandler);
 
         TestInterceptorChain interceptorChain = new TestInterceptorChain();
 
@@ -55,17 +56,16 @@ public class CredentialInterceptorTest {
                 methodCache,
                 Mockito.mock(OwnerManager.class),
                 new TestTokenStorage(),
-                new TokenProvider<String, String, String>() {
+                new TokenProvider<String>() {
+                    @NotNull
                     @Override
-                    public Request authenticateRequest(Request request, String token) {
-                        return request.newBuilder().addHeader(AUTHENTICATION_HEADER_KEY, token).build();
+                    public ResponseStatus validateResponse(int count, @NotNull Response response) {
+                        return ResponseStatus.OK;
                     }
 
                     @Override
-                    public boolean retryRequired(int count,
-                                                 Response response, TokenStorage<String, String, String> tokenStorage,
-                                                 String s, String s2, String s3) {
-                        return false;
+                    public Request authenticateRequest(@NotNull Request request, @NotNull String token) {
+                        return request.newBuilder().addHeader(AUTHENTICATION_HEADER_KEY, token).build();
                     }
                 },
                 new TestTokenTypeFactory()

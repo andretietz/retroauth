@@ -53,7 +53,6 @@ public class RetroauthTest {
 
         Retrofit retrofit = new Retroauth.Builder<>(authHandler)
                 .baseUrl(server.url("/"))
-                .enableLocking(true)
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .addConverterFactory(MoshiConverterFactory.create())
                 .build();
@@ -99,12 +98,12 @@ public class RetroauthTest {
 
     @Test
     public void userCanceledAuthentication() throws IOException, InterruptedException {
-        tokenStorage.setTestBehaviour(new TestTokenStorage.TestBehaviour() {
-            @Override
-            public String getToken(String owner, String tokenType) throws AuthenticationCanceledException {
-                throw new AuthenticationCanceledException("userCanceledAuthentication");
-            }
-        });
+//        tokenStorage.setTestBehaviour(new TestTokenStorage.TestBehaviour() {
+//            @Override
+//            public String getToken(String owner, String tokenType)  {
+//                throw new AuthenticationCanceledException("userCanceledAuthentication");
+//            }
+//        });
 
         TestSubscriber<TestResponse> subscriber = TestSubscriber.create();
 
@@ -123,10 +122,6 @@ public class RetroauthTest {
         tokenStorage.setTestBehaviour(null);
     }
 
-    /**
-     * This test should fail, if you're not using {@link Retroauth.Builder#enableLocking(boolean)}
-     * with the value <code>true</code>
-     */
     @Test
     public void blockingErrorCaseTest() throws InterruptedException {
         int requestCount = 500;

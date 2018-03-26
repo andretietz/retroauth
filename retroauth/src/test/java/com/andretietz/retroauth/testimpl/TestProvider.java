@@ -1,25 +1,24 @@
 package com.andretietz.retroauth.testimpl;
 
 import com.andretietz.retroauth.TokenProvider;
-import com.andretietz.retroauth.TokenStorage;
+
+import org.jetbrains.annotations.NotNull;
 
 import okhttp3.Request;
 import okhttp3.Response;
 
-/**
- * Created by andre on 02.05.2016.
- */
-public class TestProvider implements TokenProvider<String, String, String> {
+public class TestProvider implements TokenProvider<String> {
     @Override
     public Request authenticateRequest(Request request, String s) {
         return request.newBuilder().header("auth", s).build();
     }
 
+
+    @NotNull
     @Override
-    public boolean retryRequired(int count, Response response,
-                                 TokenStorage<String, String, String> tokenStorage, String s, String s2, String s3) {
-        if (response.code() == 401)
-            throw new RuntimeException("foo");
-        return false;
+    public ResponseStatus validateResponse(int count, @NotNull Response response) {
+        if (response.isSuccessful()) return ResponseStatus.OK;
+        if (response.code() == 401) return ResponseStatus.RETRY_TOKEN_INVALID;
+        return ResponseStatus.NO_RETRY_TOKEN_INVALID;
     }
 }

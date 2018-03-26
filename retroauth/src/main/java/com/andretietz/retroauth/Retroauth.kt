@@ -30,13 +30,14 @@ import java.util.concurrent.Executor
  */
 class Retroauth private constructor() {
 
-    class Builder<OWNER, TOKEN_TYPE, TOKEN>(private val authHandler: AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN>) {
+    class Builder<OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
+            private val authHandler: AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN>
+    ) {
 
         private val builder: Retrofit.Builder = Retrofit.Builder()
         private val callAdapterFactories: MutableList<CallAdapter.Factory>
         private var okHttpClient: OkHttpClient? = null
         private var executor: Executor? = null
-        private var enableLocking = false
 
         init {
             this.callAdapterFactories = LinkedList()
@@ -100,19 +101,6 @@ class Retroauth private constructor() {
         }
 
         /**
-         * If this flag is set to `true` requests will be locked per token. Meaning that only one
-         * request will be executed at once. Other requests will queue up. Consider using different threads for each
-         * request when using this option, since the thread will be blocked until it can be executed. By default this option
-         * is set to `false`.
-         *
-         * @param enableLocking locking the request until it's finished executing
-         */
-        fun enableLocking(enableLocking: Boolean): Builder<OWNER, TOKEN_TYPE, TOKEN> {
-            this.enableLocking = enableLocking
-            return this
-        }
-
-        /**
          * @return a [Retrofit] instance using the given parameter.
          */
         fun build(): Retrofit {
@@ -129,7 +117,7 @@ class Retroauth private constructor() {
             val builder = okHttpClient?.newBuilder() ?: OkHttpClient.Builder()
 
             // create the okhttp interceptor to intercept requests
-            val interceptor = CredentialInterceptor(authHandler, enableLocking)
+            val interceptor = CredentialInterceptor(authHandler)
 
             // add it as the first interceptor to be used
             builder.interceptors().add(interceptor)

@@ -17,7 +17,7 @@ import retrofit2.Retrofit;
 public class RetroauthBuilderTest {
 
     @Mock
-    TokenProvider<String, String, String> provider;
+    TokenProvider<String> provider;
     @Mock
     MethodCache<String> methodCache;
     @Mock

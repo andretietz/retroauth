@@ -129,8 +129,8 @@ class MainActivity : AppCompatActivity() {
         show(error.toString())
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
-        if (resultCode == Activity.RESULT_OK) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (resultCode == Activity.RESULT_OK && data != null) {
             if (requestCode == RC_ACCOUNT_CHOOSER) {
                 val accountType = data.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE)
                 val accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME)
