@@ -41,6 +41,7 @@ abstract class AuthenticationActivity : AppCompatActivity() {
     protected lateinit var accountManager: AccountManager
     private var tokenType: String? = null
     private lateinit var resultBundle: Bundle
+    private lateinit var tokenStorage: AndroidTokenStorage
 
     companion object {
         @JvmStatic
@@ -54,9 +55,9 @@ abstract class AuthenticationActivity : AppCompatActivity() {
 
     override fun onCreate(icicle: Bundle?) {
         super.onCreate(icicle)
-        val intent = intent
         accountAuthenticatorResponse = intent.getParcelableExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)
         accountAuthenticatorResponse?.onRequestContinued()
+        tokenStorage = AndroidTokenStorage(application)
         val accountType = intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE)
         if (accountType == null) {
             accountAuthenticatorResponse?.onError(AccountManager.ERROR_CODE_CANCELED, "canceled")
@@ -78,16 +79,14 @@ abstract class AuthenticationActivity : AppCompatActivity() {
      * This method stores an authentication Token to a specific account.
      *
      * @param account      Account you want to store the token for
-     * @param token        Token itself
      * @param tokenType    type of the token you want to store
-     * @param refreshToken a refresh token if present
+     * @param token        Token itself
+     * @param data         data that belongs to the data. i.e. expiring date etc.
      */
     @JvmOverloads
-    fun storeToken(account: Account, tokenType: String, token: String, refreshToken: String? = null) {
-        accountManager.setAuthToken(account, tokenType, token)
-        if (refreshToken != null) {
-            accountManager.setAuthToken(account, String.format("%s_refresh", tokenType), refreshToken)
-        }
+    fun storeToken(account: Account, tokenType: String, token: String, data: Map<String, String>? = null) {
+        val type = AndroidTokenType(account.type, tokenType, data?.keys)
+        tokenStorage.storeToken(account, type, AndroidToken(token, data))
     }
 
     /**
