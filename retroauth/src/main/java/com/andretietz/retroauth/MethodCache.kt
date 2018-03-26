@@ -23,7 +23,7 @@ import java.util.HashMap
  * authenticating the request itself. The identifier is created right now
  * in [Utils.createUniqueIdentifier], this may change.
  */
-interface MethodCache<TOKEN_TYPE> {
+interface MethodCache<TOKEN_TYPE : Any> {
 
     /**
      * Registers a token type with a specific identifier.
@@ -45,7 +45,7 @@ interface MethodCache<TOKEN_TYPE> {
      *
      * @param <TOKEN_TYPE>
      */
-    class DefaultMethodCache<TOKEN_TYPE> : MethodCache<TOKEN_TYPE> {
+    class DefaultMethodCache<TOKEN_TYPE : Any> : MethodCache<TOKEN_TYPE> {
         private val map = HashMap<Int, TOKEN_TYPE>()
 
         override fun register(requestIdentifier: Int, type: TOKEN_TYPE) {

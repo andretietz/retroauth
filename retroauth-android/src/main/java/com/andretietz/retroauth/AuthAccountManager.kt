@@ -34,13 +34,17 @@ import android.support.annotation.RequiresPermission
  * This class wraps the Android [android.accounts.AccountManager] and adds some retroauth specific
  * functionality.
  */
-class AuthAccountManager(private val application: Application) {
-    private val accountManager: AccountManager = AccountManager.get(application)
+class AuthAccountManager internal constructor(
+        private val application: Application,
+        private val accountManager: AccountManager) {
+
     private val activityManager: ActivityManager = ActivityManager[application]
 
     companion object {
         const val RETROAUTH_ACCOUNT_NAME_KEY = "com.andretietz.retroauth.ACTIVE_ACCOUNT"
     }
+
+    constructor(application: Application) : this(application, AccountManager.get(application))
 
 
     /**

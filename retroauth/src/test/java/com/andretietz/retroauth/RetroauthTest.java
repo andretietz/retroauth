@@ -26,9 +26,6 @@ import rx.observers.TestSubscriber;
 import rx.schedulers.Schedulers;
 
 
-/**
- * Created by andre on 11.06.2016.
- */
 @RunWith(MockitoJUnitRunner.class)
 public class RetroauthTest {
 
@@ -70,11 +67,11 @@ public class RetroauthTest {
         // test very simple case
         server.enqueue(new MockResponse().setBody(TestInterface.TEST_BODY));
         TestResponse response = service.authenticatedMethod().toBlocking().single();
-        Assert.assertEquals(1, response.value);
+        Assert.assertEquals(1, response.getValue());
 
         server.enqueue(new MockResponse().setBody(TestInterface.TEST_BODY));
         response = service.unauthenticatedMethod().toBlocking().single();
-        Assert.assertEquals(1, response.value);
+        Assert.assertEquals(1, response.getValue());
 
     }
 

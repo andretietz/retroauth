@@ -23,7 +23,7 @@ import okhttp3.Response
  * The TokenProvider interface is a very specific provider endpoint dependent implementation,
  * to authenticate your request and defines when or if to retry.
  */
-interface TokenProvider< TOKEN : Any> {
+interface TokenProvider<TOKEN : Any> {
 
     /**
      * Authenticates a [Request].

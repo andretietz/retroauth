@@ -36,10 +36,10 @@ import android.support.v7.app.AppCompatActivity
  */
 abstract class AuthenticationActivity : AppCompatActivity() {
 
-    private var accountAuthenticatorResponse: AccountAuthenticatorResponse? = null
-    private lateinit var accountType: String
+    protected var accountAuthenticatorResponse: AccountAuthenticatorResponse? = null
+    protected lateinit var accountType: String
+    protected lateinit var accountManager: AccountManager
     private var tokenType: String? = null
-    private lateinit var accountManager: AccountManager
     private lateinit var resultBundle: Bundle
 
     companion object {
@@ -83,7 +83,7 @@ abstract class AuthenticationActivity : AppCompatActivity() {
      * @param refreshToken a refresh token if present
      */
     @JvmOverloads
-    protected fun storeToken(account: Account, tokenType: String, token: String, refreshToken: String? = null) {
+    fun storeToken(account: Account, tokenType: String, token: String, refreshToken: String? = null) {
         accountManager.setAuthToken(account, tokenType, token)
         if (refreshToken != null) {
             accountManager.setAuthToken(account, String.format("%s_refresh", tokenType), refreshToken)
@@ -97,7 +97,7 @@ abstract class AuthenticationActivity : AppCompatActivity() {
      * @param key     the key for the data
      * @param value   the actual data you want to store
      */
-    protected fun storeUserData(account: Account, key: String, value: String) {
+    fun storeUserData(account: Account, key: String, value: String) {
         accountManager.setUserData(account, key, value)
     }
 
@@ -111,7 +111,7 @@ abstract class AuthenticationActivity : AppCompatActivity() {
      * @param finishActivity when `true`, the activity will be finished after finalization.
      */
     @JvmOverloads
-    protected fun finalizeAuthentication(account: Account, finishActivity: Boolean = true) {
+    fun finalizeAuthentication(account: Account, finishActivity: Boolean = true) {
         resultBundle.putString(AccountManager.KEY_ACCOUNT_NAME, account.name)
         val preferences = getSharedPreferences(accountType, Context.MODE_PRIVATE)
         preferences.edit().putString(AuthAccountManager.RETROAUTH_ACCOUNT_NAME_KEY, account.name).apply()
@@ -125,7 +125,7 @@ abstract class AuthenticationActivity : AppCompatActivity() {
      * @param accountName Name of the account you're searching for
      * @return The account if found, or a newly created one
      */
-    protected fun createOrGetAccount(accountName: String): Account {
+    fun createOrGetAccount(accountName: String): Account {
         // if this is a relogin
         val accountList = accountManager.getAccountsByType(accountType)
         for (account in accountList) {
@@ -144,7 +144,7 @@ abstract class AuthenticationActivity : AppCompatActivity() {
      * @param account to remove
      */
     @Suppress("DEPRECATION")
-    protected fun removeAccount(account: Account) {
+    fun removeAccount(account: Account) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
             accountManager.removeAccount(account, null, null, null)
         } else {
@@ -174,14 +174,14 @@ abstract class AuthenticationActivity : AppCompatActivity() {
     /**
      * @return The requested account type if available. otherwise `null`
      */
-    protected fun getRequestedAccountType(): String {
+    fun getRequestedAccountType(): String {
         return accountType
     }
 
     /**
      * @return The requested token type if available. otherwise `null`
      */
-    protected fun getRequestedTokenType(): String? {
+    fun getRequestedTokenType(): String? {
         return tokenType
     }
 }

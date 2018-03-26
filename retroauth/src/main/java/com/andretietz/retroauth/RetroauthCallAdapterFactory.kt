@@ -71,7 +71,7 @@ constructor(
      * @param <TOKEN_TYPE>  Type of Token to use
      * @param <RETURN_TYPE> Return type of the call
      */
-    internal class RetroauthCallAdapter<TOKEN_TYPE, RETURN_TYPE>(
+    internal class RetroauthCallAdapter<TOKEN_TYPE : Any, RETURN_TYPE : Any>(
             private val adapter: CallAdapter<Any, RETURN_TYPE>,
             private val type: TOKEN_TYPE,
             private val registration: MethodCache<TOKEN_TYPE>

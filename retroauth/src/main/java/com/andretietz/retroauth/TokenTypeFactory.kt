@@ -1,6 +1,6 @@
 package com.andretietz.retroauth
 
-interface TokenTypeFactory<out TOKEN_TYPE> {
+interface TokenTypeFactory<TOKEN_TYPE : Any> {
     /**
      * Creates a token type object. This doe
      *

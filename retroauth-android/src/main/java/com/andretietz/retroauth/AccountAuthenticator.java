@@ -41,7 +41,7 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
      * The Action string to open the implementation of the {@link AuthenticationActivity},
      * to show the user a login.
      */
-    private final String action;
+    protected final String action;
 
     /**
      * @param context The context (needed by the {@link AbstractAccountAuthenticator}
