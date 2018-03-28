@@ -83,12 +83,12 @@ class CredentialInterceptor<OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
                 } while (
                         when (authHandler.provider.validateResponse(++tryCount, response!!)) {
                         // if request was ok, no retry
-                            TokenProvider.ResponseStatus.OK -> false
-                            TokenProvider.ResponseStatus.NO_RETRY_TOKEN_INVALID -> {
+                            TokenProvider.ResponseStatus.TOKEN_VALID -> false
+                            TokenProvider.ResponseStatus.TOKEN_INVALID_NO_RETRY -> {
                                 authHandler.tokenStorage.removeToken(owner, type, token)
                                 false
                             }
-                            TokenProvider.ResponseStatus.RETRY_TOKEN_INVALID -> {
+                            TokenProvider.ResponseStatus.TOKEN_INVALID_RETRY -> {
                                 authHandler.tokenStorage.removeToken(owner, type, token)
                                 true
                             }

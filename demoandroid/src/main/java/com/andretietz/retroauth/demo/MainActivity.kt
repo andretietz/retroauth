@@ -54,8 +54,7 @@ class MainActivity : AppCompatActivity() {
                     override fun create(annotationValues: IntArray): AndroidTokenType =
                             AndroidTokenType(
                                     getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT),
-                                    getString(R.string.com_andretietz_retroauth_authentication_TOKEN),
-                                    setOf(ProviderFacebook.TOKEN_KEY_VALIDITY))
+                                    getString(R.string.com_andretietz_retroauth_authentication_TOKEN))
                 }))
                 .baseUrl("https://graph.facebook.com/")
                 .client(httpClient)

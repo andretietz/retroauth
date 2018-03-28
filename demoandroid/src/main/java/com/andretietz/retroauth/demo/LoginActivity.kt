@@ -15,8 +15,6 @@ import com.github.scribejava.httpclient.okhttp.OkHttpHttpClient
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_login.webView
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -31,16 +29,8 @@ class LoginActivity : AuthenticationActivity() {
             .apiSecret(ProviderFacebook.CLIENT_SECRET)
             .callback(ProviderFacebook.CLIENT_CALLBACK)
             .scope("email")
-            .httpClient(OkHttpHttpClient(client()))
+            .httpClient(OkHttpHttpClient())
             .build(FacebookApi.instance())
-
-    private fun client(): OkHttpClient {
-        val interceptor = HttpLoggingInterceptor()
-        interceptor.level = HttpLoggingInterceptor.Level.BODY
-        return OkHttpClient.Builder()
-                .addInterceptor(interceptor)
-                .build()
-    }
 
     override fun onCreate(icicle: Bundle?) {
         super.onCreate(icicle)
@@ -66,8 +56,7 @@ class LoginActivity : AuthenticationActivity() {
                                 storeToken(
                                         account,
                                         getRequestedTokenType()!!,
-                                        result.token.accessToken,
-                                        mapOf(ProviderFacebook.TOKEN_KEY_VALIDITY to result.token.expiresIn.toString()))
+                                        result.token.accessToken)
                                 finalizeAuthentication(account)
                             },
                                     { error -> Timber.e(error) })
@@ -88,7 +77,6 @@ class LoginActivity : AuthenticationActivity() {
         : Callable<LoginResult> {
         private val api = Retrofit.Builder()
                 .baseUrl("https://graph.facebook.com/")
-                .client(client())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(MoshiConverterFactory.create())
                 .build().create(FacebookInfoService::class.java)
@@ -99,16 +87,6 @@ class LoginActivity : AuthenticationActivity() {
             return LoginResult(info.email, token)
         }
 
-        companion object {
-            @JvmStatic
-            internal fun client(): OkHttpClient {
-                val interceptor = HttpLoggingInterceptor()
-                interceptor.level = HttpLoggingInterceptor.Level.BODY
-                return OkHttpClient.Builder()
-                        .addInterceptor(interceptor)
-                        .build()
-            }
-        }
     }
 
     internal interface FacebookInfoService {

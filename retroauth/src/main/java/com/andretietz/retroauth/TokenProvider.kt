@@ -43,9 +43,11 @@ interface TokenProvider<TOKEN : Any> {
      * @return `true` if a retry is required, `false` if not
      */
     fun validateResponse(count: Int, response: Response): ResponseStatus {
-        if (response.isSuccessful) return ResponseStatus.OK
-        if (response.code() == 401) return ResponseStatus.RETRY_TOKEN_INVALID
-        return ResponseStatus.NO_RETRY_TOKEN_INVALID
+        if (response.code() == 401) {
+            if (count <= 1) return ResponseStatus.TOKEN_INVALID_RETRY
+            return ResponseStatus.TOKEN_INVALID_NO_RETRY
+        }
+        return ResponseStatus.TOKEN_VALID
     }
 
     /**
@@ -65,10 +67,10 @@ interface TokenProvider<TOKEN : Any> {
 
     enum class ResponseStatus {
         /** Token was valid, request was successful */
-        OK,
+        TOKEN_VALID,
         /** Token was invalid, retry */
-        RETRY_TOKEN_INVALID,
+        TOKEN_INVALID_RETRY,
         /** Token was invalid, do not retry */
-        NO_RETRY_TOKEN_INVALID,
+        TOKEN_INVALID_NO_RETRY,
     }
 }
