@@ -165,13 +165,13 @@ class AuthAccountManager internal constructor(
      * @param callback    callback returns, when account was deleted.
      */
     @JvmOverloads
-    @Suppress("DEPRECATION")
     fun removeActiveAccount(accountType: String, callback: AccountCallback? = null) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
             val rac = if (callback != null) RemoveLollipopAccountCallback(callback) else null
             accountManager.removeAccount(getActiveAccount(accountType), null, rac, null)
         } else {
             val rac = if (callback != null) RemoveAccountCallback(callback) else null
+            @Suppress("DEPRECATION")
             accountManager.removeAccount(getActiveAccount(accountType), rac, null)
         }
         resetActiveAccount(accountType)
@@ -185,7 +185,6 @@ class AuthAccountManager internal constructor(
      * thrown
      * @return an Intent which you can start for result to open an account chooser.
      */
-    @Suppress("DEPRECATION")
     @RequiresPermission(Manifest.permission.GET_ACCOUNTS)
     fun newChooseAccountIntent(accountType: String): Intent {
         val accounts = accountManager.getAccountsByType(accountType).toMutableList()
@@ -200,6 +199,7 @@ class AuthAccountManager internal constructor(
                     null,
                     null)
         } else {
+            @Suppress("DEPRECATION")
             AccountManager.newChooseAccountIntent(
                     account,
                     accounts as? ArrayList ?: ArrayList(accounts),

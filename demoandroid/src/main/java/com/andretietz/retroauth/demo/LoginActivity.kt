@@ -2,10 +2,7 @@ package com.andretietz.retroauth.demo
 
 import android.annotation.TargetApi
 import android.os.Build
-import android.os.Build.VERSION
-import android.os.Build.VERSION_CODES
 import android.os.Bundle
-import android.webkit.CookieManager
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -70,7 +67,7 @@ class LoginActivity : AuthenticationActivity() {
                                         account,
                                         getRequestedTokenType()!!,
                                         result.token.accessToken,
-                                        mapOf("expiringIn" to result.token.expiresIn.toString()))
+                                        mapOf(ProviderFacebook.TOKEN_KEY_VALIDITY to result.token.expiresIn.toString()))
                                 finalizeAuthentication(account)
                             },
                                     { error -> Timber.e(error) })
@@ -86,17 +83,6 @@ class LoginActivity : AuthenticationActivity() {
             }
         }
     }
-
-//    override fun finish() {
-//        val cookieManager = CookieManager.getInstance()
-//        if (VERSION.SDK_INT < VERSION_CODES.LOLLIPOP) {
-//            @Suppress("DEPRECATION")
-//            cookieManager.removeAllCookie()
-//        } else {
-//            cookieManager.removeAllCookies(null)
-//        }
-//        super.finish()
-//    }
 
     private class TokenVerifier(private val service: OAuth20Service, private val code: String)
         : Callable<LoginResult> {

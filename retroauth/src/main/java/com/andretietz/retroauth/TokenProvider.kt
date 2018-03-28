@@ -56,6 +56,13 @@ interface TokenProvider<TOKEN : Any> {
      */
     fun refreshToken(token: TOKEN): TOKEN = token
 
+    /**
+     * This method is called on each authenticated request, to make sure the current token is still valid.
+     *
+     * @param token The current token
+     */
+    fun isTokenValid(token: TOKEN): Boolean = true
+
     enum class ResponseStatus {
         /** Token was valid, request was successful */
         OK,

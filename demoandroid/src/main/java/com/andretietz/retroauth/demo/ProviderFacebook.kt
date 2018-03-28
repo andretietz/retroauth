@@ -13,6 +13,7 @@ class ProviderFacebook : TokenProvider<AndroidToken> {
     }
 
     companion object {
+        const val TOKEN_KEY_VALIDITY = "validity"
         const val CLIENT_ID = "908466759214667"
         const val CLIENT_SECRET = "6254dc69ac506d95b897d35d0dcf9e1f"
         const val CLIENT_CALLBACK = "http://localhost:8000/accounts/facebook/login/callback/"

@@ -42,14 +42,14 @@ afterEvaluate { project ->
                 pom.groupId = GROUP
                 pom.artifactId = POM_ARTIFACT_ID
                 pom.version = VERSION_NAME
-
-                repository(url: "https://api.bintray.com/maven/unicate/android/retroauth/;publish=1") {
+                repository(url: "file://" + System.getProperty("user.home") + "/.m2/repository/") {
+//                repository(url: "https://api.bintray.com/maven/unicate/android/retroauth/;publish=1") {
                     authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
                 }
 //                snapshotRepository(url: "file://" + System.getProperty("user.home") + "/.m2/repository/") {
-                snapshotRepository(url: "https://oss.jfrog.org/artifactory/oss-snapshot-local/") {
-                    authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
-                }
+//                snapshotRepository(url: "https://oss.jfrog.org/artifactory/oss-snapshot-local/") {
+//                    authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
+//                }
 
                 pom.project {
                     name POM_NAME

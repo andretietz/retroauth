@@ -50,7 +50,6 @@ class CredentialInterceptor<OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
         // if the request does require authentication
         if (type != null) {
             var pending = false
-
             var token: TOKEN
             var owner: OWNER
             var tryCount = 0
@@ -63,10 +62,14 @@ class CredentialInterceptor<OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
                         // get the token
                         val localToken = authHandler.tokenStorage.getToken(owner, type)
                         // check if the token is still valid
-                        token = authHandler.provider.refreshToken(localToken)
-                        // if the token was refreshed, store it
-                        if (token != localToken) {
-                            authHandler.tokenStorage.storeToken(owner, type, token)
+                        if (!authHandler.provider.isTokenValid(localToken)) {
+                            token = authHandler.provider.refreshToken(localToken)
+                            // if the token was refreshed, store it
+                            if (token != localToken) {
+                                authHandler.tokenStorage.storeToken(owner, type, token)
+                            }
+                        } else {
+                            token = localToken
                         }
                         // modify the request using the token
                         request = authHandler.provider.authenticateRequest(request, token)
