@@ -63,14 +63,14 @@ class LoginActivity : AuthenticationActivity() {
                     view.loadUrl(url)
                 } else {
                     Single.fromCallable(TokenVerifier(helper, code))
-
                             .subscribeOn(Schedulers.io())
                             .subscribe({ result ->
                                 val account = createOrGetAccount(result.name)
                                 storeToken(
                                         account,
                                         getRequestedTokenType()!!,
-                                        result.token.accessToken)
+                                        result.token.accessToken,
+                                        mapOf("expiringIn" to result.token.expiresIn.toString()))
                                 finalizeAuthentication(account)
                             },
                                     { error -> Timber.e(error) })
@@ -87,16 +87,16 @@ class LoginActivity : AuthenticationActivity() {
         }
     }
 
-    override fun finish() {
-        val cookieManager = CookieManager.getInstance()
-        if (VERSION.SDK_INT < VERSION_CODES.LOLLIPOP) {
-            @Suppress("DEPRECATION")
-            cookieManager.removeAllCookie()
-        } else {
-            cookieManager.removeAllCookies(null)
-        }
-        super.finish()
-    }
+//    override fun finish() {
+//        val cookieManager = CookieManager.getInstance()
+//        if (VERSION.SDK_INT < VERSION_CODES.LOLLIPOP) {
+//            @Suppress("DEPRECATION")
+//            cookieManager.removeAllCookie()
+//        } else {
+//            cookieManager.removeAllCookies(null)
+//        }
+//        super.finish()
+//    }
 
     private class TokenVerifier(private val service: OAuth20Service, private val code: String)
         : Callable<LoginResult> {

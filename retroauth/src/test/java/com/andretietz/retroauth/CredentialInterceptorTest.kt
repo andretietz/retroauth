@@ -1,6 +1,5 @@
 package com.andretietz.retroauth
 
-import com.andretietz.retroauth.testimpl.TestTokenStorage
 import com.andretietz.retroauth.testimpl.TestTokenTypeFactory
 import okhttp3.Connection
 import okhttp3.Interceptor
@@ -8,8 +7,11 @@ import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.runners.MockitoJUnitRunner
 import java.io.IOException
 
@@ -21,7 +23,13 @@ class CredentialInterceptorTest {
         val AUTHENTICATION_HEADER_KEY = "auth"
     }
 
+    @Mock
+    private lateinit var tokenStorage: TokenStorage<String, String, String>
 
+    @Before
+    fun setup() {
+        Mockito.`when`(tokenStorage.getToken(Mockito.anyString(), Mockito.anyString())).thenReturn("token")
+    }
 
     @Test
     fun intercept() {
@@ -44,7 +52,7 @@ class CredentialInterceptorTest {
         interceptorChain.setupRequest(request2)
         response = interceptor.intercept(interceptorChain)
         // should contain the token in the header
-        Assert.assertTrue(TestTokenStorage.TEST_TOKEN == response!!.request().header(AUTHENTICATION_HEADER_KEY))
+        Assert.assertTrue("token" == response!!.request().header(AUTHENTICATION_HEADER_KEY))
 
     }
 
@@ -57,7 +65,7 @@ class CredentialInterceptorTest {
                 object : OwnerManager<String, String> {
                     override fun getOwner(type: String): String = "owner"
                 },
-                TestTokenStorage(),
+                tokenStorage,
                 object : TokenProvider<String> {
                     override fun authenticateRequest(request: Request, token: String): Request {
                         return request.newBuilder().addHeader(AUTHENTICATION_HEADER_KEY, token).build()

@@ -48,6 +48,14 @@ interface TokenProvider<TOKEN : Any> {
         return ResponseStatus.NO_RETRY_TOKEN_INVALID
     }
 
+    /**
+     * This method will be called right after a token was successfully loaded from the local [TokenStorage]. Check if
+     * it is still valid. If not, refresh the token and return it.
+     *
+     * @param token of the local [TokenStorage]
+     */
+    fun refreshToken(token: TOKEN): TOKEN = token
+
     enum class ResponseStatus {
         /** Token was valid, request was successful */
         OK,

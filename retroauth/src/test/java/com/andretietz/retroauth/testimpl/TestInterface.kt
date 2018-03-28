@@ -1,9 +1,8 @@
 package com.andretietz.retroauth.testimpl
 
 import com.andretietz.retroauth.Authenticated
-
+import io.reactivex.Single
 import retrofit2.http.GET
-import rx.Observable
 
 interface TestInterface {
 
@@ -13,10 +12,9 @@ interface TestInterface {
 
     @Authenticated
     @GET("some/authenticated/path")
-    fun authenticatedMethod(): Observable<TestResponse>
+    fun authenticatedMethod(): Single<TestResponse>
 
     @GET("some/unauthenticated/path")
-    fun unauthenticatedMethod(): Observable<TestResponse>
-
+    fun unauthenticatedMethod(): Single<TestResponse>
 
 }

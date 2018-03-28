@@ -1,11 +1,11 @@
 package com.andretietz.retroauth
 
 import com.andretietz.retroauth.testimpl.TestInterface
-import com.andretietz.retroauth.testimpl.TestTokenStorage
 import com.andretietz.retroauth.testimpl.TestProvider
 import com.andretietz.retroauth.testimpl.TestTokenTypeFactory
 
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -29,7 +29,15 @@ class RetroauthCallAdapterFactoryTest {
     @Mock
     private var ownerManager: OwnerManager<String, String>? = null
 
+    @Mock
+    private lateinit var tokenStorage: TokenStorage<String, String, String>
+
     internal var retrofit = Retrofit.Builder().baseUrl("http://foo.com").build()
+
+    @Before
+    fun setup() {
+        Mockito.`when`(tokenStorage.getToken(Mockito.anyString(), Mockito.anyString())).thenReturn("token")
+    }
 
     @Test
     fun adapterFactory() {
@@ -43,7 +51,7 @@ class RetroauthCallAdapterFactoryTest {
         val authHandler = AuthenticationHandler(
                 methodCache,
                 ownerManager!!,
-                TestTokenStorage(),
+                tokenStorage,
                 TestProvider(),
                 TestTokenTypeFactory()
         )

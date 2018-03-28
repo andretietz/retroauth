@@ -62,13 +62,11 @@ class CredentialInterceptor<OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
                         owner = authHandler.ownerManager.getOwner(type)
                         // get the token
                         val localToken = authHandler.tokenStorage.getToken(owner, type)
-                        if (authHandler.provider is RefreshableTokenProvider<TOKEN>) {
-                            token = authHandler.provider.checkForTokenRefresh(localToken)
-                            if (token != localToken) {
-                                authHandler.tokenStorage.storeToken(owner, type, token)
-                            }
-                        } else {
-                            token = localToken
+                        // check if the token is still valid
+                        token = authHandler.provider.refreshToken(localToken)
+                        // if the token was refreshed, store it
+                        if (token != localToken) {
+                            authHandler.tokenStorage.storeToken(owner, type, token)
                         }
                         // modify the request using the token
                         request = authHandler.provider.authenticateRequest(request, token)
