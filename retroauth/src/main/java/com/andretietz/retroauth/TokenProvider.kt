@@ -23,7 +23,16 @@ import okhttp3.Response
  * The TokenProvider interface is a very specific provider endpoint dependent implementation,
  * to authenticate your request and defines when or if to retry.
  */
-interface TokenProvider<TOKEN : Any> {
+interface TokenProvider<OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any> {
+
+
+    /**
+     * Creates a token type object. This doe
+     *
+     * @param annotationValues The values from the [Authenticated] annotation
+     * @return a token type.
+     */
+    fun createTokenType(annotationValues: IntArray): TOKEN_TYPE
 
     /**
      * Authenticates a [Request].
@@ -42,13 +51,7 @@ interface TokenProvider<TOKEN : Any> {
      * @param response     response to check what the result was
      * @return `true` if a retry is required, `false` if not
      */
-    fun validateResponse(count: Int, response: Response): ResponseStatus {
-        if (response.code() == 401) {
-            if (count <= 1) return ResponseStatus.TOKEN_INVALID_RETRY
-            return ResponseStatus.TOKEN_INVALID_NO_RETRY
-        }
-        return ResponseStatus.TOKEN_VALID
-    }
+    fun validateResponse(count: Int, response: Response): Boolean = (response.code() == 401 && count <= 1)
 
     /**
      * This method will be called right after a token was successfully loaded from the local [TokenStorage]. Check if
@@ -56,7 +59,7 @@ interface TokenProvider<TOKEN : Any> {
      *
      * @param token of the local [TokenStorage]
      */
-    fun refreshToken(token: TOKEN): TOKEN = token
+    fun refreshToken(owner: OWNER, tokenType: TOKEN_TYPE, token: TOKEN): TOKEN? = token
 
     /**
      * This method is called on each authenticated request, to make sure the current token is still valid.
@@ -69,8 +72,8 @@ interface TokenProvider<TOKEN : Any> {
         /** Token was valid, request was successful */
         TOKEN_VALID,
         /** Token was invalid, retry */
-        TOKEN_INVALID_RETRY,
+        TOKEN_INVALID_REFRESH,
         /** Token was invalid, do not retry */
-        TOKEN_INVALID_NO_RETRY,
+        TOKEN_INVALID_REMOVE,
     }
 }

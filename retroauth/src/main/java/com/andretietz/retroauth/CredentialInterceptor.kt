@@ -38,7 +38,7 @@ class CredentialInterceptor<OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
 ) : Interceptor {
 
     companion object {
-        private val TOKENTYPE_LOCKERS = HashMap<Any, AccountTokenLock>()
+        private val TOKEN_TYPE_LOCKERS = HashMap<Any, AccountTokenLock>()
     }
 
     override fun intercept(chain: Interceptor.Chain): Response? {
@@ -50,6 +50,7 @@ class CredentialInterceptor<OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
         // if the request does require authentication
         if (type != null) {
             var pending = false
+            var refresh = false
             var token: TOKEN
             var owner: OWNER
             var tryCount = 0
@@ -62,14 +63,17 @@ class CredentialInterceptor<OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
                         // get the token
                         val localToken = authHandler.tokenStorage.getToken(owner, type)
                         // check if the token is still valid
-                        if (!authHandler.provider.isTokenValid(localToken)) {
-                            token = authHandler.provider.refreshToken(localToken)
-                            // if the token was refreshed, store it
-                            if (token != localToken) {
-                                authHandler.tokenStorage.storeToken(owner, type, token)
+                        token = if (!authHandler.provider.isTokenValid(localToken) || refresh) {
+                            authHandler.tokenStorage.removeToken(owner, type, localToken)
+                            val refreshedToken = authHandler.provider.refreshToken(owner, type, localToken)
+                            if (refreshedToken != null) {
+                                // if the token was refreshed, store it
+                                authHandler.tokenStorage.storeToken(owner, type, refreshedToken)
+                            } else {
+                                localToken
                             }
                         } else {
-                            token = localToken
+                            localToken
                         }
                         // modify the request using the token
                         request = authHandler.provider.authenticateRequest(request, token)
@@ -79,22 +83,8 @@ class CredentialInterceptor<OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
 
                     // execute the request
                     response = chain.proceed(request)
-
-                } while (
-                        when (authHandler.provider.validateResponse(++tryCount, response!!)) {
-                        // if request was ok, no retry
-                            TokenProvider.ResponseStatus.TOKEN_VALID -> false
-                            TokenProvider.ResponseStatus.TOKEN_INVALID_NO_RETRY -> {
-                                authHandler.tokenStorage.removeToken(owner, type, token)
-                                false
-                            }
-                            TokenProvider.ResponseStatus.TOKEN_INVALID_RETRY -> {
-                                authHandler.tokenStorage.removeToken(owner, type, token)
-                                true
-                            }
-                        }
-                )
-
+                    refresh = authHandler.provider.validateResponse(++tryCount, response!!)
+                } while (refresh)
             } catch (error: Exception) {
                 storeAndThrowError(type, error)
             }
@@ -103,6 +93,10 @@ class CredentialInterceptor<OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
             response = chain.proceed(request)
         }
         return response
+    }
+
+    private fun getOrRefreshToken() {
+
     }
 
     private fun storeAndThrowError(type: TOKEN_TYPE, exception: Exception) {
@@ -114,8 +108,8 @@ class CredentialInterceptor<OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
 
     private fun getLock(type: TOKEN_TYPE): AccountTokenLock {
         synchronized(type, {
-            val lock: AccountTokenLock = TOKENTYPE_LOCKERS[type] ?: AccountTokenLock()
-            TOKENTYPE_LOCKERS[type] = lock
+            val lock: AccountTokenLock = TOKEN_TYPE_LOCKERS[type] ?: AccountTokenLock()
+            TOKEN_TYPE_LOCKERS[type] = lock
             return lock
         })
     }

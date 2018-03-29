@@ -7,10 +7,8 @@ import android.support.v7.app.AppCompatActivity
 import android.webkit.CookieManager
 import android.widget.Toast
 import com.andretietz.retroauth.AndroidAuthenticationHandler
-import com.andretietz.retroauth.AndroidTokenType
 import com.andretietz.retroauth.AuthAccountManager
 import com.andretietz.retroauth.Retroauth
-import com.andretietz.retroauth.TokenTypeFactory
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.buttonInvalidateToken
@@ -44,25 +42,18 @@ class MainActivity : AppCompatActivity() {
                 .addInterceptor(interceptor)
                 .build()
 
-        val provider = ProviderFacebook()
+        val provider = ProviderFacebook(application, authAccountManager)
 
         /**
          * Create your Retrofit Object using the [Retroauth.Builder]
          */
         val retrofit = Retroauth.Builder(
-                AndroidAuthenticationHandler.create(application, provider, object : TokenTypeFactory<AndroidTokenType> {
-                    override fun create(annotationValues: IntArray): AndroidTokenType =
-                            AndroidTokenType(
-                                    getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT),
-                                    getString(R.string.com_andretietz_retroauth_authentication_TOKEN))
-                }))
+                AndroidAuthenticationHandler.create(application, provider))
                 .baseUrl("https://graph.facebook.com/")
                 .client(httpClient)
                 .addConverterFactory(MoshiConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build()
-
-        //        provider.onRetrofitCreated(retrofit);
 
         /**
          * Create your API Service

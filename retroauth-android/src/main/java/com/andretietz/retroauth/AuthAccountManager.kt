@@ -178,6 +178,29 @@ class AuthAccountManager internal constructor(
     }
 
     /**
+     * Returns the [AndroidToken] for a specific account and a specific token type. If the token locally is invalid,
+     * this method will try to open the login.
+     */
+    fun getToken(owner: Account, tokenType: AndroidTokenType): AndroidToken? {
+        var tokenString: String?
+        val future = accountManager.getAuthToken(owner, tokenType.tokenType, null, activityManager.activity, null, null)
+        val result = future.result
+        tokenString = result.getString(AccountManager.KEY_AUTHTOKEN)
+        if (tokenString == null) {
+            tokenString = accountManager.peekAuthToken(owner, tokenType.tokenType)
+        }
+        tokenString?.let {
+            return AndroidToken(
+                    tokenString,
+                    tokenType.dataKeys
+                            ?.associateTo(HashMap()) {
+                                it to accountManager.getUserData(owner, AndroidTokenStorage.createDataKey(tokenType, it))
+                            })
+        }
+        return null
+    }
+
+    /**
      * Returns an intent to open an account chooser
      *
      * @param accountType Make sure this is your account type or you requested the permission for

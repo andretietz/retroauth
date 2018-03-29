@@ -24,5 +24,4 @@ open class AuthenticationHandler<OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
         val methodCache: MethodCache<TOKEN_TYPE>,
         val ownerManager: OwnerManager<OWNER, TOKEN_TYPE>,
         val tokenStorage: TokenStorage<OWNER, TOKEN_TYPE, TOKEN>,
-        val provider: TokenProvider<TOKEN>,
-        val typeFactory: TokenTypeFactory<TOKEN_TYPE>)
+        val provider: TokenProvider<OWNER, TOKEN_TYPE, TOKEN>)

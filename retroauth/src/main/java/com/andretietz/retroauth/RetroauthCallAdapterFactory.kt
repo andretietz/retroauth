@@ -54,7 +54,7 @@ constructor(
             val adapter = callAdapterFactories[i].get(returnType, annotations, retrofit)
             adapter?.let {
                 auth?.let {
-                    val tokenType = authHandler.typeFactory.create(auth.value)
+                    val tokenType = authHandler.provider.createTokenType(auth.value)
                     return RetroauthCallAdapter(adapter as CallAdapter<Any, Any>,
                             tokenType, authHandler.methodCache)
                 }

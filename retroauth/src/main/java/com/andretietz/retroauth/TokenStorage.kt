@@ -46,5 +46,5 @@ interface TokenStorage<OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any> {
      * @param type  Type of the token
      * @param token Token to store
      */
-    fun storeToken(owner: OWNER, type: TOKEN_TYPE, token: TOKEN)
+    fun storeToken(owner: OWNER, type: TOKEN_TYPE, token: TOKEN): TOKEN
 }

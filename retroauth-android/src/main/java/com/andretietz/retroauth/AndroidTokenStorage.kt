@@ -24,10 +24,18 @@ import java.util.Locale
 /**
  * This is the implementation of a [TokenStorage] in Android using the Android [AccountManager]
  */
-internal class AndroidTokenStorage(application: Application) : TokenStorage<Account, AndroidTokenType, AndroidToken> {
+internal class AndroidTokenStorage(
+        application: Application) :
+        TokenStorage<Account, AndroidTokenType, AndroidToken> {
 
-    private val accountManager: AccountManager = AccountManager.get(application)
-    private val activityManager: ActivityManager = ActivityManager.get(application)
+    private val activityManager = ActivityManager[application]
+    private val accountManager = AccountManager.get(application)
+
+    companion object {
+        @JvmStatic
+        fun createDataKey(type: AndroidTokenType, key: String) = String.format(Locale.US, "%s_%s", type.tokenType, key)
+    }
+
 
     override fun getToken(owner: Account, type: AndroidTokenType): AndroidToken {
         var token: String?
@@ -41,7 +49,13 @@ internal class AndroidTokenStorage(application: Application) : TokenStorage<Acco
                 String.format("No token found! Make sure you store the token during login using %s#storeToken()",
                         AuthenticationActivity::class.java.simpleName)
         )
-        return AndroidToken(token, type.dataKeys?.associateBy { accountManager.getUserData(owner, createDataKey(type, it)) })
+        return AndroidToken(
+                token,
+                type.dataKeys
+                        ?.associateTo(HashMap()) {
+                            it to accountManager.getUserData(owner, createDataKey(type, it))
+                        }
+        )
     }
 
     override fun removeToken(owner: Account, type: AndroidTokenType, token: AndroidToken) {
@@ -49,12 +63,11 @@ internal class AndroidTokenStorage(application: Application) : TokenStorage<Acco
         type.dataKeys?.forEach { accountManager.setUserData(owner, createDataKey(type, it), null) }
     }
 
-    override fun storeToken(owner: Account, type: AndroidTokenType, token: AndroidToken) {
+    override fun storeToken(owner: Account, type: AndroidTokenType, token: AndroidToken): AndroidToken {
         accountManager.setAuthToken(owner, type.tokenType, token.token)
         if (type.dataKeys != null && token.data != null) {
             type.dataKeys.forEach { accountManager.setUserData(owner, createDataKey(type, it), token.data[it]) }
         }
+        return token
     }
-
-    private fun createDataKey(type: AndroidTokenType, key: String) = String.format(Locale.US, "%s_%s", type.tokenType, key)
 }

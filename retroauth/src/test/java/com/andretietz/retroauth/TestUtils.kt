@@ -42,4 +42,14 @@ class TestUtils {
         Assert.assertEquals(2, map.size.toLong())
 
     }
+
+    @Test
+    fun foo() {
+        val map = HashMap<String, Int>()
+        val set = setOf("1", "2")
+        set.associateTo(map) {
+            it to 1
+        }
+        print(map)
+    }
 }

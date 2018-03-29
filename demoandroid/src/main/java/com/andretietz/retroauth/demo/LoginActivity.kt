@@ -53,10 +53,14 @@ class LoginActivity : AuthenticationActivity() {
                             .subscribeOn(Schedulers.io())
                             .subscribe({ result ->
                                 val account = createOrGetAccount(result.name)
+                                val expiryDate = result.token.expiresIn * 1000 + System.currentTimeMillis()
                                 storeToken(
                                         account,
                                         getRequestedTokenType()!!,
-                                        result.token.accessToken)
+                                        result.token.accessToken,
+                                        mapOf(ProviderFacebook.KEY_TOKEN_VALIDITY to expiryDate.toString()))
+
+
                                 finalizeAuthentication(account)
                             },
                                     { error -> Timber.e(error) })

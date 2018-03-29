@@ -55,6 +55,7 @@ abstract class AuthenticationActivity : AppCompatActivity() {
 
     override fun onCreate(icicle: Bundle?) {
         super.onCreate(icicle)
+        accountManager = AccountManager.get(application)
         accountAuthenticatorResponse = intent.getParcelableExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)
         accountAuthenticatorResponse?.onRequestContinued()
         tokenStorage = AndroidTokenStorage(application)
@@ -69,7 +70,7 @@ abstract class AuthenticationActivity : AppCompatActivity() {
         }
         this.accountType = accountType
         tokenType = intent.getStringExtra(AccountAuthenticator.KEY_TOKEN_TYPE)
-        accountManager = AccountManager.get(this)
+
 
         resultBundle = Bundle()
         resultBundle.putString(AccountManager.KEY_ACCOUNT_TYPE, accountType)
@@ -96,7 +97,7 @@ abstract class AuthenticationActivity : AppCompatActivity() {
      * @param key     the key for the data
      * @param value   the actual data you want to store
      */
-    fun storeUserData(account: Account, key: String, value: String) {
+    fun storeUserData(account: Account, key: String, value: String?) {
         accountManager.setUserData(account, key, value)
     }
 

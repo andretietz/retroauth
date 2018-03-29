@@ -25,20 +25,20 @@ import android.app.Application
  * make your life easier.
  */
 class AndroidAuthenticationHandler private constructor(application: Application,
-                                                       provider: TokenProvider<AndroidToken>,
-                                                       typeFactory: TokenTypeFactory<AndroidTokenType>) :
+                                                       provider: TokenProvider<Account, AndroidTokenType, AndroidToken>) :
 
         AuthenticationHandler<Account, AndroidTokenType, AndroidToken>(
                 AndroidMethodCache(),
                 AndroidOwnerManager(application, AuthAccountManager(application)),
-                AndroidTokenStorage(application), provider, typeFactory) {
+                AndroidTokenStorage(application), provider) {
 
     companion object {
         @JvmStatic
         fun create(application: Application,
-                   provider: TokenProvider<AndroidToken>,
-                   typeFactory: TokenTypeFactory<AndroidTokenType>): AndroidAuthenticationHandler
-                = AndroidAuthenticationHandler(application, provider, typeFactory)
+                   provider: TokenProvider<Account, AndroidTokenType, AndroidToken>
+        ): AndroidAuthenticationHandler = AndroidAuthenticationHandler(
+                application,
+                provider)
     }
 
 }
