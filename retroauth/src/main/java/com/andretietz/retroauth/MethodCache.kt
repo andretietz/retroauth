@@ -39,7 +39,6 @@ interface MethodCache<TOKEN_TYPE : Any> {
      */
     fun getTokenType(requestIdentifier: Int): TOKEN_TYPE?
 
-
     /**
      * The default implementation of the [MethodCache].
      *

@@ -1,6 +1,7 @@
 package com.andretietz.retroauth
 
 import com.andretietz.retroauth.testimpl.TestTokenTypeFactory
+import com.nhaarman.mockito_kotlin.whenever
 import okhttp3.Connection
 import okhttp3.Interceptor
 import okhttp3.Protocol
@@ -20,7 +21,7 @@ class CredentialInterceptorTest {
 
 
     companion object {
-        val AUTHENTICATION_HEADER_KEY = "auth"
+        const val AUTHENTICATION_HEADER_KEY = "auth"
     }
 
     @Mock
@@ -28,7 +29,8 @@ class CredentialInterceptorTest {
 
     @Before
     fun setup() {
-        Mockito.`when`(tokenStorage.getToken(Mockito.anyString(), Mockito.anyString())).thenReturn("token")
+        whenever(tokenStorage.getToken(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn("token")
     }
 
     @Test

@@ -18,7 +18,6 @@ package com.andretietz.retroauth
 
 import java.io.IOException
 
-
 /**
  * This Exception is thrown, when the user cancels the Authentication or
  * some other error happens. The Reason can be read, on calling [AuthenticationCanceledException.getCause]

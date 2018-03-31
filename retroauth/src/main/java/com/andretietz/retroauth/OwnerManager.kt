@@ -19,7 +19,7 @@ package com.andretietz.retroauth
 /**
  * Since every token belongs to a specific user, this users have to be managed.
  */
-interface OwnerManager<OWNER : Any, TOKEN_TYPE : Any> {
+interface OwnerManager<out OWNER : Any, in TOKEN_TYPE : Any> {
     /**
      * This method should be used to figure out which user authenticates a request.
      *

@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
-
 /**
  * This interceptor intercepts the okhttp requests and checks if authentication is required.
  * If so, it tries to get the owner of the token, then tries to get the token and
