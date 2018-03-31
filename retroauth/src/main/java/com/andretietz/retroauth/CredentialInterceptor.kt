@@ -34,7 +34,10 @@ import java.util.concurrent.locks.ReentrantLock
  * @param <TOKEN_TYPE> type of the token that should be added to the request
  */
 class CredentialInterceptor<OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
-        private val authHandler: AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN>
+        private val methodCache: MethodCache<TOKEN_TYPE>,
+        private val ownerManager: OwnerManager<OWNER, TOKEN_TYPE>,
+        private val tokenStorage: TokenStorage<OWNER, TOKEN_TYPE, TOKEN>,
+        private val tokenProvider: TokenProvider<OWNER, TOKEN_TYPE, TOKEN>
 ) : Interceptor {
 
     companion object {
@@ -45,7 +48,7 @@ class CredentialInterceptor<OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
         var response: Response? = null
         var request = chain.request()
         // get the token type required by this request
-        val type = authHandler.methodCache.getTokenType(Utils.createUniqueIdentifier(request))
+        val type = methodCache.getTokenType(Utils.createUniqueIdentifier(request))
 
         // if the request does require authentication
         if (type != null) {
@@ -60,34 +63,34 @@ class CredentialInterceptor<OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
                         // Lock foreach type
                         pending = lock(type)
                         // get the owner or open login
-                        owner = authHandler.ownerManager.getOwner(type)
+                        owner = ownerManager.getOwner(type)
                         // get the token of the owner
-                        val localToken = authHandler.tokenStorage.getToken(owner, type)
+                        val localToken = tokenStorage.getToken(owner, type)
                         // if the token is still valid and no refresh has been requested
-                        if (authHandler.provider.isTokenValid(localToken) && !refreshRequested) {
+                        if (tokenProvider.isTokenValid(localToken) && !refreshRequested) {
                             token = localToken
                         } else {
                             // otherwise remove the current token from the storage
-                            authHandler.tokenStorage.removeToken(owner, type, localToken)
+                            tokenStorage.removeToken(owner, type, localToken)
                             // try to refresh the token
-                            val refreshedToken = authHandler.provider.refreshToken(owner, type, localToken)
+                            val refreshedToken = tokenProvider.refreshToken(owner, type, localToken)
                             if (refreshedToken != null) {
                                 // if the token was refreshed, store it
-                                token = authHandler.tokenStorage.storeToken(owner, type, refreshedToken)
+                                token = tokenStorage.storeToken(owner, type, refreshedToken)
                             } else {
                                 // otherwise use the "old" token
                                 token = localToken
                             }
                         }
                         // authenticate the request using the token
-                        request = authHandler.provider.authenticateRequest(request, token)
+                        request = tokenProvider.authenticateRequest(request, token)
                     } finally {
                         // release type lock
                         unlock(type, pending)
                     }
                     // execute the request
                     response = chain.proceed(request)
-                    refreshRequested = authHandler.provider.refreshRequired(++tryCount, response!!)
+                    refreshRequested = tokenProvider.refreshRequired(++tryCount, response!!)
                 } while (refreshRequested)
             } catch (error: Exception) {
                 storeAndThrowError(type, error)

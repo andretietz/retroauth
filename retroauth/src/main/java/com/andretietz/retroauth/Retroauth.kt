@@ -109,7 +109,9 @@ class Retroauth private constructor() {
             callAdapterFactories.add(Retrofit2Platform.defaultCallAdapterFactory(executor))
 
             // creating a custom calladapter to handle authentication
-            val callAdapter = RetroauthCallAdapterFactory(callAdapterFactories, authHandler)
+            val callAdapter = RetroauthCallAdapterFactory(callAdapterFactories,
+                    authHandler.methodCache,
+                    authHandler.provider)
 
             // use this callAdapter to create the retrofit object
             this.builder.addCallAdapterFactory(callAdapter)
@@ -117,7 +119,11 @@ class Retroauth private constructor() {
             val builder = okHttpClient?.newBuilder() ?: OkHttpClient.Builder()
 
             // create the okhttp interceptor to intercept requests
-            val interceptor = CredentialInterceptor(authHandler)
+            val interceptor = CredentialInterceptor(
+                    authHandler.methodCache,
+                    authHandler.ownerManager,
+                    authHandler.tokenStorage,
+                    authHandler.provider)
 
             // add it as the first interceptor to be used
             builder.interceptors().add(interceptor)
