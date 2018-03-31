@@ -31,8 +31,8 @@ internal class RetroauthCallAdapterFactory<OWNER : Any, TOKEN_TYPE : Any, TOKEN 
  */
 constructor(
         private val callAdapterFactories: List<CallAdapter.Factory>,
-        private val methodCache: MethodCache<TOKEN_TYPE>,
-        private val tokenProvider: TokenProvider<OWNER, TOKEN_TYPE, TOKEN>
+        private val tokenProvider: TokenProvider<OWNER, TOKEN_TYPE, TOKEN>,
+        private val methodCache: MethodCache<TOKEN_TYPE> = MethodCache.DefaultMethodCache()
 ) : CallAdapter.Factory() {
 
     /**

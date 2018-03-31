@@ -4,7 +4,6 @@ import com.andretietz.retroauth.testimpl.TestInterface
 import com.andretietz.retroauth.testimpl.TestProvider
 import com.andretietz.retroauth.testimpl.TestResponse
 import com.andretietz.retroauth.testimpl.TestTokenStorage
-import com.andretietz.retroauth.testimpl.TestTokenTypeFactory
 import com.nhaarman.mockito_kotlin.eq
 import com.nhaarman.mockito_kotlin.spy
 import com.nhaarman.mockito_kotlin.times
@@ -30,7 +29,7 @@ class RetroauthTest {
 
     private lateinit var server: MockWebServer
     private lateinit var service: TestInterface
-    private var provider: TokenProvider<String> = spy(TestProvider())
+    private var provider: TokenProvider<String, String, String> = spy(TestProvider())
     private var tokenStorage = spy(TestTokenStorage())
 
     companion object {
@@ -50,8 +49,7 @@ class RetroauthTest {
                 methodCache,
                 ownerManager,
                 tokenStorage,
-                provider,
-                TestTokenTypeFactory()
+                provider
         )
 
         val retrofit = Retroauth.Builder(authHandler)
@@ -128,9 +126,9 @@ class RetroauthTest {
                         .setBody(TestInterface.TEST_BODY)
         )
 
-        
 
-        whenever(provider.refreshToken(eq("token")))
+
+        whenever(provider.refreshToken(anyString(), anyString(), eq("token")))
                 .thenAnswer {
                     Thread.sleep(250)
                     return@thenAnswer "new token"

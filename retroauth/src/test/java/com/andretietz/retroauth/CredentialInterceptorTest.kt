@@ -1,6 +1,5 @@
 package com.andretietz.retroauth
 
-import com.andretietz.retroauth.testimpl.TestTokenTypeFactory
 import com.nhaarman.mockito_kotlin.whenever
 import okhttp3.Connection
 import okhttp3.Interceptor
@@ -13,7 +12,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.runners.MockitoJUnitRunner
+import org.mockito.junit.MockitoJUnitRunner
 import java.io.IOException
 
 @RunWith(MockitoJUnitRunner::class)
@@ -26,6 +25,10 @@ class CredentialInterceptorTest {
 
     @Mock
     private lateinit var tokenStorage: TokenStorage<String, String, String>
+    @Mock
+    private lateinit var tokenProvider: TokenProvider<String, String, String>
+    @Mock
+    private lateinit var ownerManager: OwnerManager<String, String>
 
     @Before
     fun setup() {
@@ -39,8 +42,7 @@ class CredentialInterceptorTest {
         val request2 = Request.Builder().url("http://www.google.de/test2").build()
 
         // only request2 is authenticated
-        val authHandler = getAuthenticationHandler(request2)
-        val interceptor = CredentialInterceptor(authHandler)
+        val interceptor = CredentialInterceptor(tokenProvider, ownerManager, tokenStorage)
 
         val interceptorChain = TestInterceptorChain()
 
@@ -56,25 +58,6 @@ class CredentialInterceptorTest {
         // should contain the token in the header
         Assert.assertTrue("token" == response!!.request().header(AUTHENTICATION_HEADER_KEY))
 
-    }
-
-    private fun getAuthenticationHandler(request: Request): AuthenticationHandler<String, String, String> {
-        val methodCache = MethodCache.DefaultMethodCache<String>()
-        methodCache.register(Utils.createUniqueIdentifier(request), "token-type")
-
-        return AuthenticationHandler(
-                methodCache,
-                object : OwnerManager<String, String> {
-                    override fun getOwner(type: String): String = "owner"
-                },
-                tokenStorage,
-                object : TokenProvider<String> {
-                    override fun authenticateRequest(request: Request, token: String): Request {
-                        return request.newBuilder().addHeader(AUTHENTICATION_HEADER_KEY, token).build()
-                    }
-                },
-                TestTokenTypeFactory()
-        )
     }
 
     internal class TestInterceptorChain : Interceptor.Chain {

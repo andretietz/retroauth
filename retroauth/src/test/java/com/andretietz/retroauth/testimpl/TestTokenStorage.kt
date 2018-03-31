@@ -19,7 +19,8 @@ open class TestTokenStorage : TokenStorage<String, String, String> {
 
     }
 
-    override fun storeToken(owner: String, type: String, token: String) {
+    override fun storeToken(owner: String, type: String, token: String): String {
         tmpToken = token
+        return token
     }
 }

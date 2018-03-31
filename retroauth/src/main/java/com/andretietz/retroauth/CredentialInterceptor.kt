@@ -32,11 +32,11 @@ import java.util.concurrent.locks.ReentrantLock
  * @param <OWNER>      a type that represents the owner of a token. Since there could be multiple users on one client.
  * @param <TOKEN_TYPE> type of the token that should be added to the request
  */
-class CredentialInterceptor<OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
-        private val methodCache: MethodCache<TOKEN_TYPE>,
+internal class CredentialInterceptor<OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
+        private val tokenProvider: TokenProvider<OWNER, TOKEN_TYPE, TOKEN>,
         private val ownerManager: OwnerManager<OWNER, TOKEN_TYPE>,
         private val tokenStorage: TokenStorage<OWNER, TOKEN_TYPE, TOKEN>,
-        private val tokenProvider: TokenProvider<OWNER, TOKEN_TYPE, TOKEN>
+        private val methodCache: MethodCache<TOKEN_TYPE> = MethodCache.DefaultMethodCache()
 ) : Interceptor {
 
     companion object {

@@ -4,29 +4,26 @@ import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.runners.MockitoJUnitRunner
+import org.mockito.junit.MockitoJUnitRunner
 
 @RunWith(MockitoJUnitRunner::class)
 class AuthenticationHandlerTest {
 
     @Mock
-    private var methodCache: MethodCache<String>? = null
+    private lateinit var methodCache: MethodCache<String>
     @Mock
-    private var ownerManager: OwnerManager<String, String>? = null
+    private lateinit var ownerManager: OwnerManager<String, String>
     @Mock
-    private var tokenStorage: TokenStorage<String, String, String>? = null
+    private lateinit var tokenStorage: TokenStorage<String, String, String>
     @Mock
-    private var provider: TokenProvider<String>? = null
-    @Mock
-    private var typeFactory: TokenTypeFactory<String>? = null
+    private lateinit var provider: TokenProvider<String, String, String>
 
     @Test
     fun allocate() {
-        val authHandler = AuthenticationHandler(methodCache!!, ownerManager!!, tokenStorage!!, provider!!, typeFactory!!)
+        val authHandler = AuthenticationHandler(methodCache, ownerManager, tokenStorage, provider)
         Assert.assertNotNull(authHandler.methodCache)
         Assert.assertNotNull(authHandler.ownerManager)
         Assert.assertNotNull(authHandler.tokenStorage)
         Assert.assertNotNull(authHandler.provider)
-        Assert.assertNotNull(authHandler.typeFactory)
     }
 }

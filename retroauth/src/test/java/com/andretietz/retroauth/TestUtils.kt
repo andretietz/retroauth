@@ -1,13 +1,11 @@
 package com.andretietz.retroauth
 
+import okhttp3.Request
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.runners.MockitoJUnitRunner
-
 import java.util.HashMap
-
-import okhttp3.Request
 
 @RunWith(MockitoJUnitRunner::class)
 class TestUtils {
@@ -41,15 +39,5 @@ class TestUtils {
 
         Assert.assertEquals(2, map.size.toLong())
 
-    }
-
-    @Test
-    fun foo() {
-        val map = HashMap<String, Int>()
-        val set = setOf("1", "2")
-        set.associateTo(map) {
-            it to 1
-        }
-        print(map)
     }
 }

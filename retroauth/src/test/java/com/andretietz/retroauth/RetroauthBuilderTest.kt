@@ -1,29 +1,24 @@
 package com.andretietz.retroauth
 
 
+import okhttp3.HttpUrl
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.runners.MockitoJUnitRunner
-
-import okhttp3.HttpUrl
-import retrofit2.CallAdapter
-import retrofit2.Retrofit
+import org.mockito.junit.MockitoJUnitRunner
 
 @RunWith(MockitoJUnitRunner::class)
 class RetroauthBuilderTest {
 
     @Mock
-    private var provider: TokenProvider<String>? = null
+    private var provider: TokenProvider<String, String, String>? = null
     @Mock
     private var methodCache: MethodCache<String>? = null
     @Mock
     private var ownerManager: OwnerManager<String, String>? = null
     @Mock
     private var tokenStorage: TokenStorage<String, String, String>? = null
-    @Mock
-    private var typeFactory: TokenTypeFactory<String>? = null
 
     @Test
     fun builder() {
@@ -31,14 +26,13 @@ class RetroauthBuilderTest {
                 methodCache!!,
                 ownerManager!!,
                 tokenStorage!!,
-                provider!!,
-                typeFactory!!
+                provider!!
         )
 
-        val url = HttpUrl.parse("https://github.com/andretietz/retroauth/")
+        val url = HttpUrl.parse("https://github.com/andretietz/retroauth/")!!
 
         val retrofit = Retroauth.Builder(authHandler)
-                .baseUrl(url!!)
+                .baseUrl(url)
                 .build()
 
         val factories = retrofit.callAdapterFactories()
