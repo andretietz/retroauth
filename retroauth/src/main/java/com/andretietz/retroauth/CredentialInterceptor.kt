@@ -50,41 +50,45 @@ class CredentialInterceptor<OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
         // if the request does require authentication
         if (type != null) {
             var pending = false
-            var refresh = false
+            var refreshRequested = false
             var token: TOKEN
             var owner: OWNER
             var tryCount = 0
             try {
                 do {
                     try {
+                        // Lock foreach type
                         pending = lock(type)
-                        // get the owner of the token or opens login
+                        // get the owner or open login
                         owner = authHandler.ownerManager.getOwner(type)
-                        // get the token
+                        // get the token of the owner
                         val localToken = authHandler.tokenStorage.getToken(owner, type)
-                        // check if the token is still valid
-                        token = if (!authHandler.provider.isTokenValid(localToken) || refresh) {
+                        // if the token is still valid and no refresh has been requested
+                        if (authHandler.provider.isTokenValid(localToken) && !refreshRequested) {
+                            token = localToken
+                        } else {
+                            // otherwise remove the current token from the storage
                             authHandler.tokenStorage.removeToken(owner, type, localToken)
+                            // try to refresh the token
                             val refreshedToken = authHandler.provider.refreshToken(owner, type, localToken)
                             if (refreshedToken != null) {
                                 // if the token was refreshed, store it
-                                authHandler.tokenStorage.storeToken(owner, type, refreshedToken)
+                                token = authHandler.tokenStorage.storeToken(owner, type, refreshedToken)
                             } else {
-                                localToken
+                                // otherwise use the "old" token
+                                token = localToken
                             }
-                        } else {
-                            localToken
                         }
-                        // modify the request using the token
+                        // authenticate the request using the token
                         request = authHandler.provider.authenticateRequest(request, token)
                     } finally {
+                        // release type lock
                         unlock(type, pending)
                     }
-
                     // execute the request
                     response = chain.proceed(request)
-                    refresh = authHandler.provider.validateResponse(++tryCount, response!!)
-                } while (refresh)
+                    refreshRequested = authHandler.provider.refreshRequired(++tryCount, response!!)
+                } while (refreshRequested)
             } catch (error: Exception) {
                 storeAndThrowError(type, error)
             }
@@ -93,10 +97,6 @@ class CredentialInterceptor<OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
             response = chain.proceed(request)
         }
         return response
-    }
-
-    private fun getOrRefreshToken() {
-
     }
 
     private fun storeAndThrowError(type: TOKEN_TYPE, exception: Exception) {

@@ -23,11 +23,10 @@ import okhttp3.Response
  * The TokenProvider interface is a very specific provider endpoint dependent implementation,
  * to authenticate your request and defines when or if to retry.
  */
-interface TokenProvider<OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any> {
-
+interface TokenProvider<in OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any> {
 
     /**
-     * Creates a token type object. This doe
+     * Creates a token type object.
      *
      * @param annotationValues The values from the [Authenticated] annotation
      * @return a token type.
@@ -44,18 +43,16 @@ interface TokenProvider<OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any> {
     fun authenticateRequest(request: Request, token: TOKEN): Request
 
     /**
-     * Checks if the retry of an request is required or not. If your provider provides a refresh token
-     * mechanism, you can do it in here.
+     * Checks if the token needs to be refreshed or not.
      *
      * @param count        value contains how many times this request has been executed already
      * @param response     response to check what the result was
-     * @return `true` if a retry is required, `false` if not
+     * @return {@code true} if a token refresh is required, {@code false} if not
      */
-    fun validateResponse(count: Int, response: Response): Boolean = (response.code() == 401 && count <= 1)
+    fun refreshRequired(count: Int, response: Response): Boolean = (response.code() == 401 && count <= 1)
 
     /**
-     * This method will be called right after a token was successfully loaded from the local [TokenStorage]. Check if
-     * it is still valid. If not, refresh the token and return it.
+     * This method will be called when [isTokenValid] returned false or [refreshRequired] returned true.
      *
      * @param token of the local [TokenStorage]
      */
@@ -67,13 +64,4 @@ interface TokenProvider<OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any> {
      * @param token The current token
      */
     fun isTokenValid(token: TOKEN): Boolean = true
-
-    enum class ResponseStatus {
-        /** Token was valid, request was successful */
-        TOKEN_VALID,
-        /** Token was invalid, retry */
-        TOKEN_INVALID_REFRESH,
-        /** Token was invalid, do not retry */
-        TOKEN_INVALID_REMOVE,
-    }
 }

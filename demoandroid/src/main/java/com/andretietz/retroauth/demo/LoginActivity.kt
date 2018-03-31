@@ -22,6 +22,7 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 import timber.log.Timber
 import java.util.concurrent.Callable
+import java.util.concurrent.TimeUnit
 
 class LoginActivity : AuthenticationActivity() {
 
@@ -53,12 +54,19 @@ class LoginActivity : AuthenticationActivity() {
                             .subscribeOn(Schedulers.io())
                             .subscribe({ result ->
                                 val account = createOrGetAccount(result.name)
-                                val expiryDate = result.token.expiresIn * 1000 + System.currentTimeMillis()
+                                val expiryDate = TimeUnit.MILLISECONDS
+                                        // expiry date - 30 seconds (network tolerance)
+                                        .convert((result.token.expiresIn - 30).toLong(), TimeUnit.SECONDS)
+                                        .plus(System.currentTimeMillis())
                                 storeToken(
                                         account,
                                         getRequestedTokenType()!!,
                                         result.token.accessToken,
-                                        mapOf(ProviderFacebook.KEY_TOKEN_VALIDITY to expiryDate.toString()))
+                                        mapOf(
+                                                ProviderFacebook.KEY_TOKEN_VALIDITY
+                                                        to expiryDate.toString()
+                                        )
+                                )
 
 
                                 finalizeAuthentication(account)
