@@ -66,7 +66,9 @@ internal class AndroidTokenStorage(
     override fun storeToken(owner: Account, type: AndroidTokenType, token: AndroidToken): AndroidToken {
         accountManager.setAuthToken(owner, type.tokenType, token.token)
         if (type.dataKeys != null && token.data != null) {
-            type.dataKeys.forEach { accountManager.setUserData(owner, createDataKey(type, it), token.data[it]) }
+            type.dataKeys.forEach {
+                accountManager.setUserData(owner, createDataKey(type, it), token.data[it])
+            }
         }
         return token
     }

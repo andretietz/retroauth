@@ -44,8 +44,7 @@ class MainActivity : AppCompatActivity() {
         /**
          * Create your Retrofit Object using the [Retroauth.Builder]
          */
-        val retrofit = Retroauth.Builder(
-                AndroidAuthenticationHandler.create(application, provider))
+        val retrofit = Retroauth.Builder(AndroidAuthenticationHandler.create(application, provider))
                 .baseUrl("https://graph.facebook.com/")
                 .client(httpClient)
                 .addConverterFactory(MoshiConverterFactory.create())
@@ -76,14 +75,16 @@ class MainActivity : AppCompatActivity() {
 
         buttonLogout.setOnClickListener {
             helper.getCurrentAccount(getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT))?.let { account ->
-                helper.removeAccount(account)
-                /** remove all cookies to avoid an automatic relogin */
-                val cookieManager = CookieManager.getInstance()
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                    @Suppress("DEPRECATION")
-                    cookieManager.removeAllCookie()
-                } else {
-                    cookieManager.removeAllCookies(null)
+                helper.getToken(account, provider.tokenType)?.let { token ->
+                    helper.removeToken(account, provider.tokenType, token)
+                    /** remove all cookies to avoid an automatic relogin */
+                    val cookieManager = CookieManager.getInstance()
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                        @Suppress("DEPRECATION")
+                        cookieManager.removeAllCookie()
+                    } else {
+                        cookieManager.removeAllCookies(null)
+                    }
                 }
             }
         }

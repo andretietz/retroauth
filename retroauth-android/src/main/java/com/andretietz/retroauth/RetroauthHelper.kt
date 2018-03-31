@@ -67,11 +67,11 @@ class RetroauthHelper(application: Application) {
         accountHelper.resetCurrentAccount(account.type)
     }
 
-    fun setToken(account: Account, tokenType: AndroidTokenType, token: AndroidToken) {
-        tokenStorage.storeToken(account, tokenType, token)
-    }
+    fun setToken(account: Account, tokenType: AndroidTokenType, token: AndroidToken) = tokenStorage.storeToken(account, tokenType, token)
 
     fun getToken(owner: Account, tokenType: AndroidTokenType): AndroidToken? = tokenStorage.getToken(owner, tokenType)
+
+    fun removeToken(account: Account, tokenType: AndroidTokenType, token: AndroidToken) = tokenStorage.removeToken(account, tokenType, token)
 
     /**
      * Returns an intent to open an account chooser
