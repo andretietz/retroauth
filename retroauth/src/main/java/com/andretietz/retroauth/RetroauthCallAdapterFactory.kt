@@ -25,11 +25,7 @@ import java.lang.reflect.Type
  * This is a [retrofit2.CallAdapter.Factory] implementation for handling annotated
  * requests using retrofit2.
  */
-internal class RetroauthCallAdapterFactory<OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>
-/**
- * registered [retrofit2.CallAdapter.Factory]s.
- */
-constructor(
+internal class RetroauthCallAdapterFactory<OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
         private val callAdapterFactories: List<CallAdapter.Factory>,
         private val tokenProvider: TokenProvider<OWNER, TOKEN_TYPE, TOKEN>,
         private val methodCache: MethodCache<TOKEN_TYPE> = MethodCache.DefaultMethodCache()

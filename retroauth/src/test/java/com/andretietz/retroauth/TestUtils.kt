@@ -4,7 +4,7 @@ import okhttp3.Request
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.runners.MockitoJUnitRunner
+import org.mockito.junit.MockitoJUnitRunner
 import java.util.HashMap
 
 @RunWith(MockitoJUnitRunner::class)
@@ -38,6 +38,5 @@ class TestUtils {
         map[Utils.createUniqueIdentifier(request)] = request
 
         Assert.assertEquals(2, map.size.toLong())
-
     }
 }

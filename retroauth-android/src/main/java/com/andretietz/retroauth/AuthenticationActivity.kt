@@ -20,7 +20,6 @@ import android.accounts.Account
 import android.accounts.AccountAuthenticatorResponse
 import android.accounts.AccountManager
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -42,6 +41,7 @@ abstract class AuthenticationActivity : AppCompatActivity() {
     private var tokenType: String? = null
     private lateinit var resultBundle: Bundle
     private lateinit var tokenStorage: AndroidTokenStorage
+    private val accountHelper by lazy { AccountHelper(application) }
 
     companion object {
         @JvmStatic
@@ -65,8 +65,8 @@ abstract class AuthenticationActivity : AppCompatActivity() {
             throw IllegalStateException(
                     String.format(
                             "This Activity cannot be started without the \"%s\" extra in the intent! "
-                                    + "Use the \"addAccount\"-Method of the \"%s\" for opening the Login manually.",
-                            AccountManager.KEY_ACCOUNT_TYPE, AuthAccountManager::class.java.simpleName))
+                                    + "Use the \"addAccount\"-Method of the \"TODO\" for opening the Login manually.",
+                            AccountManager.KEY_ACCOUNT_TYPE))
         }
         this.accountType = accountType
         tokenType = intent.getStringExtra(AccountAuthenticator.KEY_TOKEN_TYPE)
@@ -104,17 +104,14 @@ abstract class AuthenticationActivity : AppCompatActivity() {
     /**
      * This method will finish the login process. Depending on the finishActivity flag, the activity will be finished or not
      * The account which is reached into this method will be set as
-     * "current-active" account. Use [AuthAccountManager.resetActiveAccount] to
-     * reset this if required
-     *
+     * "current" account.
      * @param account        Account you want to set as current active
      * @param finishActivity when `true`, the activity will be finished after finalization.
      */
     @JvmOverloads
     fun finalizeAuthentication(account: Account, finishActivity: Boolean = true) {
         resultBundle.putString(AccountManager.KEY_ACCOUNT_NAME, account.name)
-        val preferences = getSharedPreferences(accountType, Context.MODE_PRIVATE)
-        preferences.edit().putString(AuthAccountManager.RETROAUTH_ACCOUNT_NAME_KEY, account.name).apply()
+        accountHelper.setCurrentAccount(account)
         if (finishActivity) finish()
     }
 

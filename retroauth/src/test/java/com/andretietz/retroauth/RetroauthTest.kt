@@ -126,13 +126,8 @@ class RetroauthTest {
                         .setBody(TestInterface.TEST_BODY)
         )
 
-
-
         whenever(provider.refreshToken(anyString(), anyString(), eq("token")))
-                .thenAnswer {
-                    Thread.sleep(250)
-                    return@thenAnswer "new token"
-                }
+                .thenReturn("new token")
         service.authenticatedMethod()
                 .test()
                 .assertResult(expectedResult)

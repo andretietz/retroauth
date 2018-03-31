@@ -30,26 +30,28 @@ import java.util.concurrent.locks.ReentrantLock
 /**
  * This is the Android implementation of an [OwnerManager]. It does all the Android [Account] handling
  */
-internal class AndroidOwnerManager(private val application: Application, private val authAccountManager: AuthAccountManager)
-    : OwnerManager<Account, AndroidTokenType> {
+internal class AndroidOwnerManager(
+        private val application: Application,
+        private val accountManager: AccountManager = AccountManager.get(application),
+        private val accountHelper: AccountHelper = AccountHelper(application, accountManager)
+) : OwnerManager<Account, AndroidTokenType> {
 
     private val activityManager: ActivityManager = ActivityManager.get(application)
-    private val accountManager: AccountManager = AccountManager.get(application)
 
     @Throws(AuthenticationCanceledException::class)
     override fun getOwner(type: AndroidTokenType): Account {
         // get active account name
-        var accountName = authAccountManager.getActiveAccountName(type.accountType)
+        var accountName = accountHelper.getCurrentAccountName(type.accountType)
         if (accountName == null) {
             // if there's no active account choose one from the available once
             accountName = showAccountPickerDialog(type.accountType, true)
         }
         val account = if (accountName != null) {
-            authAccountManager.getAccountByName(type.accountType, accountName)!!
+            accountHelper.getAccountByNameIfExists(type.accountType, accountName)!!
         } else {
             createAccount(activityManager.activity, type)
         }
-        authAccountManager.setActiveAccount(type.accountType, account.name)
+        accountHelper.setCurrentAccount(account)
         return account
     }
 

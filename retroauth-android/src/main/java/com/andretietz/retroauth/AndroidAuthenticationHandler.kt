@@ -29,7 +29,7 @@ class AndroidAuthenticationHandler private constructor(application: Application,
 
         AuthenticationHandler<Account, AndroidTokenType, AndroidToken>(
                 AndroidMethodCache(),
-                AndroidOwnerManager(application, AuthAccountManager(application)),
+                AndroidOwnerManager(application),
                 AndroidTokenStorage(application), provider) {
 
     companion object {

@@ -4,7 +4,7 @@ import android.accounts.Account
 import android.app.Application
 import com.andretietz.retroauth.AndroidToken
 import com.andretietz.retroauth.AndroidTokenType
-import com.andretietz.retroauth.AuthAccountManager
+import com.andretietz.retroauth.RetroauthHelper
 import com.andretietz.retroauth.TokenProvider
 import okhttp3.Request
 
@@ -14,8 +14,10 @@ import okhttp3.Request
  * If the token for some reason is invalid, the returning 401 will cause the deletion of the token and a retry of the
  * call, in which it will get refreshed
  */
-class ProviderFacebook(application: Application, private val accountManager: AuthAccountManager)
+class ProviderFacebook(application: Application)
     : TokenProvider<Account, AndroidTokenType, AndroidToken> {
+
+    private val helper by lazy { RetroauthHelper(application) }
 
     companion object {
         const val CLIENT_ID = "908466759214667"
@@ -24,7 +26,7 @@ class ProviderFacebook(application: Application, private val accountManager: Aut
         const val KEY_TOKEN_VALIDITY = "token_validity"
     }
 
-    private val tokenType = AndroidTokenType(
+    val tokenType = AndroidTokenType(
             application.getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT),
             application.getString(R.string.com_andretietz_retroauth_authentication_TOKEN),
             setOf(KEY_TOKEN_VALIDITY))
@@ -47,6 +49,6 @@ class ProviderFacebook(application: Application, private val accountManager: Aut
     }
 
     override fun refreshToken(owner: Account, tokenType: AndroidTokenType, token: AndroidToken): AndroidToken? {
-        return accountManager.getToken(owner, tokenType)
+        return helper.getToken(owner, tokenType)
     }
 }

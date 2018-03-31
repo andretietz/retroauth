@@ -20,7 +20,6 @@ import android.accounts.AbstractAccountAuthenticator;
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
-import android.accounts.NetworkErrorException;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -29,7 +28,7 @@ import android.os.Bundle;
  * This AccountAuthenticator is a very basic implementation of Android's
  * {@link AbstractAccountAuthenticator}. This implementation is intentional as empty as it is. Cause of this is, that
  * it's executed in a different process, which makes it difficult to provide login endpoints from the app process in here.
- *
+ * <p>
  * NOTE: This class cannot be replaced with a kotlin version yet, since Android cannot load Authenticators
  * that are non java once
  */
@@ -55,13 +54,13 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
     @Override
     public Bundle addAccount(AccountAuthenticatorResponse response,
                              String accountType, String authTokenType,
-                             String[] requiredFeatures, Bundle options) throws NetworkErrorException {
+                             String[] requiredFeatures, Bundle options) {
         return createAuthBundle(response, accountType, authTokenType, null);
     }
 
     @Override
     public Bundle getAuthToken(AccountAuthenticatorResponse response, Account account,
-                               String authTokenType, Bundle options) throws NetworkErrorException {
+                               String authTokenType, Bundle options) {
         return createAuthBundle(response, account.type, authTokenType, account.name);
     }
 
@@ -90,7 +89,7 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
 
     @Override
     public Bundle confirmCredentials(AccountAuthenticatorResponse response,
-                                     Account account, Bundle options) throws NetworkErrorException {
+                                     Account account, Bundle options) {
         return null;
     }
 
@@ -106,13 +105,13 @@ public class AccountAuthenticator extends AbstractAccountAuthenticator {
 
     @Override
     public Bundle updateCredentials(AccountAuthenticatorResponse response, Account account,
-                                    String authTokenType, Bundle options) throws NetworkErrorException {
+                                    String authTokenType, Bundle options) {
         return null;
     }
 
     @Override
     public Bundle hasFeatures(AccountAuthenticatorResponse response, Account account,
-                              String[] features) throws NetworkErrorException {
+                              String[] features) {
         return null;
     }
 }

@@ -1,14 +1,14 @@
 package com.andretietz.retroauth.demo
 
-import android.accounts.AccountManager
 import android.os.Build
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.webkit.CookieManager
 import android.widget.Toast
 import com.andretietz.retroauth.AndroidAuthenticationHandler
-import com.andretietz.retroauth.AuthAccountManager
+import com.andretietz.retroauth.AndroidToken
 import com.andretietz.retroauth.Retroauth
+import com.andretietz.retroauth.RetroauthHelper
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.buttonInvalidateToken
@@ -22,16 +22,13 @@ import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
     private lateinit var service: FacebookService
-    private lateinit var authAccountManager: AuthAccountManager
-    private lateinit var accountManager: AccountManager
+
+    private val helper by lazy { RetroauthHelper(application) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         Timber.plant(Timber.DebugTree())
-
-        authAccountManager = AuthAccountManager(application)
-        accountManager = AccountManager.get(this)
 
         /**
          * Optional: create your own OkHttpClient
@@ -42,7 +39,7 @@ class MainActivity : AppCompatActivity() {
                 .addInterceptor(interceptor)
                 .build()
 
-        val provider = ProviderFacebook(application, authAccountManager)
+        val provider = ProviderFacebook(application)
 
         /**
          * Create your Retrofit Object using the [Retroauth.Builder]
@@ -62,9 +59,6 @@ class MainActivity : AppCompatActivity() {
 
 
         buttonRequestEmail.setOnClickListener {
-            /**
-             * Use it!
-             */
             service.getUserDetails()
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -75,24 +69,22 @@ class MainActivity : AppCompatActivity() {
         }
 
         buttonInvalidateToken.setOnClickListener {
-            authAccountManager
-                    .getActiveAccount(getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT))
-                    ?.let {
-                        // This is for demo purposes only. We're "manually" setting some-invalid-token.
-                        accountManager.setAuthToken(it,
-                                getString(R.string.com_andretietz_retroauth_authentication_TOKEN), "some-invalid-token")
-                    }
+            helper.getCurrentAccount(getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT))?.let { account ->
+                helper.setToken(account, provider.tokenType, AndroidToken("some-invalid-token"))
+            }
         }
 
         buttonLogout.setOnClickListener {
-            authAccountManager.removeActiveAccount(getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT))
-            /** remove all cookies to avoid an automatic relogin */
-            val cookieManager = CookieManager.getInstance()
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                @Suppress("DEPRECATION")
-                cookieManager.removeAllCookie()
-            } else {
-                cookieManager.removeAllCookies(null)
+            helper.getCurrentAccount(getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT))?.let { account ->
+                helper.removeAccount(account)
+                /** remove all cookies to avoid an automatic relogin */
+                val cookieManager = CookieManager.getInstance()
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                    @Suppress("DEPRECATION")
+                    cookieManager.removeAllCookie()
+                } else {
+                    cookieManager.removeAllCookies(null)
+                }
             }
         }
     }

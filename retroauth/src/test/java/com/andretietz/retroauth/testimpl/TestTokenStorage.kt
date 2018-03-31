@@ -5,7 +5,7 @@ import com.andretietz.retroauth.TokenStorage
 open class TestTokenStorage : TokenStorage<String, String, String> {
 
     companion object {
-        val TEST_TOKEN = "token"
+        const val TEST_TOKEN = "token"
     }
 
     private var tmpToken: String? = null
