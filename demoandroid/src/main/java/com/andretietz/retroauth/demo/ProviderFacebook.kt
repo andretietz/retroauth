@@ -3,8 +3,8 @@ package com.andretietz.retroauth.demo
 import android.accounts.Account
 import android.app.Application
 import com.andretietz.retroauth.AndroidToken
+import com.andretietz.retroauth.AndroidTokenStorage
 import com.andretietz.retroauth.AndroidTokenType
-import com.andretietz.retroauth.RetroauthHelper
 import com.andretietz.retroauth.TokenProvider
 import okhttp3.Request
 
@@ -17,7 +17,7 @@ import okhttp3.Request
 class ProviderFacebook(application: Application)
     : TokenProvider<Account, AndroidTokenType, AndroidToken> {
 
-    private val helper by lazy { RetroauthHelper(application) }
+    private val tokenStorage by lazy { AndroidTokenStorage(application) }
 
     companion object {
         const val CLIENT_ID = "908466759214667"
@@ -49,6 +49,6 @@ class ProviderFacebook(application: Application)
     }
 
     override fun refreshToken(owner: Account, tokenType: AndroidTokenType, token: AndroidToken): AndroidToken? {
-        return helper.getToken(owner, tokenType)
+        return tokenStorage.getToken(owner, tokenType)
     }
 }

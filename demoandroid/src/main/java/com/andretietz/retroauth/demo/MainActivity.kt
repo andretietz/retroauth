@@ -5,9 +5,10 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.webkit.CookieManager
 import android.widget.Toast
+import com.andretietz.retroauth.AndroidOwnerManager
 import com.andretietz.retroauth.AndroidToken
+import com.andretietz.retroauth.AndroidTokenStorage
 import com.andretietz.retroauth.RetroauthAndroidBuilder
-import com.andretietz.retroauth.RetroauthHelper
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.buttonInvalidateToken
@@ -22,7 +23,9 @@ import timber.log.Timber
 class MainActivity : AppCompatActivity() {
     private lateinit var service: FacebookService
 
-    private val helper by lazy { RetroauthHelper(application) }
+    //    private val helper by lazy { RetroauthHelper(application) }
+    private val ownerManager by lazy { AndroidOwnerManager(application) }
+    private val tokenStorage by lazy { AndroidTokenStorage(application) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,7 +44,7 @@ class MainActivity : AppCompatActivity() {
         val provider = ProviderFacebook(application)
 
         /**
-         * Create your Retrofit Object using the [RetroauthAndroidBuilder.Builder]
+         * Create your Retrofit Object using the [RetroauthAndroidBuilder.createBuilder]
          */
         val retrofit = RetroauthAndroidBuilder.createBuilder(application, provider)
                 .baseUrl("https://graph.facebook.com/")
@@ -67,24 +70,21 @@ class MainActivity : AppCompatActivity() {
         }
 
         buttonInvalidateToken.setOnClickListener {
-            helper.getCurrentAccount(getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT))?.let { account ->
-                helper.setToken(account, provider.tokenType, AndroidToken("some-invalid-token"))
-            }
+            val account = ownerManager.createOrGetOwner(provider.tokenType)
+            tokenStorage.storeToken(account, provider.tokenType, AndroidToken("some-invalid-token"))
         }
 
         buttonLogout.setOnClickListener {
-            helper.getCurrentAccount(getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT))?.let { account ->
-                helper.getToken(account, provider.tokenType)?.let { token ->
-                    helper.removeToken(account, provider.tokenType, token)
-                    /** remove all cookies to avoid an automatic relogin */
-                    val cookieManager = CookieManager.getInstance()
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                        @Suppress("DEPRECATION")
-                        cookieManager.removeAllCookie()
-                    } else {
-                        cookieManager.removeAllCookies(null)
-                    }
-                }
+            val account = ownerManager.createOrGetOwner(provider.tokenType)
+            val token = tokenStorage.getToken(account, provider.tokenType)
+            tokenStorage.removeToken(account, provider.tokenType, token)
+            /** remove all cookies to avoid an automatic relogin */
+            val cookieManager = CookieManager.getInstance()
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                @Suppress("DEPRECATION")
+                cookieManager.removeAllCookie()
+            } else {
+                cookieManager.removeAllCookies(null)
             }
         }
     }

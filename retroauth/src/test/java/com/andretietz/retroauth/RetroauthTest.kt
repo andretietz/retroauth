@@ -55,7 +55,7 @@ class RetroauthTest {
 
         service = retrofit.create(TestInterface::class.java)
 
-        whenever(ownerManager.getOwner(anyString())).thenReturn("owner")
+        whenever(ownerManager.createOrGetOwner(anyString())).thenReturn("owner")
     }
 
     @After
@@ -97,7 +97,7 @@ class RetroauthTest {
     @Test
     fun userCanceledAuthentication() {
 
-        whenever(ownerManager.getOwner(anyString())).thenThrow(AuthenticationCanceledException::class.java)
+        whenever(ownerManager.createOrGetOwner(anyString())).thenThrow(AuthenticationCanceledException::class.java)
 
         service.authenticatedMethod()
                 .test()

@@ -32,7 +32,6 @@ class AndroidTokenStorage(
 
     private val activityManager = ActivityManager[application]
 
-
     companion object {
         @JvmStatic
         fun createDataKey(type: AndroidTokenType, key: String) = String.format(Locale.US, "%s_%s", type.tokenType, key)

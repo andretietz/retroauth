@@ -62,7 +62,7 @@ class CredentialInterceptorTest {
         // testing authenticated request
         interceptorChain.setupRequest(request2)
         whenever(methodCache.getTokenType(any())).thenReturn("tokenType")
-        whenever(ownerManager.getOwner(anyString())).thenReturn("owner")
+        whenever(ownerManager.createOrGetOwner(anyString())).thenReturn("owner")
         whenever(tokenStorage.getToken(eq("owner"), eq("tokenType"))).thenReturn("token")
         response = interceptor.intercept(interceptorChain)
         // should contain the token in the header

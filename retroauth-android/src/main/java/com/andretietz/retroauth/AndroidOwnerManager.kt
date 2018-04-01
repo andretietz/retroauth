@@ -18,10 +18,14 @@ package com.andretietz.retroauth
 
 import android.accounts.Account
 import android.accounts.AccountManager
+import android.accounts.AccountManagerCallback
+import android.accounts.AccountManagerFuture
 import android.app.Activity
 import android.app.AlertDialog
 import android.app.Application
 import android.content.Context
+import android.os.Build
+import android.os.Bundle
 import android.os.Looper
 import java.util.concurrent.locks.Condition
 import java.util.concurrent.locks.Lock
@@ -43,7 +47,7 @@ class AndroidOwnerManager(
     private val activityManager: ActivityManager = ActivityManager.get(application)
 
     @Throws(AuthenticationCanceledException::class)
-    override fun getOwner(type: AndroidTokenType): Account {
+    override fun createOrGetOwner(type: AndroidTokenType): Account {
         // get active account name
         var accountName = getCurrentAccountName(type.accountType)
         if (accountName == null) {
@@ -171,6 +175,21 @@ class AndroidOwnerManager(
         }
     }
 
+
+    @Suppress("unused")
+    override fun removeOwner(owner: Account, callback: OwnerManager.Callback?) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            val rac = if (callback != null) RemoveLollipopAccountCallback(callback) else null
+            accountManager.removeAccount(owner, null, rac, null)
+        } else {
+            val rac = if (callback != null) RemoveAccountCallback(callback) else null
+            @Suppress("DEPRECATION")
+            accountManager.removeAccount(owner, rac, null)
+        }
+        resetCurrentAccount(owner.type)
+    }
+
+
     private fun getCurrentAccountName(accountType: String): String? {
         val preferences = application.getSharedPreferences(accountType, Context.MODE_PRIVATE)
         return preferences.getString(RETROAUTH_ACCOUNT_NAME_KEY, null)
@@ -195,6 +214,11 @@ class AndroidOwnerManager(
         return null
     }
 
+    private fun resetCurrentAccount(accountType: String) {
+        val preferences = application.getSharedPreferences(accountType, Context.MODE_PRIVATE)
+        preferences.edit().remove(RETROAUTH_ACCOUNT_NAME_KEY).apply()
+    }
+
     /**
      * Sets an account to "the current" one.
      *
@@ -205,5 +229,49 @@ class AndroidOwnerManager(
         val preferences = application.getSharedPreferences(account.type, Context.MODE_PRIVATE)
         preferences.edit().putString(RETROAUTH_ACCOUNT_NAME_KEY, account.name).apply()
         return account
+    }
+
+    /**
+     * Callback wrapper for adding an account
+     */
+    private class CreateAccountCallback(private val callback: OwnerManager.Callback) : AccountManagerCallback<Bundle> {
+
+        override fun run(accountManagerFuture: AccountManagerFuture<Bundle>) {
+            try {
+                val accountName = accountManagerFuture.result.getString(AccountManager.KEY_ACCOUNT_NAME)
+                callback.done(accountName != null)
+            } catch (e: Exception) {
+                callback.done(false)
+            }
+        }
+    }
+
+    /**
+     * Callback wrapper for account removing on >= lollipop (22) devices
+     */
+    private class RemoveLollipopAccountCallback(private val callback: OwnerManager.Callback) : AccountManagerCallback<Bundle> {
+
+        override fun run(accountManagerFuture: AccountManagerFuture<Bundle>) {
+            try {
+                callback.done(accountManagerFuture.result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT))
+            } catch (e: Exception) {
+                callback.done(false)
+            }
+        }
+    }
+
+    /**
+     * Callback wrapper for account removing on prelollipop (22 -> MR1) devices
+     */
+    private class RemoveAccountCallback(private val callback: OwnerManager.Callback) : AccountManagerCallback<Boolean> {
+
+        override fun run(accountManagerFuture: AccountManagerFuture<Boolean>) {
+            try {
+                callback.done(accountManagerFuture.result)
+            } catch (e: Exception) {
+                callback.done(false)
+            }
+
+        }
     }
 }

@@ -19,7 +19,7 @@ package com.andretietz.retroauth
 /**
  * Since every token belongs to a specific user, this users have to be managed.
  */
-interface OwnerManager<out OWNER : Any, in TOKEN_TYPE : Any> {
+interface OwnerManager<OWNER : Any, in TOKEN_TYPE : Any> {
     /**
      * This method should be used to figure out which user authenticates a request.
      *
@@ -31,5 +31,12 @@ interface OwnerManager<out OWNER : Any, in TOKEN_TYPE : Any> {
      * @param type type of the token
      * @return the owner of the token
      */
-    fun getOwner(type: TOKEN_TYPE): OWNER
+    fun createOrGetOwner(type: TOKEN_TYPE): OWNER
+
+
+    fun removeOwner(owner: OWNER, callback: Callback?)
+
+    interface Callback {
+        fun done(success: Boolean)
+    }
 }
