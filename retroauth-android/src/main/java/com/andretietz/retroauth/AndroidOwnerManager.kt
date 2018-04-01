@@ -30,28 +30,32 @@ import java.util.concurrent.locks.ReentrantLock
 /**
  * This is the Android implementation of an [OwnerManager]. It does all the Android [Account] handling
  */
-internal class AndroidOwnerManager(
+@Suppress("unused")
+class AndroidOwnerManager(
         private val application: Application,
-        private val accountManager: AccountManager = AccountManager.get(application),
-        private val accountHelper: AccountHelper = AccountHelper(application, accountManager)
+        private val accountManager: AccountManager = AccountManager.get(application)
 ) : OwnerManager<Account, AndroidTokenType> {
+
+    companion object {
+        private const val RETROAUTH_ACCOUNT_NAME_KEY = "com.andretietz.retroauth.ACTIVE_ACCOUNT"
+    }
 
     private val activityManager: ActivityManager = ActivityManager.get(application)
 
     @Throws(AuthenticationCanceledException::class)
     override fun getOwner(type: AndroidTokenType): Account {
         // get active account name
-        var accountName = accountHelper.getCurrentAccountName(type.accountType)
+        var accountName = getCurrentAccountName(type.accountType)
         if (accountName == null) {
             // if there's no active account choose one from the available once
             accountName = showAccountPickerDialog(type.accountType, true)
         }
         val account = if (accountName != null) {
-            accountHelper.getAccountByNameIfExists(type.accountType, accountName)!!
+            getAccountByNameIfExists(type.accountType, accountName)!!
         } else {
             createAccount(activityManager.activity, type)
         }
-        accountHelper.setCurrentAccount(account)
+        setCurrentAccount(account)
         return account
     }
 
@@ -165,5 +169,41 @@ internal class AndroidOwnerManager(
             }
             builder.show()
         }
+    }
+
+    private fun getCurrentAccountName(accountType: String): String? {
+        val preferences = application.getSharedPreferences(accountType, Context.MODE_PRIVATE)
+        return preferences.getString(RETROAUTH_ACCOUNT_NAME_KEY, null)
+    }
+
+    /**
+     * This method returns an account if the account exists on in the account manager.
+     *
+     * When calling this method make sure you have the correct permission to read this accountType. Since you
+     * probably want to read your own account number, no permission is required for this.
+     * If not, you need [android.Manifest.permission.GET_ACCOUNTS] permission
+     *
+     * @param accountType of which you want to get the active account
+     * @param accountName account name you're searching for
+     * @return the account if found. `null` if not
+     */
+    private fun getAccountByNameIfExists(accountType: String, accountName: String): Account? {
+        val accounts = accountManager.getAccountsByType(accountType)
+        for (account in accounts) {
+            if (accountName == account.name) return account
+        }
+        return null
+    }
+
+    /**
+     * Sets an account to "the current" one.
+     *
+     * @param account account you want to set as active
+     * @return the account which is not the currently active user
+     */
+    private fun setCurrentAccount(account: Account): Account {
+        val preferences = application.getSharedPreferences(account.type, Context.MODE_PRIVATE)
+        preferences.edit().putString(RETROAUTH_ACCOUNT_NAME_KEY, account.name).apply()
+        return account
     }
 }

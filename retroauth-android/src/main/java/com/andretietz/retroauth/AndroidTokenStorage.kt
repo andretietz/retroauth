@@ -24,12 +24,14 @@ import java.util.Locale
 /**
  * This is the implementation of a [TokenStorage] in Android using the Android [AccountManager]
  */
-internal class AndroidTokenStorage(
-        application: Application) :
+class AndroidTokenStorage(
+        application: Application,
+        private val accountManager: AccountManager = AccountManager.get(application)
+) :
         TokenStorage<Account, AndroidTokenType, AndroidToken> {
 
     private val activityManager = ActivityManager[application]
-    private val accountManager = AccountManager.get(application)
+
 
     companion object {
         @JvmStatic

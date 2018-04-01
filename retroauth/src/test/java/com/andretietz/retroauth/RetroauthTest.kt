@@ -44,15 +44,10 @@ class RetroauthTest {
     fun prepare() {
         server = MockWebServer()
         server.start()
-        val methodCache = MethodCache.DefaultMethodCache<String>()
-        val authHandler = AuthenticationHandler(
-                methodCache,
-                ownerManager,
-                tokenStorage,
-                provider
-        )
 
-        val retrofit = Retroauth.Builder(authHandler)
+        val retrofit = Retroauth.Builder(provider,
+                ownerManager,
+                tokenStorage)
                 .baseUrl(server.url("/"))
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(MoshiConverterFactory.create())

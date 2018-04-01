@@ -30,22 +30,22 @@ import java.util.concurrent.Executor
  */
 class Retroauth private constructor() {
 
-    class Builder<OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
-            private val authHandler: AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN>
+    class Builder<OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any> @JvmOverloads constructor(
+            private val tokenProvider: TokenProvider<OWNER, TOKEN_TYPE, TOKEN>,
+            private val ownerManager: OwnerManager<OWNER, TOKEN_TYPE>,
+            private val tokenStorage: TokenStorage<OWNER, TOKEN_TYPE, TOKEN>,
+            private val methodCache: MethodCache<TOKEN_TYPE> = MethodCache.DefaultMethodCache()
     ) {
 
         private val builder: Retrofit.Builder = Retrofit.Builder()
-        private val callAdapterFactories: MutableList<CallAdapter.Factory>
+        private val callAdapterFactories: MutableList<CallAdapter.Factory> = LinkedList()
         private var okHttpClient: OkHttpClient? = null
         private var executor: Executor? = null
-
-        init {
-            this.callAdapterFactories = LinkedList()
-        }
 
         /**
          * [retrofit2.Retrofit.Builder.client]
          */
+        @Suppress("unused")
         fun client(client: OkHttpClient): Builder<OWNER, TOKEN_TYPE, TOKEN> {
             this.okHttpClient = client
             return this
@@ -54,6 +54,7 @@ class Retroauth private constructor() {
         /**
          * [retrofit2.Retrofit.Builder.baseUrl]
          */
+        @Suppress("unused")
         fun baseUrl(baseUrl: HttpUrl): Builder<OWNER, TOKEN_TYPE, TOKEN> {
             this.builder.baseUrl(baseUrl)
             return this
@@ -62,6 +63,7 @@ class Retroauth private constructor() {
         /**
          * [retrofit2.Retrofit.Builder.baseUrl]
          */
+        @Suppress("unused")
         fun baseUrl(baseUrl: String): Builder<OWNER, TOKEN_TYPE, TOKEN> {
             this.builder.baseUrl(baseUrl)
             return this
@@ -70,6 +72,7 @@ class Retroauth private constructor() {
         /**
          * [retrofit2.Retrofit.Builder.addConverterFactory]
          */
+        @Suppress("unused")
         fun addConverterFactory(factory: Converter.Factory): Builder<OWNER, TOKEN_TYPE, TOKEN> {
             this.builder.addConverterFactory(factory)
             return this
@@ -78,6 +81,7 @@ class Retroauth private constructor() {
         /**
          * [retrofit2.Retrofit.Builder.addCallAdapterFactory]
          */
+        @Suppress("unused")
         fun addCallAdapterFactory(factory: CallAdapter.Factory): Builder<OWNER, TOKEN_TYPE, TOKEN> {
             this.callAdapterFactories.add(factory)
             return this
@@ -86,6 +90,7 @@ class Retroauth private constructor() {
         /**
          * [retrofit2.Retrofit.Builder.callbackExecutor]
          */
+        @Suppress("unused")
         fun callbackExecutor(executor: Executor): Builder<OWNER, TOKEN_TYPE, TOKEN> {
             this.executor = executor
             this.builder.callbackExecutor(executor)
@@ -95,6 +100,7 @@ class Retroauth private constructor() {
         /**
          * [retrofit2.Retrofit.Builder.validateEagerly]
          */
+        @Suppress("unused")
         fun validateEagerly(validateEagerly: Boolean): Builder<OWNER, TOKEN_TYPE, TOKEN> {
             this.builder.validateEagerly(validateEagerly)
             return this
@@ -110,8 +116,8 @@ class Retroauth private constructor() {
 
             // creating a custom calladapter to handle authentication
             val callAdapter = RetroauthCallAdapterFactory(callAdapterFactories,
-                    authHandler.provider,
-                    authHandler.methodCache)
+                    tokenProvider,
+                    methodCache)
 
             // use this callAdapter to create the retrofit object
             this.builder.addCallAdapterFactory(callAdapter)
@@ -120,10 +126,10 @@ class Retroauth private constructor() {
 
             // create the okhttp interceptor to intercept requests
             val interceptor = CredentialInterceptor(
-                    authHandler.provider,
-                    authHandler.ownerManager,
-                    authHandler.tokenStorage,
-                    authHandler.methodCache
+                    tokenProvider,
+                    ownerManager,
+                    tokenStorage,
+                    methodCache
             )
 
             // add it as the first interceptor to be used

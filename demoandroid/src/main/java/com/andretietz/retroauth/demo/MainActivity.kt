@@ -5,9 +5,8 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.webkit.CookieManager
 import android.widget.Toast
-import com.andretietz.retroauth.AndroidAuthenticationHandler
 import com.andretietz.retroauth.AndroidToken
-import com.andretietz.retroauth.Retroauth
+import com.andretietz.retroauth.RetroauthAndroidBuilder
 import com.andretietz.retroauth.RetroauthHelper
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -42,9 +41,9 @@ class MainActivity : AppCompatActivity() {
         val provider = ProviderFacebook(application)
 
         /**
-         * Create your Retrofit Object using the [Retroauth.Builder]
+         * Create your Retrofit Object using the [RetroauthAndroidBuilder.Builder]
          */
-        val retrofit = Retroauth.Builder(AndroidAuthenticationHandler.create(application, provider))
+        val retrofit = RetroauthAndroidBuilder.createBuilder(application, provider)
                 .baseUrl("https://graph.facebook.com/")
                 .client(httpClient)
                 .addConverterFactory(MoshiConverterFactory.create())

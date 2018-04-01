@@ -12,26 +12,19 @@ import org.mockito.junit.MockitoJUnitRunner
 class RetroauthBuilderTest {
 
     @Mock
-    private var provider: TokenProvider<String, String, String>? = null
+    private lateinit var provider: TokenProvider<String, String, String>
     @Mock
-    private var methodCache: MethodCache<String>? = null
+    private lateinit var methodCache: MethodCache<String>
     @Mock
-    private var ownerManager: OwnerManager<String, String>? = null
+    private lateinit var ownerManager: OwnerManager<String, String>
     @Mock
-    private var tokenStorage: TokenStorage<String, String, String>? = null
+    private lateinit var tokenStorage: TokenStorage<String, String, String>
 
     @Test
     fun builder() {
-        val authHandler = AuthenticationHandler(
-                methodCache!!,
-                ownerManager!!,
-                tokenStorage!!,
-                provider!!
-        )
-
         val url = HttpUrl.parse("https://github.com/andretietz/retroauth/")!!
 
-        val retrofit = Retroauth.Builder(authHandler)
+        val retrofit = Retroauth.Builder(provider, ownerManager, tokenStorage, methodCache)
                 .baseUrl(url)
                 .build()
 
