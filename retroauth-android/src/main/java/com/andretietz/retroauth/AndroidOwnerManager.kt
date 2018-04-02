@@ -20,7 +20,6 @@ import android.accounts.Account
 import android.accounts.AccountManager
 import android.accounts.AccountManagerCallback
 import android.accounts.AccountManagerFuture
-import android.app.Activity
 import android.app.AlertDialog
 import android.app.Application
 import android.content.Context
@@ -57,7 +56,7 @@ class AndroidOwnerManager(
         val account = if (accountName != null) {
             getAccountByNameIfExists(type.accountType, accountName)!!
         } else {
-            createAccount(activityManager.activity, type)
+            createAccount(type)
         }
         setCurrentAccount(account)
         return account
@@ -65,13 +64,13 @@ class AndroidOwnerManager(
 
 
     @Throws(AuthenticationCanceledException::class)
-    private fun createAccount(activity: Activity?, type: AndroidTokenType): Account {
+    fun createAccount(type: AndroidTokenType): Account {
         val future = accountManager.addAccount(
                 type.accountType,
                 type.tokenType,
                 null,
                 null,
-                activity,
+                activityManager.activity,
                 null,
                 null)
         val result = future.result
@@ -95,7 +94,7 @@ class AndroidOwnerManager(
         if (Looper.myLooper() == Looper.getMainLooper()) {
             throw RuntimeException("Method was called from the wrong thread!")
         }
-        val accounts = AccountManager.get(application).getAccountsByType(accountType)
+        val accounts = accountManager.getAccountsByType(accountType)
         if (accounts.isEmpty()) return null
         val accountList = ArrayList<String>()
         for (i in accounts.indices) {
@@ -225,7 +224,7 @@ class AndroidOwnerManager(
      * @param account account you want to set as active
      * @return the account which is not the currently active user
      */
-    private fun setCurrentAccount(account: Account): Account {
+    internal fun setCurrentAccount(account: Account): Account {
         val preferences = application.getSharedPreferences(account.type, Context.MODE_PRIVATE)
         preferences.edit().putString(RETROAUTH_ACCOUNT_NAME_KEY, account.name).apply()
         return account

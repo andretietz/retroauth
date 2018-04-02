@@ -21,20 +21,25 @@ package com.andretietz.retroauth
  */
 interface OwnerManager<OWNER : Any, in TOKEN_TYPE : Any> {
     /**
-     * This method should be used to figure out which user authenticates a request.
+     * This method creates or gets the user (owner).
      *
      * * If there is no user on the system yet, start the login procedure, this could cause
      * [AuthenticationCanceledException] when the user cancels the login.
-     * * If there are multiple users on the system, you should ask the user which one to take. This could cause
-     * an [AuthenticationCanceledException].
+     * * If there are multiple users on the system, you should ask the user which one to take.
+     * This could also cause an [AuthenticationCanceledException].
      *
      * @param type type of the token
-     * @return the owner of the token
+     * @return the owner
      */
     fun createOrGetOwner(type: TOKEN_TYPE): OWNER
 
-
-    fun removeOwner(owner: OWNER, callback: Callback?)
+    /**
+     * Removes the given owner from the system.
+     *
+     * @param owner the owner to remove.
+     * @param callback Optional to get notified when the removal is complete.
+     */
+    fun removeOwner(owner: OWNER, callback: Callback? = null)
 
     interface Callback {
         fun done(success: Boolean)

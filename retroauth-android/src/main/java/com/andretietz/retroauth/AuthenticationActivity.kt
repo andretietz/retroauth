@@ -41,7 +41,7 @@ abstract class AuthenticationActivity : AppCompatActivity() {
     private var tokenType: String? = null
     private lateinit var resultBundle: Bundle
     private lateinit var tokenStorage: AndroidTokenStorage
-    private val accountHelper by lazy { AccountHelper(application) }
+    private val ownerManager by lazy { AndroidOwnerManager(application) }
 
     companion object {
         @JvmStatic
@@ -111,7 +111,7 @@ abstract class AuthenticationActivity : AppCompatActivity() {
     @JvmOverloads
     fun finalizeAuthentication(account: Account, finishActivity: Boolean = true) {
         resultBundle.putString(AccountManager.KEY_ACCOUNT_NAME, account.name)
-        accountHelper.setCurrentAccount(account)
+        ownerManager.setCurrentAccount(account)
         if (finishActivity) finish()
     }
 

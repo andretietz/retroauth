@@ -34,7 +34,7 @@ class AndroidTokenStorage(
 
     companion object {
         @JvmStatic
-        fun createDataKey(type: AndroidTokenType, key: String) = String.format(Locale.US, "%s_%s", type.tokenType, key)
+        private fun createDataKey(type: AndroidTokenType, key: String) = String.format(Locale.US, "%s_%s", type.tokenType, key)
     }
 
 
