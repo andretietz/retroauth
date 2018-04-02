@@ -1,13 +1,12 @@
 package com.andretietz.retroauth
 
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
-
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
 
 @RunWith(RobolectricTestRunner::class)
 class ActivityManagerTest {
@@ -19,7 +18,6 @@ class ActivityManagerTest {
     }
 
     @Test
-    @Throws(Exception::class)
     fun initializing() {
         val activityManager = ActivityManager[RuntimeEnvironment.application]
         assertNotNull(activityManager)

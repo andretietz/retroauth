@@ -4,15 +4,20 @@ import android.accounts.Account
 import android.accounts.AccountAuthenticatorResponse
 import android.accounts.AccountManager
 import android.annotation.SuppressLint
+import android.os.Bundle
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyString
+import org.mockito.ArgumentMatchers.eq
+import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
+import org.mockito.Mockito.spy
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.robolectric.Robolectric
@@ -44,37 +49,41 @@ class AuthenticationActivityTest {
 
     @Test
     fun startActivitySuccess() {
-        val intent = AuthenticationActivity.createLoginIntent("action", "account", "token")
-        Robolectric.buildActivity(RetroauthTestLoginActivity::class.java, intent).setup()
+        Robolectric.buildActivity(
+                RetroauthTestLoginActivity::class.java,
+                AuthenticationActivity.createLoginIntent("action", "account", "token"))
+                .setup()
     }
 
-    @Test
-    @Throws(NoSuchFieldException::class, IllegalAccessException::class)
     fun storeTokenWithoutRefreshToken() {
         val account = mock(Account::class.java)
         val accountManager = mock(AccountManager::class.java)
         val activity = activityController.get()
+
         activity.setTestAccountManager(accountManager)
         activity.storeToken(account, "token-type", "token")
 
         verify(accountManager, times(1)).setAuthToken(any(Account::class.java), anyString(), anyString())
     }
 
-    @Test
-    @Throws(NoSuchFieldException::class, IllegalAccessException::class)
     fun storeTokenWithRefreshToken() {
-        val account = mock(Account::class.java)
+        val account = Account("acount-name", "accountType")
         val accountManager = mock(AccountManager::class.java)
         val activity = activityController.get()
+        val tokenStorage = Mockito.spy(AndroidTokenStorage(activity.application))
         activity.setTestAccountManager(accountManager)
+        activity.setTestTokenStorage(tokenStorage)
 
-        activity.storeToken(account, "token-type", "token", "refreshToken")
+        activity.storeToken(account, "tokenType", "token", mapOf("refreshToken" to "refreshToken"))
 
-        verify(accountManager, times(2)).setAuthToken(any(Account::class.java), anyString(), anyString())
+        verify(tokenStorage, times(1))
+                .storeToken(
+                        eq(account),
+                        eq(AndroidTokenType("accountType", "tokenType", setOf("refreshToken"))),
+                        eq(AndroidToken("token")))
     }
 
     @Test
-    @Throws(NoSuchFieldException::class, IllegalAccessException::class)
     fun setUserData() {
         val account = mock(Account::class.java)
         val accountManager = mock(AccountManager::class.java)
@@ -87,7 +96,6 @@ class AuthenticationActivityTest {
     }
 
     @Test
-    @Throws(NoSuchFieldException::class, IllegalAccessException::class)
     fun createOrGetAccountWhenNoAccountExists() {
         val accountManager = mock(AccountManager::class.java)
         val activity = activityController.get()
@@ -104,7 +112,6 @@ class AuthenticationActivityTest {
     }
 
     @Test
-    @Throws(NoSuchFieldException::class, IllegalAccessException::class)
     fun createOrGetAccountWhenAccountExists() {
         val accountManager = mock(AccountManager::class.java)
         val activity = activityController.get()
@@ -123,7 +130,6 @@ class AuthenticationActivityTest {
 
     @SuppressLint("NewApi")
     @Test
-    @Throws(NoSuchFieldException::class, IllegalAccessException::class)
     fun removeAccount() {
         val accountManager = mock(AccountManager::class.java)
         val activity = activityController.get()
@@ -135,33 +141,28 @@ class AuthenticationActivityTest {
         verify(accountManager, times(1)).removeAccount(account, null, null, null)
     }
 
-    @Test
     fun finalizeAuthenticationWithClosingActivity() {
-        val activity = activityController.get()
+        val activity = spy(activityController.get())
         val account = mock(Account::class.java)
         activity.finalizeAuthentication(account)
+        verify(activity, times(1)).finish()
     }
 
     @Test
     fun finalizeAuthenticationWithoutClosingActivity() {
-        val activity = activityController.get()
+        val activity = spy(activityController.get())
         val account = mock(Account::class.java)
         activity.finalizeAuthentication(account, false)
+        verify(activity, never()).finish()
     }
 
 
-    @Test
-    fun finish() {
-        val activity = activityController.get()
-        activity.finish()
-    }
-
-    @Test
-    @Throws(NoSuchFieldException::class, IllegalAccessException::class)
     fun finishFromAuthenticator() {
         val activity = activityController.get()
-        activity.setTestResponse(mock(AccountAuthenticatorResponse::class.java))
+        val response = mock(AccountAuthenticatorResponse::class.java)
+        activity.setTestResponse(response)
         activity.finish()
+        verify(response, times(1)).onResult(any(Bundle::class.java))
     }
 
     @Test

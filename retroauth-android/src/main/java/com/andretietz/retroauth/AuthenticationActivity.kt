@@ -40,7 +40,7 @@ abstract class AuthenticationActivity : AppCompatActivity() {
     protected lateinit var accountManager: AccountManager
     private var tokenType: String? = null
     private lateinit var resultBundle: Bundle
-    private lateinit var tokenStorage: AndroidTokenStorage
+    protected lateinit var tokenStorage: AndroidTokenStorage
     private val ownerManager by lazy { AndroidOwnerManager(application) }
 
     companion object {

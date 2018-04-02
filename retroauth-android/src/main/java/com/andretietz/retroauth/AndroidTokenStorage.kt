@@ -19,6 +19,7 @@ package com.andretietz.retroauth
 import android.accounts.Account
 import android.accounts.AccountManager
 import android.app.Application
+import android.os.Looper
 import java.util.Locale
 
 /**
@@ -39,10 +40,12 @@ class AndroidTokenStorage(
 
 
     override fun getToken(owner: Account, type: AndroidTokenType): AndroidToken {
-        var token: String?
-        val future = accountManager.getAuthToken(owner, type.tokenType, null, activityManager.activity, null, null)
-        val result = future.result
-        token = result.getString(AccountManager.KEY_AUTHTOKEN)
+        var token: String? = null
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            val future = accountManager.getAuthToken(owner, type.tokenType, null, activityManager.activity, null, null)
+            val result = future.result
+            token = result.getString(AccountManager.KEY_AUTHTOKEN)
+        }
         if (token == null) {
             token = accountManager.peekAuthToken(owner, type.tokenType)
         }

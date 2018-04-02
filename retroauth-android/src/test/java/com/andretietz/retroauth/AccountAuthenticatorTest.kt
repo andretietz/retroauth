@@ -31,7 +31,6 @@ class AccountAuthenticatorTest {
     }
 
     @Test
-    @Throws(NoSuchFieldException::class, IllegalAccessException::class)
     fun constructor() {
         val authenticator = AccountAuthenticator(mock(Context::class.java), "some-action")
         assertNotNull(authenticator.action)
@@ -39,10 +38,9 @@ class AccountAuthenticatorTest {
     }
 
     @Test
-    @Throws(NetworkErrorException::class)
     fun addAccount() {
         val response = mock(AccountAuthenticatorResponse::class.java)
-        val bundle = authenticator!!.addAccount(response, "accountType", "tokenType",
+        val bundle = authenticator.addAccount(response, "accountType", "tokenType",
                 arrayOf(), mock(Bundle::class.java))
 
         assertNotNull(bundle)
@@ -57,11 +55,10 @@ class AccountAuthenticatorTest {
     }
 
     @Test
-    @Throws(NetworkErrorException::class)
     fun getAuthToken() {
         val response = mock(AccountAuthenticatorResponse::class.java)
         val account = Account("accountName", "accountType")
-        val bundle = authenticator!!.getAuthToken(response, account, "tokenType", mock(Bundle::class.java))
+        val bundle = authenticator.getAuthToken(response, account, "tokenType", mock(Bundle::class.java))
 
         assertNotNull(bundle)
         val intent = bundle.getParcelable<Intent>(AccountManager.KEY_INTENT)
@@ -76,41 +73,36 @@ class AccountAuthenticatorTest {
     }
 
     @Test
-    @Throws(NetworkErrorException::class)
     fun hasFeatures() {
-        val bundle = authenticator!!
+        val bundle = authenticator
                 .hasFeatures(mock(AccountAuthenticatorResponse::class.java), mock(Account::class.java), arrayOf())
         assertNull(bundle)
     }
 
     @Test
-    @Throws(NetworkErrorException::class)
     fun updateCredentials() {
-        val bundle = authenticator!!
+        val bundle = authenticator
                 .updateCredentials(mock(AccountAuthenticatorResponse::class.java), mock(Account::class.java), "token-type",
                         mock(Bundle::class.java))
         assertNull(bundle)
     }
 
     @Test
-    @Throws(NetworkErrorException::class)
     fun getAuthTokenLabel() {
-        val label = authenticator!!.getAuthTokenLabel("token-type")
+        val label = authenticator.getAuthTokenLabel("token-type")
         assertNull(label)
     }
 
     @Test
-    @Throws(NetworkErrorException::class)
     fun editProperties() {
-        val bundle = authenticator!!
+        val bundle = authenticator
                 .editProperties(mock(AccountAuthenticatorResponse::class.java), "accountType")
         assertNull(bundle)
     }
 
     @Test
-    @Throws(NetworkErrorException::class)
     fun confirmCredentials() {
-        val bundle = authenticator!!
+        val bundle = authenticator
                 .confirmCredentials(mock(AccountAuthenticatorResponse::class.java), mock(Account::class.java), mock(Bundle::class.java))
         assertNull(bundle)
     }
