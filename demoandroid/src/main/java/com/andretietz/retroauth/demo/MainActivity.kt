@@ -70,14 +70,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         buttonInvalidateToken.setOnClickListener {
-            val account = ownerManager.createOrGetOwner(provider.tokenType)
-            tokenStorage.storeToken(account, provider.tokenType, AndroidToken("some-invalid-token"))
+            ownerManager.getOwner(provider.ownerType)?.let { account ->
+                tokenStorage.storeToken(account, provider.tokenType, AndroidToken("some-invalid-token"))
+            }
         }
 
         buttonLogout.setOnClickListener {
-            val account = ownerManager.createOrGetOwner(provider.tokenType)
-            val token = tokenStorage.getToken(account, provider.tokenType)
-            tokenStorage.removeToken(account, provider.tokenType, token)
+            ownerManager.getOwner(provider.ownerType)?.let { account ->
+                val token = tokenStorage.getToken(account, provider.tokenType)
+                tokenStorage.removeToken(account, provider.tokenType, token)
+            }
             /** remove all cookies to avoid an automatic relogin */
             val cookieManager = CookieManager.getInstance()
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {

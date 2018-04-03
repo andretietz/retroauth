@@ -23,7 +23,7 @@ import okhttp3.Response
  * The TokenProvider interface is a very specific provider endpoint dependent implementation,
  * to authenticate your request and defines when or if to retry.
  */
-interface TokenProvider<in OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any> {
+abstract class TokenProvider<out OWNER_TYPE : Any, in OWNER : Owner<OWNER_TYPE>, TOKEN_TYPE : Any, TOKEN : Any> {
 
     /**
      * Creates a token type object.
@@ -31,7 +31,9 @@ interface TokenProvider<in OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any> {
      * @param annotationValues The values from the [Authenticated] annotation
      * @return a token type.
      */
-    fun createTokenType(annotationValues: IntArray): TOKEN_TYPE
+    abstract fun getTokenType(annotationValues: IntArray? = null): TOKEN_TYPE
+
+    abstract fun getOwnerType(annotationValues: IntArray? = null): OWNER_TYPE
 
     /**
      * Authenticates a [Request].
@@ -40,7 +42,7 @@ interface TokenProvider<in OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any> {
      * @param token   Token to authenticate
      * @return a modified version of the incoming request, which is authenticated
      */
-    fun authenticateRequest(request: Request, token: TOKEN): Request
+    abstract fun authenticateRequest(request: Request, token: TOKEN): Request
 
     /**
      * Checks if the token needs to be refreshed or not.
@@ -49,19 +51,23 @@ interface TokenProvider<in OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any> {
      * @param response     response to check what the result was
      * @return {@code true} if a token refresh is required, {@code false} if not
      */
-    fun refreshRequired(count: Int, response: Response): Boolean = (response.code() == 401 && count <= 1)
+    fun refreshRequired(count: Int, response: Response): Boolean {
+        return (response.code() == 401 && count <= 1)
+    }
 
-    /**
+            /**
      * This method will be called when [isTokenValid] returned false or [refreshRequired] returned true.
      *
      * @param token of the local [TokenStorage]
      */
-    fun refreshToken(owner: OWNER, tokenType: TOKEN_TYPE, token: TOKEN): TOKEN? = token
+    @Suppress("UNUSED_PARAMETER")
+    open fun refreshToken(owner: OWNER, tokenType: TOKEN_TYPE, token: TOKEN): TOKEN? = token
 
     /**
      * This method is called on each authenticated request, to make sure the current token is still valid.
      *
      * @param token The current token
      */
-    fun isTokenValid(token: TOKEN): Boolean = true
+    @Suppress("UNUSED_PARAMETER")
+    open fun isTokenValid(token: TOKEN): Boolean = true
 }

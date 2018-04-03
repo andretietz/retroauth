@@ -19,7 +19,7 @@ package com.andretietz.retroauth
 /**
  * This is the interface of a token storage.
  */
-interface TokenStorage<in OWNER : Any, in TOKEN_TYPE : Any, TOKEN : Any> {
+interface TokenStorage<out OWNER_TYPE : Any, in OWNER : Owner<OWNER_TYPE>, in TOKEN_TYPE : Any, TOKEN : Any> {
 
     /**
      * This method returns an authentication token that is stored locally
@@ -37,7 +37,7 @@ interface TokenStorage<in OWNER : Any, in TOKEN_TYPE : Any, TOKEN : Any> {
      * @param type  Type of the token
      * @param token Token to remove
      */
-    fun removeToken(owner: OWNER, type: TOKEN_TYPE, token: TOKEN)
+    fun removeToken(owner: OWNER, type: TOKEN_TYPE, token: TOKEN): TOKEN
 
     /**
      * Stores a token of a specific type and owner to the token storage.

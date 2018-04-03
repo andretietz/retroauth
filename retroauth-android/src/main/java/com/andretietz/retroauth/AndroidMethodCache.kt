@@ -22,11 +22,13 @@ import android.util.SparseArray
  * Since [SparseArray] is on Android slightly faster, you can use this instead of the default implementation
  * [MethodCache.DefaultMethodCache]
  */
-internal class AndroidMethodCache : MethodCache<AndroidTokenType> {
+internal class AndroidMethodCache : MethodCache<String, AndroidTokenType> {
+    private val cache = SparseArray<RequestType<String, AndroidTokenType>>()
 
-    private val cache = SparseArray<AndroidTokenType>()
+    override fun register(requestIdentifier: Int, type: RequestType<String, AndroidTokenType>) {
+        cache.put(requestIdentifier, type)
+    }
 
-    override fun register(requestIdentifier: Int, type: AndroidTokenType) = cache.append(requestIdentifier, type)
+    override fun getTokenType(requestIdentifier: Int): RequestType<String, AndroidTokenType>? = cache[requestIdentifier]
 
-    override fun getTokenType(requestIdentifier: Int): AndroidTokenType = cache.get(requestIdentifier)
 }

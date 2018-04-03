@@ -88,9 +88,8 @@ abstract class AuthenticationActivity : AppCompatActivity() {
      * @param data         data that belongs to the data. i.e. expiring date etc.
      */
     @JvmOverloads
-    fun storeToken(account: Account, tokenType: String, token: String, data: Map<String, String>? = null) {
-        val type = AndroidTokenType(account.type, tokenType, data?.keys)
-        tokenStorage.storeToken(account, type, AndroidToken(token, data))
+    fun storeToken(account: AndroidOwner, tokenType: AndroidTokenType, token: String, data: Map<String, String>? = null) {
+        tokenStorage.storeToken(account, tokenType, AndroidToken(token, data))
     }
 
     /**

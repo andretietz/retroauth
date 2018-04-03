@@ -23,7 +23,7 @@ import java.util.HashMap
  * authenticating the request itself. The identifier is created right now
  * in [Utils.createUniqueIdentifier], this may change.
  */
-interface MethodCache<TOKEN_TYPE : Any> {
+interface MethodCache<OWNER_TYPE : Any, TOKEN_TYPE : Any> {
 
     /**
      * Registers a token type with a specific identifier.
@@ -31,27 +31,27 @@ interface MethodCache<TOKEN_TYPE : Any> {
      * @param requestIdentifier to identify the request later on
      * @param type              type of token to bind to the requestIdentifier
      */
-    fun register(requestIdentifier: Int, type: TOKEN_TYPE)
+    fun register(requestIdentifier: Int, type: RequestType<OWNER_TYPE, TOKEN_TYPE>)
 
     /**
      * @param requestIdentifier the request identifier
      * @return the token type to authenticate the request
      */
-    fun getTokenType(requestIdentifier: Int): TOKEN_TYPE?
+    fun getTokenType(requestIdentifier: Int): RequestType<OWNER_TYPE, TOKEN_TYPE>?
 
     /**
      * The default implementation of the [MethodCache].
      *
      * @param <TOKEN_TYPE>
      */
-    class DefaultMethodCache<TOKEN_TYPE : Any> : MethodCache<TOKEN_TYPE> {
-        private val map = HashMap<Int, TOKEN_TYPE>()
+    class DefaultMethodCache<OWNER_TYPE : Any, TOKEN_TYPE : Any> : MethodCache<OWNER_TYPE, TOKEN_TYPE> {
+        private val map = HashMap<Int, RequestType<OWNER_TYPE, TOKEN_TYPE>>()
 
-        override fun register(requestIdentifier: Int, type: TOKEN_TYPE) {
+        override fun register(requestIdentifier: Int, type: RequestType<OWNER_TYPE, TOKEN_TYPE>) {
             map[requestIdentifier] = type
         }
 
-        override fun getTokenType(requestIdentifier: Int): TOKEN_TYPE? {
+        override fun getTokenType(requestIdentifier: Int): RequestType<OWNER_TYPE, TOKEN_TYPE>? {
             return map[requestIdentifier]
         }
     }

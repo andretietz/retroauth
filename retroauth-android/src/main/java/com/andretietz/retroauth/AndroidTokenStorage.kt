@@ -16,7 +16,6 @@
 
 package com.andretietz.retroauth
 
-import android.accounts.Account
 import android.accounts.AccountManager
 import android.app.Application
 import android.os.Looper
@@ -29,25 +28,32 @@ class AndroidTokenStorage(
         application: Application,
         private val accountManager: AccountManager = AccountManager.get(application)
 ) :
-        TokenStorage<Account, AndroidTokenType, AndroidToken> {
+        TokenStorage<String, AndroidOwner, AndroidTokenType, AndroidToken> {
+
 
     private val activityManager = ActivityManager[application]
 
     companion object {
         @JvmStatic
-        private fun createDataKey(type: AndroidTokenType, key: String) = String.format(Locale.US, "%s_%s", type.tokenType, key)
+        private fun createDataKey(type: AndroidTokenType, key: String) =
+                String.format(Locale.US, "%s_%s", type.tokenType, key)
     }
 
-
-    override fun getToken(owner: Account, type: AndroidTokenType): AndroidToken {
+    override fun getToken(owner: AndroidOwner, type: AndroidTokenType): AndroidToken {
         var token: String? = null
         if (Looper.myLooper() != Looper.getMainLooper()) {
-            val future = accountManager.getAuthToken(owner, type.tokenType, null, activityManager.activity, null, null)
+            val future = accountManager.getAuthToken(
+                    owner.account,
+                    type.tokenType,
+                    null,
+                    activityManager.activity,
+                    null,
+                    null)
             val result = future.result
             token = result.getString(AccountManager.KEY_AUTHTOKEN)
         }
         if (token == null) {
-            token = accountManager.peekAuthToken(owner, type.tokenType)
+            token = accountManager.peekAuthToken(owner.account, type.tokenType)
         }
         if (token == null) throw IllegalStateException(
                 String.format("No token found! Make sure you store the token during login using %s#storeToken()",
@@ -57,23 +63,25 @@ class AndroidTokenStorage(
                 token,
                 type.dataKeys
                         ?.associateTo(HashMap()) {
-                            it to accountManager.getUserData(owner, createDataKey(type, it))
+                            it to accountManager.getUserData(owner.account, createDataKey(type, it))
                         }
         )
     }
 
-    override fun removeToken(owner: Account, type: AndroidTokenType, token: AndroidToken) {
-        accountManager.invalidateAuthToken(owner.type, token.token)
-        type.dataKeys?.forEach { accountManager.setUserData(owner, createDataKey(type, it), null) }
+    override fun removeToken(owner: AndroidOwner, type: AndroidTokenType, token: AndroidToken): AndroidToken {
+        accountManager.invalidateAuthToken(owner.getType(), token.token)
+        type.dataKeys?.forEach { accountManager.setUserData(owner.account, createDataKey(type, it), null) }
+        return token
     }
 
-    override fun storeToken(owner: Account, type: AndroidTokenType, token: AndroidToken): AndroidToken {
-        accountManager.setAuthToken(owner, type.tokenType, token.token)
+    override fun storeToken(owner: AndroidOwner, type: AndroidTokenType, token: AndroidToken): AndroidToken {
+        accountManager.setAuthToken(owner.account, type.tokenType, token.token)
         if (type.dataKeys != null && token.data != null) {
             type.dataKeys.forEach {
-                accountManager.setUserData(owner, createDataKey(type, it), token.data[it])
+                accountManager.setUserData(owner.account, createDataKey(type, it), token.data[it])
             }
         }
         return token
     }
+
 }

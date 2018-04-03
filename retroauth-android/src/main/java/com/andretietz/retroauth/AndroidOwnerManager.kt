@@ -37,7 +37,7 @@ import java.util.concurrent.locks.ReentrantLock
 class AndroidOwnerManager(
         private val application: Application,
         private val accountManager: AccountManager = AccountManager.get(application)
-) : OwnerManager<Account, AndroidTokenType> {
+) : OwnerManager<String, AndroidOwner> {
 
     companion object {
         private const val RETROAUTH_ACCOUNT_NAME_KEY = "com.andretietz.retroauth.ACTIVE_ACCOUNT"
@@ -46,38 +46,57 @@ class AndroidOwnerManager(
     private val activityManager: ActivityManager = ActivityManager.get(application)
 
     @Throws(AuthenticationCanceledException::class)
-    override fun createOrGetOwner(type: AndroidTokenType): Account {
+    override fun createOwner(ownerType: String, callback: OwnerManager.Callback?): AndroidOwner {
         // get active account name
-        var accountName = getCurrentAccountName(type.accountType)
+        var accountName = getCurrentAccountName(ownerType)
         if (accountName == null) {
             // if there's no active account choose one from the available once
-            accountName = showAccountPickerDialog(type.accountType, true)
+            accountName = showAccountPickerDialog(ownerType, true)
         }
         val account = if (accountName != null) {
-            getAccountByNameIfExists(type.accountType, accountName)!!
+            getAccountByNameIfExists(ownerType, accountName)!!
         } else {
-            createAccount(type)
+            createAccount(ownerType, callback)
         }
-        setCurrentAccount(account)
+        setCurrentAccount(account.account)
         return account
+    }
+
+    override fun getOwner(ownerType: String): AndroidOwner? {
+        getCurrentAccountName(ownerType)?.let { accountName ->
+            return getAccountByNameIfExists(ownerType, accountName)
+        }
+        return null
+    }
+
+    override fun removeOwner(owner: AndroidOwner, callback: OwnerManager.Callback?) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            val rac = if (callback != null) RemoveLollipopAccountCallback(callback) else null
+            accountManager.removeAccount(owner.account, null, rac, null)
+        } else {
+            val rac = if (callback != null) RemoveAccountCallback(callback) else null
+            @Suppress("DEPRECATION")
+            accountManager.removeAccount(owner.account, rac, null)
+        }
+        resetCurrentAccount(owner.getType())
     }
 
 
     @Throws(AuthenticationCanceledException::class)
-    fun createAccount(type: AndroidTokenType): Account {
+    private fun createAccount(accountType: String, callback: OwnerManager.Callback? = null): AndroidOwner {
         val future = accountManager.addAccount(
-                type.accountType,
-                type.tokenType,
+                accountType,
+                null,
                 null,
                 null,
                 activityManager.activity,
-                null,
+                if (callback != null) CreateAccountCallback(callback) else null,
                 null)
         val result = future.result
         val accountName = result.getString(AccountManager.KEY_ACCOUNT_NAME)
         if (accountName != null) {
-            return Account(result.getString(AccountManager.KEY_ACCOUNT_NAME),
-                    result.getString(AccountManager.KEY_ACCOUNT_TYPE))
+            return AndroidOwner(Account(result.getString(AccountManager.KEY_ACCOUNT_NAME),
+                    result.getString(AccountManager.KEY_ACCOUNT_TYPE)))
         }
         throw AuthenticationCanceledException()
     }
@@ -175,20 +194,6 @@ class AndroidOwnerManager(
     }
 
 
-    @Suppress("unused")
-    override fun removeOwner(owner: Account, callback: OwnerManager.Callback?) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            val rac = if (callback != null) RemoveLollipopAccountCallback(callback) else null
-            accountManager.removeAccount(owner, null, rac, null)
-        } else {
-            val rac = if (callback != null) RemoveAccountCallback(callback) else null
-            @Suppress("DEPRECATION")
-            accountManager.removeAccount(owner, rac, null)
-        }
-        resetCurrentAccount(owner.type)
-    }
-
-
     private fun getCurrentAccountName(accountType: String): String? {
         val preferences = application.getSharedPreferences(accountType, Context.MODE_PRIVATE)
         return preferences.getString(RETROAUTH_ACCOUNT_NAME_KEY, null)
@@ -205,10 +210,10 @@ class AndroidOwnerManager(
      * @param accountName account name you're searching for
      * @return the account if found. `null` if not
      */
-    private fun getAccountByNameIfExists(accountType: String, accountName: String): Account? {
+    private fun getAccountByNameIfExists(accountType: String, accountName: String): AndroidOwner? {
         val accounts = accountManager.getAccountsByType(accountType)
         for (account in accounts) {
-            if (accountName == account.name) return account
+            if (accountName == account.name) return AndroidOwner(account)
         }
         return null
     }
@@ -224,7 +229,7 @@ class AndroidOwnerManager(
      * @param account account you want to set as active
      * @return the account which is not the currently active user
      */
-    internal fun setCurrentAccount(account: Account): Account {
+    fun setCurrentAccount(account: Account): Account {
         val preferences = application.getSharedPreferences(account.type, Context.MODE_PRIVATE)
         preferences.edit().putString(RETROAUTH_ACCOUNT_NAME_KEY, account.name).apply()
         return account

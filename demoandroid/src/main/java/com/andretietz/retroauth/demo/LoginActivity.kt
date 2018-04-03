@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import com.andretietz.retroauth.AndroidOwner
 import com.andretietz.retroauth.AuthenticationActivity
 import com.github.scribejava.apis.FacebookApi
 import com.github.scribejava.core.builder.ServiceBuilder
@@ -33,6 +34,8 @@ class LoginActivity : AuthenticationActivity() {
             .httpClient(OkHttpHttpClient())
             .build(FacebookApi.instance())
 
+    private val provider by lazy { ProviderFacebook(application) }
+
     override fun onCreate(icicle: Bundle?) {
         super.onCreate(icicle)
         setContentView(R.layout.activity_login)
@@ -59,8 +62,8 @@ class LoginActivity : AuthenticationActivity() {
                                         .convert((result.token.expiresIn - 30).toLong(), TimeUnit.SECONDS)
                                         .plus(System.currentTimeMillis())
                                 storeToken(
-                                        account,
-                                        getRequestedTokenType()!!,
+                                        AndroidOwner(account),
+                                        provider.tokenType,
                                         result.token.accessToken,
                                         mapOf(
                                                 ProviderFacebook.KEY_TOKEN_VALIDITY

@@ -19,7 +19,8 @@ package com.andretietz.retroauth
 /**
  * Since every token belongs to a specific user, this users have to be managed.
  */
-interface OwnerManager<OWNER : Any, in TOKEN_TYPE : Any> {
+interface OwnerManager<OWNER_TYPE : Any, OWNER : Owner<OWNER_TYPE>> {
+
     /**
      * This method creates or gets the user (owner).
      *
@@ -28,10 +29,16 @@ interface OwnerManager<OWNER : Any, in TOKEN_TYPE : Any> {
      * * If there are multiple users on the system, you should ask the user which one to take.
      * This could also cause an [AuthenticationCanceledException].
      *
-     * @param type type of the token
+     * @param ownerType type of the owner
      * @return the owner
      */
-    fun createOrGetOwner(type: TOKEN_TYPE): OWNER
+    fun createOwner(ownerType: OWNER_TYPE, callback: OwnerManager.Callback? = null): OWNER
+
+    /**
+     * Returns the owner if it exists on the system
+     */
+    fun getOwner(ownerType: OWNER_TYPE): OWNER?
+
 
     /**
      * Removes the given owner from the system.
