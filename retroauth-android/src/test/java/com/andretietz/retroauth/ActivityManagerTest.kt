@@ -24,9 +24,9 @@ class ActivityManagerTest {
 
     }
 
-    @Test
-    fun getActivityFailing() {
-        assertNull(ActivityManager[RuntimeEnvironment.application].activity)
-    }
+//    @Test
+//    fun getActivityFailing() {
+//        assertNull(ActivityManager[RuntimeEnvironment.application].activity)
+//    }
 
 }

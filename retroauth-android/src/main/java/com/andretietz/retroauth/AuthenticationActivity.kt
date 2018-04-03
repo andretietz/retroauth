@@ -45,7 +45,8 @@ abstract class AuthenticationActivity : AppCompatActivity() {
 
     companion object {
         @JvmStatic
-        fun createLoginIntent(action: String, accountType: String, tokenType: String?): Intent {
+        @JvmOverloads
+        fun createLoginIntent(action: String, accountType: String, tokenType: String? = null): Intent {
             val intent = Intent(action)
             intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, accountType)
             intent.putExtra(AccountAuthenticator.KEY_TOKEN_TYPE, tokenType)
@@ -56,17 +57,19 @@ abstract class AuthenticationActivity : AppCompatActivity() {
     override fun onCreate(icicle: Bundle?) {
         super.onCreate(icicle)
         accountManager = AccountManager.get(application)
+        tokenStorage = AndroidTokenStorage(application)
+
         accountAuthenticatorResponse = intent.getParcelableExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)
         accountAuthenticatorResponse?.onRequestContinued()
-        tokenStorage = AndroidTokenStorage(application)
+
         val accountType = intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE)
         if (accountType == null) {
             accountAuthenticatorResponse?.onError(AccountManager.ERROR_CODE_CANCELED, "canceled")
             throw IllegalStateException(
                     String.format(
                             "This Activity cannot be started without the \"%s\" extra in the intent! "
-                                    + "Use the \"addAccount\"-Method of the \"TODO\" for opening the Login manually.",
-                            AccountManager.KEY_ACCOUNT_TYPE))
+                                    + "Use the \"createAccount\"-Method of the \"%s\" for opening the Login manually.",
+                            AccountManager.KEY_ACCOUNT_TYPE, OwnerManager::class.java.simpleName))
         }
         this.accountType = accountType
         tokenType = intent.getStringExtra(AccountAuthenticator.KEY_TOKEN_TYPE)
@@ -154,7 +157,7 @@ abstract class AuthenticationActivity : AppCompatActivity() {
      */
     override fun finish() {
         if (accountAuthenticatorResponse != null) {
-            accountAuthenticatorResponse!!.onResult(resultBundle)
+            accountAuthenticatorResponse?.onResult(resultBundle)
             accountAuthenticatorResponse = null
         } else {
             if (resultBundle.containsKey(AccountManager.KEY_ACCOUNT_NAME)) {

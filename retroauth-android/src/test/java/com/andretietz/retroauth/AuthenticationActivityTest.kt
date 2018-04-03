@@ -7,7 +7,6 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
