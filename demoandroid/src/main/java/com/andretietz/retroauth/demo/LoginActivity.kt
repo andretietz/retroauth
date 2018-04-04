@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import com.andretietz.retroauth.AndroidOwner
 import com.andretietz.retroauth.AuthenticationActivity
 import com.github.scribejava.apis.FacebookApi
 import com.github.scribejava.core.builder.ServiceBuilder
@@ -62,7 +61,7 @@ class LoginActivity : AuthenticationActivity() {
                                         .convert((result.token.expiresIn - 30).toLong(), TimeUnit.SECONDS)
                                         .plus(System.currentTimeMillis())
                                 storeToken(
-                                        AndroidOwner(account),
+                                        account,
                                         provider.tokenType,
                                         result.token.accessToken,
                                         mapOf(

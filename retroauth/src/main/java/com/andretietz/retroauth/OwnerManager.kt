@@ -19,26 +19,25 @@ package com.andretietz.retroauth
 /**
  * Since every token belongs to a specific user, this users have to be managed.
  */
-interface OwnerManager<OWNER_TYPE : Any, OWNER : Owner<OWNER_TYPE>> {
+interface OwnerManager<in OWNER_TYPE : Any, OWNER : Any, in TOKEN_TYPE : Any> {
 
     /**
-     * This method creates or gets the user (owner).
-     *
-     * * If there is no user on the system yet, start the login procedure, this could cause
-     * [AuthenticationCanceledException] when the user cancels the login.
-     * * If there are multiple users on the system, you should ask the user which one to take.
-     * This could also cause an [AuthenticationCanceledException].
-     *
-     * @param ownerType type of the owner
-     * @return the owner
+     * Creates an OWNER of a specific [OWNER_TYPE] for a specific [TOKEN_TYPE]
      */
-    fun createOwner(ownerType: OWNER_TYPE, callback: OwnerManager.Callback? = null): OWNER
+    @Throws(AuthenticationCanceledException::class)
+    fun createOwner(ownerType: OWNER_TYPE, tokenType: TOKEN_TYPE, callback: OwnerManager.Callback? = null): OWNER
 
     /**
-     * Returns the owner if it exists on the system
+     * @return OWNER if exists
      */
-    fun getOwner(ownerType: OWNER_TYPE): OWNER?
+    fun getOwner(ownerType: OWNER_TYPE, ownerName: String): OWNER?
 
+    fun getActiveOwner(ownerType: OWNER_TYPE): OWNER?
+
+    @Throws(AuthenticationCanceledException::class)
+    fun getOrCreateActiveOwner(ownerType: OWNER_TYPE, tokenType: TOKEN_TYPE): OWNER
+
+    fun switchActiveOwner(ownerType: OWNER_TYPE, owner: OWNER? = null)
 
     /**
      * Removes the given owner from the system.

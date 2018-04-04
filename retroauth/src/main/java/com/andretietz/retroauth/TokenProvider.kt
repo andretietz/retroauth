@@ -23,7 +23,7 @@ import okhttp3.Response
  * The TokenProvider interface is a very specific provider endpoint dependent implementation,
  * to authenticate your request and defines when or if to retry.
  */
-abstract class TokenProvider<out OWNER_TYPE : Any, in OWNER : Owner<OWNER_TYPE>, TOKEN_TYPE : Any, TOKEN : Any> {
+abstract class TokenProvider<out OWNER_TYPE : Any, in OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any> {
 
     /**
      * Creates a token type object.
@@ -31,9 +31,9 @@ abstract class TokenProvider<out OWNER_TYPE : Any, in OWNER : Owner<OWNER_TYPE>,
      * @param annotationValues The values from the [Authenticated] annotation
      * @return a token type.
      */
-    abstract fun getTokenType(annotationValues: IntArray? = null): TOKEN_TYPE
+    abstract fun getTokenType(annotationTokenType: Int = 0): TOKEN_TYPE
 
-    abstract fun getOwnerType(annotationValues: IntArray? = null): OWNER_TYPE
+    abstract fun getOwnerType(annotationOwnerType: Int = 0): OWNER_TYPE
 
     /**
      * Authenticates a [Request].
@@ -55,7 +55,7 @@ abstract class TokenProvider<out OWNER_TYPE : Any, in OWNER : Owner<OWNER_TYPE>,
         return (response.code() == 401 && count <= 1)
     }
 
-            /**
+    /**
      * This method will be called when [isTokenValid] returned false or [refreshRequired] returned true.
      *
      * @param token of the local [TokenStorage]

@@ -70,13 +70,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         buttonInvalidateToken.setOnClickListener {
-            ownerManager.getOwner(provider.ownerType)?.let { account ->
+            ownerManager.getActiveOwner(provider.ownerType)?.let { account ->
                 tokenStorage.storeToken(account, provider.tokenType, AndroidToken("some-invalid-token"))
             }
         }
 
         buttonLogout.setOnClickListener {
-            ownerManager.getOwner(provider.ownerType)?.let { account ->
+            ownerManager.getActiveOwner(provider.ownerType)?.let { account ->
                 val token = tokenStorage.getToken(account, provider.tokenType)
                 tokenStorage.removeToken(account, provider.tokenType, token)
             }

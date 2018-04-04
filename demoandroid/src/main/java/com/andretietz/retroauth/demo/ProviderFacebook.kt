@@ -1,7 +1,7 @@
 package com.andretietz.retroauth.demo
 
+import android.accounts.Account
 import android.app.Application
-import com.andretietz.retroauth.AndroidOwner
 import com.andretietz.retroauth.AndroidToken
 import com.andretietz.retroauth.AndroidTokenStorage
 import com.andretietz.retroauth.AndroidTokenType
@@ -15,7 +15,7 @@ import okhttp3.Request
  * call, in which it will get refreshed
  */
 class ProviderFacebook(application: Application)
-    : TokenProvider<String, AndroidOwner, AndroidTokenType, AndroidToken>() {
+    : TokenProvider<String, Account, AndroidTokenType, AndroidToken>() {
 
 
     private val tokenStorage by lazy { AndroidTokenStorage(application) }
@@ -33,9 +33,9 @@ class ProviderFacebook(application: Application)
 
     val ownerType = application.getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT)
 
-    override fun getTokenType(annotationValues: IntArray?): AndroidTokenType = tokenType
+    override fun getTokenType(annotationTokenType: Int): AndroidTokenType = tokenType
 
-    override fun getOwnerType(annotationValues: IntArray?): String = ownerType
+    override fun getOwnerType(annotationOwnerType: Int): String = ownerType
 
     override fun authenticateRequest(request: Request, token: AndroidToken): Request {
         return request.newBuilder()
@@ -52,7 +52,7 @@ class ProviderFacebook(application: Application)
         return true
     }
 
-    override fun refreshToken(owner: AndroidOwner, tokenType: AndroidTokenType, token: AndroidToken): AndroidToken? {
+    override fun refreshToken(owner: Account, tokenType: AndroidTokenType, token: AndroidToken): AndroidToken? {
         return tokenStorage.getToken(owner, tokenType)
     }
 }

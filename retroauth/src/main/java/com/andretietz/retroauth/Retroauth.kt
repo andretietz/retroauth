@@ -30,10 +30,10 @@ import java.util.concurrent.Executor
  */
 class Retroauth private constructor() {
 
-    class Builder<out OWNER_TYPE : Any, OWNER : Owner<OWNER_TYPE>, TOKEN_TYPE : Any, TOKEN : Any> @JvmOverloads constructor(
+    class Builder<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any> @JvmOverloads constructor(
             private val tokenProvider: TokenProvider<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN>,
-            private val ownerManager: OwnerManager<OWNER_TYPE, OWNER>,
-            private val tokenStorage: TokenStorage<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN>,
+            private val ownerManager: OwnerManager<OWNER_TYPE, OWNER, TOKEN_TYPE>,
+            private val tokenStorage: TokenStorage<OWNER, TOKEN_TYPE, TOKEN>,
             private val methodCache: MethodCache<OWNER_TYPE, TOKEN_TYPE> = MethodCache.DefaultMethodCache()
     ) {
 

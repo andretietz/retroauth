@@ -32,10 +32,10 @@ import java.util.concurrent.locks.ReentrantLock
  * @param <OWNER>      a type that represents the owner of a token. Since there could be multiple users on one client.
  * @param <TOKEN_TYPE> type of the token that should be added to the request
  */
-internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Owner<OWNER_TYPE>, TOKEN_TYPE : Any, TOKEN : Any>(
+internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
         private val tokenProvider: TokenProvider<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN>,
-        private val ownerManager: OwnerManager<OWNER_TYPE, OWNER>,
-        private val tokenStorage: TokenStorage<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN>,
+        private val ownerManager: OwnerManager<OWNER_TYPE, OWNER, TOKEN_TYPE>,
+        private val tokenStorage: TokenStorage<OWNER, TOKEN_TYPE, TOKEN>,
         private val methodCache: MethodCache<OWNER_TYPE, TOKEN_TYPE> = MethodCache.DefaultMethodCache()
 ) : Interceptor {
 
@@ -47,56 +47,52 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Owner<OWNER_T
         var response: Response? = null
         var request = chain.request()
         // get the token type required by this request
-        val type = methodCache.getTokenType(Utils.createUniqueIdentifier(request))
+        val authRequestType = methodCache.getTokenType(Utils.createUniqueIdentifier(request))
+                ?: return chain.proceed(request)
 
         // if the request does require authentication
-        if (type != null) {
-            var pending = false
-            var refreshRequested = false
-            var token: TOKEN
-            var owner: OWNER
-            var tryCount = 0
-            try {
-                do {
-                    try {
-                        // Lock foreach type
-                        pending = lock(type)
-                        // get the owner or open login
-                        owner = ownerManager.getOwner(type.ownerType) ?: ownerManager.createOwner(type.ownerType)
-                        // get the token of the owner
-                        val localToken = tokenStorage.getToken(owner, type.tokenType)
-                        // if the token is still valid and no refresh has been requested
-                        if (tokenProvider.isTokenValid(localToken) && !refreshRequested) {
-                            token = localToken
+        var pending = false
+        var refreshRequested = false
+        var token: TOKEN
+        var owner: OWNER
+        var tryCount = 0
+        try {
+            do {
+                try {
+                    // Lock foreach type
+                    pending = lock(authRequestType)
+
+                    owner = ownerManager.getOrCreateActiveOwner(authRequestType.ownerType, authRequestType.tokenType)
+                    // get the token of the owner
+                    val localToken = tokenStorage.getToken(owner, authRequestType.tokenType)
+                    // if the token is still valid and no refresh has been requested
+                    if (tokenProvider.isTokenValid(localToken) && !refreshRequested) {
+                        token = localToken
+                    } else {
+                        // otherwise remove the current token from the storage
+                        tokenStorage.removeToken(owner, authRequestType.tokenType, localToken)
+                        // try to refresh the token
+                        val refreshedToken = tokenProvider.refreshToken(owner, authRequestType.tokenType, localToken)
+                        if (refreshedToken != null) {
+                            // if the token was refreshed, store it
+                            token = tokenStorage.storeToken(owner, authRequestType.tokenType, refreshedToken)
                         } else {
-                            // otherwise remove the current token from the storage
-                            tokenStorage.removeToken(owner, type.tokenType, localToken)
-                            // try to refresh the token
-                            val refreshedToken = tokenProvider.refreshToken(owner, type.tokenType, localToken)
-                            if (refreshedToken != null) {
-                                // if the token was refreshed, store it
-                                token = tokenStorage.storeToken(owner, type.tokenType, refreshedToken)
-                            } else {
-                                // otherwise use the "old" token
-                                token = localToken
-                            }
+                            // otherwise use the "old" token
+                            token = localToken
                         }
-                        // authenticate the request using the token
-                        request = tokenProvider.authenticateRequest(request, token)
-                    } finally {
-                        // release type lock
-                        unlock(type, pending)
                     }
-                    // execute the request
-                    response = chain.proceed(request)
-                    refreshRequested = tokenProvider.refreshRequired(++tryCount, response!!)
-                } while (refreshRequested)
-            } catch (error: Exception) {
-                storeAndThrowError(type, error)
-            }
-        } else {
-            // no authentication required, proceed as usual
-            response = chain.proceed(request)
+                    // authenticate the request using the token
+                    request = tokenProvider.authenticateRequest(request, token)
+                } finally {
+                    // release type lock
+                    unlock(authRequestType, pending)
+                }
+                // execute the request
+                response = chain.proceed(request)
+                refreshRequested = tokenProvider.refreshRequired(++tryCount, response!!)
+            } while (refreshRequested)
+        } catch (error: Exception) {
+            storeAndThrowError(authRequestType, error)
         }
         return response
     }

@@ -47,9 +47,9 @@ afterEvaluate { project ->
                     authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
                 }
 //                snapshotRepository(url: "file://" + System.getProperty("user.home") + "/.m2/repository/") {
-                snapshotRepository(url: "https://oss.jfrog.org/artifactory/oss-snapshot-local/") {
-                    authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
-                }
+//                snapshotRepository(url: "https://oss.jfrog.org/artifactory/oss-snapshot-local/") {
+//                    authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
+//                }
 
                 pom.project {
                     name POM_NAME

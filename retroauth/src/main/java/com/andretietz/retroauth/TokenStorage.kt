@@ -19,7 +19,7 @@ package com.andretietz.retroauth
 /**
  * This is the interface of a token storage.
  */
-interface TokenStorage<out OWNER_TYPE : Any, in OWNER : Owner<OWNER_TYPE>, in TOKEN_TYPE : Any, TOKEN : Any> {
+interface TokenStorage<in OWNER : Any, in TOKEN_TYPE : Any, TOKEN : Any> {
 
     /**
      * This method returns an authentication token that is stored locally

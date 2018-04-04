@@ -88,7 +88,7 @@ abstract class AuthenticationActivity : AppCompatActivity() {
      * @param data         data that belongs to the data. i.e. expiring date etc.
      */
     @JvmOverloads
-    fun storeToken(account: AndroidOwner, tokenType: AndroidTokenType, token: String, data: Map<String, String>? = null) {
+    fun storeToken(account: Account, tokenType: AndroidTokenType, token: String, data: Map<String, String>? = null) {
         tokenStorage.storeToken(account, tokenType, AndroidToken(token, data))
     }
 
@@ -113,7 +113,7 @@ abstract class AuthenticationActivity : AppCompatActivity() {
     @JvmOverloads
     fun finalizeAuthentication(account: Account, finishActivity: Boolean = true) {
         resultBundle.putString(AccountManager.KEY_ACCOUNT_NAME, account.name)
-        ownerManager.setCurrentAccount(account)
+        ownerManager.switchActiveOwner(account.type, account)
         if (finishActivity) finish()
     }
 
