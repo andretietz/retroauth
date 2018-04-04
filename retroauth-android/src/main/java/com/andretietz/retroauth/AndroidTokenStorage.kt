@@ -25,7 +25,7 @@ import java.util.Locale
 /**
  * This is the implementation of a [TokenStorage] in Android using the Android [AccountManager]
  */
-class AndroidTokenStorage(
+class AndroidTokenStorage @JvmOverloads constructor(
         application: Application,
         private val accountManager: AccountManager = AccountManager.get(application)
 ) :

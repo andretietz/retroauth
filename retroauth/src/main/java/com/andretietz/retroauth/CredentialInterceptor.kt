@@ -63,7 +63,7 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TY
                     pending = lock(authRequestType)
 
                     owner = ownerManager.getActiveOwner(authRequestType.ownerType)
-                            ?: ownerManager.openOwnerPicker(authRequestType.ownerType, authRequestType.tokenType)
+                            ?: ownerManager.openOwnerPicker(authRequestType.ownerType)
                             ?: ownerManager.createOwner(authRequestType.ownerType, authRequestType.tokenType)
                     // get the token of the owner
                     val localToken = tokenStorage.getToken(owner, authRequestType.tokenType)

@@ -22,11 +22,11 @@ package com.andretietz.retroauth
 interface TokenStorage<in OWNER : Any, in TOKEN_TYPE : Any, TOKEN : Any> {
 
     /**
-     * This method returns an authentication token that is stored locally
+     * This method returns an authentication token that is stored locally.
      *
      * @param owner The owner type of the token you want to get
      * @param type  the type of the token you want to get
-     * @return the token to authenticate your request with or {@code null}, if there's no token locally stored
+     * @return the token to authenticate your request with
      */
     fun getToken(owner: OWNER, type: TOKEN_TYPE): TOKEN
 

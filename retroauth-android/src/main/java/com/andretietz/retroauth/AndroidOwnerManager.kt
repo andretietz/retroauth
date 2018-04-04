@@ -39,7 +39,6 @@ class AndroidOwnerManager @JvmOverloads constructor(
         private val accountManager: AccountManager = AccountManager.get(application)
 ) : OwnerManager<String, Account, AndroidTokenType> {
 
-
     companion object {
         private const val RETROAUTH_ACCOUNT_NAME_KEY = "com.andretietz.retroauth.ACTIVE_ACCOUNT"
     }
@@ -79,9 +78,11 @@ class AndroidOwnerManager @JvmOverloads constructor(
         return getOwner(ownerType, accountName)
     }
 
-    override fun openOwnerPicker(ownerType: String, tokenType: AndroidTokenType): Account? {
+    override fun openOwnerPicker(ownerType: String): Account? {
         showAccountPickerDialog(ownerType, true)?.let {
-            return getOwner(ownerType, it)
+            getOwner(ownerType, it)?.let {
+                switchActiveOwner(it.type, it)
+            }
         }
         return null
     }
