@@ -26,13 +26,17 @@ import okhttp3.Response
 abstract class TokenProvider<out OWNER_TYPE : Any, in OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any> {
 
     /**
-     * Creates a token type object.
+     * @param annotationTokenType type of the token reached in from the [Authenticated.tokenType]
+     * Annotation of the request.
      *
-     * @param annotationValues The values from the [Authenticated] annotation
-     * @return a token type.
+     * @return type of the token
      */
     abstract fun getTokenType(annotationTokenType: Int = 0): TOKEN_TYPE
 
+    /**
+     * @param annotationOwnerType type of the owner reached in from the [Authenticated.ownerType]
+     * Annotation of the request.
+     */
     abstract fun getOwnerType(annotationOwnerType: Int = 0): OWNER_TYPE
 
     /**
@@ -51,7 +55,7 @@ abstract class TokenProvider<out OWNER_TYPE : Any, in OWNER : Any, TOKEN_TYPE : 
      * @param response     response to check what the result was
      * @return {@code true} if a token refresh is required, {@code false} if not
      */
-    fun refreshRequired(count: Int, response: Response): Boolean {
+    open fun refreshRequired(count: Int, response: Response): Boolean {
         return (response.code() == 401 && count <= 1)
     }
 

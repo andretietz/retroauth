@@ -29,7 +29,7 @@ interface MethodCache<OWNER_TYPE : Any, TOKEN_TYPE : Any> {
      * Registers a token type with a specific identifier.
      *
      * @param requestIdentifier to identify the request later on
-     * @param type              type of token to bind to the requestIdentifier
+     * @param type              type of the request.
      */
     fun register(requestIdentifier: Int, type: RequestType<OWNER_TYPE, TOKEN_TYPE>)
 

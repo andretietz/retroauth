@@ -19,7 +19,6 @@ package com.andretietz.retroauth
 import android.accounts.Account
 import android.accounts.AccountManager
 import android.app.Application
-import android.os.Looper
 import java.util.Locale
 
 /**
@@ -28,9 +27,7 @@ import java.util.Locale
 class AndroidTokenStorage @JvmOverloads constructor(
         application: Application,
         private val accountManager: AccountManager = AccountManager.get(application)
-) :
-        TokenStorage<Account, AndroidTokenType, AndroidToken> {
-
+) : TokenStorage<Account, AndroidTokenType, AndroidToken> {
 
     private val activityManager = ActivityManager[application]
 
@@ -41,18 +38,16 @@ class AndroidTokenStorage @JvmOverloads constructor(
     }
 
     override fun getToken(owner: Account, type: AndroidTokenType): AndroidToken {
-        var token: String? = null
-        if (Looper.myLooper() != Looper.getMainLooper()) {
-            val future = accountManager.getAuthToken(
-                    owner,
-                    type.tokenType,
-                    null,
-                    activityManager.activity,
-                    null,
-                    null)
-            val result = future.result
-            token = result.getString(AccountManager.KEY_AUTHTOKEN)
-        }
+        var token: String?
+        val future = accountManager.getAuthToken(
+                owner,
+                type.tokenType,
+                null,
+                activityManager.activity,
+                null,
+                null)
+        val result = future.result
+        token = result.getString(AccountManager.KEY_AUTHTOKEN)
         if (token == null) {
             token = accountManager.peekAuthToken(owner, type.tokenType)
         }
@@ -79,6 +74,11 @@ class AndroidTokenStorage @JvmOverloads constructor(
         accountManager.setAuthToken(owner, type.tokenType, token.token)
         if (type.dataKeys != null && token.data != null) {
             type.dataKeys.forEach {
+                if (!token.data.containsKey(it)) throw IllegalArgumentException(
+                        String.format(Locale.US,
+                                "The token you want to store, needs to contain token-data with the keys: %s",
+                                type.dataKeys.toString())
+                )
                 accountManager.setUserData(owner, createDataKey(type, it), token.data[it])
             }
         }

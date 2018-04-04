@@ -17,7 +17,6 @@ import okhttp3.Request
 class ProviderFacebook(application: Application)
     : TokenProvider<String, Account, AndroidTokenType, AndroidToken>() {
 
-
     private val tokenStorage by lazy { AndroidTokenStorage(application) }
 
     companion object {
@@ -28,10 +27,14 @@ class ProviderFacebook(application: Application)
     }
 
     val tokenType = AndroidTokenType(
+            // type of the token
             application.getString(R.string.com_andretietz_retroauth_authentication_TOKEN),
-            setOf(KEY_TOKEN_VALIDITY))
+            // key(s) of additional values to store to the token
+            // i.e. token validity time
+            setOf(KEY_TOKEN_VALIDITY)
+    )
 
-    val ownerType = application.getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT)
+    val ownerType: String = application.getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT)
 
     override fun getTokenType(annotationTokenType: Int): AndroidTokenType = tokenType
 
@@ -46,6 +49,7 @@ class ProviderFacebook(application: Application)
     override fun isTokenValid(token: AndroidToken): Boolean {
         token.data?.let {
             it[KEY_TOKEN_VALIDITY]?.let {
+                // return false if the token is no longer valid
                 return it.toLong() > System.currentTimeMillis()
             }
         }
