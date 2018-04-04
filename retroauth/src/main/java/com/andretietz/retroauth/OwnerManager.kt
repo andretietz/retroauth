@@ -34,8 +34,7 @@ interface OwnerManager<in OWNER_TYPE : Any, OWNER : Any, in TOKEN_TYPE : Any> {
 
     fun getActiveOwner(ownerType: OWNER_TYPE): OWNER?
 
-    @Throws(AuthenticationCanceledException::class)
-    fun getOrCreateActiveOwner(ownerType: OWNER_TYPE, tokenType: TOKEN_TYPE): OWNER
+    fun openOwnerPicker(ownerType: OWNER_TYPE, tokenType: TOKEN_TYPE): OWNER?
 
     fun switchActiveOwner(ownerType: OWNER_TYPE, owner: OWNER? = null)
 

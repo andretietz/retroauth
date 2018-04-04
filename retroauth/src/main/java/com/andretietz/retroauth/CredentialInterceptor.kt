@@ -62,7 +62,9 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TY
                     // Lock foreach type
                     pending = lock(authRequestType)
 
-                    owner = ownerManager.getOrCreateActiveOwner(authRequestType.ownerType, authRequestType.tokenType)
+                    owner = ownerManager.getActiveOwner(authRequestType.ownerType)
+                            ?: ownerManager.openOwnerPicker(authRequestType.ownerType, authRequestType.tokenType)
+                            ?: ownerManager.createOwner(authRequestType.ownerType, authRequestType.tokenType)
                     // get the token of the owner
                     val localToken = tokenStorage.getToken(owner, authRequestType.tokenType)
                     // if the token is still valid and no refresh has been requested

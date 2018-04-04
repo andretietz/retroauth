@@ -79,16 +79,11 @@ class AndroidOwnerManager @JvmOverloads constructor(
         return getOwner(ownerType, accountName)
     }
 
-    override fun getOrCreateActiveOwner(ownerType: String, tokenType: AndroidTokenType): Account {
-        val preferences = application.getSharedPreferences(ownerType, Context.MODE_PRIVATE)
-        val accountName = preferences.getString(RETROAUTH_ACCOUNT_NAME_KEY, null)
-        return if (accountName != null) {
-            getOwner(ownerType, accountName)
-        } else {
-            showAccountPickerDialog(ownerType, true)?.let {
-                getOwner(ownerType, it)
-            }
-        } ?: createOwner(ownerType, tokenType)
+    override fun openOwnerPicker(ownerType: String, tokenType: AndroidTokenType): Account? {
+        showAccountPickerDialog(ownerType, true)?.let {
+            return getOwner(ownerType, it)
+        }
+        return null
     }
 
     override fun switchActiveOwner(ownerType: String, owner: Account?) {
