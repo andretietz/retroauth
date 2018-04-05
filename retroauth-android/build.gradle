@@ -35,8 +35,9 @@ android {
         }
     }
 
-    // TODO replace with https://issuetracker.google.com/issues/72050365 once released.
+
     libraryVariants.all {
+        // replace with https://issuetracker.google.com/issues/72050365 once released.
         it.generateBuildConfig.enabled = false
     }
 }
@@ -75,7 +76,7 @@ afterEvaluate {
 dependencies {
     implementation 'com.android.support:appcompat-v7:23.0.0'
     api project(':retroauth')
-    api "com.jakewharton.timber:timber:4.6.1"
+
     testImplementation 'junit:junit:4.12'
     testImplementation "org.robolectric:robolectric:3.6"
     testImplementation 'org.mockito:mockito-core:2.13.0'
