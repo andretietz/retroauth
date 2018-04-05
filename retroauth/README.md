@@ -88,7 +88,7 @@ public interface Provider<OWNER, TOKEN_TYPE, TOKEN> {
 ```
 
 * "authenticateRequest" - implement the provider specific modification of the request to authenticate your request ([okhttp3.Request](https://github.com/square/okhttp/blob/master/okhttp/src/main/java/okhttp3/Request.java))
-* "retryRequired" - take a look onto the response and decide by yourself if you want the request to be retried or not
+* "validateResponse" - take a look onto the response and decide by yourself if you want the request to be retried or not
   * This method is a perfect place for refreshing tokens if required.
     * Example: You get a 401 response, you can use the TokenStorage object to remove the current Token (cause it's invalid), call a token refresh endpoint and store the new token also using the TokenStorage.
     return true to retry the whole request and it shouldn't return a 401 anymore. For details see the [android example](retroauth-core/).

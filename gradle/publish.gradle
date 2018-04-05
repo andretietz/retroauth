@@ -42,7 +42,7 @@ afterEvaluate { project ->
                 pom.groupId = GROUP
                 pom.artifactId = POM_ARTIFACT_ID
                 pom.version = VERSION_NAME
-
+//                repository(url: "file://" + System.getProperty("user.home") + "/.m2/repository/") {
                 repository(url: "https://api.bintray.com/maven/unicate/android/retroauth/;publish=1") {
                     authentication(userName: getRepositoryUsername(), password: getRepositoryPassword())
                 }

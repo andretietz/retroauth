@@ -21,27 +21,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Invalidate Token"/>
-    <Button
-        android:id="@+id/buttonInvalidateRefreshToken"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Invalidate Refresh-Token"/>
 
     <Button
-        android:id="@+id/buttonSwitchAccount"
+        android:id="@+id/buttonLogout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Switch Account"/>
-
-    <Button
-        android:id="@+id/buttonAddAccount"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Add a new Account"/>
-    <Button
-        android:id="@+id/buttonRemoveAccount"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Remove active Account"/>
+        android:text="Logout"/>
 
 </LinearLayout>

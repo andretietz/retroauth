@@ -1,10 +1,11 @@
 apply plugin: 'com.android.library'
-
+apply plugin: 'kotlin-android'
 android {
     compileSdkVersion 23
 
     defaultConfig {
         minSdkVersion 14
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         targetSdkVersion 23
         versionCode 1
         versionName VERSION_NAME
@@ -34,8 +35,9 @@ android {
         }
     }
 
-    // TODO replace with https://issuetracker.google.com/issues/72050365 once released.
+
     libraryVariants.all {
+        // replace with https://issuetracker.google.com/issues/72050365 once released.
         it.generateBuildConfig.enabled = false
     }
 }
@@ -74,10 +76,14 @@ afterEvaluate {
 dependencies {
     implementation 'com.android.support:appcompat-v7:23.0.0'
     api project(':retroauth')
+
     testImplementation 'junit:junit:4.12'
-    testImplementation 'org.khronos:opengl-api:gl1.1-android-2.1_r1'
     testImplementation "org.robolectric:robolectric:3.6"
-    testImplementation 'org.mockito:mockito-core:2.0.111-beta'
+    testImplementation 'org.mockito:mockito-core:2.13.0'
+
+    androidTestImplementation 'org.mockito:mockito-android:2.17.0'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'com.android.support.test:rules:1.0.1'
 
 }
 apply plugin: 'com.getkeepsafe.dexcount'
