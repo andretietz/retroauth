@@ -26,6 +26,8 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.os.Looper
+import java.util.concurrent.Callable
+import java.util.concurrent.Executors
 import java.util.concurrent.locks.Condition
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
@@ -44,6 +46,7 @@ class AndroidOwnerManager @JvmOverloads constructor(
     }
 
     private val activityManager: ActivityManager = ActivityManager[application]
+    private val executor by lazy { Executors.newSingleThreadExecutor() }
 
     @Throws(AuthenticationCanceledException::class)
     override fun createOwner(ownerType: String, tokenType: AndroidTokenType, callback: OwnerManager.Callback?): Account {
@@ -74,12 +77,14 @@ class AndroidOwnerManager @JvmOverloads constructor(
 
     override fun getActiveOwner(ownerType: String): Account? {
         val preferences = application.getSharedPreferences(ownerType, Context.MODE_PRIVATE)
-        val accountName = preferences.getString(RETROAUTH_ACCOUNT_NAME_KEY, null)
-        return getOwner(ownerType, accountName)
+        preferences.getString(RETROAUTH_ACCOUNT_NAME_KEY, null)?.let { accountName ->
+            return getOwner(ownerType, accountName)
+        }
+        return null
     }
 
     override fun openOwnerPicker(ownerType: String): Account? {
-        showAccountPickerDialog(ownerType, true)?.let {
+        showAccountPickerDialog(ownerType)?.let {
             getOwner(ownerType, it)?.let {
                 switchActiveOwner(it.type, it)
             }
@@ -116,40 +121,55 @@ class AndroidOwnerManager @JvmOverloads constructor(
      * @return the accounts the user chooses from
      */
     @Throws(AuthenticationCanceledException::class)
-    private fun showAccountPickerDialog(accountType: String, canAddAccount: Boolean): String? {
+    private fun showAccountPickerDialog(accountType: String): String? {
+        val task = ShowDialogPickerTask(application, accountManager, accountType)
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            throw RuntimeException("Method was called from the wrong thread!")
+            return executor.submit(task).get()
         }
-        val accounts = accountManager.getAccountsByType(accountType)
-        if (accounts.isEmpty()) return null
-        val accountList = ArrayList<String>()
-        for (i in accounts.indices) {
-            accountList[i] = accounts[i].name
-        }
-        if (canAddAccount) {
-            accountList[accounts.size] = application.getString(R.string.add_account_button_label)
-        }
-        val lock = ReentrantLock()
-        val condition = lock.newCondition()
-        val activity = activityManager.activity
-        // show the account chooser
-        val showDialog = ShowAccountChooser(application, activityManager, accountList.toTypedArray(), lock, condition)
-        activity?.let {
-            activity.runOnUiThread(showDialog)
-            lock.lock()
-            try {
-                // wait until the user has chosen
-                condition.await()
-            } catch (e: InterruptedException) {
-                // ignore
-            } finally {
-                lock.unlock()
+        return task.call()
+    }
+
+
+    private class ShowDialogPickerTask(
+            private val application: Application,
+            private val accountManager: AccountManager,
+            private val accountType: String
+
+    ) : Callable<String?> {
+
+        private val activityManager = ActivityManager[application]
+
+        override fun call(): String? {
+            val accounts = accountManager.getAccountsByType(accountType)
+            if (accounts.isEmpty()) return null
+            val accountList = ArrayList<String>()
+            for (i in accounts.indices) {
+                accountList[i] = accounts[i].name
             }
+            accountList[accounts.size] = application.getString(R.string.add_account_button_label)
+            val lock = ReentrantLock()
+            val condition = lock.newCondition()
+            val activity = activityManager.activity
+            // show the account chooser
+            val showDialog = ShowAccountChooser(application, activityManager, accountList.toTypedArray(), lock, condition)
+            activity?.let {
+                activity.runOnUiThread(showDialog)
+                lock.lock()
+                try {
+                    // wait until the user has chosen
+                    condition.await()
+                } catch (e: InterruptedException) {
+                    // ignore
+                } finally {
+                    lock.unlock()
+                }
+            }
+            if (showDialog.canceled) {
+                throw AuthenticationCanceledException("User canceled authentication!")
+            }
+            return showDialog.selectedOption
         }
-        if (showDialog.canceled) {
-            throw AuthenticationCanceledException("User canceled authentication!")
-        }
-        return showDialog.selectedOption
+
     }
 
     /**
