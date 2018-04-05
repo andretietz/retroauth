@@ -14,6 +14,7 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.buttonInvalidateToken
 import kotlinx.android.synthetic.main.activity_main.buttonLogout
 import kotlinx.android.synthetic.main.activity_main.buttonRequestEmail
+import kotlinx.android.synthetic.main.activity_main.buttonSwitch
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
@@ -80,6 +81,18 @@ class MainActivity : AppCompatActivity() {
                 val token = tokenStorage.getToken(account, provider.tokenType)
                 tokenStorage.removeToken(account, provider.tokenType, token)
             }
+            /** remove all cookies to avoid an automatic relogin */
+            val cookieManager = CookieManager.getInstance()
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                @Suppress("DEPRECATION")
+                cookieManager.removeAllCookie()
+            } else {
+                cookieManager.removeAllCookies(null)
+            }
+        }
+
+        buttonSwitch.setOnClickListener {
+            ownerManager.switchActiveOwner(provider.ownerType)
             /** remove all cookies to avoid an automatic relogin */
             val cookieManager = CookieManager.getInstance()
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {

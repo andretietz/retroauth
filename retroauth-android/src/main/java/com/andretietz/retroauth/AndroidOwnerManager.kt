@@ -22,15 +22,18 @@ import android.accounts.AccountManagerCallback
 import android.accounts.AccountManagerFuture
 import android.app.AlertDialog
 import android.app.Application
+import android.app.Dialog
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import android.os.Looper
+import android.view.WindowManager
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.locks.Condition
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
+
 
 /**
  * This is the Android implementation of an [OwnerManager]. It does all the Android [Account] handling
@@ -87,6 +90,7 @@ class AndroidOwnerManager @JvmOverloads constructor(
         showAccountPickerDialog(ownerType)?.let {
             getOwner(ownerType, it)?.let {
                 switchActiveOwner(it.type, it)
+                return it
             }
         }
         return null
@@ -142,11 +146,8 @@ class AndroidOwnerManager @JvmOverloads constructor(
         override fun call(): String? {
             val accounts = accountManager.getAccountsByType(accountType)
             if (accounts.isEmpty()) return null
-            val accountList = ArrayList<String>()
-            for (i in accounts.indices) {
-                accountList[i] = accounts[i].name
-            }
-            accountList[accounts.size] = application.getString(R.string.add_account_button_label)
+            val accountList = accounts.map { it.name }.toMutableSet()
+            accountList.add(application.getString(R.string.add_account_button_label))
             val lock = ReentrantLock()
             val condition = lock.newCondition()
             val activity = activityManager.activity
@@ -156,10 +157,7 @@ class AndroidOwnerManager @JvmOverloads constructor(
                 activity.runOnUiThread(showDialog)
                 lock.lock()
                 try {
-                    // wait until the user has chosen
                     condition.await()
-                } catch (e: InterruptedException) {
-                    // ignore
                 } finally {
                     lock.unlock()
                 }
@@ -188,33 +186,38 @@ class AndroidOwnerManager @JvmOverloads constructor(
             this.selectedOption = options[0]
         }
 
+        private fun unlock() {
+            lock.lock()
+            try {
+                condition.signal()
+            } finally {
+                lock.unlock()
+            }
+        }
+
         override fun run() {
             val builder = AlertDialog.Builder(activityManager.activity)
-            builder.setTitle(context.getString(R.string.choose_account_label))
-            builder.setCancelable(false)
-            builder.setSingleChoiceItems(options, 0) { _, which ->
-                selectedOption = if (which < options.size - 1) {
-                    options[which]
-                } else null
-            }
-            builder.setPositiveButton(android.R.string.ok) { _, _ ->
-                lock.lock()
-                try {
-                    condition.signal()
-                } finally {
-                    lock.unlock()
-                }
-            }
-            builder.setNegativeButton(android.R.string.cancel) { _, _ ->
-                canceled = true
-                lock.lock()
-                try {
-                    condition.signal()
-                } finally {
-                    lock.unlock()
-                }
-            }
-            builder.show()
+                    .setTitle(context.getString(R.string.choose_account_label))
+                    .setCancelable(false)
+                    .setSingleChoiceItems(options, 0) { _, which ->
+                        selectedOption = if (which < options.size - 1) {
+                            options[which]
+                        } else null
+                    }
+                    .setNegativeButton(android.R.string.cancel) { _, _ -> canceled = true }
+                    .setPositiveButton(android.R.string.ok) { _, _ -> canceled = false }
+            val dialog = builder.create()
+            dialog.setOnDismissListener { unlock() }
+            dialog.show()
+            keep(dialog)
+        }
+
+        private fun keep(dialog: Dialog) {
+            val lp = WindowManager.LayoutParams()
+            lp.copyFrom(dialog.window.attributes)
+            lp.width = WindowManager.LayoutParams.WRAP_CONTENT
+            lp.height = WindowManager.LayoutParams.WRAP_CONTENT
+            dialog.window.attributes = lp
         }
     }
 
