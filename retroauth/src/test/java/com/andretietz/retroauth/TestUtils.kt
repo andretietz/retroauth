@@ -25,7 +25,6 @@ class TestUtils {
                 .build()
         map[Utils.createUniqueIdentifier(request)] = request
 
-
         request = Request.Builder()
                 .url("http://www.google.com/test/request2")
                 .build()

@@ -3,9 +3,10 @@
 ## Dependencies
 * [Retrofit](https://github.com/square/retrofit) 2.3.0 (transitive from retroauth-core)
 * appcompat-v7 23.0.0
+* kotlin-stdlib 1.2.30
 
-Method-Count: 229
-Field-Count:  56
+Method-Count: 323
+Field-Count:  73
 
 ## What does it do?
 If you call a request method, annotated with the authenticated annotation, it'll do the following steps:
@@ -14,121 +15,57 @@ If you call a request method, annotated with the authenticated annotation, it'll
 * Step 3: Sends the actual request
 * Step 4: By implementing a TokenProvider you can check the response (i.e. a 401 you will be able to refresh the token) and decide if you want to retry the request or not.
 
-## How to use it on Android
+## How to use it?
 
 Add it as dependency:
 ```groovy
-compile 'com.andretietz.retroauth:retroauth-android:2.3.1'
+implementation 'com.andretietz.retroauth:retroauth-android:x.y.z'
 ```
 Make sure you're overriding the appcompat dependency if required!
 i.e.:
 ```groovy
-compile 'com.android.support:appcompat-v7:26.X.Y'
+compile 'com.android.support:appcompat-v7:x.y.z'
 ```
 
+## Setup
+### 1. Define an Account-Type String
+The Account-Type should be unique for an app or company, depending on if you want to share the account in multiple apps of your company or not.
+I recommend using something like ```your.company.id.ACCOUNT```.
+### 2. Define an Authentication Action.
+We'll use this String later in order to start our Login-Activity using an intent-filter in the manifest.
+This could be something like ```your.company.id.ACTION```
+### 3. Create an Authentication Service.
+This Service is started whenever the Android OS is asked for a login of the in #1 provided Account-Type. It then uses the Action-String defined in #2 to show the Login.
+This must be a service since you can add create accounts within the account-settings.
 
-### 1. You need to deal with at least 3 different strings
-1. An action string which will be used to start your Login 
- * (recommended: use your applicationId for example and add: ".ACTION")
-2. An Account-Type string. This should be a unique string! 
- * (recommended: use your applicationId for example and add: ".ACCOUNT")
-3. A Token-Type string. It should be a unique string too. 
- * (recommended: use your applicationId for example and add: ".TOKEN")
-4. (Optional) Create as many Token-Type Strings as you need.
-
-add them to your strings.xml
-
-```xml
-<string name="authentication_ACTION" translatable="false">com.andretietz.retroauth.demo.ACTION</string>
-<string name="authentication_ACCOUNT" translatable="false">com.andretietz.retroauth.demo.ACCOUNT</string>
-<string name="authentication_TOKEN" translatable="false">com.andretietz.retroauth.demo.TOKEN</string>
-... other tokens
-```
-
-Change the String keys as you like, but remember renaming them in all the other places too!
-
- 
-### 2. Create an Activity (or use one you already have) where the user can login. This Activity must extend from AuthenticationActivity and call finalizeAuthentication when the authentication finished
- i.e. (see Demo for an example)
- 
-```java
-public class LoginActivity extends AuthenticationActivity {
-...
-private void someLoginMethod() {
-     String user;
-     String token;
-     ... 
-     // do login work here and make sure, that you provide at least a user and a token String
-     ...
-     Account account = createOrGetAccount(user);
-     storeToken(account, getString(R.string.authentication_TOKEN), token);
-     // or optional
-     storeToken(account, getString(R.string.authentication_TOKEN), token, refreshToken);
-     // add multiple tokens: storeToken(account, getString(R.string.authentication_TOKEN_X), token2);
-     // store some additional userdata (optionally)
-     storeUserData(account, "key_for_some_user_data", "very-important-userdata");
-     // finishes the activity and set this account to the "current-active" one
-     finalizeAuthentication(account);
+This is a very small implementation, that could look like this:
+```kotlin
+class DemoAuthenticationService : AuthenticationService() {
+    override fun getLoginAction(): String = "your.company.id.ACTION"
 }
-...
-}
+
 ```
- Make sure your LoginActivity has the intent filter in the manifest:
- ```xml
- <?xml version="1.0" encoding="utf-8"?>
- <manifest>
- ...
-        <activity android:name=".LoginActivity">
-            <intent-filter>
-                <action android:name="<your-ACTION-string-defined-in-1>"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
-        </activity>
- ...
- </manifest>
- ```
-### 3. Setup an AuthenticationService
-There are two ways of doing that:
- 
-* Option 1:
-Extend the AuthenticationService and provide the ACTION-string.
- 
-```java
-public class SomeAuthenticationService extends AuthenticationService {
-@Override
-public String getLoginAction(Context context) {
-    // this is used only to provide the action for the LoginActivity to open
-    return context.getString(R.string.authentication_ACTION);
-}
-}
-```
-* Option 2.
-Instead of creating you own Service feel free to use the "RetroauthAuthenticationService"
-Make sure you define a new string:
-```xml
-<string name="com.andretietz.retroauth.authentication.ACTION" translatable="false">@string/authentication_ACTION</string>
-```
-the key of your ACTION-string defined in step 1 is: "com.andretietz.retroauth.authentication.ACTION"
- 
-In both cases:
-Provide a authenticator.xml:
+### 4. Creating the link to the authenticator
+With this xml in the res/xml folder of our project we tell the Android OS that there is an authenticator for our Account-Type (defined in #1)
+If you provide multiple account types, you need to provide multiple authenticator xmls
+
+Here's an example. Make sure you're replacing the accountType with your own.
 ```xml
 <account-authenticator xmlns:android="http://schemas.android.com/apk/res/android"
-                   android:accountType="@string/authentication_ACCOUNT"
+                   android:accountType="your.company.id.ACCOUNT"
                    android:icon="@mipmap/ic_launcher"
                    android:smallIcon="@mipmap/ic_launcher"
                    android:label="@string/app_name" />
 ```
- 
-Add the Service to the Manifest:
-If you choose
 
-* Option 1: provide the Service you created in the manifest
+### 5. Gluing the Service and the Authenticator together.
+
+For that we need to add the Service we created in #3 into the manifest:
+Note that there's an additional `meta-data` tag which provides the xml we created in #4. If you have multiple xml's you need to provide additional Services.
+
 ```xml
-     ...
      <service
-         android:name=".SomeAuthenticationService"
-         android:process=":auth"
+         android:name=".DemoAuthenticationService"
          android:exported="false">
          <intent-filter>
              <action android:name="android.accounts.AccountAuthenticator"/>
@@ -137,88 +74,117 @@ If you choose
              android:name="android.accounts.AccountAuthenticator"
              android:resource="@xml/authenticator"/>
      </service>
-     ...
- </application>
-</manifest>
 ```
-* Option 2: provide the RetroauthAuthenticationService in the manifest
-```xml
-      ...
-      <service
-          android:name="com.andretietz.retroauth.RetroauthAuthenticationService"
-          android:process=":auth"
-          android:exported="false">
-          <intent-filter>
-              <action android:name="android.accounts.AccountAuthenticator"/>
-          </intent-filter>
-          <meta-data
-              android:name="android.accounts.AccountAuthenticator"
-              android:resource="@xml/authenticator"/>
-      </service>
-      ...
-  </application>
-</manifest>
-```
-### 4. Create a Provider implementation
-Since every TokenProvider may have a different way of authenticating their request, you have to tell how this should work
- 
-```java
-public class MyProvider implements Provider<Account, AndroidTokenType, AndroidToken> {
 
- @Override
- public Request authenticateRequest(Request request, AndroidToken androidToken) {
-     // this is an example of adding the token to the header of a request 
-     return request.newBuilder()
-             .header("Authorization", "Bearer " + androidToken.token)
-             .build();
- }
-
- @Override
- public boolean retryRequired(int count, Response response, TokenStorage<Account, AndroidTokenType, AndroidToken> tokenStorage, Account account, AndroidTokenType androidTokenType, AndroidToken androidToken) {
-        // this is an optional (sample) implementation
-        if (!response.isSuccessful()) {
-            if (response.code() == 401) {
-                tokenStorage.removeToken(account, androidTokenType, androidToken);
-                ...
-                // refresh your token using androidToken.refreshToken
-                ...
-                // store the refreshed token
-                tokenStorage.storeToken(account, androidTokenType, new AndroidToken(newAccessToken, newRefreshToken));
-                // retry
-                return true;
-            }
-        }
-        return false;
- }
+### 6. Provide a LoginActivity
+Make sure you're extending it from the `AuthenticationActivity`
+```kotlin
+class LoginActivity : AuthenticationActivity() {
+    ...
+    fun someLoginMethod() {
+        val user: String
+        val token: String
+        ...
+        // do login work here and make sure, that you provide at least a user and a token String
+        ...
+        Account account = createOrGetAccount(user);
+        storeToken(
+                account,
+                tokenType,  // AndroidTokenType
+                token,      // String as you get it from your provider
+                mapOf(
+                        "some-key" to "some-value"
+                )
+        // store some additional userdata (optionally)
+        storeUserData(account, "key_for_some_user_data", "very-important-userdata");
+        // finishes the activity and set this account to the "current-active" one
+        finalizeAuthentication(account);
+    }
+    ...
 }
+```
+and add it also in the manifest using a special `intent-filter`. This `intent-filter` should
+as `action:name` contain the Action String you defined in #2
+
+ ```xml
+ <?xml version="1.0" encoding="utf-8"?>
+ <manifest>
+ ...
+        <activity android:name=".LoginActivity">
+            <intent-filter>
+                <action android:name="your.company.id.ACTION"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+ ...
+ </manifest>
+ ```
+
+## Usage
+### Create a TokenProvider implementation
+For the Android Implementation you need to create a TokenProvider:
+```kotlin
+class YourTokenProvider
+    : TokenProvider<String, Account, AndroidTokenType, AndroidToken>() {
+```
+
+There are 3 Methods required to implement:
+* The Owner-Type
+```kotlin
+    override fun getOwnerType(annotationOwnerType: Int): String
+```
+This method provides us the ownerType that has been setup in the `@Authenticated` annotation.
+The value is optional! So if you don't need it, don't use it. A reason to use it could be, you need to use multiple ownerTypes on one endpoint.
+
+* The Token-Type
+```kotlin
+    override fun getTokenType(annotationTokenType: Int): AndroidTokenType {
+        return AndroidTokenType(
+            "your.company.id.TOKEN_TYPE",
+            setOf(
+                "some optional",
+                "keys",
+                "which a token provides"
+            )
+        )
+    }
+
+```
+Note that when getting an AndroidToken it only contains the data, which is loaded
+using this set of optional keys.
+
+* Authenticate the request
+```kotlin
+    override fun authenticateRequest(request: Request, token: AndroidToken): Request {
+        return request.newBuilder()
+                .header("Authorization", "Bearer " + token.token)
+                .build()
+    }
 ```
  
 ### 5. Create your REST interface
- * Add authentication information to it:
- 
-```java
-public interface SomeAuthenticatedService {
+```kotlin
+interface SomeAuthenticatedService {
  @GET("/some/path")
- Call<ResultObject> someUnauthenticatedCall();
+ fun someUnauthenticatedCall(): Call<ResultObject>
 
- @Authenticated({R.string.accountType, R.string.tokenType})
+ @Authenticated
  @GET("/some/other/path")
- Call<ResultObject> someAuthenticatedCall();
+ fun someAuthenticatedCall(): Call<ResultObject>
 }
 ```
  
  * Create the Retrofit object and instantiate it
 ```java
-Retrofit retrofit = new Retroauth.Builder<>(new AndroidAuthenticationHandler(new MyProvider()))
+Retrofit retrofit = RetroauthAndroidBuilder.create(application, YourTokenProvider()))
         .baseUrl("https://api.awesome.com/")
-        .client(httpClient)
         // add whatever you used to do with retrofit2
         // i.e.:
         .addConverterFactory(GsonConverterFactory.create())
         
         .build();
 // create your services
-SomeAuthenticatedService service = retrofit.create(SomeAuthenticatedService.class);
+val service = retrofit.create(SomeAuthenticatedService.class)
 // use them
-service.someAuthenticatedCall().execute();
+service.someAuthenticatedCall().execute()
 ```

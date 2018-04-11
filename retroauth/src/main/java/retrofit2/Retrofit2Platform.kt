@@ -29,6 +29,5 @@ internal object Retrofit2Platform {
             return Platform.get().defaultCallAdapterFactory(executor)
         }
         return Platform.get().defaultCallAdapterFactory(Platform.get().defaultCallbackExecutor())
-
     }
 }

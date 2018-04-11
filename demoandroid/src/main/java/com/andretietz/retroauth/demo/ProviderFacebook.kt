@@ -28,13 +28,13 @@ class ProviderFacebook(application: Application)
 
     val tokenType = AndroidTokenType(
             // type of the token
-            application.getString(R.string.com_andretietz_retroauth_authentication_TOKEN),
+            application.getString(R.string.authentication_TOKEN),
             // key(s) of additional values to store to the token
             // i.e. token validity time
             setOf(KEY_TOKEN_VALIDITY)
     )
 
-    val ownerType: String = application.getString(R.string.com_andretietz_retroauth_authentication_ACCOUNT)
+    val ownerType: String = application.getString(R.string.authentication_ACCOUNT)
 
     override fun getTokenType(annotationTokenType: Int): AndroidTokenType = tokenType
 
