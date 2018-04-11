@@ -12,7 +12,6 @@ checkstyle {
 dependencies {
     api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     api "com.squareup.retrofit2:retrofit:$retrofitVersion"
-    api "com.squareup.okhttp3:okhttp:$okhttpVersion"
 
     testImplementation 'junit:junit:4.12'
     testImplementation "io.reactivex.rxjava2:rxjava:2.1.12"

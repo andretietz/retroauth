@@ -24,7 +24,6 @@ import timber.log.Timber
 class MainActivity : AppCompatActivity() {
     private lateinit var service: FacebookService
 
-    //    private val helper by lazy { RetroauthHelper(application) }
     private val ownerManager by lazy { AndroidOwnerManager(application) }
     private val tokenStorage by lazy { AndroidTokenStorage(application) }
 
@@ -59,7 +58,6 @@ class MainActivity : AppCompatActivity() {
          */
         service = retrofit.create(FacebookService::class.java)
 
-
         buttonRequestEmail.setOnClickListener {
             service.getUserDetails()
                     .subscribeOn(Schedulers.io())
@@ -72,7 +70,12 @@ class MainActivity : AppCompatActivity() {
 
         buttonInvalidateToken.setOnClickListener {
             ownerManager.getActiveOwner(provider.ownerType)?.let { account ->
-                tokenStorage.storeToken(account, provider.tokenType, AndroidToken("some-invalid-token"))
+                val token = tokenStorage.getToken(account, provider.tokenType)
+                tokenStorage.storeToken(
+                        account,
+                        provider.tokenType,
+                        AndroidToken("some-invalid-token", token.data)
+                )
             }
         }
 

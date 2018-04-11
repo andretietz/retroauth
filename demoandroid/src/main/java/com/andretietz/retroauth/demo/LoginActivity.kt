@@ -40,7 +40,6 @@ class LoginActivity : AuthenticationActivity() {
         setContentView(R.layout.activity_login)
         Timber.plant(Timber.DebugTree())
 
-
         webView.loadUrl(helper.authorizationUrl)
         @Suppress("UsePropertyAccessSyntax")
         webView.getSettings().setJavaScriptEnabled(true)
@@ -69,12 +68,8 @@ class LoginActivity : AuthenticationActivity() {
                                                         to expiryDate.toString()
                                         )
                                 )
-
-
                                 finalizeAuthentication(account)
-                            },
-                                    { error -> Timber.e(error) })
-
+                            }, { error -> Timber.e(error) })
                 }
                 return true
             }
@@ -100,7 +95,6 @@ class LoginActivity : AuthenticationActivity() {
             val info = api.getUserInfo("name,email", token.accessToken).blockingGet()
             return LoginResult(info.email, token)
         }
-
     }
 
     internal interface FacebookInfoService {

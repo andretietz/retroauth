@@ -2,22 +2,20 @@
 <lint>
     <!-- this is a fix for a lint error that occurs using okio (okhttp dependency)
     see here for more details: https://github.com/square/okio/issues/58 -->
-    <issue id="InvalidPackage">
-        <warning regexp="okio-1.13.0.jar"/>
-        <warning regexp="retrofit-2.3.0.jar"/>
-    </issue>
-    <!-- This warning should be ignored, since I don't want to add this service to the manifest
-    of the library -->
-    <issue id="Registered">
-        <ignore regexp="RetroauthAuthenticationService.java"/>
-    </issue>
+    <!--<issue id="InvalidPackage">-->
+        <!--<warning regexp="okio-1.13.0.jar"/>-->
+        <!--<warning regexp="retrofit-2.3.0.jar"/>-->
+    <!--</issue>-->
 
     <!-- this should be ignored, since I try to be backwards compatible -->
     <issue id="OldTargetApi" severity="ignore"/>
+    <!-- this is for the appcompat dependencies -->
     <issue id="GradleDependency" severity="ignore"/>
     <!-- since the kotlin usage is ignored, I'll ignore this one until this is fixed -->
     <issue id="UnusedResources">
         <ignore regexp="extracted_strings.xml" />
     </issue>
+    <issue id="HardcodedText" severity="ignore" />
+    <issue id="GoogleAppIndexingWarning" severity="ignore" />
 
 </lint>

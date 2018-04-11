@@ -4,111 +4,57 @@
 * [Retrofit](https://github.com/square/retrofit) 2.3.0
 
 ## Example:
-Your services using retrofit:
-``` java
-public interface SomeService {
+This is how you would create an authenticated call using retroauth. Just create
+the interface as you're used to and annotate your authenticated methods as such.
+using the ```@Authenticated``` annotation.
+``` kotlin
+interface SomeService {
+    @Authenticated
     @GET("/some/path")
-    Call<ResultObject> someRequest();
-}
-```
-Your services using retroauth:
-``` java
-public interface SomeService {
-    int ACCOUNT_TYPE = 1;
-    int TOKEN_TYPE = 2;
-    @Authenticated({ACCOUNT_TYPE, TOKEN_TYPE})
-    @GET("/some/path")
-    Call<ResultObject> someRequest();
+    Call<ResultObject> someAuthenticatedRequest();
 }
 
 ```
-If you're an Android Developer feel free to go directly to the [android project](retroauth-android/).
-## How to use it (Java)?
+
+``` kotlin
+interface SomeService {
+    @Authenticated(ownerType = 1, tokenType = 1)
+    @GET("/some/path")
+    Call<ResultObject> someAuthenticatedRequest();
+}
+
+```
+
+If you're an Android Developer feel free to go directly to the [android implementation](retroauth-android/).
+## How to use it?
 
 Add it as dependency:
 ```groovy
-compile 'com.andretietz.retroauth:retroauth-core:2.3.1'
+implementation 'com.andretietz.retroauth:retroauth:x.y.z'
 ```
 
-An Authentication with this library requires 3 generic classes, which you should aware of, before implementing. You can use whatever you want, for explanation reasons I'll use their generic names
+## The API
 
- * A class: TOKEN_TYPE - you will generate this class out of the information, the Annotation on the method provides you
- * A class: TOKEN - This is a Token which you'll need to authenticate your requests with
- * A class: OWNER - The owner that owns the Token after the login. 
+This library is made for a system that CAN have multiple users.
+These users CAN have multiple different ```TOKEN```s of a specific ```TOKEN_TYPE```.
+A User is an ```OWNER``` of a ```TOKEN```, so within the library they're called ```OWNER```.
+You can also have different ```OWNER_TYPE```s.
 
-A common scenario: every OWNER owns mulitple TOKENs of multiple TOKEN_TYPEs
- 
-### 1. Implement an OwnerManager
+ * ```OWNER_TYPE``` -> contains one or more:
+   * ```OWNER```s -> owns one or more:
+     * ```TOKEN_TYPE```s -> is bound to exactly one ```TOKEN```
 
-``` java
-public interface OwnerManager<OWNER, TOKEN_TYPE> {
-    OWNER getOwner(TOKEN_TYPE type) throws ChooseOwnerCanceledException;
-}
-```
- * If the owner does not exist, return null. 
- * If there are multiple owners ask the user to choose one.
-   * throw an ChooseOwnerCanceledException when the user canceled choosing.
+In most of the cases you probably need only one ```OWNER_TYPE``` which contains one ```OWNER```, which owns one ```TOKEN``` of a specific ```TOKEN_TYPE```.
+Which is totally fine.
 
 
-### 2. Implement a TokenStorage
-``` java
-public interface TokenStorage<OWNER, TOKEN_TYPE, TOKEN> {
-    TOKEN_TYPE createType(int[] annotationValues);
-    TOKEN getToken(OWNER owner, TOKEN_TYPE type) throws AuthenticationCanceledException;
-    void storeToken(OWNER owner, TOKEN_TYPE type, TOKEN token);
-    void removeToken(OWNER owner, TOKEN_TYPE type, TOKEN token);
-}
-```
- * "createType" - create your custom token type out of the values you're using in the annotation
- * "getToken" - get the token
-   * When owner doesn't exist, create one
-   * When token doesn't exist, request one
- * "storeToken" - store a token of a token type
- * "removeToken" - remove the token of a token type
-
-
-### 3. Implement a MethodCache (optional)
-
-``` java
-public interface MethodCache<TOKEN_TYPE> {
-    void register(int requestIdentifier, TOKEN_TYPE type);
-    TOKEN_TYPE getTokenType(int requestIdentifier);
-}
-```
-This should be a simple key value store. If you don't want implement this by yourself, use the default implementation.
-
-
-### 4. Implement a Provider
-``` java
-public interface Provider<OWNER, TOKEN_TYPE, TOKEN> {
-    Request authenticateRequest(Request request, TOKEN token);
-    boolean retryRequired(int count, Response response,
-                          TokenStorage<OWNER, TOKEN_TYPE, TOKEN> tokenStorage, OWNER owner, TOKEN_TYPE type, TOKEN token);
-}
-```
-
-* "authenticateRequest" - implement the provider specific modification of the request to authenticate your request ([okhttp3.Request](https://github.com/square/okhttp/blob/master/okhttp/src/main/java/okhttp3/Request.java))
-* "validateResponse" - take a look onto the response and decide by yourself if you want the request to be retried or not
-  * This method is a perfect place for refreshing tokens if required.
-    * Example: You get a 401 response, you can use the TokenStorage object to remove the current Token (cause it's invalid), call a token refresh endpoint and store the new token also using the TokenStorage.
-    return true to retry the whole request and it shouldn't return a 401 anymore. For details see the [android example](retroauth-core/).
-
-Wrap all of the together into the AuthenticationHandler and create your retrofit object
-
-``` java
-    AuthenticationHandler<OWNER, TOKEN_TYPE, TOKEN> authHandler = new AuthenticationHandler<>(
-            new MethodCache.DefaultMethodCache<>(),
-            new MyOwnerManager(), myTokenStorage, myCustomProvider
-    );
-
-    Retrofit retrofit = new Retroauth.Builder<>(authHandler)
-            .baseUrl(<some-base-url>)
-            .build();
-
-```
-
-
-Take a look at the Java8 Demo implementation, which uses java-scribe to authenticate against the google-apis
+The API provides 3 interaces and an abstract class. All of the
+### The interfaces
+  * [OwnerManager](src/main/java/com/andretietz/retroauth/OwnerManager.kt): In order to handle one or more Owners on a system you need to provide some basic functionalities to handle this Owners.
+  * [TokenStorage](src/main/java/com/andretietz/retroauth/TokenStorage.kt): So that
+  * [MethodCache](src/main/java/com/andretietz/retroauth/MethodCache.kt):
+  This is an interface optionally to implement. If you don't, you can use it's default implementation, the ```DefaultMethodCache```.
+  * [TokenProvider](src/main/java/com/andretietz/retroauth/TokenProvider.kt): This is an abstract class and it's supposed to be the interface to the backend you're authenticating against.
 
 ## Pull requests are welcome
 Since I am the only one working on that, I would like to know your opinion and/or your suggestions.
@@ -116,7 +62,7 @@ Please feel free to create Pull-Requests!
 
 ## LICENSE
 ```
-Copyrights 2016 André Tietz
+Copyrights 2018 André Tietz
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

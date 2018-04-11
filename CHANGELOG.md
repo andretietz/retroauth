@@ -1,3 +1,12 @@
+## 3.0.0 ()
+* Converted the project to Kotlin
+* API changes
+  * Solving problem with multiple authenticated requests. -> removed the blocking functionality (obsolete)
+  * Renamed Provider to TokenProvider and added functionality
+  * Better separation of OwnerManager and TokenManager
+* Fixed Demo app which is using Facebook with [scribe](https://github.com/scribejava/scribejava)
+* Added functionalities to refresh the token before the authenticated call is called.
+
 ## 2.3.1 (2018-01-15)
 * Updating release script
 * Fixing Exception when Exception is thrown during the actual call (was always AuthenticationCanceledException)

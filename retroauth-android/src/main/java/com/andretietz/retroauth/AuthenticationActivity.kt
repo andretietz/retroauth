@@ -35,24 +35,13 @@ import android.support.v7.app.AppCompatActivity
  */
 abstract class AuthenticationActivity : AppCompatActivity() {
 
-    protected var accountAuthenticatorResponse: AccountAuthenticatorResponse? = null
-    protected lateinit var accountType: String
-    protected lateinit var accountManager: AccountManager
+    private var accountAuthenticatorResponse: AccountAuthenticatorResponse? = null
+    private lateinit var accountType: String
+    private lateinit var accountManager: AccountManager
     private var tokenType: String? = null
     private lateinit var resultBundle: Bundle
-    protected lateinit var tokenStorage: AndroidTokenStorage
+    private lateinit var tokenStorage: AndroidTokenStorage
     private val ownerManager by lazy { AndroidOwnerManager(application) }
-
-    companion object {
-        @JvmStatic
-        @JvmOverloads
-        fun createLoginIntent(action: String, accountType: String, tokenType: String? = null): Intent {
-            val intent = Intent(action)
-            intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, accountType)
-            intent.putExtra(AccountAuthenticator.KEY_TOKEN_TYPE, tokenType)
-            return intent
-        }
-    }
 
     override fun onCreate(icicle: Bundle?) {
         super.onCreate(icicle)

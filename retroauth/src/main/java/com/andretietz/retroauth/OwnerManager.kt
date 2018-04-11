@@ -37,6 +37,8 @@ interface OwnerManager<in OWNER_TYPE : Any, OWNER : Any, in TOKEN_TYPE : Any> {
     fun createOwner(ownerType: OWNER_TYPE, tokenType: TOKEN_TYPE, callback: Callback? = null): OWNER
 
     /**
+     * Returns the owner if exists
+     *
      * @param ownerType type of the owner you need.
      * @param ownerName name of the owner you want to receive.
      *

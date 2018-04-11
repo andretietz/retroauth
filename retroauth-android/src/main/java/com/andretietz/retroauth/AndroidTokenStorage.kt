@@ -32,7 +32,6 @@ class AndroidTokenStorage @JvmOverloads constructor(
         private val accountManager: AccountManager = AccountManager.get(application)
 ) : TokenStorage<Account, AndroidTokenType, AndroidToken> {
 
-    private val activityManager = ActivityManager[application]
     private val executor by lazy { Executors.newSingleThreadExecutor() }
 
     companion object {

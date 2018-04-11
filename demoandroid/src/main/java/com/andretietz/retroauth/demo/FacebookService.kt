@@ -11,7 +11,6 @@ interface FacebookService {
     @GET("v2.11/me?fields=name,email")
     fun getUserDetails(): Single<User>
 
-
     class User {
         var name: String? = null
         var email: String? = null
@@ -21,4 +20,3 @@ interface FacebookService {
         }
     }
 }
-
