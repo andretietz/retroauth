@@ -6,5 +6,11 @@
     <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" android:maxSdkVersion="22"/>
     <uses-permission android:name="android.permission.USE_CREDENTIALS" android:maxSdkVersion="22"/>
 
-    <application />
+    <application>
+        <provider
+            android:authorities="${applicationId}.retroauthinitprovider"
+            android:exported="false"
+            android:enabled="true"
+            android:name=".RetroauthInitProvider" />
+    </application>
 </manifest>
