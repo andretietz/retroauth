@@ -39,17 +39,17 @@ import java.util.concurrent.locks.ReentrantLock
  * This is the Android implementation of an [OwnerManager]. It does all the Android [Account] handling
  */
 @Suppress("unused")
-class AndroidOwnerManager @JvmOverloads constructor(
-        private val application: Application,
-        private val accountManager: AccountManager = AccountManager.get(application)
+class AndroidOwnerManager constructor(
+        private val application: Application
 ) : OwnerManager<String, Account, AndroidTokenType> {
 
     companion object {
         private const val RETROAUTH_ACCOUNT_NAME_KEY = "com.andretietz.retroauth.ACTIVE_ACCOUNT"
     }
 
-    private val activityManager: ActivityManager = ActivityManager[application]
+    private val activityManager by lazy { ActivityManager[application] }
     private val executor by lazy { Executors.newSingleThreadExecutor() }
+    private val accountManager by lazy { AccountManager.get(application) }
 
     @Throws(AuthenticationCanceledException::class)
     override fun createOwner(ownerType: String, tokenType: AndroidTokenType, callback: OwnerManager.Callback?): Account {

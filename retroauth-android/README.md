@@ -91,7 +91,7 @@ class LoginActivity : AuthenticationActivity() {
         storeToken(
                 account,
                 tokenType,  // AndroidTokenType
-                token,      // String as you get it from your provider
+                token,      // String as you get it from your TokenProvider implementation
                 mapOf(
                         "some-key" to "some-value"
                 )

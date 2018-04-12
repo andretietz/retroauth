@@ -27,12 +27,12 @@ import java.util.concurrent.Executors
 /**
  * This is the implementation of a [TokenStorage] in Android using the Android [AccountManager]
  */
-class AndroidTokenStorage @JvmOverloads constructor(
-        private val application: Application,
-        private val accountManager: AccountManager = AccountManager.get(application)
+class AndroidTokenStorage constructor(
+        private val application: Application
 ) : TokenStorage<Account, AndroidTokenType, AndroidToken> {
 
     private val executor by lazy { Executors.newSingleThreadExecutor() }
+    private val accountManager by lazy { AccountManager.get(application) }
 
     companion object {
         @JvmStatic

@@ -57,6 +57,10 @@ class ProviderFacebook(application: Application)
     }
 
     override fun refreshToken(owner: Account, tokenType: AndroidTokenType, token: AndroidToken): AndroidToken? {
+        // This is very implementation specific!
+        // https://developers.facebook.com/docs/facebook-login/access-tokens/refreshing
+        // `At any point, you can generate a new long-lived token by sending the
+        // person back to the login flow used by your web app.`
         return tokenStorage.getToken(owner, tokenType)
     }
 }
