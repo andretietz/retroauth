@@ -80,7 +80,6 @@ class AndroidTokenStorage constructor(
 
         override fun call(): AndroidToken {
             var token: String?
-            Thread.interrupted()
             val future = accountManager.getAuthToken(
                     owner,
                     type.tokenType,
