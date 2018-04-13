@@ -29,13 +29,11 @@ import android.os.Bundle
 import android.os.Looper
 import android.view.WindowManager
 import java.util.concurrent.Callable
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.FutureTask
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.locks.Condition
-import java.util.concurrent.locks.Lock
-import java.util.concurrent.locks.ReentrantLock
 
 
 /**
@@ -67,13 +65,6 @@ class AndroidOwnerManager constructor(
                 if (callback != null) CreateAccountCallback(callback) else null,
                 null)
         return AccountFuture(future)
-//        val result = future.result
-//        val accountName = result.getString(AccountManager.KEY_ACCOUNT_NAME)
-//        if (accountName != null) {
-//            return Account(result.getString(AccountManager.KEY_ACCOUNT_NAME),
-//                    result.getString(AccountManager.KEY_ACCOUNT_TYPE))
-//        }
-//        throw AuthenticationCanceledException()
     }
 
     override fun getOwner(ownerType: String, ownerName: String): Account? {
@@ -130,7 +121,6 @@ class AndroidOwnerManager constructor(
             private val accountManager: AccountManager,
             private val accountType: String,
             private val callback: Callback<Account?>?
-
     ) : Callable<Account?> {
 
         private val activityManager = ActivityManager[application]
@@ -140,23 +130,17 @@ class AndroidOwnerManager constructor(
             if (accounts.isEmpty()) return null
             val accountList = accounts.map { it.name }.toMutableSet()
             accountList.add(application.getString(R.string.add_account_button_label))
-            val lock = ReentrantLock()
-            val condition = lock.newCondition()
+            val countDownLatch = CountDownLatch(1)
             val activity = activityManager.activity
             // show the account chooser
             val showDialog = ShowAccountChooser(
                     application,
                     activityManager,
                     accountList.toTypedArray(),
-                    lock, condition)
+                    countDownLatch)
             activity?.let {
                 activity.runOnUiThread(showDialog)
-                lock.lock()
-                try {
-                    condition.await()
-                } finally {
-                    lock.unlock()
-                }
+                countDownLatch.await()
             }
             if (showDialog.canceled) {
                 throw AuthenticationCanceledException("User canceled authentication!")
@@ -172,7 +156,6 @@ class AndroidOwnerManager constructor(
             }
             return null
         }
-
     }
 
     /**
@@ -182,22 +165,12 @@ class AndroidOwnerManager constructor(
             private val context: Context,
             private val activityManager: ActivityManager,
             private val options: Array<String>,
-            private val lock: Lock,
-            private val condition: Condition) : Runnable {
+            private val countDownLatch: CountDownLatch) : Runnable {
         internal var canceled = false
         var selectedOption: String? = null
 
         init {
             this.selectedOption = options[0]
-        }
-
-        private fun unlock() {
-            lock.lock()
-            try {
-                condition.signal()
-            } finally {
-                lock.unlock()
-            }
         }
 
         override fun run() {
@@ -212,7 +185,7 @@ class AndroidOwnerManager constructor(
                     .setNegativeButton(android.R.string.cancel) { _, _ -> canceled = true }
                     .setPositiveButton(android.R.string.ok) { _, _ -> canceled = false }
             val dialog = builder.create()
-            dialog.setOnDismissListener { unlock() }
+            dialog.setOnDismissListener { countDownLatch.countDown() }
             dialog.show()
             keep(dialog)
         }
@@ -272,7 +245,7 @@ class AndroidOwnerManager constructor(
         }
     }
 
-    internal class AccountFuture(
+    private class AccountFuture(
             private val accountFuture: AccountManagerFuture<Bundle>
     ) : Future<Account> {
         override fun isDone(): Boolean = accountFuture.isDone

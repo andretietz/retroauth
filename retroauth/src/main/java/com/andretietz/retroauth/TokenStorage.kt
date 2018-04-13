@@ -16,6 +16,8 @@
 
 package com.andretietz.retroauth
 
+import java.util.concurrent.Future
+
 /**
  * This is the interface of a token storage.
  */
@@ -28,7 +30,7 @@ interface TokenStorage<in OWNER : Any, in TOKEN_TYPE : Any, TOKEN : Any> {
      * @param type  the type of the token you want to get
      * @return the token to authenticate your request with
      */
-    fun getToken(owner: OWNER, type: TOKEN_TYPE): TOKEN
+    fun getToken(owner: OWNER, type: TOKEN_TYPE, callback: Callback<TOKEN>? = null): Future<TOKEN>
 
     /**
      * Removes the token of a specific type and owner from the token storage.
@@ -37,7 +39,7 @@ interface TokenStorage<in OWNER : Any, in TOKEN_TYPE : Any, TOKEN : Any> {
      * @param type  Type of the token
      * @param token Token to remove
      */
-    fun removeToken(owner: OWNER, type: TOKEN_TYPE, token: TOKEN): TOKEN
+    fun removeToken(owner: OWNER, type: TOKEN_TYPE, token: TOKEN)
 
     /**
      * Stores a token of a specific type and owner to the token storage.
@@ -46,5 +48,5 @@ interface TokenStorage<in OWNER : Any, in TOKEN_TYPE : Any, TOKEN : Any> {
      * @param type  Type of the token
      * @param token Token to store
      */
-    fun storeToken(owner: OWNER, type: TOKEN_TYPE, token: TOKEN): TOKEN
+    fun storeToken(owner: OWNER, type: TOKEN_TYPE, token: TOKEN)
 }
