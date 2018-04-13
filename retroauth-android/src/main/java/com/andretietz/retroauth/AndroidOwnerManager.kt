@@ -30,6 +30,9 @@ import android.os.Looper
 import android.view.WindowManager
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
+import java.util.concurrent.Future
+import java.util.concurrent.FutureTask
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.Condition
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
@@ -52,7 +55,9 @@ class AndroidOwnerManager constructor(
     private val accountManager by lazy { AccountManager.get(application) }
 
     @Throws(AuthenticationCanceledException::class)
-    override fun createOwner(ownerType: String, tokenType: AndroidTokenType, callback: OwnerManager.Callback?): Account {
+    override fun createOwner(ownerType: String,
+                             tokenType: AndroidTokenType,
+                             callback: Callback<Account>?): Future<Account> {
         val future = accountManager.addAccount(
                 ownerType,
                 tokenType.tokenType,
@@ -61,13 +66,14 @@ class AndroidOwnerManager constructor(
                 activityManager.activity,
                 if (callback != null) CreateAccountCallback(callback) else null,
                 null)
-        val result = future.result
-        val accountName = result.getString(AccountManager.KEY_ACCOUNT_NAME)
-        if (accountName != null) {
-            return Account(result.getString(AccountManager.KEY_ACCOUNT_NAME),
-                    result.getString(AccountManager.KEY_ACCOUNT_TYPE))
-        }
-        throw AuthenticationCanceledException()
+        return AccountFuture(future)
+//        val result = future.result
+//        val accountName = result.getString(AccountManager.KEY_ACCOUNT_NAME)
+//        if (accountName != null) {
+//            return Account(result.getString(AccountManager.KEY_ACCOUNT_NAME),
+//                    result.getString(AccountManager.KEY_ACCOUNT_TYPE))
+//        }
+//        throw AuthenticationCanceledException()
     }
 
     override fun getOwner(ownerType: String, ownerName: String): Account? {
@@ -86,14 +92,14 @@ class AndroidOwnerManager constructor(
         return null
     }
 
-    override fun openOwnerPicker(ownerType: String): Account? {
-        showAccountPickerDialog(ownerType)?.let {
-            getOwner(ownerType, it)?.let {
-                switchActiveOwner(it.type, it)
-                return it
-            }
+    override fun openOwnerPicker(ownerType: String, callback: Callback<Account?>?): Future<Account?> {
+        val task = ShowDialogPickerTask(application, accountManager, ownerType, callback)
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            return executor.submit(task)
         }
-        return null
+        val future = FutureTask(task)
+        future.run()
+        return future
     }
 
     override fun switchActiveOwner(ownerType: String, owner: Account?) {
@@ -105,45 +111,31 @@ class AndroidOwnerManager constructor(
         }
     }
 
-    override fun removeOwner(owner: Account, callback: OwnerManager.Callback?) {
+    override fun removeOwner(owner: Account, callback: Callback<Boolean>?): Future<Boolean> {
+        val accountFuture: Future<Boolean>
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
             val rac = if (callback != null) RemoveLollipopAccountCallback(callback) else null
-            accountManager.removeAccount(owner, null, rac, null)
+            accountFuture = RemoveAccountFuture(accountManager.removeAccount(owner, null, rac, null))
         } else {
             val rac = if (callback != null) RemoveAccountCallback(callback) else null
             @Suppress("DEPRECATION")
-            accountManager.removeAccount(owner, rac, null)
+            accountFuture = PreLollipopRemoveAccountFuture(accountManager.removeAccount(owner, rac, null))
         }
         switchActiveOwner(owner.type)
+        return accountFuture
     }
-
-    /**
-     * Shows an account picker for the user to choose an account. Make sure you're calling this from a non-ui thread
-     *
-     * @param accountType   Account type of the accounts the user can choose
-     * @param canAddAccount if `true` the user has the option to add an account
-     * @return the accounts the user chooses from
-     */
-    @Throws(AuthenticationCanceledException::class)
-    private fun showAccountPickerDialog(accountType: String): String? {
-        val task = ShowDialogPickerTask(application, accountManager, accountType)
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            return executor.submit(task).get()
-        }
-        return task.call()
-    }
-
 
     private class ShowDialogPickerTask(
             private val application: Application,
             private val accountManager: AccountManager,
-            private val accountType: String
+            private val accountType: String,
+            private val callback: Callback<Account?>?
 
-    ) : Callable<String?> {
+    ) : Callable<Account?> {
 
         private val activityManager = ActivityManager[application]
 
-        override fun call(): String? {
+        override fun call(): Account? {
             val accounts = accountManager.getAccountsByType(accountType)
             if (accounts.isEmpty()) return null
             val accountList = accounts.map { it.name }.toMutableSet()
@@ -152,7 +144,11 @@ class AndroidOwnerManager constructor(
             val condition = lock.newCondition()
             val activity = activityManager.activity
             // show the account chooser
-            val showDialog = ShowAccountChooser(application, activityManager, accountList.toTypedArray(), lock, condition)
+            val showDialog = ShowAccountChooser(
+                    application,
+                    activityManager,
+                    accountList.toTypedArray(),
+                    lock, condition)
             activity?.let {
                 activity.runOnUiThread(showDialog)
                 lock.lock()
@@ -165,7 +161,16 @@ class AndroidOwnerManager constructor(
             if (showDialog.canceled) {
                 throw AuthenticationCanceledException("User canceled authentication!")
             }
-            return showDialog.selectedOption
+            val accountName = showDialog.selectedOption
+            for (account in accounts) {
+                if (accountName == account.name) {
+                    val preferences = application.getSharedPreferences(accountType, Context.MODE_PRIVATE)
+                    preferences.edit().putString(RETROAUTH_ACCOUNT_NAME_KEY, account.name).apply()
+                    callback?.onResult(account)
+                    return account
+                }
+            }
+            return null
         }
 
     }
@@ -225,14 +230,14 @@ class AndroidOwnerManager constructor(
     /**
      * Callback wrapper for adding an account
      */
-    private class CreateAccountCallback(private val callback: OwnerManager.Callback) : AccountManagerCallback<Bundle> {
+    private class CreateAccountCallback(private val callback: Callback<Account>) : AccountManagerCallback<Bundle> {
 
         override fun run(accountManagerFuture: AccountManagerFuture<Bundle>) {
-            try {
-                val accountName = accountManagerFuture.result.getString(AccountManager.KEY_ACCOUNT_NAME)
-                callback.done(accountName != null)
-            } catch (e: Exception) {
-                callback.done(false)
+            val accountName = accountManagerFuture.result.getString(AccountManager.KEY_ACCOUNT_NAME)
+            if (accountName != null) {
+                callback.onResult(Account(accountName,
+                        accountManagerFuture.result.getString(AccountManager.KEY_ACCOUNT_TYPE)))
+                return
             }
         }
     }
@@ -240,14 +245,14 @@ class AndroidOwnerManager constructor(
     /**
      * Callback wrapper for account removing on >= lollipop (22) devices
      */
-    private class RemoveLollipopAccountCallback(private val callback: OwnerManager.Callback)
+    private class RemoveLollipopAccountCallback(private val callback: Callback<Boolean>)
         : AccountManagerCallback<Bundle> {
 
         override fun run(accountManagerFuture: AccountManagerFuture<Bundle>) {
             try {
-                callback.done(accountManagerFuture.result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT))
+                callback.onResult(accountManagerFuture.result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT))
             } catch (e: Exception) {
-                callback.done(false)
+                callback.onResult(false)
             }
         }
     }
@@ -255,15 +260,53 @@ class AndroidOwnerManager constructor(
     /**
      * Callback wrapper for account removing on prelollipop (22 -> MR1) devices
      */
-    private class RemoveAccountCallback(private val callback: OwnerManager.Callback) : AccountManagerCallback<Boolean> {
+    private class RemoveAccountCallback(private val callback: Callback<Boolean>) : AccountManagerCallback<Boolean> {
 
         override fun run(accountManagerFuture: AccountManagerFuture<Boolean>) {
             try {
-                callback.done(accountManagerFuture.result)
+                callback.onResult(accountManagerFuture.result)
             } catch (e: Exception) {
-                callback.done(false)
+                callback.onResult(false)
             }
 
         }
+    }
+
+    internal class AccountFuture(
+            private val accountFuture: AccountManagerFuture<Bundle>
+    ) : Future<Account> {
+        override fun isDone(): Boolean = accountFuture.isDone
+        override fun get(): Account = createAccount(accountFuture.result)
+        override fun get(p0: Long, p1: TimeUnit?): Account = createAccount(accountFuture.getResult(p0, p1))
+        private fun createAccount(bundle: Bundle): Account {
+            val accountName = bundle.getString(AccountManager.KEY_ACCOUNT_NAME)
+            if (accountName != null) {
+                return Account(bundle.getString(AccountManager.KEY_ACCOUNT_NAME),
+                        bundle.getString(AccountManager.KEY_ACCOUNT_TYPE))
+            }
+            throw AuthenticationCanceledException()
+        }
+
+        override fun cancel(p0: Boolean): Boolean = accountFuture.cancel(p0)
+        override fun isCancelled(): Boolean = accountFuture.isCancelled
+    }
+
+    private class RemoveAccountFuture(private val accountFuture: AccountManagerFuture<Bundle>) : Future<Boolean> {
+        override fun isDone(): Boolean = accountFuture.isDone
+        override fun get(): Boolean = accountFuture.result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT)
+        override fun get(p0: Long, p1: TimeUnit?): Boolean = accountFuture.getResult(p0, p1)
+                .getBoolean(AccountManager.KEY_BOOLEAN_RESULT)
+
+        override fun cancel(p0: Boolean): Boolean = accountFuture.cancel(p0)
+        override fun isCancelled(): Boolean = accountFuture.isCancelled
+    }
+
+    private class PreLollipopRemoveAccountFuture(private val accountFuture: AccountManagerFuture<Boolean>)
+        : Future<Boolean> {
+        override fun isDone(): Boolean = accountFuture.isDone
+        override fun get(): Boolean = accountFuture.result
+        override fun get(p0: Long, p1: TimeUnit?): Boolean = accountFuture.getResult(p0, p1)
+        override fun cancel(p0: Boolean): Boolean = accountFuture.cancel(p0)
+        override fun isCancelled(): Boolean = accountFuture.isCancelled
     }
 }

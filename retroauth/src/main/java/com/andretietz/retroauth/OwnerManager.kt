@@ -16,6 +16,8 @@
 
 package com.andretietz.retroauth
 
+import java.util.concurrent.Future
+
 /**
  * Since every token belongs to a specific user, this users have to be managed.
  */
@@ -34,7 +36,7 @@ interface OwnerManager<in OWNER_TYPE : Any, OWNER : Any, in TOKEN_TYPE : Any> {
      * @throws AuthenticationCanceledException
      */
     @Throws(AuthenticationCanceledException::class)
-    fun createOwner(ownerType: OWNER_TYPE, tokenType: TOKEN_TYPE, callback: Callback? = null): OWNER
+    fun createOwner(ownerType: OWNER_TYPE, tokenType: TOKEN_TYPE, callback: Callback<OWNER>? = null): Future<OWNER>
 
     /**
      * Returns the owner if exists
@@ -59,7 +61,7 @@ interface OwnerManager<in OWNER_TYPE : Any, OWNER : Any, in TOKEN_TYPE : Any> {
      * @throws AuthenticationCanceledException
      */
     @Throws(AuthenticationCanceledException::class)
-    fun openOwnerPicker(ownerType: OWNER_TYPE): OWNER?
+    fun openOwnerPicker(ownerType: OWNER_TYPE, callback: Callback<OWNER?>? = null): Future<OWNER?>
 
     /**
      * @param ownerType type of the active owner you want to receive.
@@ -84,9 +86,5 @@ interface OwnerManager<in OWNER_TYPE : Any, OWNER : Any, in TOKEN_TYPE : Any> {
      * @param owner the owner to remove.
      * @param callback Optional to get notified when the removal is complete.
      */
-    fun removeOwner(owner: OWNER, callback: Callback? = null)
-
-    interface Callback {
-        fun done(success: Boolean)
-    }
+    fun removeOwner(owner: OWNER, callback: Callback<Boolean>? = null): Future<Boolean>
 }
