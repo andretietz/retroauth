@@ -63,10 +63,10 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TY
                     pending = lock(authRequestType)
 
                     owner = ownerManager.getActiveOwner(authRequestType.ownerType)
-                            ?: ownerManager.openOwnerPicker(authRequestType.ownerType)
-                            ?: ownerManager.createOwner(authRequestType.ownerType, authRequestType.tokenType)
+                            ?: ownerManager.openOwnerPicker(authRequestType.ownerType).get()
+                            ?: ownerManager.createOwner(authRequestType.ownerType, authRequestType.tokenType).get()
                     // get the token of the owner
-                    val localToken = tokenStorage.getToken(owner, authRequestType.tokenType)
+                    val localToken = tokenStorage.getToken(owner, authRequestType.tokenType).get()
                     // if the token is still valid and no refresh has been requested
                     if (tokenProvider.isTokenValid(localToken) && !refreshRequested) {
                         token = localToken
@@ -77,7 +77,8 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TY
                         val refreshedToken = tokenProvider.refreshToken(owner, authRequestType.tokenType, localToken)
                         if (refreshedToken != null) {
                             // if the token was refreshed, store it
-                            token = tokenStorage.storeToken(owner, authRequestType.tokenType, refreshedToken)
+                            tokenStorage.storeToken(owner, authRequestType.tokenType, refreshedToken)
+                            token = refreshedToken
                         } else {
                             // otherwise use the "old" token
                             token = localToken

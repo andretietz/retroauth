@@ -8,6 +8,7 @@ import android.widget.Toast
 import com.andretietz.retroauth.AndroidOwnerManager
 import com.andretietz.retroauth.AndroidToken
 import com.andretietz.retroauth.AndroidTokenStorage
+import com.andretietz.retroauth.Callback
 import com.andretietz.retroauth.RetroauthAndroidBuilder
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -70,19 +71,27 @@ class MainActivity : AppCompatActivity() {
 
         buttonInvalidateToken.setOnClickListener {
             ownerManager.getActiveOwner(provider.ownerType)?.let { account ->
-                val token = tokenStorage.getToken(account, provider.tokenType)
-                tokenStorage.storeToken(
-                        account,
-                        provider.tokenType,
-                        AndroidToken("some-invalid-token", token.data)
-                )
+                tokenStorage.getToken(account, provider.tokenType, object : Callback<AndroidToken> {
+                    override fun onResult(result: AndroidToken?) {
+                        tokenStorage.storeToken(
+                                account,
+                                provider.tokenType,
+                                AndroidToken("some-invalid-token", result?.data))
+                    }
+
+                })
             }
         }
 
         buttonLogout.setOnClickListener {
             ownerManager.getActiveOwner(provider.ownerType)?.let { account ->
-                val token = tokenStorage.getToken(account, provider.tokenType)
-                tokenStorage.removeToken(account, provider.tokenType, token)
+                tokenStorage.getToken(account, provider.tokenType, object : Callback<AndroidToken> {
+                    override fun onResult(result: AndroidToken?) {
+                        result?.let {
+                            tokenStorage.removeToken(account, provider.tokenType, it)
+                        }
+                    }
+                })
             }
             /** remove all cookies to avoid an automatic relogin */
             val cookieManager = CookieManager.getInstance()

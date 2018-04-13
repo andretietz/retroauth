@@ -61,6 +61,6 @@ class ProviderFacebook(application: Application)
         // https://developers.facebook.com/docs/facebook-login/access-tokens/refreshing
         // `At any point, you can generate a new long-lived token by sending the
         // person back to the login flow used by your web app.`
-        return tokenStorage.getToken(owner, tokenType)
+        return tokenStorage.getToken(owner, tokenType).get()
     }
 }
