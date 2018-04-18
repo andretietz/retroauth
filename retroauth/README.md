@@ -54,7 +54,7 @@ The API provides 3 interaces and an abstract class. All of the
   * [TokenStorage](src/main/java/com/andretietz/retroauth/TokenStorage.kt): So that
   * [MethodCache](src/main/java/com/andretietz/retroauth/MethodCache.kt):
   This is an interface optionally to implement. If you don't, you can use it's default implementation, the ```DefaultMethodCache```.
-  * [TokenProvider](src/main/java/com/andretietz/retroauth/TokenProvider.kt): This is an abstract class and it's supposed to be the interface to the backend you're authenticating against.
+  * [Authenticator](src/main/java/com/andretietz/retroauth/Authenticator.kt): This is an abstract class and it's supposed to be an abstract class to the backend you're authenticating against.
 
 ## Pull requests are welcome
 Since I am the only one working on that, I would like to know your opinion and/or your suggestions.

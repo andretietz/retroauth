@@ -33,7 +33,7 @@ import java.util.concurrent.locks.ReentrantLock
  * @param <TOKEN_TYPE> type of the token that should be added to the request
  */
 internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
-        private val tokenProvider: TokenProvider<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN>,
+        private val authenticator: Authenticator<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN>,
         private val ownerManager: OwnerManager<OWNER_TYPE, OWNER, TOKEN_TYPE>,
         private val tokenStorage: TokenStorage<OWNER, TOKEN_TYPE, TOKEN>,
         private val methodCache: MethodCache<OWNER_TYPE, TOKEN_TYPE> = MethodCache.DefaultMethodCache()
@@ -68,13 +68,13 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TY
                     // get the token of the owner
                     val localToken = tokenStorage.getToken(owner, authRequestType.tokenType).get()
                     // if the token is still valid and no refresh has been requested
-                    if (tokenProvider.isTokenValid(localToken) && !refreshRequested) {
+                    if (authenticator.isTokenValid(localToken) && !refreshRequested) {
                         token = localToken
                     } else {
                         // otherwise remove the current token from the storage
                         tokenStorage.removeToken(owner, authRequestType.tokenType, localToken)
                         // try to refresh the token
-                        val refreshedToken = tokenProvider.refreshToken(owner, authRequestType.tokenType, localToken)
+                        val refreshedToken = authenticator.refreshToken(owner, authRequestType.tokenType, localToken)
                         if (refreshedToken != null) {
                             // if the token was refreshed, store it
                             tokenStorage.storeToken(owner, authRequestType.tokenType, refreshedToken)
@@ -85,14 +85,14 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TY
                         }
                     }
                     // authenticate the request using the token
-                    request = tokenProvider.authenticateRequest(request, token)
+                    request = authenticator.authenticateRequest(request, token)
                 } finally {
                     // release type lock
                     unlock(authRequestType, pending)
                 }
                 // execute the request
                 response = chain.proceed(request)
-                refreshRequested = tokenProvider.refreshRequired(++tryCount, response!!)
+                refreshRequested = authenticator.refreshRequired(++tryCount, response!!)
             } while (refreshRequested)
         } catch (error: Exception) {
             storeAndThrowError(authRequestType, error)

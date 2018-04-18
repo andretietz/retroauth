@@ -26,14 +26,14 @@ import java.util.concurrent.TimeUnit
 
 class LoginActivity : AuthenticationActivity() {
 
-    private val helper = ServiceBuilder(ProviderFacebook.CLIENT_ID)
-            .apiSecret(ProviderFacebook.CLIENT_SECRET)
-            .callback(ProviderFacebook.CLIENT_CALLBACK)
+    private val helper = ServiceBuilder(FacebookAuthenticator.CLIENT_ID)
+            .apiSecret(FacebookAuthenticator.CLIENT_SECRET)
+            .callback(FacebookAuthenticator.CLIENT_CALLBACK)
             .scope("email")
             .httpClient(OkHttpHttpClient())
             .build(FacebookApi.instance())
 
-    private val provider by lazy { ProviderFacebook(application) }
+    private val authenticator by lazy { FacebookAuthenticator(application) }
 
     override fun onCreate(icicle: Bundle?) {
         super.onCreate(icicle)
@@ -61,10 +61,10 @@ class LoginActivity : AuthenticationActivity() {
                                         .plus(System.currentTimeMillis())
                                 storeToken(
                                         account,
-                                        provider.tokenType,
+                                        authenticator.tokenType,
                                         result.token.accessToken,
                                         mapOf(
-                                                ProviderFacebook.KEY_TOKEN_VALIDITY
+                                                FacebookAuthenticator.KEY_TOKEN_VALIDITY
                                                         to expiryDate.toString()
                                         )
                                 )

@@ -7,9 +7,9 @@ object RetroauthAndroidBuilder {
     @JvmStatic
     fun createBuilder(
             application: Application,
-            tokenProvider: TokenProvider<String, Account, AndroidTokenType, AndroidToken>): Retroauth.Builder<String, Account, AndroidTokenType, AndroidToken> {
+            authenticator: Authenticator<String, Account, AndroidTokenType, AndroidToken>): Retroauth.Builder<String, Account, AndroidTokenType, AndroidToken> {
         return Retroauth.Builder(
-                tokenProvider,
+                authenticator,
                 AndroidOwnerManager(application),
                 AndroidTokenStorage(application),
                 AndroidMethodCache()

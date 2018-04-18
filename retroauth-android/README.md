@@ -13,7 +13,7 @@ If you call a request method, annotated with the authenticated annotation, it'll
 * Step 1: Checks if there already is an account in the Android AccountManager. If not, it'll open a LoginActivity (you choose which). If there already is an account, go on with step 2, If there's more than one account open an Dialog to pick an account.
 * Step 2: Tries to get the authentication token from the (choosen) account for authorizing the request. If there is no valid token, your LoginActivity will open. After login go to Step 1.
 * Step 3: Sends the actual request
-* Step 4: By implementing a TokenProvider you can check the response (i.e. a 401 you will be able to refresh the token) and decide if you want to retry the request or not.
+* Step 4: By implementing a Authenticator you can check the response (i.e. a 401 you will be able to refresh the token) and decide if you want to retry the request or not.
 
 ## How to use it?
 
@@ -91,7 +91,7 @@ class LoginActivity : AuthenticationActivity() {
         storeToken(
                 account,
                 tokenType,  // AndroidTokenType
-                token,      // String as you get it from your TokenProvider implementation
+                token,      // String as you get it from your Authenticator implementation
                 mapOf(
                         "some-key" to "some-value"
                 )
@@ -121,11 +121,11 @@ as `action:name` contain the Action String you defined in #2
  ```
 
 ## Usage
-### Create a TokenProvider implementation
-For the Android Implementation you need to create a TokenProvider:
+### Create an Authenticator implementation
+For the Android Implementation you need to create an Authenticator:
 ```kotlin
-class YourTokenProvider
-    : TokenProvider<String, Account, AndroidTokenType, AndroidToken>() {
+class YourAuthenticator
+    : Authenticator<String, Account, AndroidTokenType, AndroidToken>() {
 ```
 
 There are 3 Methods required to implement:
@@ -176,7 +176,7 @@ interface SomeAuthenticatedService {
  
  * Create the Retrofit object and instantiate it
 ```java
-Retrofit retrofit = RetroauthAndroidBuilder.create(application, YourTokenProvider()))
+Retrofit retrofit = RetroauthAndroidBuilder.create(application, YourAuthenticator()))
         .baseUrl("https://api.awesome.com/")
         // add whatever you used to do with retrofit2
         // i.e.:

@@ -30,7 +30,7 @@ import android.support.v7.app.AppCompatActivity
  * It'll provide functionality to {@link #storeToken(Account, String, String)} and
  * {@link #storeUserData(Account, String, String)} when logging in. In case your service is providing a refresh token,
  * use {@link #storeToken(Account, String, String, String)}. This will additionally store a refresh token that can be used
- * in {@link TokenProvider#validateResponse(int, okhttp3.Response, TokenStorage, Object, Object, Object)}
+ * in {@link Authenticator#validateResponse(int, okhttp3.Response, TokenStorage, Object, Object, Object)}
  * to update the access-token
  */
 abstract class AuthenticationActivity : AppCompatActivity() {

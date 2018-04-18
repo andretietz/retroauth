@@ -27,7 +27,7 @@ import java.lang.reflect.Type
  */
 internal class RetroauthCallAdapterFactory<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
         private val callAdapterFactories: List<CallAdapter.Factory>,
-        private val tokenProvider: TokenProvider<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN>,
+        private val authenticator: Authenticator<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN>,
         private val methodCache: MethodCache<OWNER_TYPE, TOKEN_TYPE> = MethodCache.DefaultMethodCache()
 ) : CallAdapter.Factory() {
 
@@ -53,8 +53,8 @@ internal class RetroauthCallAdapterFactory<out OWNER_TYPE : Any, OWNER : Any, TO
                 auth?.let {
                     return RetroauthCallAdapter(
                             adapter as CallAdapter<Any, Any>,
-                            tokenProvider.getTokenType(auth.tokenType),
-                            tokenProvider.getOwnerType(auth.ownerType),
+                            authenticator.getTokenType(auth.tokenType),
+                            authenticator.getOwnerType(auth.ownerType),
                             methodCache)
                 }
                 return adapter

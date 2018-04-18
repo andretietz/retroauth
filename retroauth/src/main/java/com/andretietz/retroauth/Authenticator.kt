@@ -20,10 +20,10 @@ import okhttp3.Request
 import okhttp3.Response
 
 /**
- * The TokenProvider interface is a very specific provider endpoint dependent implementation,
+ * The Authenticator interface is a very specific provider endpoint dependent implementation,
  * to authenticate your request and defines when or if to retry.
  */
-abstract class TokenProvider<out OWNER_TYPE : Any, in OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any> {
+abstract class Authenticator<out OWNER_TYPE : Any, in OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any> {
 
     /**
      * @param annotationTokenType type of the token reached in from the [Authenticated.tokenType]

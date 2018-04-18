@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
                 .addInterceptor(interceptor)
                 .build()
 
-        val provider = ProviderFacebook(application)
+        val provider = FacebookAuthenticator(application)
 
         /**
          * Create your Retrofit Object using the [RetroauthAndroidBuilder.createBuilder]

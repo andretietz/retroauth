@@ -5,17 +5,17 @@ import android.app.Application
 import com.andretietz.retroauth.AndroidToken
 import com.andretietz.retroauth.AndroidTokenStorage
 import com.andretietz.retroauth.AndroidTokenType
-import com.andretietz.retroauth.TokenProvider
+import com.andretietz.retroauth.Authenticator
 import okhttp3.Request
 
 /**
- * This is an optimistic implementation of facebook as token provider.
+ * This is an optimistic implementation of facebook as [Authenticator].
  *
  * If the token for some reason is invalid, the returning 401 will cause the deletion of the token and a retry of the
  * call, in which it will get refreshed
  */
-class ProviderFacebook(application: Application)
-    : TokenProvider<String, Account, AndroidTokenType, AndroidToken>() {
+class FacebookAuthenticator(application: Application)
+    : Authenticator<String, Account, AndroidTokenType, AndroidToken>() {
 
     private val tokenStorage by lazy { AndroidTokenStorage(application) }
 
