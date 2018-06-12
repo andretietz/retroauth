@@ -23,14 +23,14 @@ import okhttp3.Request
  */
 internal object Utils {
 
-    /**
-     * Creates an identifier, which can identify the request by itself
-     *
-     * @param request request to create the identifier for
-     * @return an identifier
-     */
-    @JvmStatic
-    fun createUniqueIdentifier(request: Request): Int {
-        return (request.url().toString() + request.method()).hashCode()
-    }
+  /**
+   * Creates an identifier, which can identify the request by itself
+   *
+   * @param request request to create the identifier for
+   * @return an identifier
+   */
+  @JvmStatic
+  fun createUniqueIdentifier(request: Request): Int {
+    return (request.url().toString() + request.method()).hashCode()
+  }
 }

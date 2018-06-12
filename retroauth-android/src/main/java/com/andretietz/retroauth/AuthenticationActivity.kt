@@ -35,141 +35,141 @@ import android.support.v7.app.AppCompatActivity
  */
 abstract class AuthenticationActivity : AppCompatActivity() {
 
-    private var accountAuthenticatorResponse: AccountAuthenticatorResponse? = null
-    private lateinit var accountType: String
-    private lateinit var accountManager: AccountManager
-    private var tokenType: String? = null
-    private lateinit var resultBundle: Bundle
-    private lateinit var tokenStorage: AndroidTokenStorage
-    private val ownerManager by lazy { AndroidOwnerManager(application) }
+  private var accountAuthenticatorResponse: AccountAuthenticatorResponse? = null
+  private lateinit var accountType: String
+  private lateinit var accountManager: AccountManager
+  private var tokenType: String? = null
+  private lateinit var resultBundle: Bundle
+  private lateinit var tokenStorage: AndroidTokenStorage
+  private val ownerManager by lazy { AndroidOwnerManager(application) }
 
-    override fun onCreate(icicle: Bundle?) {
-        super.onCreate(icicle)
-        accountManager = AccountManager.get(application)
-        tokenStorage = AndroidTokenStorage(application)
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    accountManager = AccountManager.get(application)
+    tokenStorage = AndroidTokenStorage(application)
 
-        accountAuthenticatorResponse = intent.getParcelableExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)
-        accountAuthenticatorResponse?.onRequestContinued()
+    accountAuthenticatorResponse = intent.getParcelableExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)
+    accountAuthenticatorResponse?.onRequestContinued()
 
-        val accountType = intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE)
-        if (accountType == null) {
-            accountAuthenticatorResponse?.onError(AccountManager.ERROR_CODE_CANCELED, "canceled")
-            throw IllegalStateException(
-                    String.format(
-                            "This Activity cannot be started without the \"%s\" extra in the intent! "
-                                    + "Use the \"createAccount\"-Method of the \"%s\" for opening the Login manually.",
-                            AccountManager.KEY_ACCOUNT_TYPE, OwnerManager::class.java.simpleName))
-        }
-        this.accountType = accountType
-        tokenType = intent.getStringExtra(AccountAuthenticator.KEY_TOKEN_TYPE)
-
-
-        resultBundle = Bundle()
-        resultBundle.putString(AccountManager.KEY_ACCOUNT_TYPE, accountType)
+    val accountType = intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE)
+    if (accountType == null) {
+      accountAuthenticatorResponse?.onError(AccountManager.ERROR_CODE_CANCELED, "canceled")
+      throw IllegalStateException(
+          String.format(
+              "This Activity cannot be started without the \"%s\" extra in the intent! "
+                  + "Use the \"createAccount\"-Method of the \"%s\" for opening the Login manually.",
+              AccountManager.KEY_ACCOUNT_TYPE, OwnerManager::class.java.simpleName))
     }
+    this.accountType = accountType
+    tokenType = intent.getStringExtra(AccountAuthenticator.KEY_TOKEN_TYPE)
 
-    /**
-     * This method stores an authentication Token to a specific account.
-     *
-     * @param account      Account you want to store the token for
-     * @param tokenType    type of the token you want to store
-     * @param token        Token itself
-     * @param data         data that belongs to the data. i.e. expiring date etc.
-     */
-    @JvmOverloads
-    fun storeToken(account: Account, tokenType: AndroidTokenType, token: String, data: Map<String, String>? = null) {
-        tokenStorage.storeToken(account, tokenType, AndroidToken(token, data))
-    }
 
-    /**
-     * With this you can store some additional userdata in key-value-pairs to the account.
-     *
-     * @param account Account you want to store information for
-     * @param key     the key for the data
-     * @param value   the actual data you want to store
-     */
-    fun storeUserData(account: Account, key: String, value: String?) {
-        accountManager.setUserData(account, key, value)
-    }
+    resultBundle = Bundle()
+    resultBundle.putString(AccountManager.KEY_ACCOUNT_TYPE, accountType)
+  }
 
-    /**
-     * This method will finish the login process. Depending on the finishActivity flag, the activity will be finished or not
-     * The account which is reached into this method will be set as
-     * "current" account.
-     * @param account        Account you want to set as current active
-     * @param finishActivity when `true`, the activity will be finished after finalization.
-     */
-    @JvmOverloads
-    fun finalizeAuthentication(account: Account, finishActivity: Boolean = true) {
-        resultBundle.putString(AccountManager.KEY_ACCOUNT_NAME, account.name)
-        ownerManager.switchActiveOwner(account.type, account)
-        if (finishActivity) finish()
-    }
+  /**
+   * This method stores an authentication Token to a specific account.
+   *
+   * @param account      Account you want to store the token for
+   * @param tokenType    type of the token you want to store
+   * @param token        Token itself
+   * @param data         data that belongs to the data. i.e. expiring date etc.
+   */
+  @JvmOverloads
+  fun storeToken(account: Account, tokenType: AndroidTokenType, token: String, data: Map<String, String>? = null) {
+    tokenStorage.storeToken(account, tokenType, AndroidToken(token, data))
+  }
 
-    /**
-     * Tries finding an existing account with the given name.
-     * It creates a new Account if it couldn't find it
-     *
-     * @param accountName Name of the account you're searching for
-     * @return The account if found, or a newly created one
-     */
-    fun createOrGetAccount(accountName: String): Account {
-        // if this is a relogin
-        val accountList = accountManager.getAccountsByType(accountType)
-        for (account in accountList) {
-            if (account.name == accountName)
-                return account
-        }
-        val account = Account(accountName, accountType)
-        accountManager.addAccountExplicitly(account, null, null)
+  /**
+   * With this you can store some additional userdata in key-value-pairs to the account.
+   *
+   * @param account Account you want to store information for
+   * @param key     the key for the data
+   * @param value   the actual data you want to store
+   */
+  fun storeUserData(account: Account, key: String, value: String?) {
+    accountManager.setUserData(account, key, value)
+  }
+
+  /**
+   * This method will finish the login process. Depending on the finishActivity flag, the activity will be finished or not
+   * The account which is reached into this method will be set as
+   * "current" account.
+   * @param account        Account you want to set as current active
+   * @param finishActivity when `true`, the activity will be finished after finalization.
+   */
+  @JvmOverloads
+  fun finalizeAuthentication(account: Account, finishActivity: Boolean = true) {
+    resultBundle.putString(AccountManager.KEY_ACCOUNT_NAME, account.name)
+    ownerManager.switchActiveOwner(account.type, account)
+    if (finishActivity) finish()
+  }
+
+  /**
+   * Tries finding an existing account with the given name.
+   * It creates a new Account if it couldn't find it
+   *
+   * @param accountName Name of the account you're searching for
+   * @return The account if found, or a newly created one
+   */
+  fun createOrGetAccount(accountName: String): Account {
+    // if this is a relogin
+    val accountList = accountManager.getAccountsByType(accountType)
+    for (account in accountList) {
+      if (account.name == accountName)
         return account
     }
+    val account = Account(accountName, accountType)
+    accountManager.addAccountExplicitly(account, null, null)
+    return account
+  }
 
-    /**
-     * If for some reason an account was created already and the login couldn't complete successfully, you can user this
-     * method to remove this account
-     *
-     * @param account to remove
-     */
-    @Suppress("DEPRECATION")
-    fun removeAccount(account: Account) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            accountManager.removeAccount(account, null, null, null)
-        } else {
-            accountManager.removeAccount(account, null, null)
-        }
+  /**
+   * If for some reason an account was created already and the login couldn't complete successfully, you can user this
+   * method to remove this account
+   *
+   * @param account to remove
+   */
+  @Suppress("DEPRECATION")
+  fun removeAccount(account: Account) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+      accountManager.removeAccount(account, null, null, null)
+    } else {
+      accountManager.removeAccount(account, null, null)
     }
+  }
 
-    /**
-     * Sends the result or a Constants.ERROR_CODE_CANCELED error if a result isn't present.
-     */
-    override fun finish() {
-        if (accountAuthenticatorResponse != null) {
-            accountAuthenticatorResponse?.onResult(resultBundle)
-            accountAuthenticatorResponse = null
-        } else {
-            if (resultBundle.containsKey(AccountManager.KEY_ACCOUNT_NAME)) {
-                val intent = Intent()
-                intent.putExtras(resultBundle)
-                setResult(Activity.RESULT_OK, intent)
-            } else {
-                setResult(Activity.RESULT_CANCELED)
-            }
-        }
-        super.finish()
+  /**
+   * Sends the result or a Constants.ERROR_CODE_CANCELED error if a result isn't present.
+   */
+  override fun finish() {
+    if (accountAuthenticatorResponse != null) {
+      accountAuthenticatorResponse?.onResult(resultBundle)
+      accountAuthenticatorResponse = null
+    } else {
+      if (resultBundle.containsKey(AccountManager.KEY_ACCOUNT_NAME)) {
+        val intent = Intent()
+        intent.putExtras(resultBundle)
+        setResult(Activity.RESULT_OK, intent)
+      } else {
+        setResult(Activity.RESULT_CANCELED)
+      }
     }
+    super.finish()
+  }
 
-    /**
-     * @return The requested account type if available. otherwise `null`
-     */
-    fun getRequestedAccountType(): String {
-        return accountType
-    }
+  /**
+   * @return The requested account type if available. otherwise `null`
+   */
+  fun getRequestedAccountType(): String {
+    return accountType
+  }
 
-    /**
-     * @return The requested token type if available. otherwise `null`
-     */
-    fun getRequestedTokenType(): String? {
-        return tokenType
-    }
+  /**
+   * @return The requested token type if available. otherwise `null`
+   */
+  fun getRequestedTokenType(): String? {
+    return tokenType
+  }
 }

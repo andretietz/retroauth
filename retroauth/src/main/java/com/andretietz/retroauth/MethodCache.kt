@@ -25,34 +25,34 @@ import java.util.HashMap
  */
 interface MethodCache<OWNER_TYPE : Any, TOKEN_TYPE : Any> {
 
-    /**
-     * Registers a token type with a specific identifier.
-     *
-     * @param requestIdentifier to identify the request later on
-     * @param type              type of the request.
-     */
-    fun register(requestIdentifier: Int, type: RequestType<OWNER_TYPE, TOKEN_TYPE>)
+  /**
+   * Registers a token type with a specific identifier.
+   *
+   * @param requestIdentifier to identify the request later on
+   * @param type              type of the request.
+   */
+  fun register(requestIdentifier: Int, type: RequestType<OWNER_TYPE, TOKEN_TYPE>)
 
-    /**
-     * @param requestIdentifier the request identifier
-     * @return the token type to authenticate the request
-     */
-    fun getTokenType(requestIdentifier: Int): RequestType<OWNER_TYPE, TOKEN_TYPE>?
+  /**
+   * @param requestIdentifier the request identifier
+   * @return the token type to authenticate the request
+   */
+  fun getTokenType(requestIdentifier: Int): RequestType<OWNER_TYPE, TOKEN_TYPE>?
 
-    /**
-     * The default implementation of the [MethodCache].
-     *
-     * @param <TOKEN_TYPE>
-     */
-    class DefaultMethodCache<OWNER_TYPE : Any, TOKEN_TYPE : Any> : MethodCache<OWNER_TYPE, TOKEN_TYPE> {
-        private val map = HashMap<Int, RequestType<OWNER_TYPE, TOKEN_TYPE>>()
+  /**
+   * The default implementation of the [MethodCache].
+   *
+   * @param <TOKEN_TYPE>
+   */
+  class DefaultMethodCache<OWNER_TYPE : Any, TOKEN_TYPE : Any> : MethodCache<OWNER_TYPE, TOKEN_TYPE> {
+    private val map = HashMap<Int, RequestType<OWNER_TYPE, TOKEN_TYPE>>()
 
-        override fun register(requestIdentifier: Int, type: RequestType<OWNER_TYPE, TOKEN_TYPE>) {
-            map[requestIdentifier] = type
-        }
-
-        override fun getTokenType(requestIdentifier: Int): RequestType<OWNER_TYPE, TOKEN_TYPE>? {
-            return map[requestIdentifier]
-        }
+    override fun register(requestIdentifier: Int, type: RequestType<OWNER_TYPE, TOKEN_TYPE>) {
+      map[requestIdentifier] = type
     }
+
+    override fun getTokenType(requestIdentifier: Int): RequestType<OWNER_TYPE, TOKEN_TYPE>? {
+      return map[requestIdentifier]
+    }
+  }
 }

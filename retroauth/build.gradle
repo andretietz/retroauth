@@ -1,13 +1,6 @@
 apply plugin: 'kotlin'
 apply plugin: 'java-library'
-apply plugin: 'checkstyle'
 
-checkstyle {
-    toolVersion '6.0'
-    configFile = new File(rootDir, "checkstyle.xml")
-    ignoreFailures false
-    showViolations true
-}
 
 dependencies {
     api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"

@@ -24,51 +24,51 @@ import java.util.LinkedList
 
 internal class WeakActivityStack {
 
-    private val map = SparseArray<WeakReference<Activity>>()
+  private val map = SparseArray<WeakReference<Activity>>()
 
-    private val stack = LinkedList<Int>()
+  private val stack = LinkedList<Int>()
 
 
-    fun push(item: Activity) {
-        val identifier = getIdentifier(item)
-        synchronized(this) {
-            stack.push(identifier)
-            map.put(identifier, WeakReference(item))
-        }
+  fun push(item: Activity) {
+    val identifier = getIdentifier(item)
+    synchronized(this) {
+      stack.push(identifier)
+      map.put(identifier, WeakReference(item))
     }
+  }
 
-    fun pop(): Activity? {
-        synchronized(this) {
-            if (!stack.isEmpty()) {
-                val identifier = stack.removeFirst()
-                val item = map.get(identifier!!).get()
-                map.remove(identifier)
-                return item
-            }
-            return null
-        }
+  fun pop(): Activity? {
+    synchronized(this) {
+      if (!stack.isEmpty()) {
+        val identifier = stack.removeFirst()
+        val item = map.get(identifier!!).get()
+        map.remove(identifier)
+        return item
+      }
+      return null
     }
+  }
 
-    fun remove(item: Activity) {
-        val identifier = getIdentifier(item)
-        synchronized(this) {
-            stack.remove(identifier)
-            map.remove(identifier)
-        }
+  fun remove(item: Activity) {
+    val identifier = getIdentifier(item)
+    synchronized(this) {
+      stack.remove(identifier)
+      map.remove(identifier)
     }
+  }
 
-    fun peek(): Activity? {
-        synchronized(this) {
-            if (!stack.isEmpty()) {
-                return map.get(stack.first).get()
-            }
-        }
-        return null
+  fun peek(): Activity? {
+    synchronized(this) {
+      if (!stack.isEmpty()) {
+        return map.get(stack.first).get()
+      }
     }
+    return null
+  }
 
 
-    private fun getIdentifier(item: Activity): Int {
-        return item.hashCode()
-    }
+  private fun getIdentifier(item: Activity): Int {
+    return item.hashCode()
+  }
 
 }

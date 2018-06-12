@@ -23,11 +23,11 @@ import java.util.concurrent.Executor
  * This helper gets some os dependent information from retrofit.
  */
 internal object Retrofit2Platform {
-    @JvmStatic
-    fun defaultCallAdapterFactory(executor: Executor?): Factory {
-        executor?.let {
-            return Platform.get().defaultCallAdapterFactory(executor)
-        }
-        return Platform.get().defaultCallAdapterFactory(Platform.get().defaultCallbackExecutor())
+  @JvmStatic
+  fun defaultCallAdapterFactory(executor: Executor?): Factory {
+    executor?.let {
+      return Platform.get().defaultCallAdapterFactory(executor)
     }
+    return Platform.get().defaultCallAdapterFactory(Platform.get().defaultCallbackExecutor())
+  }
 }

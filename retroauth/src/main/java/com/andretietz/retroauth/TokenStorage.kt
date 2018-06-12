@@ -23,30 +23,30 @@ import java.util.concurrent.Future
  */
 interface TokenStorage<in OWNER : Any, in TOKEN_TYPE : Any, TOKEN : Any> {
 
-    /**
-     * This method returns an authentication token that is stored locally.
-     *
-     * @param owner The owner type of the token you want to get
-     * @param type  the type of the token you want to get
-     * @return the token to authenticate your request with
-     */
-    fun getToken(owner: OWNER, type: TOKEN_TYPE, callback: Callback<TOKEN>? = null): Future<TOKEN>
+  /**
+   * This method returns an authentication token that is stored locally.
+   *
+   * @param owner The owner type of the token you want to get
+   * @param type  the type of the token you want to get
+   * @return the token to authenticate your request with
+   */
+  fun getToken(owner: OWNER, type: TOKEN_TYPE, callback: Callback<TOKEN>? = null): Future<TOKEN>
 
-    /**
-     * Removes the token of a specific type and owner from the token storage.
-     *
-     * @param owner Owner of the token
-     * @param type  Type of the token
-     * @param token Token to remove
-     */
-    fun removeToken(owner: OWNER, type: TOKEN_TYPE, token: TOKEN)
+  /**
+   * Removes the token of a specific type and owner from the token storage.
+   *
+   * @param owner Owner of the token
+   * @param type  Type of the token
+   * @param token Token to remove
+   */
+  fun removeToken(owner: OWNER, type: TOKEN_TYPE, token: TOKEN)
 
-    /**
-     * Stores a token of a specific type and owner to the token storage.
-     *
-     * @param owner Owner of the token
-     * @param type  Type of the token
-     * @param token Token to store
-     */
-    fun storeToken(owner: OWNER, type: TOKEN_TYPE, token: TOKEN)
+  /**
+   * Stores a token of a specific type and owner to the token storage.
+   *
+   * @param owner Owner of the token
+   * @param type  Type of the token
+   * @param token Token to store
+   */
+  fun storeToken(owner: OWNER, type: TOKEN_TYPE, token: TOKEN)
 }

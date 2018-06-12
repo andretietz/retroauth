@@ -25,10 +25,10 @@ import android.os.IBinder
  */
 abstract class AuthenticationService : Service() {
 
-    override fun onBind(intent: Intent): IBinder? = AccountAuthenticator(this, getLoginAction()).iBinder
+  override fun onBind(intent: Intent): IBinder? = AccountAuthenticator(this, getLoginAction()).iBinder
 
-    /**
-     * @return An Action String to open the activity to login
-     */
-    abstract fun getLoginAction(): String
+  /**
+   * @return An Action String to open the activity to login
+   */
+  abstract fun getLoginAction(): String
 }

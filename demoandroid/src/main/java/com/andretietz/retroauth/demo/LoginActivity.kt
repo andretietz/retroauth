@@ -26,86 +26,86 @@ import java.util.concurrent.TimeUnit
 
 class LoginActivity : AuthenticationActivity() {
 
-    private val helper = ServiceBuilder(FacebookAuthenticator.CLIENT_ID)
-            .apiSecret(FacebookAuthenticator.CLIENT_SECRET)
-            .callback(FacebookAuthenticator.CLIENT_CALLBACK)
-            .scope("email")
-            .httpClient(OkHttpHttpClient())
-            .build(FacebookApi.instance())
+  private val helper = ServiceBuilder(FacebookAuthenticator.CLIENT_ID)
+      .apiSecret(FacebookAuthenticator.CLIENT_SECRET)
+      .callback(FacebookAuthenticator.CLIENT_CALLBACK)
+      .scope("email")
+      .httpClient(OkHttpHttpClient())
+      .build(FacebookApi.instance())
 
-    private val authenticator by lazy { FacebookAuthenticator(application) }
+  private val authenticator by lazy { FacebookAuthenticator(application) }
 
-    override fun onCreate(icicle: Bundle?) {
-        super.onCreate(icicle)
-        setContentView(R.layout.activity_login)
-        Timber.plant(Timber.DebugTree())
+  override fun onCreate(savedInstanceBundle: Bundle?) {
+    super.onCreate(savedInstanceBundle)
+    setContentView(R.layout.activity_login)
+    Timber.plant(Timber.DebugTree())
 
-        webView.loadUrl(helper.authorizationUrl)
-        @Suppress("UsePropertyAccessSyntax")
-        webView.getSettings().setJavaScriptEnabled(true)
-        webView.webViewClient = object : WebViewClient() {
-            @Suppress("OverridingDeprecatedMember")
-            override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
-                val authorization = helper.extractAuthorization(url)
-                val code = authorization.code
-                if (code == null) {
-                    view.loadUrl(url)
-                } else {
-                    Single.fromCallable(TokenVerifier(helper, code))
-                            .subscribeOn(Schedulers.io())
-                            .subscribe({ result ->
-                                val account = createOrGetAccount(result.name)
-                                val expiryDate = TimeUnit.MILLISECONDS
-                                        // expiry date - 30 seconds (network tolerance)
-                                        .convert((result.token.expiresIn - 30).toLong(), TimeUnit.SECONDS)
-                                        .plus(System.currentTimeMillis())
-                                storeToken(
-                                        account,
-                                        authenticator.tokenType,
-                                        result.token.accessToken,
-                                        mapOf(
-                                                FacebookAuthenticator.KEY_TOKEN_VALIDITY
-                                                        to expiryDate.toString()
-                                        )
-                                )
-                                finalizeAuthentication(account)
-                            }, { error -> Timber.e(error) })
-                }
-                return true
-            }
-
-            @Suppress("DEPRECATION")
-            @TargetApi(Build.VERSION_CODES.N)
-            override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-                return shouldOverrideUrlLoading(view, request.url.toString())
-            }
+    webView.loadUrl(helper.authorizationUrl)
+    @Suppress("UsePropertyAccessSyntax")
+    webView.getSettings().setJavaScriptEnabled(true)
+    webView.webViewClient = object : WebViewClient() {
+      @Suppress("OverridingDeprecatedMember")
+      override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
+        val authorization = helper.extractAuthorization(url)
+        val code = authorization.code
+        if (code == null) {
+          view.loadUrl(url)
+        } else {
+          Single.fromCallable(TokenVerifier(helper, code))
+              .subscribeOn(Schedulers.io())
+              .subscribe({ result ->
+                val account = createOrGetAccount(result.name)
+                val expiryDate = TimeUnit.MILLISECONDS
+                    // expiry date - 30 seconds (network tolerance)
+                    .convert((result.token.expiresIn - 30).toLong(), TimeUnit.SECONDS)
+                    .plus(System.currentTimeMillis())
+                storeToken(
+                    account,
+                    authenticator.tokenType,
+                    result.token.accessToken,
+                    mapOf(
+                        FacebookAuthenticator.KEY_TOKEN_VALIDITY
+                            to expiryDate.toString()
+                    )
+                )
+                finalizeAuthentication(account)
+              }, { error -> Timber.e(error) })
         }
+        return true
+      }
+
+      @Suppress("DEPRECATION")
+      @TargetApi(Build.VERSION_CODES.N)
+      override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+        return shouldOverrideUrlLoading(view, request.url.toString())
+      }
     }
+  }
 
-    private class TokenVerifier(private val service: OAuth20Service, private val code: String)
-        : Callable<LoginResult> {
-        private val api = Retrofit.Builder()
-                .baseUrl("https://graph.facebook.com/")
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .addConverterFactory(MoshiConverterFactory.create())
-                .build().create(FacebookInfoService::class.java)
+  private class TokenVerifier(private val service: OAuth20Service, private val code: String)
+    : Callable<LoginResult> {
+    private val api = Retrofit.Builder()
+        .baseUrl("https://graph.facebook.com/")
+        .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+        .addConverterFactory(MoshiConverterFactory.create())
+        .build().create(FacebookInfoService::class.java)
 
-        override fun call(): LoginResult {
-            val token = service.getAccessToken(code)
-            val info = api.getUserInfo("name,email", token.accessToken).blockingGet()
-            return LoginResult(info.email, token)
-        }
+    override fun call(): LoginResult {
+      val token = service.getAccessToken(code)
+      val info = api.getUserInfo("name,email", token.accessToken).blockingGet()
+      return LoginResult(info.email, token)
     }
+  }
 
-    internal interface FacebookInfoService {
-        @GET("v2.11/me")
-        fun getUserInfo(@Query("fields") fields: String, @Query("access_token") token: String): Single<UserInfo>
-    }
+  internal interface FacebookInfoService {
+    @GET("v2.11/me")
+    fun getUserInfo(@Query("fields") fields: String, @Query("access_token") token: String): Single<UserInfo>
+  }
 
-    internal class UserInfo {
-        var name: String = ""
-        var email: String = ""
-    }
+  internal class UserInfo {
+    var name: String = ""
+    var email: String = ""
+  }
 
-    private class LoginResult(val name: String, val token: OAuth2AccessToken)
+  private class LoginResult(val name: String, val token: OAuth2AccessToken)
 }

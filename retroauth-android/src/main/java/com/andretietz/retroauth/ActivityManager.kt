@@ -32,65 +32,65 @@ import android.os.Bundle
  * [android.app.Service] there will be no Login if required.
  */
 internal class ActivityManager private constructor(application: Application) {
-    private val handler: LifecycleHandler
+  private val handler: LifecycleHandler
+
+  /**
+   * @return an [Activity] if there's one available.
+   */
+  val activity: Activity? get() = handler.current
+
+  init {
+    handler = LifecycleHandler()
+    application.registerActivityLifecycleCallbacks(handler)
+  }
+
+  /**
+   * An implementation of [ActivityLifecycleCallbacks] which stores a reference to the [Activity] as long as
+   * it is not stopped. If the [Activity] is stopped, the reference will be removed.
+   */
+  private class LifecycleHandler internal constructor() : ActivityLifecycleCallbacks {
+    private val activityStack = WeakActivityStack()
+
+    internal val current: Activity? get() = activityStack.peek()
+
+    override fun onActivityResumed(activity: Activity) {}
+
+    override fun onActivityPaused(activity: Activity) {}
+
+    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
+
+    override fun onActivityStarted(activity: Activity) = activityStack.push(activity)
+
+    override fun onActivityStopped(activity: Activity) = activityStack.remove(activity)
+
+    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle?) {}
+
+    override fun onActivityDestroyed(activity: Activity) {}
+  }
+
+  companion object {
+    @Volatile
+    private var instance: ActivityManager? = null
 
     /**
-     * @return an [Activity] if there's one available.
+     * @param application some [Activity] to be able to create the instance
+     * @return a singleton instance of the [ActivityManager].
      */
-    val activity: Activity? get() = handler.current
-
-    init {
-        handler = LifecycleHandler()
-        application.registerActivityLifecycleCallbacks(handler)
-    }
-
-    /**
-     * An implementation of [ActivityLifecycleCallbacks] which stores a reference to the [Activity] as long as
-     * it is not stopped. If the [Activity] is stopped, the reference will be removed.
-     */
-    private class LifecycleHandler internal constructor() : ActivityLifecycleCallbacks {
-        private val activityStack = WeakActivityStack()
-
-        internal val current: Activity? get() = activityStack.peek()
-
-        override fun onActivityResumed(activity: Activity) {}
-
-        override fun onActivityPaused(activity: Activity) {}
-
-        override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
-
-        override fun onActivityStarted(activity: Activity) = activityStack.push(activity)
-
-        override fun onActivityStopped(activity: Activity) = activityStack.remove(activity)
-
-        override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle?) {}
-
-        override fun onActivityDestroyed(activity: Activity) {}
-    }
-
-    companion object {
-        @Volatile
-        private var instance: ActivityManager? = null
-
-        /**
-         * @param application some [Activity] to be able to create the instance
-         * @return a singleton instance of the [ActivityManager].
-         */
-        @JvmStatic
-        operator fun get(application: Application): ActivityManager {
-            val i = instance
-            i?.let {
-                return i
-            }
-            return synchronized(this) {
-                val i2 = instance
-                i2?.let {
-                    i2
-                }
-                val created = ActivityManager(application)
-                instance = created
-                created
-            }
+    @JvmStatic
+    operator fun get(application: Application): ActivityManager {
+      val i = instance
+      i?.let {
+        return i
+      }
+      return synchronized(this) {
+        val i2 = instance
+        i2?.let {
+          i2
         }
+        val created = ActivityManager(application)
+        instance = created
+        created
+      }
     }
+  }
 }

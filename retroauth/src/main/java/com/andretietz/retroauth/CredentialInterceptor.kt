@@ -33,113 +33,113 @@ import java.util.concurrent.locks.ReentrantLock
  * @param <TOKEN_TYPE> type of the token that should be added to the request
  */
 internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
-        private val authenticator: Authenticator<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN>,
-        private val ownerManager: OwnerManager<OWNER_TYPE, OWNER, TOKEN_TYPE>,
-        private val tokenStorage: TokenStorage<OWNER, TOKEN_TYPE, TOKEN>,
-        private val methodCache: MethodCache<OWNER_TYPE, TOKEN_TYPE> = MethodCache.DefaultMethodCache()
+    private val authenticator: Authenticator<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN>,
+    private val ownerManager: OwnerManager<OWNER_TYPE, OWNER, TOKEN_TYPE>,
+    private val tokenStorage: TokenStorage<OWNER, TOKEN_TYPE, TOKEN>,
+    private val methodCache: MethodCache<OWNER_TYPE, TOKEN_TYPE> = MethodCache.DefaultMethodCache()
 ) : Interceptor {
 
-    companion object {
-        private val TOKEN_TYPE_LOCKERS = HashMap<Any, AccountTokenLock>()
-    }
+  companion object {
+    private val TOKEN_TYPE_LOCKERS = HashMap<Any, AccountTokenLock>()
+  }
 
-    override fun intercept(chain: Interceptor.Chain): Response? {
-        var response: Response? = null
-        var request = chain.request()
-        // get the token type required by this request
-        val authRequestType = methodCache.getTokenType(Utils.createUniqueIdentifier(request))
-                ?: return chain.proceed(request)
+  override fun intercept(chain: Interceptor.Chain): Response? {
+    var response: Response? = null
+    var request = chain.request()
+    // get the token type required by this request
+    val authRequestType = methodCache.getTokenType(Utils.createUniqueIdentifier(request))
+        ?: return chain.proceed(request)
 
-        // if the request does require authentication
-        var pending = false
-        var refreshRequested = false
-        var token: TOKEN
-        var owner: OWNER
-        var tryCount = 0
+    // if the request does require authentication
+    var pending = false
+    var refreshRequested = false
+    var token: TOKEN
+    var owner: OWNER
+    var tryCount = 0
+    try {
+      do {
         try {
-            do {
-                try {
-                    // Lock foreach type
-                    pending = lock(authRequestType)
+          // Lock foreach type
+          pending = lock(authRequestType)
 
-                    owner = ownerManager.getActiveOwner(authRequestType.ownerType)
-                            ?: ownerManager.openOwnerPicker(authRequestType.ownerType).get()
-                            ?: ownerManager.createOwner(authRequestType.ownerType, authRequestType.tokenType).get()
-                    // get the token of the owner
-                    val localToken = tokenStorage.getToken(owner, authRequestType.tokenType).get()
-                    // if the token is still valid and no refresh has been requested
-                    if (authenticator.isTokenValid(localToken) && !refreshRequested) {
-                        token = localToken
-                    } else {
-                        // otherwise remove the current token from the storage
-                        tokenStorage.removeToken(owner, authRequestType.tokenType, localToken)
-                        // try to refresh the token
-                        val refreshedToken = authenticator.refreshToken(owner, authRequestType.tokenType, localToken)
-                        if (refreshedToken != null) {
-                            // if the token was refreshed, store it
-                            tokenStorage.storeToken(owner, authRequestType.tokenType, refreshedToken)
-                            token = refreshedToken
-                        } else {
-                            // otherwise use the "old" token
-                            token = localToken
-                        }
-                    }
-                    // authenticate the request using the token
-                    request = authenticator.authenticateRequest(request, token)
-                } finally {
-                    // release type lock
-                    unlock(authRequestType, pending)
-                }
-                // execute the request
-                response = chain.proceed(request)
-                refreshRequested = authenticator.refreshRequired(++tryCount, response!!)
-            } while (refreshRequested)
-        } catch (error: Exception) {
-            storeAndThrowError(authRequestType, error)
-        }
-        return response
-    }
-
-    private fun storeAndThrowError(type: RequestType<OWNER_TYPE, TOKEN_TYPE>, exception: Exception) {
-        if (getLock(type).errorContainer.get() == null) {
-            getLock(type).errorContainer.set(exception)
-        }
-        throw exception
-    }
-
-    private fun getLock(type: RequestType<OWNER_TYPE, TOKEN_TYPE>): AccountTokenLock {
-        synchronized(type, {
-            val lock: AccountTokenLock = TOKEN_TYPE_LOCKERS[type] ?: AccountTokenLock()
-            TOKEN_TYPE_LOCKERS[type] = lock
-            return lock
-        })
-    }
-
-    @Throws(Exception::class)
-    private fun lock(type: RequestType<OWNER_TYPE, TOKEN_TYPE>): Boolean {
-        val lock = getLock(type)
-        if (!lock.lock.tryLock()) {
-            lock.lock.lock()
-            val exception = lock.errorContainer.get()
-            if (exception != null) {
-                throw exception
+          owner = ownerManager.getActiveOwner(authRequestType.ownerType)
+              ?: ownerManager.openOwnerPicker(authRequestType.ownerType).get()
+              ?: ownerManager.createOwner(authRequestType.ownerType, authRequestType.tokenType).get()
+          // get the token of the owner
+          val localToken = tokenStorage.getToken(owner, authRequestType.tokenType).get()
+          // if the token is still valid and no refresh has been requested
+          if (authenticator.isTokenValid(localToken) && !refreshRequested) {
+            token = localToken
+          } else {
+            // otherwise remove the current token from the storage
+            tokenStorage.removeToken(owner, authRequestType.tokenType, localToken)
+            // try to refresh the token
+            val refreshedToken = authenticator.refreshToken(owner, authRequestType.tokenType, localToken)
+            if (refreshedToken != null) {
+              // if the token was refreshed, store it
+              tokenStorage.storeToken(owner, authRequestType.tokenType, refreshedToken)
+              token = refreshedToken
+            } else {
+              // otherwise use the "old" token
+              token = localToken
             }
-            return true
+          }
+          // authenticate the request using the token
+          request = authenticator.authenticateRequest(request, token)
+        } finally {
+          // release type lock
+          unlock(authRequestType, pending)
         }
-        return false
+        // execute the request
+        response = chain.proceed(request)
+        refreshRequested = authenticator.refreshRequired(++tryCount, response!!)
+      } while (refreshRequested)
+    } catch (error: Exception) {
+      storeAndThrowError(authRequestType, error)
     }
+    return response
+  }
 
-    private fun unlock(type: RequestType<OWNER_TYPE, TOKEN_TYPE>, wasWaiting: Boolean) {
-        val lock = getLock(type)
-        if (wasWaiting && lock.waitCounter.decrementAndGet() <= 0) {
-            lock.errorContainer.set(null)
-        }
-        lock.lock.unlock()
+  private fun storeAndThrowError(type: RequestType<OWNER_TYPE, TOKEN_TYPE>, exception: Exception) {
+    if (getLock(type).errorContainer.get() == null) {
+      getLock(type).errorContainer.set(exception)
     }
+    throw exception
+  }
 
-    internal class AccountTokenLock {
-        val lock: Lock = ReentrantLock(true)
-        val errorContainer: AtomicReference<Exception> = AtomicReference()
-        val waitCounter = AtomicInteger()
+  private fun getLock(type: RequestType<OWNER_TYPE, TOKEN_TYPE>): AccountTokenLock {
+    synchronized(type, {
+      val lock: AccountTokenLock = TOKEN_TYPE_LOCKERS[type] ?: AccountTokenLock()
+      TOKEN_TYPE_LOCKERS[type] = lock
+      return lock
+    })
+  }
+
+  @Throws(Exception::class)
+  private fun lock(type: RequestType<OWNER_TYPE, TOKEN_TYPE>): Boolean {
+    val lock = getLock(type)
+    if (!lock.lock.tryLock()) {
+      lock.lock.lock()
+      val exception = lock.errorContainer.get()
+      if (exception != null) {
+        throw exception
+      }
+      return true
     }
+    return false
+  }
+
+  private fun unlock(type: RequestType<OWNER_TYPE, TOKEN_TYPE>, wasWaiting: Boolean) {
+    val lock = getLock(type)
+    if (wasWaiting && lock.waitCounter.decrementAndGet() <= 0) {
+      lock.errorContainer.set(null)
+    }
+    lock.lock.unlock()
+  }
+
+  internal class AccountTokenLock {
+    val lock: Lock = ReentrantLock(true)
+    val errorContainer: AtomicReference<Exception> = AtomicReference()
+    val waitCounter = AtomicInteger()
+  }
 }

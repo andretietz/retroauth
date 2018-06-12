@@ -23,6 +23,6 @@ import java.io.IOException
  * some other error happens. The Reason can be read, on calling [AuthenticationCanceledException.getCause]
  */
 class AuthenticationCanceledException @JvmOverloads constructor(
-        detailMessage: String? = null,
-        throwable: Throwable? = null)
-    : IOException(detailMessage, throwable)
+    detailMessage: String? = null,
+    throwable: Throwable? = null)
+  : IOException(detailMessage, throwable)

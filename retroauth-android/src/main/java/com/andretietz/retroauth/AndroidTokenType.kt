@@ -21,5 +21,5 @@ package com.andretietz.retroauth
  * represents a token bound to an account
  */
 data class AndroidTokenType @JvmOverloads constructor(
-        val tokenType: String,
-        val dataKeys: Set<String>? = null)
+    val tokenType: String,
+    val dataKeys: Set<String>? = null)
