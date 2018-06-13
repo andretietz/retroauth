@@ -26,9 +26,9 @@ import java.lang.reflect.Type
  * requests using retrofit2.
  */
 internal class RetroauthCallAdapterFactory<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
-    private val callAdapterFactories: List<CallAdapter.Factory>,
-    private val authenticator: Authenticator<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN>,
-    private val methodCache: MethodCache<OWNER_TYPE, TOKEN_TYPE> = MethodCache.DefaultMethodCache()
+  private val callAdapterFactories: List<CallAdapter.Factory>,
+  private val authenticator: Authenticator<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN>,
+  private val methodCache: MethodCache<OWNER_TYPE, TOKEN_TYPE> = MethodCache.DefaultMethodCache()
 ) : CallAdapter.Factory() {
 
   /**
@@ -71,17 +71,19 @@ internal class RetroauthCallAdapterFactory<out OWNER_TYPE : Any, OWNER : Any, TO
    * @param <RETURN_TYPE> Return type of the call
    */
   internal class RetroauthCallAdapter<OWNER_TYPE : Any, TOKEN_TYPE : Any, RETURN_TYPE : Any>(
-      private val adapter: CallAdapter<Any, RETURN_TYPE>,
-      private val tokenType: TOKEN_TYPE,
-      private val ownerType: OWNER_TYPE,
-      private val registration: MethodCache<OWNER_TYPE, TOKEN_TYPE>
+    private val adapter: CallAdapter<Any, RETURN_TYPE>,
+    private val tokenType: TOKEN_TYPE,
+    private val ownerType: OWNER_TYPE,
+    private val registration: MethodCache<OWNER_TYPE, TOKEN_TYPE>
   ) : CallAdapter<Any, RETURN_TYPE> {
 
     override fun responseType(): Type = adapter.responseType()
 
     override fun adapt(call: Call<Any>): RETURN_TYPE {
-      val request = call.request()
-      registration.register(Utils.createUniqueIdentifier(request), RequestType(tokenType, ownerType))
+      registration.register(
+          Utils.createUniqueIdentifier(
+              call.request()
+          ), RequestType(tokenType, ownerType))
       return adapter.adapt(call)
     }
   }
