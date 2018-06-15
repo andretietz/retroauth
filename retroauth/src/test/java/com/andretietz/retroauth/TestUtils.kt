@@ -66,7 +66,8 @@ class TestUtils {
     val id2 = Utils.createUniqueIdentifier(request2)
     val id3 = Utils.createUniqueIdentifier(request3)
 
-    Assert.assertFalse(id1 == id2)
+    /** Headers should not effect the id **/
+    Assert.assertTrue(id1 == id2)
     Assert.assertTrue(id2 == id3)
 
   }
