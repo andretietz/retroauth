@@ -31,6 +31,6 @@ internal object Utils {
    */
   @JvmStatic
   fun createUniqueIdentifier(request: Request): Int {
-    return request.url().hashCode() + 31 * request.method().hashCode() + 31 * request.headers().names().hashCode()
+    return request.url().hashCode() + 31 * request.method().hashCode()
   }
 }
