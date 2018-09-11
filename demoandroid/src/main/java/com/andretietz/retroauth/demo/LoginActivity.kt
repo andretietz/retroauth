@@ -23,6 +23,8 @@ import retrofit2.http.Query
 import timber.log.Timber
 import java.util.concurrent.Callable
 import java.util.concurrent.TimeUnit
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 
 class LoginActivity : AuthenticationActivity() {
   private val compositeDisposable = CompositeDisposable()
