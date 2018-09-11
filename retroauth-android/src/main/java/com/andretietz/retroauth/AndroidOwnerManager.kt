@@ -35,13 +35,12 @@ import java.util.concurrent.Future
 import java.util.concurrent.FutureTask
 import java.util.concurrent.TimeUnit
 
-
 /**
  * This is the Android implementation of an [OwnerManager]. It does all the Android [Account] handling
  */
 @Suppress("unused")
 class AndroidOwnerManager constructor(
-    private val application: Application
+  private val application: Application
 ) : OwnerManager<String, Account, AndroidTokenType> {
 
   companion object {
@@ -54,16 +53,17 @@ class AndroidOwnerManager constructor(
 
   @Throws(AuthenticationCanceledException::class)
   override fun createOwner(ownerType: String,
-                           tokenType: AndroidTokenType,
-                           callback: Callback<Account>?): Future<Account> {
+    tokenType: AndroidTokenType,
+    callback: Callback<Account>?
+  ): Future<Account> {
     val future = accountManager.addAccount(
-        ownerType,
-        tokenType.tokenType,
-        null,
-        null,
-        activityManager.activity,
-        if (callback != null) CreateAccountCallback(callback) else null,
-        null)
+      ownerType,
+      tokenType.tokenType,
+      null,
+      null,
+      activityManager.activity,
+      if (callback != null) CreateAccountCallback(callback) else null,
+      null)
     return AccountFuture(future)
   }
 
@@ -117,10 +117,10 @@ class AndroidOwnerManager constructor(
   }
 
   private class ShowDialogPickerTask(
-      private val application: Application,
-      private val accountManager: AccountManager,
-      private val accountType: String,
-      private val callback: Callback<Account?>?
+    private val application: Application,
+    private val accountManager: AccountManager,
+    private val accountType: String,
+    private val callback: Callback<Account?>?
   ) : Callable<Account?> {
 
     private val activityManager = ActivityManager[application]
@@ -134,10 +134,10 @@ class AndroidOwnerManager constructor(
       val activity = activityManager.activity
       // show the account chooser
       val showDialog = ShowAccountChooser(
-          application,
-          activityManager,
-          accountList.toTypedArray(),
-          countDownLatch)
+        application,
+        activityManager,
+        accountList.toTypedArray(),
+        countDownLatch)
       activity?.let {
         activity.runOnUiThread(showDialog)
         countDownLatch.await()
@@ -162,10 +162,11 @@ class AndroidOwnerManager constructor(
    * This [Runnable] shows an [AlertDialog] where the user can choose an account or create a new one
    */
   private class ShowAccountChooser(
-      private val context: Context,
-      private val activityManager: ActivityManager,
-      private val options: Array<String>,
-      private val countDownLatch: CountDownLatch) : Runnable {
+    private val context: Context,
+    private val activityManager: ActivityManager,
+    private val options: Array<String>,
+    private val countDownLatch: CountDownLatch
+  ) : Runnable {
     internal var canceled = false
     var selectedOption: String? = null
 
@@ -175,15 +176,15 @@ class AndroidOwnerManager constructor(
 
     override fun run() {
       val builder = AlertDialog.Builder(activityManager.activity)
-          .setTitle(context.getString(R.string.choose_account_label))
-          .setCancelable(false)
-          .setSingleChoiceItems(options, 0) { _, which ->
-            selectedOption = if (which < options.size - 1) {
-              options[which]
-            } else null
-          }
-          .setNegativeButton(android.R.string.cancel) { _, _ -> canceled = true }
-          .setPositiveButton(android.R.string.ok) { _, _ -> canceled = false }
+        .setTitle(context.getString(R.string.choose_account_label))
+        .setCancelable(false)
+        .setSingleChoiceItems(options, 0) { _, which ->
+          selectedOption = if (which < options.size - 1) {
+            options[which]
+          } else null
+        }
+        .setNegativeButton(android.R.string.cancel) { _, _ -> canceled = true }
+        .setPositiveButton(android.R.string.ok) { _, _ -> canceled = false }
       val dialog = builder.create()
       dialog.setOnDismissListener { countDownLatch.countDown() }
       dialog.show()
@@ -199,7 +200,6 @@ class AndroidOwnerManager constructor(
     }
   }
 
-
   /**
    * Callback wrapper for adding an account
    */
@@ -209,7 +209,7 @@ class AndroidOwnerManager constructor(
       val accountName = accountManagerFuture.result.getString(AccountManager.KEY_ACCOUNT_NAME)
       if (accountName != null) {
         callback.onResult(Account(accountName,
-            accountManagerFuture.result.getString(AccountManager.KEY_ACCOUNT_TYPE)))
+          accountManagerFuture.result.getString(AccountManager.KEY_ACCOUNT_TYPE)))
         return
       }
     }
@@ -218,8 +218,7 @@ class AndroidOwnerManager constructor(
   /**
    * Callback wrapper for account removing on >= lollipop (22) devices
    */
-  private class RemoveLollipopAccountCallback(private val callback: Callback<Boolean>)
-    : AccountManagerCallback<Bundle> {
+  private class RemoveLollipopAccountCallback(private val callback: Callback<Boolean>) : AccountManagerCallback<Bundle> {
 
     override fun run(accountManagerFuture: AccountManagerFuture<Bundle>) {
       try {
@@ -246,7 +245,7 @@ class AndroidOwnerManager constructor(
   }
 
   private class AccountFuture(
-      private val accountFuture: AccountManagerFuture<Bundle>
+    private val accountFuture: AccountManagerFuture<Bundle>
   ) : Future<Account> {
     override fun isDone(): Boolean = accountFuture.isDone
     override fun get(): Account = createAccount(accountFuture.result)
@@ -255,7 +254,7 @@ class AndroidOwnerManager constructor(
       val accountName = bundle.getString(AccountManager.KEY_ACCOUNT_NAME)
       if (accountName != null) {
         return Account(bundle.getString(AccountManager.KEY_ACCOUNT_NAME),
-            bundle.getString(AccountManager.KEY_ACCOUNT_TYPE))
+          bundle.getString(AccountManager.KEY_ACCOUNT_TYPE))
       }
       throw AuthenticationCanceledException()
     }
@@ -268,14 +267,13 @@ class AndroidOwnerManager constructor(
     override fun isDone(): Boolean = accountFuture.isDone
     override fun get(): Boolean = accountFuture.result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT)
     override fun get(p0: Long, p1: TimeUnit?): Boolean = accountFuture.getResult(p0, p1)
-        .getBoolean(AccountManager.KEY_BOOLEAN_RESULT)
+      .getBoolean(AccountManager.KEY_BOOLEAN_RESULT)
 
     override fun cancel(p0: Boolean): Boolean = accountFuture.cancel(p0)
     override fun isCancelled(): Boolean = accountFuture.isCancelled
   }
 
-  private class PreLollipopRemoveAccountFuture(private val accountFuture: AccountManagerFuture<Boolean>)
-    : Future<Boolean> {
+  private class PreLollipopRemoveAccountFuture(private val accountFuture: AccountManagerFuture<Boolean>) : Future<Boolean> {
     override fun isDone(): Boolean = accountFuture.isDone
     override fun get(): Boolean = accountFuture.result
     override fun get(p0: Long, p1: TimeUnit?): Boolean = accountFuture.getResult(p0, p1)
