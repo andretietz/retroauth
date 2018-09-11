@@ -1,4 +1,4 @@
 <resources>
-  <string name='choose_account_label'>"Επιλέξτε λογαριασμό"</string>
-  <string name='add_account_button_label'>"Προσθήκη λογαριασμού"</string>
+    <string name='choose_account_label'>"Επιλέξτε λογαριασμό"</string>
+    <string name='add_account_button_label'>"Προσθήκη λογαριασμού"</string>
 </resources>

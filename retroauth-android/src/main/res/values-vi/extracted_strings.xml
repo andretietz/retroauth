@@ -1,4 +1,4 @@
 <resources>
-  <string name='choose_account_label'>"Chọn tài khoản"</string>
-  <string name='add_account_button_label'>"Thêm tài khoản"</string>
+    <string name='choose_account_label'>"Chọn tài khoản"</string>
+    <string name='add_account_button_label'>"Thêm tài khoản"</string>
 </resources>

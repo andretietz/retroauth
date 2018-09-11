@@ -8,22 +8,12 @@ android {
     defaultConfig {
         minSdkVersion 14
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        targetSdkVersion 23
-        versionCode 1
-        versionName VERSION_NAME
     }
     buildTypes {
         release {
-            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             consumerProguardFiles 'proguard-rules.pro'
         }
-    }
-
-    lintOptions {
-        abortOnError true
-        absolutePaths false
-        lintConfig rootProject.file("lint.xml")
     }
 
     compileOptions {

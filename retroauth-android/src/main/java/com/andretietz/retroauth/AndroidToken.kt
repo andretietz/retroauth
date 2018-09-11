@@ -22,5 +22,6 @@ package com.andretietz.retroauth
  */
 
 data class AndroidToken @JvmOverloads constructor(
-    val token: String,
-    val data: Map<String, String>? = null)
+  val token: String,
+  val data: Map<String, String>? = null
+)
