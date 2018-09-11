@@ -3,14 +3,14 @@ apply plugin: 'kotlin-android'
 
 
 android {
-    compileSdkVersion 23
+    compileSdkVersion versions.compileSdk
 
     defaultConfig {
-        minSdkVersion 14
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        targetSdkVersion 23
-        versionCode 1
-        versionName VERSION_NAME
+        minSdkVersion versions.minSdk
+        testInstrumentationRunner names.testInstrumentationRunner
+        targetSdkVersion  versions.targetSdk
+        versionCode versions.versionCode as Integer
+        versionName versions.versionName
     }
     buildTypes {
         release {
@@ -45,16 +45,16 @@ android {
 }
 
 dependencies {
-    implementation 'com.android.support:appcompat-v7:23.0.0'
+    implementation "com.android.support:appcompat-v7:${versions.appcompat}"
     api project(':retroauth')
 
-    testImplementation 'junit:junit:4.12'
-    testImplementation "org.robolectric:robolectric:3.6"
-    testImplementation 'org.mockito:mockito-core:2.13.0'
+    testImplementation "junit:junit:${versions.junit}"
+    testImplementation "org.robolectric:robolectric:${versions.robolectric}"
+    testImplementation "org.mockito:mockito-core:${versions.mochitoCore}"
 
-    androidTestImplementation 'org.mockito:mockito-android:2.17.0'
-    androidTestImplementation 'com.android.support.test:runner:1.0.1'
-    androidTestImplementation 'com.android.support.test:rules:1.0.1'
+    androidTestImplementation "org.mockito:mockito-android:${versions.mochitoAndroid}"
+    androidTestImplementation "com.android.support.test:runner:${versions.testRunner}"
+    androidTestImplementation "com.android.support.test:rules:${versions.testRules}"
 
 }
 apply plugin: 'com.getkeepsafe.dexcount'

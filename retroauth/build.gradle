@@ -3,16 +3,16 @@ apply plugin: 'java-library'
 
 
 dependencies {
-    api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
-    api "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    api "org.jetbrains.kotlin:kotlin-stdlib:${versions.kotlinStdlib}"
+    api "com.squareup.retrofit2:retrofit:${versions.retrofitVersion}"
 
-    testImplementation 'junit:junit:4.12'
-    testImplementation "io.reactivex.rxjava2:rxjava:2.1.12"
-    testImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
-    testImplementation "com.squareup.okhttp3:mockwebserver:$okhttpVersion"
-    testImplementation "com.squareup.retrofit2:converter-moshi:$retrofitVersion"
-    testImplementation "com.squareup.retrofit2:adapter-rxjava2:$retrofitVersion"
-    testImplementation "com.nhaarman:mockito-kotlin:1.5.0"
+    testImplementation "junit:junit:${versions.junit}"
+    testImplementation "io.reactivex.rxjava2:rxjava:${versions.rxjava}"
+    testImplementation "org.jetbrains.kotlin:kotlin-reflect:${versions.kotlinReflect}"
+    testImplementation "com.squareup.okhttp3:mockwebserver:${versions.okhttpMockServer}"
+    testImplementation "com.squareup.retrofit2:converter-moshi:${versions.retrofitMoshi}"
+    testImplementation "com.squareup.retrofit2:adapter-rxjava2:${versions.retrofitRxAdapter}"
+    testImplementation "com.nhaarman:mockito-kotlin:${versions.mochitoKotlin}"
 }
 
 apply from: rootProject.file('gradle/publish.gradle')
