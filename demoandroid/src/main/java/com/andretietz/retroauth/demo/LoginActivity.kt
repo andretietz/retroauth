@@ -24,7 +24,6 @@ import timber.log.Timber
 import java.util.concurrent.Callable
 import java.util.concurrent.TimeUnit
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
 
 class LoginActivity : AuthenticationActivity() {
   private val compositeDisposable = CompositeDisposable()
@@ -37,8 +36,8 @@ class LoginActivity : AuthenticationActivity() {
 
   private val authenticator by lazy { FacebookAuthenticator(application) }
 
-  override fun onCreate(savedInstanceBundle: Bundle?) {
-    super.onCreate(savedInstanceBundle)
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_login)
     Timber.plant(Timber.DebugTree())
 

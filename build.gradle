@@ -6,8 +6,7 @@ buildscript {
         gradlePluginPortal()
     }
     dependencies {
-        // android plugin
-        classpath 'com.android.tools.build:gradle:3.1.3'
+        classpath 'com.android.tools.build:gradle:3.1.4'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.6.4'
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.13.0'
@@ -30,10 +29,10 @@ codeQualityTools {
     findbugs.enabled false
     ktlint.enabled false
     lint {
-        lintConfig rootProject.file("lint.xml")
+        lintConfig rootProject.file("quality/lint.xml")
     }
     checkstyle {
-        configFile 'checkstyle.xml'
+        configFile rootProject.file("quality/checkstyle.xml").path
     }
     pmd.enabled false
 }
