@@ -6,7 +6,7 @@ buildscript {
             'versionName'               : VERSION_NAME,
             'versionCode'               : VERSION_CODE,
 
-            'appcompat'                 : '28.0.0-rc02',
+            'appcompat'                 : '27.1.1',
             'retrofitMoshi'             : retrofitVersion,
             'retrofitVersion'           : retrofitVersion,
             'retrofitRxAdapter'         : '2.4.0',
