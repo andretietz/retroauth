@@ -1,4 +1,4 @@
 <resources>
-  <string name='choose_account_label'>"Есептік жазба таңдау"</string>
-  <string name='add_account_button_label'>"Есептік жазба қосу."</string>
+    <string name='choose_account_label'>"Есептік жазба таңдау"</string>
+    <string name='add_account_button_label'>"Есептік жазба қосу."</string>
 </resources>

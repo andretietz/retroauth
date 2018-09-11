@@ -28,7 +28,6 @@ internal class WeakActivityStack {
 
   private val stack = LinkedList<Int>()
 
-
   fun push(item: Activity) {
     val identifier = getIdentifier(item)
     synchronized(this) {
@@ -65,7 +64,6 @@ internal class WeakActivityStack {
     }
     return null
   }
-
 
   private fun getIdentifier(item: Activity): Int {
     return item.hashCode()

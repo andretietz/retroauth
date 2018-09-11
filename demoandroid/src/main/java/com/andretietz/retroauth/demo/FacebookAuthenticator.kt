@@ -14,8 +14,7 @@ import okhttp3.Request
  * If the token for some reason is invalid, the returning 401 will cause the deletion of the token and a retry of the
  * call, in which it will get refreshed
  */
-class FacebookAuthenticator(application: Application)
-  : Authenticator<String, Account, AndroidTokenType, AndroidToken>() {
+class FacebookAuthenticator(application: Application) : Authenticator<String, Account, AndroidTokenType, AndroidToken>() {
 
   private val tokenStorage by lazy { AndroidTokenStorage(application) }
 
@@ -27,11 +26,11 @@ class FacebookAuthenticator(application: Application)
   }
 
   val tokenType = AndroidTokenType(
-      // type of the token
-      application.getString(R.string.authentication_TOKEN),
-      // key(s) of additional values to store to the token
-      // i.e. token validity time
-      setOf(KEY_TOKEN_VALIDITY)
+    // type of the token
+    application.getString(R.string.authentication_TOKEN),
+    // key(s) of additional values to store to the token
+    // i.e. token validity time
+    setOf(KEY_TOKEN_VALIDITY)
   )
 
   val ownerType: String = application.getString(R.string.authentication_ACCOUNT)
@@ -42,8 +41,8 @@ class FacebookAuthenticator(application: Application)
 
   override fun authenticateRequest(request: Request, token: AndroidToken): Request {
     return request.newBuilder()
-        .header("Authorization", "Bearer " + token.token)
-        .build()
+      .header("Authorization", "Bearer " + token.token)
+      .build()
   }
 
   override fun isTokenValid(token: AndroidToken): Boolean {

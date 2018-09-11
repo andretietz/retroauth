@@ -3,7 +3,7 @@
     package="com.andretietz.retroauth.demo"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
@@ -11,14 +11,14 @@
         android:theme="@style/AppTheme">
         <activity android:name=".MainActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name=".LoginActivity">
             <intent-filter>
-                <action android:name="com.andretietz.retroauth.demo.ACTION" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="com.andretietz.retroauth.demo.ACTION"/>
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
 
@@ -26,11 +26,11 @@
             android:name="com.andretietz.retroauth.demo.DemoAuthenticationService"
             android:exported="false">
             <intent-filter>
-                <action android:name="android.accounts.AccountAuthenticator" />
+                <action android:name="android.accounts.AccountAuthenticator"/>
             </intent-filter>
             <meta-data
                 android:name="android.accounts.AccountAuthenticator"
-                android:resource="@xml/authenticator" />
+                android:resource="@xml/authenticator"/>
         </service>
     </application>
 

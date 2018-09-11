@@ -31,10 +31,10 @@ import java.util.concurrent.Executor
 class Retroauth private constructor() {
 
   class Builder<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any> @JvmOverloads constructor(
-      private val authenticator: Authenticator<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN>,
-      private val ownerManager: OwnerManager<OWNER_TYPE, OWNER, TOKEN_TYPE>,
-      private val tokenStorage: TokenStorage<OWNER, TOKEN_TYPE, TOKEN>,
-      private val methodCache: MethodCache<OWNER_TYPE, TOKEN_TYPE> = MethodCache.DefaultMethodCache()
+    private val authenticator: Authenticator<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN>,
+    private val ownerManager: OwnerManager<OWNER_TYPE, OWNER, TOKEN_TYPE>,
+    private val tokenStorage: TokenStorage<OWNER, TOKEN_TYPE, TOKEN>,
+    private val methodCache: MethodCache<OWNER_TYPE, TOKEN_TYPE> = MethodCache.DefaultMethodCache()
   ) {
 
     private val builder: Retrofit.Builder = Retrofit.Builder()
@@ -116,8 +116,8 @@ class Retroauth private constructor() {
 
       // creating a custom calladapter to handle authentication
       val callAdapter = RetroauthCallAdapterFactory(callAdapterFactories,
-          authenticator,
-          methodCache)
+        authenticator,
+        methodCache)
 
       // use this callAdapter to create the retrofit object
       this.builder.addCallAdapterFactory(callAdapter)
@@ -126,10 +126,10 @@ class Retroauth private constructor() {
 
       // create the okhttp interceptor to intercept requests
       val interceptor = CredentialInterceptor(
-          authenticator,
-          ownerManager,
-          tokenStorage,
-          methodCache
+        authenticator,
+        ownerManager,
+        tokenStorage,
+        methodCache
       )
 
       // add it as the first interceptor to be used

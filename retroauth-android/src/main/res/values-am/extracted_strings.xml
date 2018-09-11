@@ -1,4 +1,4 @@
 <resources>
-  <string name='choose_account_label'>"መለያ ምረጥ"</string>
-  <string name='add_account_button_label'>"መለያ አክል"</string>
+    <string name='choose_account_label'>"መለያ ምረጥ"</string>
+    <string name='add_account_button_label'>"መለያ አክል"</string>
 </resources>
