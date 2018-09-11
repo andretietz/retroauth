@@ -3,14 +3,14 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion versions.compileSdk
 
     defaultConfig {
-        applicationId "com.andretietz.retroauth.demo"
-        minSdkVersion 14
-        targetSdkVersion 27
-        versionCode 1
-        versionName "1.0.0"
+        applicationId names.applicationId
+        minSdkVersion versions.minSdk
+        targetSdkVersion versions.targetSdk
+        versionCode versions.versionCode as Integer
+        versionName versions.versionName
     }
     buildTypes {
         release {
@@ -29,15 +29,15 @@ android {
 }
 
 dependencies {
-    implementation 'com.android.support:appcompat-v7:27.1.0'
-    implementation "com.squareup.retrofit2:converter-moshi:2.3.0"
-    implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
-    implementation "com.squareup.retrofit2:adapter-rxjava2:2.3.0"
-    implementation 'com.squareup.okhttp3:logging-interceptor:3.10.0'
-    implementation 'com.jakewharton.timber:timber:4.6.1'
-    implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
-    implementation 'com.github.scribejava:scribejava-apis:5.3.0'
-    implementation 'com.github.scribejava:scribejava-httpclient-okhttp:5.3.0'
+    implementation "com.android.support:appcompat-v7:${versions.appcompat}"
+    implementation "com.squareup.retrofit2:converter-moshi:${versions.retrofitMoshi}"
+    implementation "com.squareup.okhttp3:okhttp:${versions.okhttpVersion}"
+    implementation "com.squareup.retrofit2:adapter-rxjava2:${versions.retrofitRxAdapter}"
+    implementation "com.squareup.okhttp3:logging-interceptor:${versions.okhttpLogging}"
+    implementation "com.jakewharton.timber:timber:${versions.timber}"
+    implementation "io.reactivex.rxjava2:rxandroid:${versions.rxandroid}"
+    implementation "com.github.scribejava:scribejava-apis:${versions.scribejavaApis}"
+    implementation "com.github.scribejava:scribejava-httpclient-okhttp:${versions.scribejavaHttpClientOkHttp}"
 
     implementation project(':retroauth-android')
 }
