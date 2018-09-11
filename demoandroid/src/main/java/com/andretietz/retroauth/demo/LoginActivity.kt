@@ -23,9 +23,11 @@ import retrofit2.http.Query
 import timber.log.Timber
 import java.util.concurrent.Callable
 import java.util.concurrent.TimeUnit
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 
 class LoginActivity : AuthenticationActivity() {
-
+  private val compositeDisposable = CompositeDisposable()
   private val helper = ServiceBuilder(FacebookAuthenticator.CLIENT_ID)
       .apiSecret(FacebookAuthenticator.CLIENT_SECRET)
       .callback(FacebookAuthenticator.CLIENT_CALLBACK)
@@ -51,7 +53,7 @@ class LoginActivity : AuthenticationActivity() {
         if (code == null) {
           view.loadUrl(url)
         } else {
-          Single.fromCallable(TokenVerifier(helper, code))
+          val disposable = Single.fromCallable(TokenVerifier(helper, code))
               .subscribeOn(Schedulers.io())
               .subscribe({ result ->
                 val account = createOrGetAccount(result.name)
@@ -70,6 +72,7 @@ class LoginActivity : AuthenticationActivity() {
                 )
                 finalizeAuthentication(account)
               }, { error -> Timber.e(error) })
+          compositeDisposable.add(disposable)
         }
         return true
       }
@@ -80,6 +83,11 @@ class LoginActivity : AuthenticationActivity() {
         return shouldOverrideUrlLoading(view, request.url.toString())
       }
     }
+  }
+
+  override fun onDestroy() {
+     compositeDisposable.dispose()
+     super.onDestroy()
   }
 
   private class TokenVerifier(private val service: OAuth20Service, private val code: String)
