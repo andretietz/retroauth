@@ -29,8 +29,8 @@ import android.support.v7.app.AppCompatActivity
  * Your activity that's supposed to create the account (i.e. Login{@link android.app.Activity}) has to implement this.
  * It'll provide functionality to {@link #storeToken(Account, String, String)} and
  * {@link #storeUserData(Account, String, String)} when logging in. In case your service is providing a refresh token,
- * use {@link #storeToken(Account, String, String, String)}. This will additionally store a refresh token that can be used
- * in {@link Authenticator#validateResponse(int, okhttp3.Response, TokenStorage, Object, Object, Object)}
+ * use {@link #storeToken(Account, String, String, String)}. This will additionally store a refresh token that
+ * can be used in {@link Authenticator#validateResponse(int, okhttp3.Response, TokenStorage, Object, Object, Object)}
  * to update the access-token
  */
 abstract class AuthenticationActivity : AppCompatActivity() {
@@ -56,13 +56,12 @@ abstract class AuthenticationActivity : AppCompatActivity() {
       accountAuthenticatorResponse?.onError(AccountManager.ERROR_CODE_CANCELED, "canceled")
       throw IllegalStateException(
         String.format(
-          "This Activity cannot be started without the \"%s\" extra in the intent! "
-            + "Use the \"createAccount\"-Method of the \"%s\" for opening the Login manually.",
+          "This Activity cannot be started without the \"%s\" extra in the intent! " +
+            "Use the \"createAccount\"-Method of the \"%s\" for opening the Login manually.",
           AccountManager.KEY_ACCOUNT_TYPE, OwnerManager::class.java.simpleName))
     }
     this.accountType = accountType
     tokenType = intent.getStringExtra(AccountAuthenticator.KEY_TOKEN_TYPE)
-
 
     resultBundle = Bundle()
     resultBundle.putString(AccountManager.KEY_ACCOUNT_TYPE, accountType)
@@ -71,10 +70,10 @@ abstract class AuthenticationActivity : AppCompatActivity() {
   /**
    * This method stores an authentication Token to a specific account.
    *
-   * @param account      Account you want to store the token for
-   * @param tokenType    type of the token you want to store
-   * @param token        Token itself
-   * @param data         data that belongs to the data. i.e. expiring date etc.
+   * @param account Account you want to store the token for
+   * @param tokenType type of the token you want to store
+   * @param token Token itself
+   * @param data data that belongs to the data. i.e. expiring date etc.
    */
   @JvmOverloads
   fun storeToken(account: Account, tokenType: AndroidTokenType, token: String, data: Map<String, String>? = null) {
@@ -85,18 +84,19 @@ abstract class AuthenticationActivity : AppCompatActivity() {
    * With this you can store some additional userdata in key-value-pairs to the account.
    *
    * @param account Account you want to store information for
-   * @param key     the key for the data
-   * @param value   the actual data you want to store
+   * @param key the key for the data
+   * @param value the actual data you want to store
    */
   fun storeUserData(account: Account, key: String, value: String?) {
     accountManager.setUserData(account, key, value)
   }
 
   /**
-   * This method will finish the login process. Depending on the finishActivity flag, the activity will be finished or not
-   * The account which is reached into this method will be set as
+   * This method will finish the login process. Depending on the finishActivity flag, the activity
+   * will be finished or not. The account which is reached into this method will be set as
    * "current" account.
-   * @param account        Account you want to set as current active
+   *
+   * @param account Account you want to set as current active
    * @param finishActivity when `true`, the activity will be finished after finalization.
    */
   @JvmOverloads
@@ -162,14 +162,10 @@ abstract class AuthenticationActivity : AppCompatActivity() {
   /**
    * @return The requested account type if available. otherwise `null`
    */
-  fun getRequestedAccountType(): String {
-    return accountType
-  }
+  fun getRequestedAccountType() = accountType
 
   /**
    * @return The requested token type if available. otherwise `null`
    */
-  fun getRequestedTokenType(): String? {
-    return tokenType
-  }
+  fun getRequestedTokenType() = tokenType
 }

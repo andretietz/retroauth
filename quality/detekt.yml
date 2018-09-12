@@ -2,50 +2,29 @@ failFast: true
 
 potential-bugs:
   UnsafeCast:
-    active: false # We know what we're doing.
+    active: false
   LateinitUsage:
-    active: false # We know what we're doing.
-  UnsafeCallOnNullableType:
-    active: false # We know what we're doing.
+    active: false
 
 complexity:
-  LargeClass:
-    active: false # We know what we're doing.
-  ComplexMethod:
+  NestedBlockDepth:
     active: false
-  LabeledExpression:
-    active: false # required for things like return@map
   MethodOverloading:
     active: false
-  ComplexInterface:
-    active: false
-  TooManyFunctions:
-    active: false # remove when bug fixed: https://github.com/arturbosch/detekt/issues/881
-    thresholdInFiles: 25
-    thresholdInClasses: 25
-    thresholdInInterfaces: 25
-    thresholdInObjects: 25
-    thresholdInEnums: 25
 
 exceptions:
-  NotImplementedDeclaration:
-    active: false # We'll activate this one later.
+  TooGenericExceptionCaught:
+    active: false
+  TooGenericExceptionThrown:
+    active: false
 
 style:
-  SerialVersionUIDInSerializableClass:
+  PackageNaming:
+    active: false # retrofit
+  ReturnCount:
     active: false
-  DataClassContainsFunctions:
-    active: false
-  TopLevelPropertyNaming:
-    active: false
-  MaxLineLength:
-    maxLineLength: 124
-  ExpressionBodySyntax:
-    active: false
-  ForbiddenComment:
-    active: false # We'll activate this one later.
   UnnecessaryAbstractClass:
-    active: false # sometimes we need empty classes for flavors
+    active: false
   UseDataClass:
     active: false
 

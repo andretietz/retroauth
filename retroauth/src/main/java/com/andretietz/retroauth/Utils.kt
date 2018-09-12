@@ -23,14 +23,12 @@ import okhttp3.Request
  */
 internal object Utils {
 
+  private const val HASH_PRIME = 31
   /**
    * Creates an identifier, which can identify the request by itself
    *
    * @param request request to create the identifier for
    * @return an identifier
    */
-  @JvmStatic
-  fun createUniqueIdentifier(request: Request): Int {
-    return request.url().hashCode() + 31 * request.method().hashCode()
-  }
+  fun createUniqueIdentifier(request: Request) = request.url().hashCode() + HASH_PRIME * request.method().hashCode()
 }

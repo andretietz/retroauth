@@ -78,7 +78,6 @@ class MainActivity : AppCompatActivity() {
               provider.tokenType,
               AndroidToken("some-invalid-token", result?.data))
           }
-
         })
       }
     }

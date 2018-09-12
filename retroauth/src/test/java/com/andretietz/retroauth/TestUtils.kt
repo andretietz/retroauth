@@ -68,6 +68,5 @@ class TestUtils {
     /** Headers should not effect the id **/
     Assert.assertTrue(id1 == id2)
     Assert.assertTrue(id2 == id3)
-
   }
 }
