@@ -15,25 +15,25 @@ class TestUtils {
     val map = HashMap<Int, Request>()
 
     var request = Request.Builder()
-        .url("http://www.google.com/test/request1")
-        .build()
+      .url("http://www.google.com/test/request1")
+      .build()
     map[Utils.createUniqueIdentifier(request)] = request
 
     request = Request.Builder()
-        .method("GET", null)
-        .url("http://www.google.com/test/request1")
-        .build()
+      .method("GET", null)
+      .url("http://www.google.com/test/request1")
+      .build()
     map[Utils.createUniqueIdentifier(request)] = request
 
     request = Request.Builder()
-        .url("http://www.google.com/test/request2")
-        .build()
+      .url("http://www.google.com/test/request2")
+      .build()
     map[Utils.createUniqueIdentifier(request)] = request
 
     request = Request.Builder()
-        .method("GET", null)
-        .url("http://www.google.com/test/request2")
-        .build()
+      .method("GET", null)
+      .url("http://www.google.com/test/request2")
+      .build()
     map[Utils.createUniqueIdentifier(request)] = request
 
     Assert.assertEquals(2, map.size.toLong())
@@ -43,24 +43,23 @@ class TestUtils {
   fun check() {
 
     val request1 = Request.Builder()
-        .method("GET", null)
-        .header("foo", "bar")
-        .url("http://www.google.com/test/request2")
-        .build()
-
+      .method("GET", null)
+      .header("foo", "bar")
+      .url("http://www.google.com/test/request2")
+      .build()
 
     val request2 = Request.Builder()
-        .method("GET", null)
-        .header("var", "foo")
-        .url("http://www.google.com/test/request2")
-        .build()
+      .method("GET", null)
+      .header("var", "foo")
+      .url("http://www.google.com/test/request2")
+      .build()
 
     val request3 = Request.Builder()
-        .method("GET", null)
-        .header("var", "foo")
-        .tag("fpp")
-        .url("http://www.google.com/test/request2")
-        .build()
+      .method("GET", null)
+      .header("var", "foo")
+      .tag("fpp")
+      .url("http://www.google.com/test/request2")
+      .build()
 
     val id1 = Utils.createUniqueIdentifier(request1)
     val id2 = Utils.createUniqueIdentifier(request2)

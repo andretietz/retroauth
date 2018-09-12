@@ -24,7 +24,7 @@ internal class RetroauthInitProvider : ContentProvider() {
     // So if the authorities equal the library internal ones, the developer forgot to set his applicationId
     if ("com.andretietz.retroauth.retroauthinitprovider".equals(info.authority)) {
       throw IllegalStateException("Incorrect provider authority in manifest. Most likely due to a "
-          + "missing applicationId variable in application\'s build.gradle.")
+        + "missing applicationId variable in application\'s build.gradle.")
     }
     super.attachInfo(context, info)
   }

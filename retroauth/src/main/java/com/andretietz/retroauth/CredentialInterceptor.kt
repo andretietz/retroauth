@@ -33,10 +33,10 @@ import java.util.concurrent.locks.ReentrantLock
  * @param <TOKEN_TYPE> type of the token that should be added to the request
  */
 internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
-    private val authenticator: Authenticator<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN>,
-    private val ownerManager: OwnerManager<OWNER_TYPE, OWNER, TOKEN_TYPE>,
-    private val tokenStorage: TokenStorage<OWNER, TOKEN_TYPE, TOKEN>,
-    private val methodCache: MethodCache<OWNER_TYPE, TOKEN_TYPE> = MethodCache.DefaultMethodCache()
+  private val authenticator: Authenticator<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN>,
+  private val ownerManager: OwnerManager<OWNER_TYPE, OWNER, TOKEN_TYPE>,
+  private val tokenStorage: TokenStorage<OWNER, TOKEN_TYPE, TOKEN>,
+  private val methodCache: MethodCache<OWNER_TYPE, TOKEN_TYPE> = MethodCache.DefaultMethodCache()
 ) : Interceptor {
 
   companion object {
@@ -48,7 +48,7 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TY
     var request = chain.request()
     // get the token type required by this request
     val authRequestType = methodCache.getTokenType(Utils.createUniqueIdentifier(request))
-        ?: return chain.proceed(request)
+      ?: return chain.proceed(request)
 
     // if the request does require authentication
     var pending = false
@@ -63,8 +63,8 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TY
           pending = lock(authRequestType)
 
           owner = ownerManager.getActiveOwner(authRequestType.ownerType)
-              ?: ownerManager.openOwnerPicker(authRequestType.ownerType).get()
-              ?: ownerManager.createOwner(authRequestType.ownerType, authRequestType.tokenType).get()
+            ?: ownerManager.openOwnerPicker(authRequestType.ownerType).get()
+            ?: ownerManager.createOwner(authRequestType.ownerType, authRequestType.tokenType).get()
           // get the token of the owner
           val localToken = tokenStorage.getToken(owner, authRequestType.tokenType).get()
           // if the token is still valid and no refresh has been requested

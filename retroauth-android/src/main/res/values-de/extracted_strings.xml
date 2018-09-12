@@ -1,4 +1,4 @@
 <resources>
-  <string name='choose_account_label'>"Konto auswählen"</string>
-  <string name='add_account_button_label'>"Konto hinzufügen"</string>
+    <string name='choose_account_label'>"Konto auswählen"</string>
+    <string name='add_account_button_label'>"Konto hinzufügen"</string>
 </resources>

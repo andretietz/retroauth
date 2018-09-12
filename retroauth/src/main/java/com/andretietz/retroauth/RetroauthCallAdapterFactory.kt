@@ -52,10 +52,10 @@ internal class RetroauthCallAdapterFactory<out OWNER_TYPE : Any, OWNER : Any, TO
       adapter?.let {
         auth?.let {
           return RetroauthCallAdapter(
-              adapter as CallAdapter<Any, Any>,
-              authenticator.getTokenType(auth.tokenType),
-              authenticator.getOwnerType(auth.ownerType),
-              methodCache)
+            adapter as CallAdapter<Any, Any>,
+            authenticator.getTokenType(auth.tokenType),
+            authenticator.getOwnerType(auth.ownerType),
+            methodCache)
         }
         return adapter
       }
@@ -81,9 +81,9 @@ internal class RetroauthCallAdapterFactory<out OWNER_TYPE : Any, OWNER : Any, TO
 
     override fun adapt(call: Call<Any>): RETURN_TYPE {
       registration.register(
-          Utils.createUniqueIdentifier(
-              call.request()
-          ), RequestType(tokenType, ownerType))
+        Utils.createUniqueIdentifier(
+          call.request()
+        ), RequestType(tokenType, ownerType))
       return adapter.adapt(call)
     }
   }
