@@ -46,8 +46,8 @@ class AccountAuthenticatorTest {
     assertEquals(
       response,
       requireNotNull(intent).getParcelableExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE))
-    assertEquals("accountType", intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE))
-    assertEquals("tokenType", intent.getStringExtra(AccountAuthenticator.KEY_TOKEN_TYPE))
+    assertEquals("accountType", intent?.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE))
+    assertEquals("tokenType", intent?.getStringExtra(AccountAuthenticator.KEY_TOKEN_TYPE))
   }
 
   @Test
@@ -63,9 +63,9 @@ class AccountAuthenticatorTest {
     assertEquals(
       response,
       requireNotNull(intent).getParcelableExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE))
-    assertEquals("accountType", intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE))
-    assertEquals("tokenType", intent.getStringExtra(AccountAuthenticator.KEY_TOKEN_TYPE))
-    assertEquals("accountName", intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME))
+    assertEquals("accountType", intent?.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE))
+    assertEquals("tokenType", intent?.getStringExtra(AccountAuthenticator.KEY_TOKEN_TYPE))
+    assertEquals("accountName", intent?.getStringExtra(AccountManager.KEY_ACCOUNT_NAME))
   }
 
   @Test
