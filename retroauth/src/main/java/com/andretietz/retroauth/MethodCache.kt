@@ -29,7 +29,7 @@ interface MethodCache<OWNER_TYPE : Any, TOKEN_TYPE : Any> {
    * Registers a token type with a specific identifier.
    *
    * @param requestIdentifier to identify the request later on
-   * @param type              type of the request.
+   * @param type type of the request.
    */
   fun register(requestIdentifier: Int, type: RequestType<OWNER_TYPE, TOKEN_TYPE>)
 
@@ -51,8 +51,6 @@ interface MethodCache<OWNER_TYPE : Any, TOKEN_TYPE : Any> {
       map[requestIdentifier] = type
     }
 
-    override fun getTokenType(requestIdentifier: Int): RequestType<OWNER_TYPE, TOKEN_TYPE>? {
-      return map[requestIdentifier]
-    }
+    override fun getTokenType(requestIdentifier: Int): RequestType<OWNER_TYPE, TOKEN_TYPE>? = map[requestIdentifier]
   }
 }

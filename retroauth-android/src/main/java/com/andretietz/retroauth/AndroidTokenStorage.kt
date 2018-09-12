@@ -42,7 +42,11 @@ class AndroidTokenStorage constructor(
       String.format(Locale.US, "%s_%s", type.tokenType, key)
   }
 
-  override fun getToken(owner: Account, type: AndroidTokenType, callback: Callback<AndroidToken>?): Future<AndroidToken> {
+  override fun getToken(
+    owner: Account,
+    type: AndroidTokenType,
+    callback: Callback<AndroidToken>?
+  ): Future<AndroidToken> {
     val task = GetTokenTask(application, accountManager, owner, type, callback)
     if (Looper.myLooper() == Looper.getMainLooper()) {
       return executor.submit(task)
@@ -111,6 +115,5 @@ class AndroidTokenStorage constructor(
       callback?.onResult(androidToken)
       return androidToken
     }
-
   }
 }

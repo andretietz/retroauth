@@ -30,5 +30,4 @@ internal class AndroidMethodCache : MethodCache<String, AndroidTokenType> {
   }
 
   override fun getTokenType(requestIdentifier: Int): RequestType<String, AndroidTokenType>? = cache[requestIdentifier]
-
 }

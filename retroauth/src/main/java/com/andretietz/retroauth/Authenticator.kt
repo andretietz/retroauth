@@ -18,6 +18,7 @@ package com.andretietz.retroauth
 
 import okhttp3.Request
 import okhttp3.Response
+import java.net.HttpURLConnection
 
 /**
  * The Authenticator interface is a very specific provider endpoint dependent implementation,
@@ -43,7 +44,7 @@ abstract class Authenticator<out OWNER_TYPE : Any, in OWNER : Any, TOKEN_TYPE : 
    * Authenticates a [Request].
    *
    * @param request request to authenticate
-   * @param token   Token to authenticate
+   * @param token Token to authenticate
    * @return a modified version of the incoming request, which is authenticated
    */
   abstract fun authenticateRequest(request: Request, token: TOKEN): Request
@@ -51,13 +52,12 @@ abstract class Authenticator<out OWNER_TYPE : Any, in OWNER : Any, TOKEN_TYPE : 
   /**
    * Checks if the token needs to be refreshed or not.
    *
-   * @param count        value contains how many times this request has been executed already
-   * @param response     response to check what the result was
+   * @param count value contains how many times this request has been executed already
+   * @param response response to check what the result was
    * @return {@code true} if a token refresh is required, {@code false} if not
    */
-  open fun refreshRequired(count: Int, response: Response): Boolean {
-    return (response.code() == 401 && count <= 1)
-  }
+  open fun refreshRequired(count: Int, response: Response): Boolean =
+    response.code() == HttpURLConnection.HTTP_UNAUTHORIZED && count <= 1
 
   /**
    * This method will be called when [isTokenValid] returned false or [refreshRequired] returned true.

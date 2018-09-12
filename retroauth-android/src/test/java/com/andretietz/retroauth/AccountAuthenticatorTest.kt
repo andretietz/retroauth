@@ -6,7 +6,6 @@ import android.accounts.AccountManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.Parcelable
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -46,7 +45,7 @@ class AccountAuthenticatorTest {
 
     assertEquals(
       response,
-      intent!!.getParcelableExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE))
+      requireNotNull(intent).getParcelableExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE))
     assertEquals("accountType", intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE))
     assertEquals("tokenType", intent.getStringExtra(AccountAuthenticator.KEY_TOKEN_TYPE))
   }
@@ -63,7 +62,7 @@ class AccountAuthenticatorTest {
 
     assertEquals(
       response,
-      intent!!.getParcelableExtra<Parcelable>(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE))
+      requireNotNull(intent).getParcelableExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE))
     assertEquals("accountType", intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE))
     assertEquals("tokenType", intent.getStringExtra(AccountAuthenticator.KEY_TOKEN_TYPE))
     assertEquals("accountName", intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME))

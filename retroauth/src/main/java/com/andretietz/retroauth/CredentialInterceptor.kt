@@ -92,7 +92,7 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TY
         }
         // execute the request
         response = chain.proceed(request)
-        refreshRequested = authenticator.refreshRequired(++tryCount, response!!)
+        refreshRequested = authenticator.refreshRequired(++tryCount, requireNotNull(response))
       } while (refreshRequested)
     } catch (error: Exception) {
       storeAndThrowError(authRequestType, error)
@@ -108,11 +108,11 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TY
   }
 
   private fun getLock(type: RequestType<OWNER_TYPE, TOKEN_TYPE>): AccountTokenLock {
-    synchronized(type, {
+    synchronized(type) {
       val lock: AccountTokenLock = TOKEN_TYPE_LOCKERS[type] ?: AccountTokenLock()
       TOKEN_TYPE_LOCKERS[type] = lock
       return lock
-    })
+    }
   }
 
   @Throws(Exception::class)
@@ -137,9 +137,9 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TY
     lock.lock.unlock()
   }
 
-  internal class AccountTokenLock {
-    val lock: Lock = ReentrantLock(true)
-    val errorContainer: AtomicReference<Exception> = AtomicReference()
-    val waitCounter = AtomicInteger()
-  }
+  internal data class AccountTokenLock(
+    val lock: Lock = ReentrantLock(true),
+    val errorContainer: AtomicReference<Exception> = AtomicReference(),
+    val waitCounter: AtomicInteger = AtomicInteger()
+  )
 }
