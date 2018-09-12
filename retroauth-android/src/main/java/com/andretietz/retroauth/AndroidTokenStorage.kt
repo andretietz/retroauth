@@ -86,7 +86,6 @@ class AndroidTokenStorage constructor(
     private val activityManager = ActivityManager[application]
 
     override fun call(): AndroidToken {
-      var token: String?
       val future = accountManager.getAuthToken(
         owner,
         type.tokenType,
@@ -94,26 +93,19 @@ class AndroidTokenStorage constructor(
         activityManager.activity,
         null,
         null)
-      val result = future.result
-      token = result.getString(AccountManager.KEY_AUTHTOKEN)
-      if (token == null) {
-        token = accountManager.peekAuthToken(owner, type.tokenType)
+      return (future.result.getString(AccountManager.KEY_AUTHTOKEN)
+        ?: accountManager.peekAuthToken(owner, type.tokenType)
+        ?: throw AuthenticationCanceledException()).let { token ->
+        AndroidToken(
+          token,
+          type.dataKeys
+            ?.associateTo(HashMap()) {
+              it to accountManager.getUserData(owner, createDataKey(type, it))
+            }
+        ).apply {
+          callback?.onResult(this)
+        }
       }
-      if (token == null) {
-        throw IllegalStateException(
-          String.format("No token found! Make sure you store the token during login using %s#storeToken()",
-            AuthenticationActivity::class.java.simpleName)
-        )
-      }
-      val androidToken = AndroidToken(
-        token,
-        type.dataKeys
-          ?.associateTo(HashMap()) {
-            it to accountManager.getUserData(owner, createDataKey(type, it))
-          }
-      )
-      callback?.onResult(androidToken)
-      return androidToken
     }
   }
 }
