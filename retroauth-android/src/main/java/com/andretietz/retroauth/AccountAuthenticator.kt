@@ -47,11 +47,13 @@ class AccountAuthenticator
      val action: String
 ) : AbstractAccountAuthenticator(context) {
 
-    override fun addAccount(
-        response: AccountAuthenticatorResponse,
-        accountType: String, authTokenType: String,
-        requiredFeatures: Array<String>, options: Bundle
-    ) = createAuthBundle(response, accountType, authTokenType, null)
+  override fun addAccount(
+    response: AccountAuthenticatorResponse?,
+    accountType: String?,
+    authTokenType: String?,
+    requiredFeatures: Array<out String>?,
+    options: Bundle?
+  ) = createAuthBundle(response, accountType, authTokenType, null)
 
     override fun getAuthToken(
         response: AccountAuthenticatorResponse, account: Account,
@@ -68,8 +70,8 @@ class AccountAuthenticator
      * @return a bundle to open the activity
      */
     private fun createAuthBundle(
-        response: AccountAuthenticatorResponse, accountType: String,
-        tokenType: String, accountName: String?
+      response: AccountAuthenticatorResponse?, accountType: String?,
+      tokenType: String?, accountName: String?
     ): Bundle {
         val intent = Intent(action)
         intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response)
