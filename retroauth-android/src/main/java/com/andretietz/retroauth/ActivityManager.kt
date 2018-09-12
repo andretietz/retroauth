@@ -78,18 +78,12 @@ internal class ActivityManager private constructor(application: Application) {
      */
     @JvmStatic
     operator fun get(application: Application): ActivityManager {
-      val i = instance
-      i?.let {
-        return i
-      }
+      instance?.let { return it }
       return synchronized(this) {
-        val i2 = instance
-        i2?.let {
-          i2
+        instance?.let { return it }
+        ActivityManager(application).apply {
+          instance = this
         }
-        val created = ActivityManager(application)
-        instance = created
-        created
       }
     }
   }

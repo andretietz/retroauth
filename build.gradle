@@ -25,14 +25,14 @@ allprojects {
 
 apply plugin: "com.vanniktech.code.quality.tools"
 codeQualityTools {
-    detekt.enabled false
+
+    ignoreProjects = ["demoandroid"]
+
+    detekt.config = rootProject.file("quality/detekt.yml").path
+    ktlint.toolVersion = '0.28.0'
+    lint.lintConfig rootProject.file("quality/lint.xml")
+    checkstyle.configFile rootProject.file("quality/checkstyle.xml").path
+
     findbugs.enabled false
-    ktlint.enabled false
-    lint {
-        lintConfig rootProject.file("quality/lint.xml")
-    }
-    checkstyle {
-        configFile rootProject.file("quality/checkstyle.xml").path
-    }
     pmd.enabled false
 }

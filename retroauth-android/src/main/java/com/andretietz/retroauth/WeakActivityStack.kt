@@ -40,7 +40,7 @@ internal class WeakActivityStack {
     synchronized(this) {
       if (!stack.isEmpty()) {
         val identifier = stack.removeFirst()
-        val item = map.get(identifier!!).get()
+        val item = map.get(requireNotNull(identifier)).get()
         map.remove(identifier)
         return item
       }
@@ -65,8 +65,5 @@ internal class WeakActivityStack {
     return null
   }
 
-  private fun getIdentifier(item: Activity): Int {
-    return item.hashCode()
-  }
-
+  private fun getIdentifier(item: Activity) = item.hashCode()
 }

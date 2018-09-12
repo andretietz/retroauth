@@ -37,7 +37,7 @@ class Retroauth private constructor() {
     private val methodCache: MethodCache<OWNER_TYPE, TOKEN_TYPE> = MethodCache.DefaultMethodCache()
   ) {
 
-    private val builder: Retrofit.Builder = Retrofit.Builder()
+    private val retrofitBuilder: Retrofit.Builder = Retrofit.Builder()
     private val callAdapterFactories: MutableList<CallAdapter.Factory> = LinkedList()
     private var okHttpClient: OkHttpClient? = null
     private var executor: Executor? = null
@@ -56,7 +56,7 @@ class Retroauth private constructor() {
      */
     @Suppress("unused")
     fun baseUrl(baseUrl: HttpUrl): Builder<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN> {
-      this.builder.baseUrl(baseUrl)
+      this.retrofitBuilder.baseUrl(baseUrl)
       return this
     }
 
@@ -65,7 +65,7 @@ class Retroauth private constructor() {
      */
     @Suppress("unused")
     fun baseUrl(baseUrl: String): Builder<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN> {
-      this.builder.baseUrl(baseUrl)
+      this.retrofitBuilder.baseUrl(baseUrl)
       return this
     }
 
@@ -74,7 +74,7 @@ class Retroauth private constructor() {
      */
     @Suppress("unused")
     fun addConverterFactory(factory: Converter.Factory): Builder<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN> {
-      this.builder.addConverterFactory(factory)
+      this.retrofitBuilder.addConverterFactory(factory)
       return this
     }
 
@@ -93,7 +93,7 @@ class Retroauth private constructor() {
     @Suppress("unused")
     fun callbackExecutor(executor: Executor): Builder<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN> {
       this.executor = executor
-      this.builder.callbackExecutor(executor)
+      this.retrofitBuilder.callbackExecutor(executor)
       return this
     }
 
@@ -102,7 +102,7 @@ class Retroauth private constructor() {
      */
     @Suppress("unused")
     fun validateEagerly(validateEagerly: Boolean): Builder<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN> {
-      this.builder.validateEagerly(validateEagerly)
+      this.retrofitBuilder.validateEagerly(validateEagerly)
       return this
     }
 
@@ -120,7 +120,7 @@ class Retroauth private constructor() {
         methodCache)
 
       // use this callAdapter to create the retrofit object
-      this.builder.addCallAdapterFactory(callAdapter)
+      this.retrofitBuilder.addCallAdapterFactory(callAdapter)
 
       val builder = okHttpClient?.newBuilder() ?: OkHttpClient.Builder()
 
@@ -136,10 +136,10 @@ class Retroauth private constructor() {
       builder.interceptors().add(interceptor)
 
       // add the newly created okhttpclient as callFactory
-      this.builder.callFactory(builder.build())
+      this.retrofitBuilder.callFactory(builder.build())
 
       // create the retrofit object
-      return this.builder.build()
+      return this.retrofitBuilder.build()
     }
   }
 }

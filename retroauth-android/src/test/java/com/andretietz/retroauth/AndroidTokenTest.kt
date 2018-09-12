@@ -12,6 +12,6 @@ class AndroidTokenTest {
   fun dataCheck() {
     val androidToken = AndroidToken("token", mapOf("refresh" to "refresh"))
     assertEquals("token", androidToken.token)
-    assertEquals("refresh", androidToken.data!!["refresh"])
+    assertEquals("refresh", requireNotNull(androidToken.data)["refresh"])
   }
 }

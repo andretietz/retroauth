@@ -55,5 +55,4 @@ class WeakActivityStackTest {
 
     assertEquals(mainScreen, stack.peek())
   }
-
 }
