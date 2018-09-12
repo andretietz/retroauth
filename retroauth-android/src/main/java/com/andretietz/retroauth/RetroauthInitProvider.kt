@@ -19,12 +19,12 @@ internal class RetroauthInitProvider : ContentProvider() {
 
   override fun attachInfo(context: Context?, info: ProviderInfo?) {
     if (info == null) {
-      throw NullPointerException("YourLibraryInitProvider ProviderInfo cannot be null.")
+      throw NullPointerException("RetroauthInitProvider ProviderInfo cannot be null.")
     }
     // So if the authorities equal the library internal ones, the developer forgot to set his applicationId
     if ("com.andretietz.retroauth.retroauthinitprovider".equals(info.authority)) {
-      throw IllegalStateException("Incorrect provider authority in manifest. Most likely due to a "
-        + "missing applicationId variable in application\'s build.gradle.")
+      throw IllegalStateException("Incorrect provider authority in manifest. Most likely due to a " +
+        "missing applicationId variable in application\'s build.gradle.")
     }
     super.attachInfo(context, info)
   }

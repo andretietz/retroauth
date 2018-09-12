@@ -19,12 +19,5 @@ class ActivityManagerTest {
   fun initializing() {
     val activityManager = ActivityManager[RuntimeEnvironment.application]
     assertNotNull(activityManager)
-
   }
-
-  //    @Test
-  //    fun getActivityFailing() {
-  //        assertNull(ActivityManager[RuntimeEnvironment.application].activity)
-  //    }
-
 }

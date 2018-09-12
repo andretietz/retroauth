@@ -52,7 +52,8 @@ class AndroidOwnerManager constructor(
   private val accountManager by lazy { AccountManager.get(application) }
 
   @Throws(AuthenticationCanceledException::class)
-  override fun createOwner(ownerType: String,
+  override fun createOwner(
+    ownerType: String,
     tokenType: AndroidTokenType,
     callback: Callback<Account>?
   ): Future<Account> {
@@ -192,11 +193,11 @@ class AndroidOwnerManager constructor(
     }
 
     private fun keep(dialog: Dialog) {
-      val lp = WindowManager.LayoutParams()
-      lp.copyFrom(dialog.window.attributes)
-      lp.width = WindowManager.LayoutParams.WRAP_CONTENT
-      lp.height = WindowManager.LayoutParams.WRAP_CONTENT
-      dialog.window.attributes = lp
+      dialog.window.attributes = WindowManager.LayoutParams().apply {
+        copyFrom(dialog.window.attributes)
+        width = WindowManager.LayoutParams.WRAP_CONTENT
+        height = WindowManager.LayoutParams.WRAP_CONTENT
+      }
     }
   }
 
@@ -218,7 +219,9 @@ class AndroidOwnerManager constructor(
   /**
    * Callback wrapper for account removing on >= lollipop (22) devices
    */
-  private class RemoveLollipopAccountCallback(private val callback: Callback<Boolean>) : AccountManagerCallback<Bundle> {
+  private class RemoveLollipopAccountCallback(
+    private val callback: Callback<Boolean>
+  ) : AccountManagerCallback<Bundle> {
 
     override fun run(accountManagerFuture: AccountManagerFuture<Bundle>) {
       try {
@@ -240,7 +243,6 @@ class AndroidOwnerManager constructor(
       } catch (e: Exception) {
         callback.onResult(false)
       }
-
     }
   }
 
@@ -266,18 +268,20 @@ class AndroidOwnerManager constructor(
   private class RemoveAccountFuture(private val accountFuture: AccountManagerFuture<Bundle>) : Future<Boolean> {
     override fun isDone(): Boolean = accountFuture.isDone
     override fun get(): Boolean = accountFuture.result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT)
-    override fun get(p0: Long, p1: TimeUnit?): Boolean = accountFuture.getResult(p0, p1)
+    override fun get(timeout: Long, timeUnit: TimeUnit?): Boolean = accountFuture.getResult(timeout, timeUnit)
       .getBoolean(AccountManager.KEY_BOOLEAN_RESULT)
 
-    override fun cancel(p0: Boolean): Boolean = accountFuture.cancel(p0)
+    override fun cancel(mayInterruptIfRunning: Boolean): Boolean = accountFuture.cancel(mayInterruptIfRunning)
     override fun isCancelled(): Boolean = accountFuture.isCancelled
   }
 
-  private class PreLollipopRemoveAccountFuture(private val accountFuture: AccountManagerFuture<Boolean>) : Future<Boolean> {
+  private class PreLollipopRemoveAccountFuture(
+    private val accountFuture: AccountManagerFuture<Boolean>
+  ) : Future<Boolean> {
     override fun isDone(): Boolean = accountFuture.isDone
     override fun get(): Boolean = accountFuture.result
-    override fun get(p0: Long, p1: TimeUnit?): Boolean = accountFuture.getResult(p0, p1)
-    override fun cancel(p0: Boolean): Boolean = accountFuture.cancel(p0)
+    override fun get(timeout: Long, timeUnit: TimeUnit?): Boolean = accountFuture.getResult(timeout, timeUnit)
+    override fun cancel(mayInterruptIfRunning: Boolean): Boolean = accountFuture.cancel(mayInterruptIfRunning)
     override fun isCancelled(): Boolean = accountFuture.isCancelled
   }
 }

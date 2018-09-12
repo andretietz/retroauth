@@ -78,18 +78,15 @@ class MainActivity : AppCompatActivity() {
               provider.tokenType,
               AndroidToken("some-invalid-token", result?.data))
           }
-
         })
       }
     }
 
     buttonLogout.setOnClickListener {
       ownerManager.getActiveOwner(provider.ownerType)?.let { account ->
-        tokenStorage.getToken(account, provider.tokenType, object : Callback<AndroidToken> {
-          override fun onResult(result: AndroidToken?) {
-            result?.let {
-              tokenStorage.removeToken(account, provider.tokenType, it)
-            }
+        ownerManager.removeOwner(account, object : Callback<Boolean> {
+          override fun onResult(result: Boolean?) {
+            show("Logged out!")
           }
         })
       }
