@@ -5,8 +5,8 @@
 * appcompat-v7 23.0.0
 * kotlin-stdlib 1.2.30
 
-Method-Count: 323
-Field-Count:  73
+Method-Count: 348
+Field-Count:  77
 
 ## What does it do?
 If you call a request method, annotated with the authenticated annotation, it'll do the following steps:

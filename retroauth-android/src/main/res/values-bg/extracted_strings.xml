@@ -1,4 +1,4 @@
 <resources>
-  <string name='choose_account_label'>"Избор на профил"</string>
-  <string name='add_account_button_label'>"Добавяне на профил"</string>
+    <string name='choose_account_label'>"Избор на профил"</string>
+    <string name='add_account_button_label'>"Добавяне на профил"</string>
 </resources>

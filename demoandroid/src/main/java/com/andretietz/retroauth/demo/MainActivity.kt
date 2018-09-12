@@ -39,8 +39,8 @@ class MainActivity : AppCompatActivity() {
     val interceptor = HttpLoggingInterceptor()
     interceptor.level = HttpLoggingInterceptor.Level.BODY
     val httpClient = OkHttpClient.Builder()
-        .addInterceptor(interceptor)
-        .build()
+      .addInterceptor(interceptor)
+      .build()
 
     val provider = FacebookAuthenticator(application)
 
@@ -48,11 +48,11 @@ class MainActivity : AppCompatActivity() {
      * Create your Retrofit Object using the [RetroauthAndroidBuilder.createBuilder]
      */
     val retrofit = RetroauthAndroidBuilder.createBuilder(application, provider)
-        .baseUrl("https://graph.facebook.com/")
-        .client(httpClient)
-        .addConverterFactory(MoshiConverterFactory.create())
-        .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-        .build()
+      .baseUrl("https://graph.facebook.com/")
+      .client(httpClient)
+      .addConverterFactory(MoshiConverterFactory.create())
+      .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+      .build()
 
     /**
      * Create your API Service
@@ -61,12 +61,12 @@ class MainActivity : AppCompatActivity() {
 
     buttonRequestEmail.setOnClickListener {
       service.getUserDetails()
-          .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(
-              { item -> show(item.toString()) },
-              { error -> showError(error) }
-          )
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(
+          { item -> show(item.toString()) },
+          { error -> showError(error) }
+        )
     }
 
     buttonInvalidateToken.setOnClickListener {
@@ -74,9 +74,9 @@ class MainActivity : AppCompatActivity() {
         tokenStorage.getToken(account, provider.tokenType, object : Callback<AndroidToken> {
           override fun onResult(result: AndroidToken?) {
             tokenStorage.storeToken(
-                account,
-                provider.tokenType,
-                AndroidToken("some-invalid-token", result?.data))
+              account,
+              provider.tokenType,
+              AndroidToken("some-invalid-token", result?.data))
           }
 
         })

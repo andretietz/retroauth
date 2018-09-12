@@ -1,4 +1,4 @@
 <resources>
-  <string name='choose_account_label'>"Pilih akaun"</string>
-  <string name='add_account_button_label'>"Tambah akaun"</string>
+    <string name='choose_account_label'>"Pilih akaun"</string>
+    <string name='add_account_button_label'>"Tambah akaun"</string>
 </resources>

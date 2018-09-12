@@ -1,4 +1,4 @@
 <resources>
-  <string name='choose_account_label'>"Konto valimine"</string>
-  <string name='add_account_button_label'>"Lisa konto"</string>
+    <string name='choose_account_label'>"Konto valimine"</string>
+    <string name='add_account_button_label'>"Lisa konto"</string>
 </resources>

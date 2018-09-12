@@ -30,7 +30,7 @@ import java.util.concurrent.FutureTask
  * This is the implementation of a [TokenStorage] in Android using the Android [AccountManager]
  */
 class AndroidTokenStorage constructor(
-    private val application: Application
+  private val application: Application
 ) : TokenStorage<Account, AndroidTokenType, AndroidToken> {
 
   private val executor by lazy { Executors.newSingleThreadExecutor() }
@@ -39,7 +39,7 @@ class AndroidTokenStorage constructor(
   companion object {
     @JvmStatic
     private fun createDataKey(type: AndroidTokenType, key: String) =
-        String.format(Locale.US, "%s_%s", type.tokenType, key)
+      String.format(Locale.US, "%s_%s", type.tokenType, key)
   }
 
   override fun getToken(owner: Account, type: AndroidTokenType, callback: Callback<AndroidToken>?): Future<AndroidToken> {
@@ -62,9 +62,9 @@ class AndroidTokenStorage constructor(
     if (type.dataKeys != null && token.data != null) {
       type.dataKeys.forEach {
         if (!token.data.containsKey(it)) throw IllegalArgumentException(
-            String.format(Locale.US,
-                "The token you want to store, needs to contain token-data with the keys: %s",
-                type.dataKeys.toString())
+          String.format(Locale.US,
+            "The token you want to store, needs to contain token-data with the keys: %s",
+            type.dataKeys.toString())
         )
         accountManager.setUserData(owner, createDataKey(type, it), token.data[it])
       }
@@ -72,11 +72,11 @@ class AndroidTokenStorage constructor(
   }
 
   private class GetTokenTask(
-      application: Application,
-      private val accountManager: AccountManager,
-      private val owner: Account,
-      private val type: AndroidTokenType,
-      private val callback: Callback<AndroidToken>?
+    application: Application,
+    private val accountManager: AccountManager,
+    private val owner: Account,
+    private val type: AndroidTokenType,
+    private val callback: Callback<AndroidToken>?
   ) : Callable<AndroidToken> {
 
     private val activityManager = ActivityManager[application]
@@ -84,12 +84,12 @@ class AndroidTokenStorage constructor(
     override fun call(): AndroidToken {
       var token: String?
       val future = accountManager.getAuthToken(
-          owner,
-          type.tokenType,
-          null,
-          activityManager.activity,
-          null,
-          null)
+        owner,
+        type.tokenType,
+        null,
+        activityManager.activity,
+        null,
+        null)
       val result = future.result
       token = result.getString(AccountManager.KEY_AUTHTOKEN)
       if (token == null) {
@@ -97,16 +97,16 @@ class AndroidTokenStorage constructor(
       }
       if (token == null) {
         throw IllegalStateException(
-            String.format("No token found! Make sure you store the token during login using %s#storeToken()",
-                AuthenticationActivity::class.java.simpleName)
+          String.format("No token found! Make sure you store the token during login using %s#storeToken()",
+            AuthenticationActivity::class.java.simpleName)
         )
       }
       val androidToken = AndroidToken(
-          token,
-          type.dataKeys
-              ?.associateTo(HashMap()) {
-                it to accountManager.getUserData(owner, createDataKey(type, it))
-              }
+        token,
+        type.dataKeys
+          ?.associateTo(HashMap()) {
+            it to accountManager.getUserData(owner, createDataKey(type, it))
+          }
       )
       callback?.onResult(androidToken)
       return androidToken

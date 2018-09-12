@@ -1,4 +1,4 @@
 <resources>
-  <string name='choose_account_label'>"Alegeţi un cont"</string>
-  <string name='add_account_button_label'>"Adăugaţi un cont"</string>
+    <string name='choose_account_label'>"Alegeţi un cont"</string>
+    <string name='add_account_button_label'>"Adăugaţi un cont"</string>
 </resources>

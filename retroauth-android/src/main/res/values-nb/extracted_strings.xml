@@ -1,4 +1,4 @@
 <resources>
-  <string name='choose_account_label'>"Velg en konto"</string>
-  <string name='add_account_button_label'>"Legg til konto"</string>
+    <string name='choose_account_label'>"Velg en konto"</string>
+    <string name='add_account_button_label'>"Legg til konto"</string>
 </resources>
