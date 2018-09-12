@@ -11,6 +11,8 @@ complexity:
     active: false
   MethodOverloading:
     active: false
+  ComplexMethod:
+    active: false
 
 exceptions:
   TooGenericExceptionCaught:
