@@ -35,7 +35,7 @@ import android.os.Bundle
  */
 class AccountAuthenticator(
   context: Context,
-  private val action: String
+  internal val action: String
 ) : AbstractAccountAuthenticator(context) {
 
   override fun addAccount(
@@ -56,9 +56,9 @@ class AccountAuthenticator(
   /**
    * Creates an Intent to open the Activity to login.
    *
-   * @param response    needed parameter
+   * @param response needed parameter
    * @param accountType The account Type
-   * @param tokenType   The requested token type
+   * @param tokenType The requested token type
    * @param accountName The name of the account
    * @return a bundle to open the activity
    */

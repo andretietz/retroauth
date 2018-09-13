@@ -40,7 +40,7 @@ class AccountAuthenticatorTest {
       arrayOf(), mock(Bundle::class.java))
 
     assertNotNull(bundle)
-    val intent = bundle.getParcelable<Intent>(AccountManager.KEY_INTENT)
+    val intent = requireNotNull(bundle).getParcelable<Intent>(AccountManager.KEY_INTENT)
     assertNotNull(intent)
 
     assertEquals(
@@ -57,7 +57,7 @@ class AccountAuthenticatorTest {
     val bundle = authenticator.getAuthToken(response, account, "tokenType", mock(Bundle::class.java))
 
     assertNotNull(bundle)
-    val intent = bundle.getParcelable<Intent>(AccountManager.KEY_INTENT)
+    val intent = requireNotNull(bundle).getParcelable<Intent>(AccountManager.KEY_INTENT)
     assertNotNull(intent)
 
     assertEquals(
