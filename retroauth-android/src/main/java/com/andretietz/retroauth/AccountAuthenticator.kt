@@ -27,8 +27,8 @@ import android.os.Bundle
 /**
  * This AccountAuthenticator is a very basic implementation of Android's
  * [AbstractAccountAuthenticator]. This implementation is intentional as empty as it is. Cause of this is, that
- * it's executed in a different process, which makes it difficult to provide login endpoints from the app process in here.
- *
+ * it's executed in a different process, which makes it difficult to provide login endpoints from
+ * the app process in here.
  *
  * NOTE: This class cannot be replaced with a kotlin version yet, since Android cannot load Authenticators
  * that are non java once
