@@ -1,5 +1,7 @@
 ## 3.0.0 ()
 * Converted the project to Kotlin
+* Refresh-Tokens need to be stored in the user data
+* When getting the token, it CAN automatically read user data items, which are defined in the TokenType
 * API changes
   * Solving problem with multiple authenticated requests. -> removed the blocking functionality (obsolete)
   * Renamed Provider to TokenProvider and added functionality
