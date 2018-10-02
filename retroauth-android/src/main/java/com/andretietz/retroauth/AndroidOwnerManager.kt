@@ -22,7 +22,6 @@ import android.accounts.AccountManagerCallback
 import android.accounts.AccountManagerFuture
 import android.app.AlertDialog
 import android.app.Application
-import android.app.Dialog
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
@@ -189,14 +188,12 @@ class AndroidOwnerManager constructor(
       val dialog = builder.create()
       dialog.setOnDismissListener { countDownLatch.countDown() }
       dialog.show()
-      keep(dialog)
-    }
-
-    private fun keep(dialog: Dialog) {
-      dialog.window.attributes = WindowManager.LayoutParams().apply {
-        copyFrom(dialog.window.attributes)
-        width = WindowManager.LayoutParams.WRAP_CONTENT
-        height = WindowManager.LayoutParams.WRAP_CONTENT
+      dialog.window?.let { window ->
+        window.attributes = WindowManager.LayoutParams().apply {
+          copyFrom(window.attributes)
+          width = WindowManager.LayoutParams.WRAP_CONTENT
+          height = WindowManager.LayoutParams.WRAP_CONTENT
+        }
       }
     }
   }

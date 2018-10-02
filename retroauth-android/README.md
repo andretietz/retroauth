@@ -3,7 +3,7 @@
 ## Dependencies
 * [Retrofit](https://github.com/square/retrofit) 2.3.0 (transitive from retroauth-core)
 * appcompat-v7 23.0.0
-* kotlin-stdlib 1.2.30
+* kotlin-stdlib 1.2.71
 
 Method-Count: 348
 Field-Count:  77
