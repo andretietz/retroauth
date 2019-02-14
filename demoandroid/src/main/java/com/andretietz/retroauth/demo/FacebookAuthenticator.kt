@@ -21,7 +21,7 @@ class FacebookAuthenticator(application: Application) : Authenticator<String, Ac
   companion object {
     const val CLIENT_ID = "908466759214667"
     const val CLIENT_SECRET = "6254dc69ac506d95b897d35d0dcf9e1f"
-    const val CLIENT_CALLBACK = "http://localhost:8000/accounts/facebook/login/callback/"
+    const val CLIENT_CALLBACK = "https://localhost:8000/accounts/facebook/login/callback/"
     const val KEY_TOKEN_VALIDITY = "token_validity"
   }
 

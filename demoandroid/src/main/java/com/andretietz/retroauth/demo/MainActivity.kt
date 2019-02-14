@@ -2,7 +2,7 @@ package com.andretietz.retroauth.demo
 
 import android.os.Build
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.webkit.CookieManager
 import android.widget.Toast
 import com.andretietz.retroauth.AndroidOwnerManager

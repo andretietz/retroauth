@@ -23,7 +23,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 
 /**
  * Your activity that's supposed to create the account (i.e. Login{@link android.app.Activity}) has to implement this.
