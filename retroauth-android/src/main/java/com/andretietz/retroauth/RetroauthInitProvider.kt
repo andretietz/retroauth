@@ -10,19 +10,17 @@ import android.net.Uri
 
 internal class RetroauthInitProvider : ContentProvider() {
   override fun onCreate(): Boolean {
-    if (context.applicationContext is Application) {
-      val application = context.applicationContext as Application
+    if (requireNotNull(context).applicationContext is Application) {
+      val application = requireNotNull(context).applicationContext as Application
       ActivityManager[application]
     }
     return false
   }
 
   override fun attachInfo(context: Context?, info: ProviderInfo?) {
-    if (info == null) {
-      throw NullPointerException("RetroauthInitProvider ProviderInfo cannot be null.")
-    }
+    if (info == null) throw NullPointerException("RetroauthInitProvider ProviderInfo cannot be null.")
     // So if the authorities equal the library internal ones, the developer forgot to set his applicationId
-    if ("com.andretietz.retroauth.retroauthinitprovider".equals(info.authority)) {
+    if ("com.andretietz.retroauth.retroauthinitprovider" == info.authority) {
       throw IllegalStateException("Incorrect provider authority in manifest. Most likely due to a " +
         "missing applicationId variable in application\'s build.gradle.")
     }

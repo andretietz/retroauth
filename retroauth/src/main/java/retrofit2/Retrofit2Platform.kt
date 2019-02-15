@@ -24,10 +24,10 @@ import java.util.concurrent.Executor
  */
 internal object Retrofit2Platform {
   @JvmStatic
-  fun defaultCallAdapterFactory(executor: Executor?): Factory {
+  fun defaultCallAdapterFactories(executor: Executor?): List<Factory> {
     executor?.let {
-      return Platform.get().defaultCallAdapterFactory(executor)
+      return Platform.get().defaultCallAdapterFactories(executor)
     }
-    return Platform.get().defaultCallAdapterFactory(Platform.get().defaultCallbackExecutor())
+    return Platform.get().defaultCallAdapterFactories(Platform.get().defaultCallbackExecutor())
   }
 }

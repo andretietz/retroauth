@@ -112,7 +112,7 @@ class Retroauth private constructor() {
     fun build(): Retrofit {
 
       // after adding the retrofit default callAdapter factories
-      callAdapterFactories.add(Retrofit2Platform.defaultCallAdapterFactory(executor))
+      callAdapterFactories.addAll(Retrofit2Platform.defaultCallAdapterFactories(executor))
 
       // creating a custom calladapter to handle authentication
       val callAdapter = RetroauthCallAdapterFactory(callAdapterFactories,

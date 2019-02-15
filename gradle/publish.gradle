@@ -110,7 +110,7 @@ afterEvaluate { project ->
     task androidSourcesJar(type: Jar) {
         classifier = 'sources'
         if (project.plugins.hasPlugin('kotlin-android')) {
-            from android.sourceSets.main.java.sourceFiles
+            from android.sourceSets.main.java.srcDirs
         }
     }
 
