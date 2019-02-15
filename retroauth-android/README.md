@@ -1,12 +1,9 @@
 # A simple way of calling authenticated requests using retrofit in android
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-retroauth-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/2195)
 ## Dependencies
-* [Retrofit](https://github.com/square/retrofit) 2.3.0 (transitive from retroauth-core)
-* appcompat-v7 23.0.0
-* kotlin-stdlib 1.2.71
-
-Method-Count: 348
-Field-Count:  77
+* [Retrofit](https://github.com/square/retrofit) 2.5.0 (transitive from retroauth-core)
+* androidx.appcompat 1.0.2
+* kotlin-stdlib 1.3.21
 
 ## What does it do?
 If you call a request method, annotated with the authenticated annotation, it'll do the following steps:
@@ -24,7 +21,7 @@ implementation 'com.andretietz.retroauth:retroauth-android:x.y.z'
 Make sure you're overriding the appcompat dependency if required!
 i.e.:
 ```groovy
-compile 'com.android.support:appcompat-v7:x.y.z'
+implementation 'androidx.appcompat:appcompat:x.y.z'
 ```
 
 ## Setup
