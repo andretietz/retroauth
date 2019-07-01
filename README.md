@@ -7,13 +7,10 @@
 I split the project into two separate ones. 
 
  * [retroauth](retroauth)
-  This is the base implementation, to be used in plain java.
+  This is the base implementation, to be used in plain java/kotlin projects.
  * [retroauth-android](retroauth-android/)
-  On top of the Java implementation there's the Android implementation, which makes use of the
-Android AccountManager.
-
-![Dependency Graph](https://cloud.githubusercontent.com/assets/2174386/16000555/4d82f452-314d-11e6-9807-7ba0dbbb7f96.png)
-
+  On top of the Kotlin implementation there's the Android implementation, which uses the
+Android AccountManager in order to store Owners (Accounts) and their Tokens.
 
 ## Pull requests are welcome
 Since I am the only one working on that, I would like to know your opinion and/or your suggestions.

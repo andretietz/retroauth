@@ -3,7 +3,7 @@
 ## Dependencies
 * [Retrofit](https://github.com/square/retrofit) 2.5.0 (transitive from retroauth-core)
 * androidx.appcompat 1.0.2
-* kotlin-stdlib 1.3.21
+* kotlin-stdlib 1.3.31
 
 ## What does it do?
 If you call a request method, annotated with the authenticated annotation, it'll do the following steps:

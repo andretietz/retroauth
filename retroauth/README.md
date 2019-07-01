@@ -1,7 +1,7 @@
 # A simple way of calling authenticated requests using retrofit
 [![Build Status](https://www.bitrise.io/app/d4189e3709bdf16d.svg?token=KpeuDTgCOEWgfL4RoZaVLQ&branch=master)](https://www.bitrise.io/app/d4189e3709bdf16d)
 ## Dependencies
-* [Retrofit](https://github.com/square/retrofit) 2.3.0
+* [Retrofit](https://github.com/square/retrofit) 2.5.0
 
 ## Example:
 This is how you would create an authenticated call using retroauth. Just create
@@ -11,16 +11,7 @@ using the ```@Authenticated``` annotation.
 interface SomeService {
     @Authenticated
     @GET("/some/path")
-    Call<ResultObject> someAuthenticatedRequest();
-}
-
-```
-
-``` kotlin
-interface SomeService {
-    @Authenticated(ownerType = 1, tokenType = 1)
-    @GET("/some/path")
-    Call<ResultObject> someAuthenticatedRequest();
+    Call<ResultObject> someAuthenticatedRequest()
 }
 
 ```
