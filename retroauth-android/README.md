@@ -1,7 +1,7 @@
 # A simple way of calling authenticated requests using retrofit in android
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-retroauth-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/2195)
 ## Dependencies
-* [Retrofit](https://github.com/square/retrofit) 2.5.0 (transitive from retroauth-core)
+* [Retrofit](https://github.com/square/retrofit) 2.5.0 (transitive from retroauth, feel free to upgrade to 2.6.0 if you're running on API 21+)
 * androidx.appcompat 1.0.2
 * kotlin-stdlib 1.3.31
 
@@ -18,12 +18,6 @@ Add it as dependency:
 ```groovy
 implementation 'com.andretietz.retroauth:retroauth-android:x.y.z'
 ```
-Make sure you're overriding the appcompat dependency if required!
-i.e.:
-```groovy
-implementation 'androidx.appcompat:appcompat:x.y.z'
-```
-
 ## Setup
 ### 1. Define an Account-Type String
 The Account-Type should be unique for an app or company, depending on if you want to share the account in multiple apps of your company or not.
