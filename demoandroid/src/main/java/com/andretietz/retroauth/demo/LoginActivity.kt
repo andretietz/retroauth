@@ -30,7 +30,7 @@ class LoginActivity : AuthenticationActivity() {
   private val helper = ServiceBuilder(FacebookAuthenticator.CLIENT_ID)
     .apiSecret(FacebookAuthenticator.CLIENT_SECRET)
     .callback(FacebookAuthenticator.CLIENT_CALLBACK)
-    .scope("email")
+    .withScope("email")
     .httpClient(OkHttpHttpClient())
     .build(FacebookApi.instance())
 

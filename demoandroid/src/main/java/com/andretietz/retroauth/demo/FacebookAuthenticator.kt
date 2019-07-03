@@ -41,7 +41,7 @@ class FacebookAuthenticator(application: Application) : Authenticator<String, Ac
 
   override fun authenticateRequest(request: Request, token: AndroidToken): Request {
     return request.newBuilder()
-      .header("Authorization", "Bearer " + token.token)
+      .header("Authorization", "Bearer ${token.token}")
       .build()
   }
 

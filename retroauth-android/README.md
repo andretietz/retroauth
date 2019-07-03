@@ -39,8 +39,12 @@ This is a very small implementation, that could look like this:
 ```kotlin
 class DemoAuthenticationService : AuthenticationService() {
     override fun getLoginAction(): String = "your.company.id.ACTION"
+    // optionally to implement. Get's called, when the account will be removed
+    override fun cleanupAccount(account: Account) {
+        // Here you can trigger your account cleanup (userdata wiping)
+        Timber.e("Remove account: ${account.name}")
+    }
 }
-
 ```
 ### 4. Creating the link to the authenticator
 With this xml in the res/xml folder of our project we tell the Android OS that there is an authenticator for our Account-Type (defined in #1)
@@ -84,7 +88,7 @@ class LoginActivity : AuthenticationActivity() {
         ...
         // do login work here and make sure, that you provide at least a user and a token String
         ...
-        Account account = createOrGetAccount(user);
+        Account account = createOrGetAccount(user)
         storeToken(
                 account,
                 tokenType,  // AndroidTokenType
@@ -93,9 +97,9 @@ class LoginActivity : AuthenticationActivity() {
                         "some-key" to "some-value"
                 )
         // store some additional userdata (optionally)
-        storeUserData(account, "key_for_some_user_data", "very-important-userdata");
+        storeUserData(account, "key_for_some_user_data", "some-userdata")
         // finishes the activity and set this account to the "current-active" one
-        finalizeAuthentication(account);
+        finalizeAuthentication(account)
     }
     ...
 }

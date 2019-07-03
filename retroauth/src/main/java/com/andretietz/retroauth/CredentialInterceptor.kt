@@ -97,6 +97,7 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TY
         // execute the request
         response = chain.proceed(request)
         refreshRequested = authenticator.refreshRequired(++tryCount, requireNotNull(response))
+        if (refreshRequested) response?.close()
       } while (refreshRequested)
     } catch (error: Exception) {
       storeAndThrowError(authRequestType, error)
@@ -115,7 +116,7 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TY
   private fun unwrapThrowable(throwable: Throwable): Throwable {
     if (
       throwable is AuthenticationCanceledException ||
-        throwable is AuthenticationRequiredException
+      throwable is AuthenticationRequiredException
     ) return throwable
     throwable.cause?.let {
       return unwrapThrowable(it)
