@@ -9,6 +9,7 @@
 * Fixed Demo app which is using Facebook with [scribe](https://github.com/scribejava/scribejava)
 * Added functionalities to refresh the token before the authenticated call is called.
 * Renaming TokenProvider to Authenticator
+* Callback method when the account is removed from the Android AccountManager
 
 ## 2.3.1 (2018-01-15)
 * Updating release script
