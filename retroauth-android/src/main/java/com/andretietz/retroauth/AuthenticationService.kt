@@ -16,6 +16,7 @@
 
 package com.andretietz.retroauth
 
+import android.accounts.Account
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
@@ -25,10 +26,26 @@ import android.os.IBinder
  */
 abstract class AuthenticationService : Service() {
 
-  override fun onBind(intent: Intent): IBinder? = AccountAuthenticator(this, getLoginAction()).iBinder
+  override fun onBind(intent: Intent): IBinder? = AccountAuthenticator(
+    this,
+    getLoginAction(),
+    this::cleanupAccount
+  ).iBinder
 
   /**
    * @return An Action String to open the activity to login
    */
   abstract fun getLoginAction(): String
+
+  /**
+   * Called when an account is intended to be removed. Use it if you need to remove any kinds of user related data.
+   *
+   * At this point the account hasn't been removed yet. It will right after this method has been executed. If
+   *
+   * <b>Caution</b>: This method can (and will) be called from a different process (when the user removes the account using the
+   * account settings on the android device). Consider that when cleaning up your user data.
+   *
+   * @param account that will be removed.
+   */
+  open fun cleanupAccount(account: Account) = Unit
 }

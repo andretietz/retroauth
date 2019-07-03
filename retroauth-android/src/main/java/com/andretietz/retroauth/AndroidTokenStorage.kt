@@ -48,12 +48,10 @@ class AndroidTokenStorage constructor(
     callback: Callback<AndroidToken>?
   ): Future<AndroidToken> {
     val task = GetTokenTask(application, accountManager, owner, type, callback)
-    if (Looper.myLooper() == Looper.getMainLooper()) {
-      return executor.submit(task)
-    }
-    val future = FutureTask(task)
-    future.run()
-    return future
+    return if (Looper.myLooper() == Looper.getMainLooper())
+      executor.submit(task)
+    else
+      FutureTask(task).also { it.run() }
   }
 
   override fun removeToken(owner: Account, type: AndroidTokenType, token: AndroidToken) {

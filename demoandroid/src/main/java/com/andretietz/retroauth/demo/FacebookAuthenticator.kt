@@ -47,9 +47,9 @@ class FacebookAuthenticator(application: Application) : Authenticator<String, Ac
 
   override fun isTokenValid(token: AndroidToken): Boolean {
     token.data?.let {
-      it[KEY_TOKEN_VALIDITY]?.let {
+      it[KEY_TOKEN_VALIDITY]?.let { validity ->
         // return false if the token is no longer valid
-        return it.toLong() > System.currentTimeMillis()
+        return validity.toLong() > System.currentTimeMillis()
       }
     }
     return true

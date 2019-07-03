@@ -20,9 +20,12 @@ import android.accounts.AbstractAccountAuthenticator
 import android.accounts.Account
 import android.accounts.AccountAuthenticatorResponse
 import android.accounts.AccountManager
+import android.accounts.NetworkErrorException
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 
 /**
  * This AccountAuthenticator is a very basic implementation of Android's
@@ -35,7 +38,8 @@ import android.os.Bundle
  */
 class AccountAuthenticator(
   context: Context,
-  internal val action: String
+  internal val action: String,
+  private val cleanupUserData: (account: Account) -> Unit
 ) : AbstractAccountAuthenticator(context) {
 
   override fun addAccount(
@@ -103,6 +107,22 @@ class AccountAuthenticator(
     account: Account,
     features: Array<String>
   ) = null
+
+  @SuppressLint("CheckResult")
+  @Throws(NetworkErrorException::class)
+  override fun getAccountRemovalAllowed(response: AccountAuthenticatorResponse, account: Account): Bundle? {
+    val result = super.getAccountRemovalAllowed(response, account)
+    if (result != null && result.containsKey(AccountManager.KEY_BOOLEAN_RESULT)) {
+      if (result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT, false)) {
+        try {
+          cleanupUserData(account)
+        } catch (exception: Exception) {
+          Log.w("AuthenticationService", "Your cleanup method threw an exception:", exception)
+        }
+      }
+    }
+    return result
+  }
 
   companion object {
     const val KEY_TOKEN_TYPE = "account_token_type"
