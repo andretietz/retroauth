@@ -1,4 +1,4 @@
-# A simple way of calling authenticated requests using retrofit in android
+# A simple way of calling authenticated requests using retrofit on android
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-retroauth-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/2195)
 ## Dependencies
 * [Retrofit](https://github.com/square/retrofit) 2.5.0 (transitive from retroauth, feel free to upgrade to 2.6.0 if you're running on API 21+)
