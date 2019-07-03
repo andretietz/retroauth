@@ -42,8 +42,8 @@ abstract class AuthenticationService : Service() {
    *
    * At this point the account hasn't been removed yet. It will right after this method has been executed. If
    *
-   * <b>Caution</b>: This method can (and will) be called from a different process (when the user removes the account using the
-   * account settings on the android device). Consider that when cleaning up your user data.
+   * <b>Caution</b>: This method can (and will) be called from a different process (when the user removes the account
+   * using the account settings on the android device). Consider that when cleaning up your user data.
    *
    * @param account that will be removed.
    */

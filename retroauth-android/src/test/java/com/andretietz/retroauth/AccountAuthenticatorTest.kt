@@ -19,7 +19,7 @@ import org.robolectric.RuntimeEnvironment
 @RunWith(RobolectricTestRunner::class)
 class AccountAuthenticatorTest {
 
-  private val authenticator: AccountAuthenticator = AccountAuthenticator(mock(Context::class.java), "some-action")
+  private val authenticator: AccountAuthenticator = AccountAuthenticator(mock(Context::class.java), "some-action") {}
 
   @Before
   fun setup() {
@@ -28,7 +28,7 @@ class AccountAuthenticatorTest {
 
   @Test
   fun constructor() {
-    val authenticator = AccountAuthenticator(mock(Context::class.java), "some-action")
+    val authenticator = AccountAuthenticator(mock(Context::class.java), "some-action") {}
     assertNotNull(authenticator.action)
     assertEquals("some-action", authenticator.action)
   }

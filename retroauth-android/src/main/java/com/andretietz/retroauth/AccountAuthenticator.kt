@@ -112,13 +112,13 @@ class AccountAuthenticator(
   @Throws(NetworkErrorException::class)
   override fun getAccountRemovalAllowed(response: AccountAuthenticatorResponse, account: Account): Bundle? {
     val result = super.getAccountRemovalAllowed(response, account)
-    if (result != null && result.containsKey(AccountManager.KEY_BOOLEAN_RESULT)) {
-      if (result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT, false)) {
-        try {
-          cleanupUserData(account)
-        } catch (exception: Exception) {
-          Log.w("AuthenticationService", "Your cleanup method threw an exception:", exception)
-        }
+    if (
+      result != null && result.containsKey(AccountManager.KEY_BOOLEAN_RESULT) &&
+      result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT, false)) {
+      try {
+        cleanupUserData(account)
+      } catch (exception: Exception) {
+        Log.w("AuthenticationService", "Your cleanup method threw an exception:", exception)
       }
     }
     return result
