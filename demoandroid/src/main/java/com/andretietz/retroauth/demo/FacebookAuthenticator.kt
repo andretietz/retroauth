@@ -2,6 +2,7 @@ package com.andretietz.retroauth.demo
 
 import android.accounts.Account
 import android.app.Application
+import android.content.Context
 import com.andretietz.retroauth.AndroidToken
 import com.andretietz.retroauth.AndroidTokenStorage
 import com.andretietz.retroauth.AndroidTokenType
@@ -23,15 +24,20 @@ class FacebookAuthenticator(application: Application) : Authenticator<String, Ac
     const val CLIENT_SECRET = "6254dc69ac506d95b897d35d0dcf9e1f"
     const val CLIENT_CALLBACK = "https://localhost:8000/accounts/facebook/login/callback/"
     const val KEY_TOKEN_VALIDITY = "token_validity"
+
+    @JvmStatic
+    fun createTokenType(context: Context): AndroidTokenType {
+      return AndroidTokenType(
+        // type of the token
+        context.getString(R.string.authentication_TOKEN),
+        // key(s) of additional values to store to the token
+        // i.e. token validity time
+        setOf(KEY_TOKEN_VALIDITY)
+      )
+    }
   }
 
-  val tokenType = AndroidTokenType(
-    // type of the token
-    application.getString(R.string.authentication_TOKEN),
-    // key(s) of additional values to store to the token
-    // i.e. token validity time
-    setOf(KEY_TOKEN_VALIDITY)
-  )
+  val tokenType = createTokenType(application)
 
   val ownerType: String = application.getString(R.string.authentication_ACCOUNT)
 

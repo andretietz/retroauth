@@ -35,7 +35,7 @@ class LoginActivity : AuthenticationActivity() {
     .httpClient(OkHttpHttpClient())
     .build(FacebookApi.instance())
 
-  private val authenticator by lazy { FacebookAuthenticator(application) }
+  //  private val authenticator by lazy { FacebookAuthenticator(application) }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -57,13 +57,9 @@ class LoginActivity : AuthenticationActivity() {
             .subscribeOn(Schedulers.io())
             .subscribe({ result ->
               val account = createOrGetAccount(result.name)
-              val expiryDate = TimeUnit.MILLISECONDS
-                // expiry date - 30 seconds (network tolerance)
-                .convert((result.token.expiresIn - 30).toLong(), TimeUnit.SECONDS)
-                .plus(System.currentTimeMillis())
               storeToken(
                 account,
-                authenticator.tokenType,
+                FacebookAuthenticator.createTokenType(application),
                 result.token.toAndroidToken()
               )
               finalizeAuthentication(account)
@@ -106,7 +102,6 @@ class LoginActivity : AuthenticationActivity() {
   }
 
   internal class UserInfo {
-    var name: String = ""
     var email: String = ""
   }
 
