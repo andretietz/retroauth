@@ -72,12 +72,10 @@ abstract class AuthenticationActivity : AppCompatActivity() {
    *
    * @param account Account you want to store the token for
    * @param tokenType type of the token you want to store
-   * @param token Token itself
-   * @param data data that belongs to the data. i.e. expiring date etc.
+   * @param token the AndroidToken
    */
-  @JvmOverloads
-  fun storeToken(account: Account, tokenType: AndroidTokenType, token: String, data: Map<String, String>? = null) {
-    tokenStorage.storeToken(account, tokenType, AndroidToken(token, data))
+  fun storeToken(account: Account, tokenType: AndroidTokenType, token: AndroidToken) {
+    tokenStorage.storeToken(account, tokenType, token)
   }
 
   /**

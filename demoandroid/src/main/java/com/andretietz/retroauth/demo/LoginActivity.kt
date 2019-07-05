@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import com.andretietz.retroauth.AndroidToken
 import com.andretietz.retroauth.AuthenticationActivity
 import com.github.scribejava.apis.FacebookApi
 import com.github.scribejava.core.builder.ServiceBuilder
@@ -63,11 +64,7 @@ class LoginActivity : AuthenticationActivity() {
               storeToken(
                 account,
                 authenticator.tokenType,
-                result.token.accessToken,
-                mapOf(
-                  FacebookAuthenticator.KEY_TOKEN_VALIDITY
-                    to expiryDate.toString()
-                )
+                result.token.toAndroidToken()
               )
               finalizeAuthentication(account)
             }, { error -> Timber.e(error) })
@@ -114,4 +111,15 @@ class LoginActivity : AuthenticationActivity() {
   }
 
   private class LoginResult(val name: String, val token: OAuth2AccessToken)
+
+  fun OAuth2AccessToken.toAndroidToken(): AndroidToken {
+    return AndroidToken(this.accessToken, mapOf(
+      FacebookAuthenticator.KEY_TOKEN_VALIDITY
+        to TimeUnit.MILLISECONDS
+        // expiry date - 30 seconds (network tolerance)
+        .convert((this.expiresIn - 30).toLong(), TimeUnit.SECONDS)
+        .plus(System.currentTimeMillis()).toString()
+    ))
+
+  }
 }
