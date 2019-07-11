@@ -83,6 +83,8 @@ class AndroidOwnerManager constructor(
     return null
   }
 
+  override fun getOwners(ownerType: String): List<Account> = accountManager.accounts.toList()
+
   override fun openOwnerPicker(ownerType: String, callback: Callback<Account?>?): Future<Account?> {
     val task = ShowDialogPickerTask(application, accountManager, ownerType, callback)
     if (Looper.myLooper() == Looper.getMainLooper()) {

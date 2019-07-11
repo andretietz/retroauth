@@ -75,13 +75,13 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TY
               tokenStorage.removeToken(owner, authRequestType.tokenType, localToken)
               // try to refresh the token
               val refreshedToken = authenticator.refreshToken(owner, authRequestType.tokenType, localToken)
-              if (refreshedToken != null) {
+              token = if (refreshedToken != null) {
                 // if the token was refreshed, store it
                 tokenStorage.storeToken(owner, authRequestType.tokenType, refreshedToken)
-                token = refreshedToken
+                refreshedToken
               } else {
                 // otherwise use the "old" token
-                token = localToken
+                localToken
               }
             }
             // authenticate the request using the token
@@ -96,8 +96,9 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TY
         }
         // execute the request
         response = chain.proceed(request)
-        refreshRequested = authenticator.refreshRequired(++tryCount, requireNotNull(response))
-        if (refreshRequested) response?.close()
+        refreshRequested = authenticator.refreshRequired(++tryCount, response)
+        // if a refresh is required, close the response
+        if (refreshRequested) response.close()
       } while (refreshRequested)
     } catch (error: Exception) {
       storeAndThrowError(authRequestType, error)

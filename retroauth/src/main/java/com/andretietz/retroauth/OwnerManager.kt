@@ -72,6 +72,13 @@ interface OwnerManager<in OWNER_TYPE : Any, OWNER : Any, in TOKEN_TYPE : Any> {
   fun getActiveOwner(ownerType: OWNER_TYPE): OWNER?
 
   /**
+   * @param ownerType type of the owners you want to receive.
+   *
+   * @return a list of [OWNER]s of the given type
+   */
+  fun getOwners(ownerType: OWNER_TYPE): List<OWNER>
+
+  /**
    * Switches the active owner of the given [ownerType]. If the [owner] is `null`, it resets the active owner. So there
    * won't be an active user.
    *
