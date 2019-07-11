@@ -97,7 +97,7 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TY
         // execute the request
         response = chain.proceed(request)
         refreshRequested = authenticator.refreshRequired(++tryCount, response)
-        // if a refresh is required, close the response
+        // https://github.com/square/okhttp/blob/master/CHANGELOG.md#version-3141
         if (refreshRequested) response.close()
       } while (refreshRequested)
     } catch (error: Exception) {
