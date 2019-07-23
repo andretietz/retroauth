@@ -24,15 +24,15 @@ import java.net.HttpURLConnection
  * The Authenticator interface is a very specific provider endpoint dependent implementation,
  * to authenticate your request and defines when or if to retry.
  */
-abstract class Authenticator<out OWNER_TYPE : Any, in OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any> {
+abstract class Authenticator<out OWNER_TYPE : Any, in OWNER : Any, CREDENTIAL_TYPE : Any, CREDENTIAL : Any> {
 
   /**
-   * @param annotationTokenType type of the token reached in from the [Authenticated.tokenType]
+   * @param annotationCredentialType type of the credential reached in from the [Authenticated.credentialType]
    * Annotation of the request.
    *
-   * @return type of the token
+   * @return type of the credential
    */
-  abstract fun getTokenType(annotationTokenType: Int = 0): TOKEN_TYPE
+  abstract fun getCredentialType(annotationCredentialType: Int = 0): CREDENTIAL_TYPE
 
   /**
    * @param annotationOwnerType type of the owner reached in from the [Authenticated.ownerType]
@@ -44,34 +44,38 @@ abstract class Authenticator<out OWNER_TYPE : Any, in OWNER : Any, TOKEN_TYPE : 
    * Authenticates a [Request].
    *
    * @param request request to authenticate
-   * @param token Token to authenticate
+   * @param credential Token to authenticate
    * @return a modified version of the incoming request, which is authenticated
    */
-  abstract fun authenticateRequest(request: Request, token: TOKEN): Request
+  abstract fun authenticateRequest(request: Request, credential: CREDENTIAL): Request
 
   /**
-   * Checks if the token needs to be refreshed or not.
+   * Checks if the credential needs to be refreshed or not.
    *
    * @param count value contains how many times this request has been executed already
    * @param response response to check what the result was
-   * @return {@code true} if a token refresh is required, {@code false} if not
+   * @return {@code true} if a credential refresh is required, {@code false} if not
    */
   open fun refreshRequired(count: Int, response: Response): Boolean =
     response.code() == HttpURLConnection.HTTP_UNAUTHORIZED && count <= 1
 
   /**
-   * This method will be called when [isTokenValid] returned false or [refreshRequired] returned true.
+   * This method will be called when [isCredentialValid] returned false or [refreshRequired] returned true.
    *
-   * @param token of the local [TokenStorage]
+   * @param credential of the local [CredentialStorage]
    */
   @Suppress("UNUSED_PARAMETER")
-  open fun refreshToken(owner: OWNER, tokenType: TOKEN_TYPE, token: TOKEN): TOKEN? = token
+  open fun refreshCredentials(
+    owner: OWNER,
+    credentialType: CREDENTIAL_TYPE,
+    credential: CREDENTIAL
+  ): CREDENTIAL? = credential
 
   /**
-   * This method is called on each authenticated request, to make sure the current token is still valid.
+   * This method is called on each authenticated request, to make sure the current credential is still valid.
    *
-   * @param token The current token
+   * @param credential The current credential
    */
   @Suppress("UNUSED_PARAMETER")
-  open fun isTokenValid(token: TOKEN): Boolean = true
+  open fun isCredentialValid(credential: CREDENTIAL): Boolean = true
 }

@@ -35,12 +35,12 @@ import java.util.concurrent.FutureTask
 import java.util.concurrent.TimeUnit
 
 /**
- * This is the Android implementation of an [OwnerManager]. It does all the Android [Account] handling
+ * This is the Android implementation of an [OwnerStorage]. It does all the Android [Account] handling
  */
 @Suppress("unused")
-class AndroidOwnerManager constructor(
+class AndroidOwnerStorage constructor(
   private val application: Application
-) : OwnerManager<String, Account, AndroidTokenType> {
+) : OwnerStorage<String, Account, AndroidCredentialType> {
 
   companion object {
     private const val RETROAUTH_ACCOUNT_NAME_KEY = "com.andretietz.retroauth.ACTIVE_ACCOUNT"
@@ -53,12 +53,12 @@ class AndroidOwnerManager constructor(
   @Throws(AuthenticationCanceledException::class)
   override fun createOwner(
     ownerType: String,
-    tokenType: AndroidTokenType,
+    credentialType: AndroidCredentialType,
     callback: Callback<Account>?
   ): Future<Account> {
     val future = accountManager.addAccount(
       ownerType,
-      tokenType.tokenType,
+      credentialType.type,
       null,
       null,
       activityManager.activity,

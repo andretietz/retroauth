@@ -17,10 +17,9 @@
 package com.andretietz.retroauth
 
 /**
- * The default android token represents a token string and additional data to it
+ * represents a credential type on android.
  */
-
-data class AndroidToken @JvmOverloads constructor(
-  val token: String,
-  val data: Map<String, String>? = null
+data class AndroidCredentialType @JvmOverloads constructor(
+  val type: String,
+  val dataKeys: Set<String>? = null
 )

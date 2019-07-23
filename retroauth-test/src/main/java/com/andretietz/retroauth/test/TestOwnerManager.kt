@@ -1,15 +1,15 @@
 package com.andretietz.retroauth.test
 
 import com.andretietz.retroauth.Callback
-import com.andretietz.retroauth.OwnerManager
+import com.andretietz.retroauth.OwnerStorage
 import java.util.concurrent.Future
 
 class TestOwnerManager(
   private val owners: Map<String, MutableList<String>> = HashMap(),
   private var currentlyActive: String? = null
-) : OwnerManager<String, String, String> {
+) : OwnerStorage<String, String, String> {
 
-  override fun createOwner(ownerType: String, tokenType: String, callback: Callback<String>?): Future<String> {
+  override fun createOwner(ownerType: String, credentialType: String, callback: Callback<String>?): Future<String> {
     throw IllegalStateException("Cannot create owners using the test class")
   }
 

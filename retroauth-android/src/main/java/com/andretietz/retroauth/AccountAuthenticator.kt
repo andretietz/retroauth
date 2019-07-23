@@ -45,10 +45,10 @@ class AccountAuthenticator(
   override fun addAccount(
     response: AccountAuthenticatorResponse,
     accountType: String,
-    authTokenType: String?,
+    authCredentialType: String?,
     requiredFeatures: Array<String>?,
     options: Bundle
-  ) = createAuthBundle(response, action, accountType, authTokenType, null)
+  ) = createAuthBundle(response, action, accountType, authCredentialType, null)
 
   override fun getAuthToken(
     response: AccountAuthenticatorResponse,
@@ -62,7 +62,7 @@ class AccountAuthenticator(
    *
    * @param response needed parameter
    * @param accountType The account Type
-   * @param tokenType The requested token type
+   * @param credentialType The requested credential-type
    * @param accountName The name of the account
    * @return a bundle to open the activity
    */
@@ -70,7 +70,7 @@ class AccountAuthenticator(
     response: AccountAuthenticatorResponse,
     action: String,
     accountType: String,
-    tokenType: String?,
+    credentialType: String?,
     accountName: String?
   ): Bundle? = Bundle().apply {
     putParcelable(
@@ -78,7 +78,7 @@ class AccountAuthenticator(
       Intent(action).apply {
         putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response)
         putExtra(AccountManager.KEY_ACCOUNT_TYPE, accountType)
-        putExtra(KEY_TOKEN_TYPE, tokenType)
+        putExtra(KEY_CREDENTIAL_TYPE, credentialType)
         accountName?.let {
           putExtra(AccountManager.KEY_ACCOUNT_NAME, it)
         }
@@ -93,12 +93,12 @@ class AccountAuthenticator(
 
   override fun editProperties(response: AccountAuthenticatorResponse, accountType: String) = null
 
-  override fun getAuthTokenLabel(authTokenType: String) = null
+  override fun getAuthTokenLabel(authCredentialType: String) = null
 
   override fun updateCredentials(
     response: AccountAuthenticatorResponse,
     account: Account,
-    authTokenType: String,
+    authCredentialType: String,
     options: Bundle
   ): Bundle? = null
 
@@ -125,6 +125,6 @@ class AccountAuthenticator(
   }
 
   companion object {
-    const val KEY_TOKEN_TYPE = "account_token_type"
+    const val KEY_CREDENTIAL_TYPE = "account_credential_type"
   }
 }

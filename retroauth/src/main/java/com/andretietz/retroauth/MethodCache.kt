@@ -23,34 +23,34 @@ import java.util.HashMap
  * authenticating the request itself. The identifier is created right now
  * in [Utils.createUniqueIdentifier], this may change.
  */
-interface MethodCache<OWNER_TYPE : Any, TOKEN_TYPE : Any> {
+interface MethodCache<OWNER_TYPE : Any, CREDENTIAL_TYPE : Any> {
 
   /**
-   * Registers a token type with a specific identifier.
+   * Registers a credential type with a specific identifier.
    *
    * @param requestIdentifier to identify the request later on
    * @param type type of the request.
    */
-  fun register(requestIdentifier: Int, type: RequestType<OWNER_TYPE, TOKEN_TYPE>)
+  fun register(requestIdentifier: Int, type: RequestType<OWNER_TYPE, CREDENTIAL_TYPE>)
 
   /**
    * @param requestIdentifier the request identifier
-   * @return the token type to authenticate the request
+   * @return the credential type to authenticate the request
    */
-  fun getTokenType(requestIdentifier: Int): RequestType<OWNER_TYPE, TOKEN_TYPE>?
+  fun getCredentialType(requestIdentifier: Int): RequestType<OWNER_TYPE, CREDENTIAL_TYPE>?
 
   /**
    * The default implementation of the [MethodCache].
    *
-   * @param <TOKEN_TYPE>
+   * @param <CREDENTIAL_TYPE>
    */
-  class DefaultMethodCache<OWNER_TYPE : Any, TOKEN_TYPE : Any> : MethodCache<OWNER_TYPE, TOKEN_TYPE> {
-    private val map = HashMap<Int, RequestType<OWNER_TYPE, TOKEN_TYPE>>()
+  class DefaultMethodCache<OWNER_TYPE : Any, CREDENTIAL_TYPE : Any> : MethodCache<OWNER_TYPE, CREDENTIAL_TYPE> {
+    private val map = HashMap<Int, RequestType<OWNER_TYPE, CREDENTIAL_TYPE>>()
 
-    override fun register(requestIdentifier: Int, type: RequestType<OWNER_TYPE, TOKEN_TYPE>) {
+    override fun register(requestIdentifier: Int, type: RequestType<OWNER_TYPE, CREDENTIAL_TYPE>) {
       map[requestIdentifier] = type
     }
 
-    override fun getTokenType(requestIdentifier: Int): RequestType<OWNER_TYPE, TOKEN_TYPE>? = map[requestIdentifier]
+    override fun getCredentialType(requestIdentifier: Int) = map[requestIdentifier]
   }
 }

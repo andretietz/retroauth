@@ -25,7 +25,7 @@ import android.os.Bundle
  * The [ActivityManager] provides an application [android.content.Context] as well as an [Activity] if
  * this was not stopped already. It registers [ActivityLifecycleCallbacks] to be able to know if there's an active
  * [Activity] or not. The [Activity] is required in case the user calls an
- * [com.andretietz.retroauth.Authenticated] request and there are not tokens provided, to be able to open the
+ * [com.andretietz.retroauth.Authenticated] request and there are not Credentials provided, to be able to open the
  * [Activity] for login, using the
  * [android.accounts.AccountManager.getAuthToken]. If you don't provide an [Activity] there, the
  * login screen wont open. So in case you're calling an [com.andretietz.retroauth.Authenticated] request from a

@@ -19,16 +19,16 @@ package com.andretietz.retroauth
 import java.util.concurrent.Future
 
 /**
- * Since every token belongs to a specific user, this users have to be managed.
+ * Since every credential belongs to a specific user, this users have to be managed.
  */
-interface OwnerManager<in OWNER_TYPE : Any, OWNER : Any, in TOKEN_TYPE : Any> {
+interface OwnerStorage<in OWNER_TYPE : Any, OWNER : Any, in CREDENTIAL_TYPE : Any> {
 
   /**
-   * Creates an [OWNER] of a specific [ownerType] for a specific [tokenType]. So open a login and let the user
+   * Creates an [OWNER] of a specific [ownerType] for a specific [credentialType]. So open a login and let the user
    * login. If the User cancels the login an [AuthenticationCanceledException] should be thrown.
    *
    * @param ownerType Type of owner you want to create.
-   * @param tokenType Type of token you want to open the login for.
+   * @param credentialType Type of credential you want to open the login for.
    * @param callback Optional callback to get notified when the user was created `true` or not `false`.
    *
    * @return [OWNER] which was created.
@@ -36,7 +36,11 @@ interface OwnerManager<in OWNER_TYPE : Any, OWNER : Any, in TOKEN_TYPE : Any> {
    * @throws AuthenticationCanceledException
    */
   @Throws(AuthenticationCanceledException::class)
-  fun createOwner(ownerType: OWNER_TYPE, tokenType: TOKEN_TYPE, callback: Callback<OWNER>? = null): Future<OWNER>
+  fun createOwner(
+    ownerType: OWNER_TYPE,
+    credentialType: CREDENTIAL_TYPE,
+    callback: Callback<OWNER>? = null
+  ): Future<OWNER>
 
   /**
    * Returns the owner if exists

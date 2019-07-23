@@ -27,9 +27,9 @@ import androidx.appcompat.app.AppCompatActivity
 
 /**
  * Your activity that's supposed to create the account (i.e. Login{@link android.app.Activity}) has to implement this.
- * It'll provide functionality to {@link #storeToken(Account, String, String)} and
+ * It'll provide functionality to {@link #storeCredentials(Account, String, String)} and
  * {@link #storeUserData(Account, String, String)} when logging in. In case your service is providing a refresh token,
- * use {@link #storeToken(Account, String, String, String)}. This will additionally store a refresh token that
+ * use {@link #storeCredentials(Account, String, String, String)}. This will additionally store a refresh token that
  * can be used in {@link Authenticator#validateResponse(int, okhttp3.Response, TokenStorage, Object, Object, Object)}
  * to update the access-token
  */
@@ -38,15 +38,15 @@ abstract class AuthenticationActivity : AppCompatActivity() {
   private var accountAuthenticatorResponse: AccountAuthenticatorResponse? = null
   private lateinit var accountType: String
   private lateinit var accountManager: AccountManager
-  private var tokenType: String? = null
+  private var credentialType: String? = null
   private lateinit var resultBundle: Bundle
-  private lateinit var tokenStorage: AndroidTokenStorage
-  private val ownerManager by lazy { AndroidOwnerManager(application) }
+  private lateinit var credentialStorage: AndroidCredentialStorage
+  private val ownerManager by lazy { AndroidOwnerStorage(application) }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     accountManager = AccountManager.get(application)
-    tokenStorage = AndroidTokenStorage(application)
+    credentialStorage = AndroidCredentialStorage(application)
 
     accountAuthenticatorResponse = intent.getParcelableExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)
     accountAuthenticatorResponse?.onRequestContinued()
@@ -58,10 +58,10 @@ abstract class AuthenticationActivity : AppCompatActivity() {
         String.format(
           "This Activity cannot be started without the \"%s\" extra in the intent! " +
             "Use the \"createAccount\"-Method of the \"%s\" for opening the Login manually.",
-          AccountManager.KEY_ACCOUNT_TYPE, OwnerManager::class.java.simpleName))
+          AccountManager.KEY_ACCOUNT_TYPE, OwnerStorage::class.java.simpleName))
     }
     this.accountType = accountType
-    tokenType = intent.getStringExtra(AccountAuthenticator.KEY_TOKEN_TYPE)
+    credentialType = intent.getStringExtra(AccountAuthenticator.KEY_CREDENTIAL_TYPE)
 
     resultBundle = Bundle()
     resultBundle.putString(AccountManager.KEY_ACCOUNT_TYPE, accountType)
@@ -70,12 +70,12 @@ abstract class AuthenticationActivity : AppCompatActivity() {
   /**
    * This method stores an authentication Token to a specific account.
    *
-   * @param account Account you want to store the token for
-   * @param tokenType type of the token you want to store
-   * @param token the AndroidToken
+   * @param account Account you want to store the credentials for
+   * @param credentialType type of the credentials you want to store
+   * @param credentials the AndroidToken
    */
-  fun storeToken(account: Account, tokenType: AndroidTokenType, token: AndroidToken) {
-    tokenStorage.storeToken(account, tokenType, token)
+  fun storeCredentials(account: Account, credentialType: AndroidCredentialType, credentials: AndroidCredentials) {
+    credentialStorage.storeCredentials(account, credentialType, credentials)
   }
 
   /**
@@ -165,5 +165,5 @@ abstract class AuthenticationActivity : AppCompatActivity() {
   /**
    * @return The requested token type if available. otherwise `null`
    */
-  fun getRequestedTokenType() = tokenType
+  fun getRequestedCredentialType() = credentialType
 }

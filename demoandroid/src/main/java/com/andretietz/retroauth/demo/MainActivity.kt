@@ -5,11 +5,11 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import android.webkit.CookieManager
 import android.widget.Toast
-import com.andretietz.retroauth.AndroidOwnerManager
-import com.andretietz.retroauth.AndroidToken
-import com.andretietz.retroauth.AndroidTokenStorage
+import com.andretietz.retroauth.AndroidOwnerStorage
+import com.andretietz.retroauth.AndroidCredentials
+import com.andretietz.retroauth.AndroidCredentialStorage
 import com.andretietz.retroauth.Callback
-import com.andretietz.retroauth.RetroauthAndroidBuilder
+import com.andretietz.retroauth.RetroauthAndroid
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.buttonInvalidateToken
@@ -25,8 +25,8 @@ import timber.log.Timber
 class MainActivity : AppCompatActivity() {
   private lateinit var service: FacebookService
 
-  private val ownerManager by lazy { AndroidOwnerManager(application) }
-  private val tokenStorage by lazy { AndroidTokenStorage(application) }
+  private val ownerManager by lazy { AndroidOwnerStorage(application) }
+  private val credentialStorage by lazy { AndroidCredentialStorage(application) }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -45,9 +45,9 @@ class MainActivity : AppCompatActivity() {
     val provider = FacebookAuthenticator(application)
 
     /**
-     * Create your Retrofit Object using the [RetroauthAndroidBuilder.createBuilder]
+     * Create your Retrofit Object using the [RetroauthAndroid.createBuilder]
      */
-    val retrofit = RetroauthAndroidBuilder.createBuilder(application, provider)
+    val retrofit = RetroauthAndroid.createBuilder(application, provider)
       .baseUrl("https://graph.facebook.com/")
       .client(httpClient)
       .addConverterFactory(MoshiConverterFactory.create())
@@ -71,12 +71,12 @@ class MainActivity : AppCompatActivity() {
 
     buttonInvalidateToken.setOnClickListener {
       ownerManager.getActiveOwner(provider.ownerType)?.let { account ->
-        tokenStorage.getToken(account, provider.tokenType, object : Callback<AndroidToken> {
-          override fun onResult(result: AndroidToken?) {
-            tokenStorage.storeToken(
+        credentialStorage.getCredentials(account, provider.credentialType, object : Callback<AndroidCredentials> {
+          override fun onResult(result: AndroidCredentials?) {
+            credentialStorage.storeCredentials(
               account,
-              provider.tokenType,
-              AndroidToken("some-invalid-token", result?.data))
+              provider.credentialType,
+              AndroidCredentials("some-invalid-token", result?.data))
           }
         })
       }

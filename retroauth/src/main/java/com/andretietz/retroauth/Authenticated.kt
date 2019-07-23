@@ -28,5 +28,5 @@ import kotlin.annotation.AnnotationTarget.PROPERTY_SETTER
 @Retention(RUNTIME)
 annotation class Authenticated(
   val ownerType: Int = 0,
-  val tokenType: Int = 0
+  val credentialType: Int = 0
 )

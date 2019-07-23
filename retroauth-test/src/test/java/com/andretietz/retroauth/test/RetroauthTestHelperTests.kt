@@ -21,7 +21,7 @@ class RetroauthTestHelperTests {
   @Before
   fun prepareTest() {
     server.start()
-    retrofit = RetroauthTestHelper.createBuilder()
+    retrofit = TestRetroauth.createBuilder()
       .baseUrl(server.url("/"))
       .addConverterFactory(GsonConverterFactory.create())
       .build()
@@ -42,7 +42,7 @@ class RetroauthTestHelperTests {
 
     assertTrue(data != null)
     assertEquals(requireNotNull(data).data, "testdata")
-    assertTrue(server.takeRequest().headers[RetroauthTestHelper.TEST_AUTH_HEADER_NAME] == RetroauthTestHelper.TOKEN)
+    assertTrue(server.takeRequest().headers[TestRetroauth.TEST_AUTH_HEADER_NAME] == TestRetroauth.CREDENTIAL)
   }
 }
 

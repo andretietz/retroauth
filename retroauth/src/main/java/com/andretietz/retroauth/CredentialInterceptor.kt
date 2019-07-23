@@ -26,17 +26,17 @@ import java.util.concurrent.locks.ReentrantLock
 
 /**
  * This interceptor intercepts the okhttp requests and checks if authentication is required.
- * If so, it tries to get the owner of the token, then tries to get the token and
- * applies the token to the request
+ * If so, it tries to get the owner of the credential, then tries to get the credential and
+ * applies the credential to the request
  *
- * @param <OWNER>      a type that represents the owner of a token. Since there could be multiple users on one client.
- * @param <TOKEN_TYPE> type of the token that should be added to the request
+ * @param <OWNER> a type that represents the owner of a credential. Since there could be multiple users on one client.
+ * @param <CREDENTIAL_TYPE> type of the credential that should be added to the request
  */
-internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
-  private val authenticator: Authenticator<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN>,
-  private val ownerManager: OwnerManager<OWNER_TYPE, OWNER, TOKEN_TYPE>,
-  private val tokenStorage: TokenStorage<OWNER, TOKEN_TYPE, TOKEN>,
-  private val methodCache: MethodCache<OWNER_TYPE, TOKEN_TYPE> = MethodCache.DefaultMethodCache()
+internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE : Any, CREDENTIAL : Any>(
+  private val authenticator: Authenticator<OWNER_TYPE, OWNER, CREDENTIAL_TYPE, CREDENTIAL>,
+  private val ownerManager: OwnerStorage<OWNER_TYPE, OWNER, CREDENTIAL_TYPE>,
+  private val credentialStorage: CredentialStorage<OWNER, CREDENTIAL_TYPE, CREDENTIAL>,
+  private val methodCache: MethodCache<OWNER_TYPE, CREDENTIAL_TYPE> = MethodCache.DefaultMethodCache()
 ) : Interceptor {
 
   companion object {
@@ -46,14 +46,14 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TY
   override fun intercept(chain: Interceptor.Chain): Response? {
     var response: Response? = null
     var request = chain.request()
-    // get the token type required by this request
-    val authRequestType = methodCache.getTokenType(Utils.createUniqueIdentifier(request))
+    // get the credential type required by this request
+    val authRequestType = methodCache.getCredentialType(Utils.createUniqueIdentifier(request))
       ?: return chain.proceed(request)
 
     // if the request does require authentication
     var pending = false
     var refreshRequested = false
-    var token: TOKEN
+    var credential: CREDENTIAL
     var owner: OWNER?
     var tryCount = 0
     try {
@@ -65,29 +65,29 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TY
           owner = ownerManager.getActiveOwner(authRequestType.ownerType)
             ?: ownerManager.openOwnerPicker(authRequestType.ownerType).get()
           if (owner != null) {
-            // get the token of the owner
-            val localToken = tokenStorage.getToken(owner, authRequestType.tokenType).get()
-            // if the token is still valid and no refresh has been requested
-            if (authenticator.isTokenValid(localToken) && !refreshRequested) {
-              token = localToken
+            // get the credential of the owner
+            val localToken = credentialStorage.getCredentials(owner, authRequestType.credentialType).get()
+            // if the credential is still valid and no refresh has been requested
+            if (authenticator.isCredentialValid(localToken) && !refreshRequested) {
+              credential = localToken
             } else {
-              // otherwise remove the current token from the storage
-              tokenStorage.removeToken(owner, authRequestType.tokenType, localToken)
-              // try to refresh the token
-              val refreshedToken = authenticator.refreshToken(owner, authRequestType.tokenType, localToken)
-              token = if (refreshedToken != null) {
-                // if the token was refreshed, store it
-                tokenStorage.storeToken(owner, authRequestType.tokenType, refreshedToken)
+              // otherwise remove the current credential from the storage
+              credentialStorage.removeCredentials(owner, authRequestType.credentialType, localToken)
+              // try to refresh the credential
+              val refreshedToken = authenticator.refreshCredentials(owner, authRequestType.credentialType, localToken)
+              credential = if (refreshedToken != null) {
+                // if the credential was refreshed, store it
+                credentialStorage.storeCredentials(owner, authRequestType.credentialType, refreshedToken)
                 refreshedToken
               } else {
-                // otherwise use the "old" token
+                // otherwise use the "old" credential
                 localToken
               }
             }
-            // authenticate the request using the token
-            request = authenticator.authenticateRequest(request, token)
+            // authenticate the request using the credential
+            request = authenticator.authenticateRequest(request, credential)
           } else {
-            ownerManager.createOwner(authRequestType.ownerType, authRequestType.tokenType)
+            ownerManager.createOwner(authRequestType.ownerType, authRequestType.credentialType)
             throw AuthenticationRequiredException()
           }
         } finally {
@@ -106,7 +106,7 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TY
     return response
   }
 
-  private fun storeAndThrowError(type: RequestType<OWNER_TYPE, TOKEN_TYPE>, exception: Exception) {
+  private fun storeAndThrowError(type: RequestType<OWNER_TYPE, CREDENTIAL_TYPE>, exception: Exception) {
     val unwrappedException = unwrapThrowable(exception)
     if (getLock(type).errorContainer.get() == null) {
       getLock(type).errorContainer.set(unwrappedException)
@@ -125,7 +125,7 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TY
     return throwable
   }
 
-  private fun getLock(type: RequestType<OWNER_TYPE, TOKEN_TYPE>): AccountTokenLock {
+  private fun getLock(type: RequestType<OWNER_TYPE, CREDENTIAL_TYPE>): AccountTokenLock {
     synchronized(type) {
       val lock: AccountTokenLock = TOKEN_TYPE_LOCKERS[type] ?: AccountTokenLock()
       TOKEN_TYPE_LOCKERS[type] = lock
@@ -134,7 +134,7 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TY
   }
 
   @Throws(Exception::class)
-  private fun lock(type: RequestType<OWNER_TYPE, TOKEN_TYPE>): Boolean {
+  private fun lock(type: RequestType<OWNER_TYPE, CREDENTIAL_TYPE>): Boolean {
     val lock = getLock(type)
     if (!lock.lock.tryLock()) {
       lock.lock.lock()
@@ -147,7 +147,7 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TY
     return false
   }
 
-  private fun unlock(type: RequestType<OWNER_TYPE, TOKEN_TYPE>, wasWaiting: Boolean) {
+  private fun unlock(type: RequestType<OWNER_TYPE, CREDENTIAL_TYPE>, wasWaiting: Boolean) {
     val lock = getLock(type)
     if (wasWaiting && lock.waitCounter.decrementAndGet() <= 0) {
       lock.errorContainer.set(null)

@@ -30,11 +30,11 @@ import java.util.concurrent.Executor
  */
 class Retroauth private constructor() {
 
-  class Builder<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any> @JvmOverloads constructor(
-    private val authenticator: Authenticator<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN>,
-    private val ownerManager: OwnerManager<OWNER_TYPE, OWNER, TOKEN_TYPE>,
-    private val tokenStorage: TokenStorage<OWNER, TOKEN_TYPE, TOKEN>,
-    private val methodCache: MethodCache<OWNER_TYPE, TOKEN_TYPE> = MethodCache.DefaultMethodCache()
+  class Builder<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE : Any, CREDENTIAL : Any> @JvmOverloads constructor(
+    private val authenticator: Authenticator<OWNER_TYPE, OWNER, CREDENTIAL_TYPE, CREDENTIAL>,
+    private val ownerManager: OwnerStorage<OWNER_TYPE, OWNER, CREDENTIAL_TYPE>,
+    private val credentialStorage: CredentialStorage<OWNER, CREDENTIAL_TYPE, CREDENTIAL>,
+    private val methodCache: MethodCache<OWNER_TYPE, CREDENTIAL_TYPE> = MethodCache.DefaultMethodCache()
   ) {
 
     private val retrofitBuilder: Retrofit.Builder = Retrofit.Builder()
@@ -46,7 +46,7 @@ class Retroauth private constructor() {
      * [retrofit2.Retrofit.Builder.client]
      */
     @Suppress("unused")
-    fun client(client: OkHttpClient): Builder<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN> {
+    fun client(client: OkHttpClient): Builder<OWNER_TYPE, OWNER, CREDENTIAL_TYPE, CREDENTIAL> {
       this.okHttpClient = client
       return this
     }
@@ -55,7 +55,7 @@ class Retroauth private constructor() {
      * [retrofit2.Retrofit.Builder.baseUrl]
      */
     @Suppress("unused")
-    fun baseUrl(baseUrl: HttpUrl): Builder<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN> {
+    fun baseUrl(baseUrl: HttpUrl): Builder<OWNER_TYPE, OWNER, CREDENTIAL_TYPE, CREDENTIAL> {
       this.retrofitBuilder.baseUrl(baseUrl)
       return this
     }
@@ -64,7 +64,7 @@ class Retroauth private constructor() {
      * [retrofit2.Retrofit.Builder.baseUrl]
      */
     @Suppress("unused")
-    fun baseUrl(baseUrl: String): Builder<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN> {
+    fun baseUrl(baseUrl: String): Builder<OWNER_TYPE, OWNER, CREDENTIAL_TYPE, CREDENTIAL> {
       this.retrofitBuilder.baseUrl(baseUrl)
       return this
     }
@@ -73,7 +73,7 @@ class Retroauth private constructor() {
      * [retrofit2.Retrofit.Builder.addConverterFactory]
      */
     @Suppress("unused")
-    fun addConverterFactory(factory: Converter.Factory): Builder<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN> {
+    fun addConverterFactory(factory: Converter.Factory): Builder<OWNER_TYPE, OWNER, CREDENTIAL_TYPE, CREDENTIAL> {
       this.retrofitBuilder.addConverterFactory(factory)
       return this
     }
@@ -82,7 +82,7 @@ class Retroauth private constructor() {
      * [retrofit2.Retrofit.Builder.addCallAdapterFactory]
      */
     @Suppress("unused")
-    fun addCallAdapterFactory(factory: CallAdapter.Factory): Builder<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN> {
+    fun addCallAdapterFactory(factory: CallAdapter.Factory): Builder<OWNER_TYPE, OWNER, CREDENTIAL_TYPE, CREDENTIAL> {
       this.callAdapterFactories.add(factory)
       return this
     }
@@ -91,7 +91,7 @@ class Retroauth private constructor() {
      * [retrofit2.Retrofit.Builder.callbackExecutor]
      */
     @Suppress("unused")
-    fun callbackExecutor(executor: Executor): Builder<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN> {
+    fun callbackExecutor(executor: Executor): Builder<OWNER_TYPE, OWNER, CREDENTIAL_TYPE, CREDENTIAL> {
       this.executor = executor
       this.retrofitBuilder.callbackExecutor(executor)
       return this
@@ -101,7 +101,7 @@ class Retroauth private constructor() {
      * [retrofit2.Retrofit.Builder.validateEagerly]
      */
     @Suppress("unused")
-    fun validateEagerly(validateEagerly: Boolean): Builder<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN> {
+    fun validateEagerly(validateEagerly: Boolean): Builder<OWNER_TYPE, OWNER, CREDENTIAL_TYPE, CREDENTIAL> {
       this.retrofitBuilder.validateEagerly(validateEagerly)
       return this
     }
@@ -128,7 +128,7 @@ class Retroauth private constructor() {
       val interceptor = CredentialInterceptor(
         authenticator,
         ownerManager,
-        tokenStorage,
+        credentialStorage,
         methodCache
       )
 

@@ -25,10 +25,10 @@ import java.lang.reflect.Type
  * This is a [retrofit2.CallAdapter.Factory] implementation for handling annotated
  * requests using retrofit2.
  */
-internal class RetroauthCallAdapterFactory<out OWNER_TYPE : Any, OWNER : Any, TOKEN_TYPE : Any, TOKEN : Any>(
+internal class RetroauthCallAdapterFactory<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE : Any, CREDENTIAL : Any>(
   private val callAdapterFactories: List<CallAdapter.Factory>,
-  private val authenticator: Authenticator<OWNER_TYPE, OWNER, TOKEN_TYPE, TOKEN>,
-  private val methodCache: MethodCache<OWNER_TYPE, TOKEN_TYPE> = MethodCache.DefaultMethodCache()
+  private val authenticator: Authenticator<OWNER_TYPE, OWNER, CREDENTIAL_TYPE, CREDENTIAL>,
+  private val methodCache: MethodCache<OWNER_TYPE, CREDENTIAL_TYPE> = MethodCache.DefaultMethodCache()
 ) : CallAdapter.Factory() {
 
   /**
@@ -53,7 +53,7 @@ internal class RetroauthCallAdapterFactory<out OWNER_TYPE : Any, OWNER : Any, TO
         auth?.let {
           return RetroauthCallAdapter(
             adapter as CallAdapter<Any, Any>,
-            authenticator.getTokenType(auth.tokenType),
+            authenticator.getCredentialType(auth.credentialType),
             authenticator.getOwnerType(auth.ownerType),
             methodCache)
         }
@@ -67,14 +67,14 @@ internal class RetroauthCallAdapterFactory<out OWNER_TYPE : Any, OWNER : Any, TO
    * This [CallAdapter] is a wrapper adapter. After registering the request as an
    * authenticated request, it executes the given [CallAdapter.adapt] call
    *
-   * @param <TOKEN_TYPE>  Type of Token to use
+   * @param <CREDENTIAL_TYPE>  Type of Token to use
    * @param <RETURN_TYPE> Return type of the call
    */
-  internal class RetroauthCallAdapter<OWNER_TYPE : Any, TOKEN_TYPE : Any, RETURN_TYPE : Any>(
+  internal class RetroauthCallAdapter<OWNER_TYPE : Any, CREDENTIAL_TYPE : Any, RETURN_TYPE : Any>(
     private val adapter: CallAdapter<Any, RETURN_TYPE>,
-    private val tokenType: TOKEN_TYPE,
+    private val credentialType: CREDENTIAL_TYPE,
     private val ownerType: OWNER_TYPE,
-    private val registration: MethodCache<OWNER_TYPE, TOKEN_TYPE>
+    private val registration: MethodCache<OWNER_TYPE, CREDENTIAL_TYPE>
   ) : CallAdapter<Any, RETURN_TYPE> {
 
     override fun responseType(): Type = adapter.responseType()
@@ -83,7 +83,7 @@ internal class RetroauthCallAdapterFactory<out OWNER_TYPE : Any, OWNER : Any, TO
       registration.register(
         Utils.createUniqueIdentifier(
           call.request()
-        ), RequestType(tokenType, ownerType))
+        ), RequestType(credentialType, ownerType))
       return adapter.adapt(call)
     }
   }

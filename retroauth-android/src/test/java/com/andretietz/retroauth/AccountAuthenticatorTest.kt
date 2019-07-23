@@ -36,7 +36,7 @@ class AccountAuthenticatorTest {
   @Test
   fun addAccount() {
     val response = mock(AccountAuthenticatorResponse::class.java)
-    val bundle = authenticator.addAccount(response, "accountType", "tokenType",
+    val bundle = authenticator.addAccount(response, "accountType", "credentialType",
       arrayOf(), mock(Bundle::class.java))
 
     assertNotNull(bundle)
@@ -47,14 +47,14 @@ class AccountAuthenticatorTest {
       response,
       requireNotNull(intent).getParcelableExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE))
     assertEquals("accountType", intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE))
-    assertEquals("tokenType", intent.getStringExtra(AccountAuthenticator.KEY_TOKEN_TYPE))
+    assertEquals("credentialType", intent.getStringExtra(AccountAuthenticator.KEY_CREDENTIAL_TYPE))
   }
 
   @Test
   fun getAuthToken() {
     val response = mock(AccountAuthenticatorResponse::class.java)
     val account = Account("accountName", "accountType")
-    val bundle = authenticator.getAuthToken(response, account, "tokenType", mock(Bundle::class.java))
+    val bundle = authenticator.getAuthToken(response, account, "credentialType", mock(Bundle::class.java))
 
     assertNotNull(bundle)
     val intent = requireNotNull(bundle).getParcelable<Intent>(AccountManager.KEY_INTENT)
@@ -64,7 +64,7 @@ class AccountAuthenticatorTest {
       response,
       requireNotNull(intent).getParcelableExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE))
     assertEquals("accountType", intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE))
-    assertEquals("tokenType", intent.getStringExtra(AccountAuthenticator.KEY_TOKEN_TYPE))
+    assertEquals("credentialType", intent.getStringExtra(AccountAuthenticator.KEY_CREDENTIAL_TYPE))
     assertEquals("accountName", intent.getStringExtra(AccountManager.KEY_ACCOUNT_NAME))
   }
 
@@ -78,14 +78,14 @@ class AccountAuthenticatorTest {
   @Test
   fun updateCredentials() {
     val bundle = authenticator
-      .updateCredentials(mock(AccountAuthenticatorResponse::class.java), mock(Account::class.java), "token-type",
+      .updateCredentials(mock(AccountAuthenticatorResponse::class.java), mock(Account::class.java), "credential-type",
         mock(Bundle::class.java))
     assertNull(bundle)
   }
 
   @Test
   fun getAuthTokenLabel() {
-    val label = authenticator.getAuthTokenLabel("token-type")
+    val label = authenticator.getAuthTokenLabel("credential-type")
     assertNull(label)
   }
 

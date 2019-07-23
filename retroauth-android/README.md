@@ -8,8 +8,8 @@
 ## What does it do?
 If you call a request method, annotated with the authenticated annotation, it'll do the following steps:
 * Step 1: Checks if there already is an account in the Android AccountManager. If not, it'll open a LoginActivity (you choose which). If there already is an account, go on with step 2, If there's more than one account open an Dialog to pick an account.
-* Step 2: Tries to get the authentication token from the (choosen) account for authorizing the request. If there is no valid token, your LoginActivity will open. After login go to Step 1.
-* Step 3: If no Login was required (token exists already), it sends the actual request.
+* Step 2: Tries to get the authentication credentials from the (choosen) account for authorizing the request. If there is no valid credential, your LoginActivity will open. After login go to Step 1.
+* Step 3: If no Login was required (credentials exists already), it sends the actual request.
 * Step 4: By implementing a Authenticator you can check the response (i.e. a 401 you will be able to refresh the token) and decide if you want to retry the request or not.
 
 ## How to use it?
@@ -78,15 +78,15 @@ class LoginActivity : AuthenticationActivity() {
     ...
     fun someLoginMethod() {
         val user: String
-        val token: String
+        val credential: String
         ...
-        // do login work here and make sure, that you provide at least a user and a token String
+        // do login work here and make sure, that you provide at least a user and a credential String
         ...
         Account account = createOrGetAccount(user)
-        storeToken(
+        storeCredentials(
                 account,
-                tokenType,  // AndroidTokenType
-                token,      // String as you get it from your Authenticator implementation
+                credentialType,  // AndroidCredentialType
+                credential,      // String as you get it from your Authenticator implementation
                 mapOf(
                         "some-key" to "some-value"
                 )
@@ -131,28 +131,28 @@ There are 3 Methods required to implement:
 This method provides us the ownerType that has been setup in the `@Authenticated` annotation.
 The value is optional! So if you don't need it, don't use it. A reason to use it could be, you need to use multiple ownerTypes on one endpoint.
 
-* The Token-Type
+* The Credential-Type
 ```kotlin
-    override fun getTokenType(annotationTokenType: Int): AndroidTokenType {
-        return AndroidTokenType(
+    override fun getCredentialType(annotationTokenType: Int): AndroidCredentialType {
+        return AndroidCredentialType(
             "your.company.id.TOKEN_TYPE",
             setOf(
                 "some optional",
                 "keys",
-                "which a token provides"
+                "which a credential provides"
             )
         )
     }
 
 ```
-Note that when getting an AndroidToken it only contains the data, which is loaded
+Note that when getting an `AndroidCredential` it only contains the data, which is loaded
 using this set of optional keys.
 
 * Authenticate the request
 ```kotlin
-    override fun authenticateRequest(request: Request, token: AndroidToken): Request {
+    override fun authenticateRequest(request: Request, credentials: AndroidCredentials): Request {
         return request.newBuilder()
-                .header("Authorization", "Bearer " + token.token)
+                .header("Authorization", "Bearer " + credentials.token)
                 .build()
     }
 ```

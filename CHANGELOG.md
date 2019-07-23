@@ -1,14 +1,14 @@
 ## 3.0.0 ()
+* Renaming Token -> Credentials
 * Added Test library to simplify testing your authenticated calls.
 * Converted the project to Kotlin
-* Refresh-Tokens need to be stored in the user data
-* When getting the token, it CAN automatically read user data items, which are defined in the TokenType
+* When getting the credentials, it CAN automatically read user data items, which are defined in the CredentialType
 * API changes
   * Solving problem with multiple authenticated requests. -> removed the blocking functionality (obsolete)
   * Renamed Provider to TokenProvider and added functionality
   * Better separation of OwnerManager and TokenManager
 * Fixed Demo app which is using Facebook with [scribe](https://github.com/scribejava/scribejava)
-* Added functionalities to refresh the token before the authenticated call is called.
+* Added functionalities to refresh the credentials before the authenticated call is called.
 * Renaming TokenProvider to Authenticator
 * Callback method when the account is removed from the Android AccountManager
 
@@ -93,7 +93,7 @@
 
 ## 1.0.3 (2015-08-29)
 
-* Storing multiple tokens in the AuthenticationActivity
+* Storing multiple credentials in the AuthenticationActivity
 * Adding some sequence diagrams for a better understanding
 * Bugfixes:
   * Creating an instance of the LockingStrategy required a protected class as argument. fixed this.
