@@ -6,7 +6,7 @@ dependencies {
     api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     api "com.squareup.retrofit2:retrofit:$retrofitVersion"
 
-    testImplementation 'junit:junit:4.12'
+    testImplementation "junit:junit:$junitVersion"
     testImplementation "io.reactivex.rxjava2:rxjava:2.1.12"
     testImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     testImplementation "com.squareup.okhttp3:mockwebserver:$okhttpVersion"
