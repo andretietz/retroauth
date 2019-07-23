@@ -93,5 +93,5 @@ interface OwnerManager<in OWNER_TYPE : Any, OWNER : Any, in TOKEN_TYPE : Any> {
    * @param owner the owner to remove.
    * @param callback Optional to get notified when the removal is complete.
    */
-  fun removeOwner(owner: OWNER, callback: Callback<Boolean>? = null): Future<Boolean>
+  fun removeOwner(ownerType: OWNER_TYPE, owner: OWNER, callback: Callback<Boolean>? = null): Future<Boolean>
 }

@@ -1,4 +1,5 @@
 ## 3.0.0 ()
+* Added Test library to simplify testing your authenticated calls.
 * Converted the project to Kotlin
 * Refresh-Tokens need to be stored in the user data
 * When getting the token, it CAN automatically read user data items, which are defined in the TokenType

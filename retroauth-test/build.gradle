@@ -1,0 +1,14 @@
+apply plugin: 'kotlin'
+apply plugin: 'java-library'
+
+dependencies {
+    api project(':retroauth')
+
+    testImplementation "junit:junit:4.12"
+    testImplementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+    testImplementation 'com.squareup.okhttp3:mockwebserver:3.9.1'
+//    testImplementation "com.squareup.moshi:moshi-kotlin:1.8.0"
+//    testImplementation "com.squareup.moshi:moshi:1.8.0"
+}
+
+apply from: rootProject.file('gradle/publish.gradle')

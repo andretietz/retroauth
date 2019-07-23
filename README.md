@@ -8,6 +8,7 @@ I split the project into two separate ones.
 
  * [retroauth](retroauth)
   This is the base implementation, to be used in plain java/kotlin projects.
+ * [retroauth-test](retroauth-test) To simplify testing your authenticated calls.
  * [retroauth-android](retroauth-android/)
   On top of the Kotlin implementation there's the Android implementation, which uses the
 Android AccountManager in order to store Owners (Accounts) and their Tokens.

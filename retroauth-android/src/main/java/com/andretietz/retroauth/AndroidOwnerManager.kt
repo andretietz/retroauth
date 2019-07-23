@@ -104,7 +104,7 @@ class AndroidOwnerManager constructor(
     }
   }
 
-  override fun removeOwner(owner: Account, callback: Callback<Boolean>?): Future<Boolean> {
+  override fun removeOwner(ownerType: String, owner: Account, callback: Callback<Boolean>?): Future<Boolean> {
     val accountFuture: Future<Boolean>
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
       val rac = if (callback != null) RemoveLollipopAccountCallback(callback) else null

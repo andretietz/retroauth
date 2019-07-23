@@ -84,7 +84,7 @@ class MainActivity : AppCompatActivity() {
 
     buttonLogout.setOnClickListener {
       ownerManager.getActiveOwner(provider.ownerType)?.let { account ->
-        ownerManager.removeOwner(account, object : Callback<Boolean> {
+        ownerManager.removeOwner(account.type, account, object : Callback<Boolean> {
           override fun onResult(result: Boolean?) {
             show("Logged out!")
           }
