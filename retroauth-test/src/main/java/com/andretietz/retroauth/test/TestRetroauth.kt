@@ -23,7 +23,7 @@ object TestRetroauth {
     }
   ): Retroauth.Builder<String, String, String, String> = Retroauth.Builder(
     TestAuthenticator(ownerType, credentials, authenticate),
-    TestOwnerManager(
+    TestOwnerStorage(
       owners = HashMap<String, MutableList<String>>().also {
         it[ownerType] = mutableListOf(owner)
       },

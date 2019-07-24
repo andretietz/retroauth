@@ -4,7 +4,7 @@ import com.andretietz.retroauth.Callback
 import com.andretietz.retroauth.CredentialStorage
 import java.util.concurrent.Future
 
-class TestCredentialStorage(
+class TestCredentialStorage @JvmOverloads constructor(
   private val credentials: MutableMap<String, MutableMap<String, String>> = HashMap()
 ) : CredentialStorage<String, String, String> {
 

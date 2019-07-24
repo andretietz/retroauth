@@ -4,7 +4,7 @@ import com.andretietz.retroauth.Callback
 import com.andretietz.retroauth.OwnerStorage
 import java.util.concurrent.Future
 
-class TestOwnerManager(
+class TestOwnerStorage @JvmOverloads constructor(
   private val owners: Map<String, MutableList<String>> = HashMap(),
   private var currentlyActive: String? = null
 ) : OwnerStorage<String, String, String> {

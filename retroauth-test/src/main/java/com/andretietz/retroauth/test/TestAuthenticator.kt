@@ -6,7 +6,7 @@ import okhttp3.Request
 /**
  * This is an Authenticator to test authentication with.
  */
-class TestAuthenticator constructor(
+class TestAuthenticator @JvmOverloads constructor(
   private val testOwnerType: String,
   private val credentials: String,
   private val authenticate: (request: Request, credential: String) -> Request = { request, _ -> request }
