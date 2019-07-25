@@ -22,7 +22,7 @@ object TestRetroauth {
       request.newBuilder().addHeader(TEST_AUTH_HEADER_NAME, credentials).build()
     }
   ): Retroauth.Builder<String, String, String, String> = Retroauth.Builder(
-    TestAuthenticator(ownerType, credentials, authenticate),
+    TestAuthenticator(ownerType, credentialType, authenticate),
     TestOwnerStorage(
       owners = HashMap<String, MutableList<String>>().also {
         it[ownerType] = mutableListOf(owner)
@@ -32,7 +32,7 @@ object TestRetroauth {
     TestCredentialStorage(
       credentials = HashMap<String, MutableMap<String, String>>().also {
         it[owner] = mutableMapOf(
-          credentials to credentialType
+          credentialType to credentials
         )
       }
     )
