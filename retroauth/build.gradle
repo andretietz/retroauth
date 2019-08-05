@@ -11,6 +11,7 @@ dependencies {
     testImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     testImplementation "com.squareup.okhttp3:mockwebserver:$okhttpVersion"
     testImplementation "com.squareup.retrofit2:converter-moshi:$retrofitVersion"
+    testImplementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
     testImplementation "com.squareup.retrofit2:adapter-rxjava2:$retrofitVersion"
     testImplementation "com.nhaarman:mockito-kotlin:1.5.0"
 }
