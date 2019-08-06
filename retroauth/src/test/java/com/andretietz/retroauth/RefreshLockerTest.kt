@@ -1,5 +1,15 @@
 package com.andretietz.retroauth
 
+/**
+ * required
+testImplementation "org.jetbrains.kotlin:kotlin-stdlib:1.3.40"
+testImplementation "junit:junit:4.12"
+testImplementation "io.reactivex.rxjava2:rxjava:2.1.12"
+testImplementation "com.nhaarman:mockito-kotlin:1.5.0"
+ */
+
+import com.nhaarman.mockito_kotlin.doAnswer
+import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.times
 import com.nhaarman.mockito_kotlin.verify
 import io.reactivex.Single
@@ -18,17 +28,19 @@ class RefreshLockerTest {
      * This runnable is simulating a token refresh & get token.
      * While this, something goes wrong and the refresh throws an exception.
      */
-    val runnable = Runnable {
-      // refresh...
-      Thread.sleep(200) // make sure it takes longer than 200 request to also try
-      // something goes wrong
-      throw IllegalStateException()
+    val runnable = mock<Runnable> {
+      on { run() } doAnswer {
+        // refresh...
+        Thread.sleep(200) // make sure it takes longer than 200 request to also try
+        // something goes wrong
+        throw IllegalStateException()
+      }
     }
 
     // parallel outgoing requests
     val requestCount = 200
     // token types
-    val tokenTypes = 1
+    val tokenTypes = 1 // TODO: when increasing this number, test fails.
     // list of observers to test
     val list = mutableListOf<TestObserver<String>>()
     // this is a fake request interceptor
@@ -38,6 +50,8 @@ class RefreshLockerTest {
       list.add(
         Single.create<String> { emitter ->
           emitter.onSuccess(interceptor
+            // when a string is dynamically created it's instance isn't the same
+            // this is why I use a mapping here 'getLockingObject'
             .doRequest(getLockingObject("lock-${i % tokenTypes}"))
           )
         }
@@ -85,7 +99,8 @@ internal class FakeInterceptor(private val refreshEmulator: Runnable) {
       try {
         refreshEmulator.run()
       } catch (error: Exception) {
-        storeAndThrowError(lock, error)
+        getLock(lock).errorContainer.set(error)
+        throw error
       }
     } finally {
       unlock(lock)
@@ -98,24 +113,6 @@ internal class FakeInterceptor(private val refreshEmulator: Runnable) {
     return lock
   }
 
-  private fun storeAndThrowError(type: String, exception: Exception) {
-    val unwrappedException = unwrapThrowable(exception)
-    if (getLock(type).errorContainer.get() == null) {
-      getLock(type).errorContainer.set(unwrappedException)
-    }
-    throw unwrappedException
-  }
-
-  private fun unwrapThrowable(throwable: Throwable): Throwable {
-    if (
-      throwable is AuthenticationCanceledException ||
-      throwable is AuthenticationRequiredException
-    ) return throwable
-    throwable.cause?.let {
-      return unwrapThrowable(it)
-    }
-    return throwable
-  }
 
   private fun getLock(type: String): AccountTokenLock {
     synchronized(type) {
