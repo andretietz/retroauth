@@ -114,7 +114,7 @@ internal class FakeInterceptor(private val refreshEmulator: Runnable) {
   }
 
 
-  private fun getLock(type: String): AccountTokenLock {
+  private fun getLock(type: Any): AccountTokenLock {
     synchronized(type) {
       val lock: AccountTokenLock = TOKEN_TYPE_LOCKERS[type] ?: AccountTokenLock()
       TOKEN_TYPE_LOCKERS[type] = lock
@@ -123,7 +123,7 @@ internal class FakeInterceptor(private val refreshEmulator: Runnable) {
   }
 
   @Throws(Exception::class)
-  private fun lock(type: String) {
+  private fun lock(type: Any) {
     val lock = getLock(type)
     if (!lock.lock.tryLock()) {
       println("Thread ${Thread.currentThread().id} is waiting.")
@@ -140,7 +140,7 @@ internal class FakeInterceptor(private val refreshEmulator: Runnable) {
     }
   }
 
-  private fun unlock(type: String) {
+  private fun unlock(type: Any) {
     val lock = getLock(type)
     println("unlocking Thread ${Thread.currentThread().id} waiting threads left: ${lock.waitCounter.get()}")
     if (lock.waitCounter.getAndDecrement() <= 0) {
