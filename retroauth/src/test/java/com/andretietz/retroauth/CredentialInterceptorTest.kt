@@ -134,15 +134,9 @@ class CredentialInterceptorTest {
       .test()
 
 
-    testObserver.awaitTerminalEvent()
     testObserver.assertResult(Data("testdata"))
-
     verify(authenticator, times(1)).authenticateRequest(any(), anyString())
-
-//    assert(server.takeRequest().headers.toMultimap().containsKey("auth-header"))
     assert(server.takeRequest().headers["auth-header"] == "auth-token")
-
-
   }
 }
 
