@@ -41,27 +41,24 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTI
 
   companion object {
     private val TOKEN_TYPE_LOCKERS = HashMap<Any, AccountTokenLock>()
+    private val refreshLock = Any()
   }
 
   override fun intercept(chain: Interceptor.Chain): Response? {
-    var response: Response? = null
+    var response: Response?
     var request = chain.request()
     // get the credential type required by this request
     val authRequestType = methodCache.getCredentialType(Utils.createUniqueIdentifier(request))
       ?: return chain.proceed(request)
 
-    // if the request does require authentication
-    var pending = false
     var refreshRequested = false
     var credential: CREDENTIAL
     var owner: OWNER?
     var tryCount = 0
-    try {
-      do {
+    do {
+      try {
+        lock(refreshLock)
         try {
-          // Lock foreach type
-          pending = lock(authRequestType)
-
           owner = ownerManager.getActiveOwner(authRequestType.ownerType)
             ?: ownerManager.openOwnerPicker(authRequestType.ownerType).get()
           if (owner != null) {
@@ -90,42 +87,22 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTI
             ownerManager.createOwner(authRequestType.ownerType, authRequestType.credentialType)
             throw AuthenticationRequiredException()
           }
-        } finally {
-          // release type lock
-          unlock(authRequestType, pending)
+        } catch (error: Exception) {
+          getLock(refreshLock).errorContainer.set(error)
+          throw error
         }
-        // execute the request
-        response = chain.proceed(request)
-        refreshRequested = authenticator.refreshRequired(++tryCount, response)
-        // https://github.com/square/okhttp/blob/master/CHANGELOG.md#version-3141
-        if (refreshRequested) response.close()
-      } while (refreshRequested)
-    } catch (error: Exception) {
-      storeAndThrowError(authRequestType, error)
-    }
+      } finally {
+        unlock(refreshLock)
+      }
+      // execute the request
+      response = chain.proceed(request)
+      refreshRequested = authenticator.refreshRequired(++tryCount, response)
+      if (refreshRequested) response.close()
+    } while (refreshRequested)
     return response
   }
 
-  private fun storeAndThrowError(type: RequestType<OWNER_TYPE, CREDENTIAL_TYPE>, exception: Exception) {
-    val unwrappedException = unwrapThrowable(exception)
-    if (getLock(type).errorContainer.get() == null) {
-      getLock(type).errorContainer.set(unwrappedException)
-    }
-    throw unwrappedException
-  }
-
-  private fun unwrapThrowable(throwable: Throwable): Throwable {
-    if (
-      throwable is AuthenticationCanceledException ||
-      throwable is AuthenticationRequiredException
-    ) return throwable
-    throwable.cause?.let {
-      return unwrapThrowable(it)
-    }
-    return throwable
-  }
-
-  private fun getLock(type: RequestType<OWNER_TYPE, CREDENTIAL_TYPE>): AccountTokenLock {
+  private fun getLock(type: Any): AccountTokenLock {
     synchronized(type) {
       val lock: AccountTokenLock = TOKEN_TYPE_LOCKERS[type] ?: AccountTokenLock()
       TOKEN_TYPE_LOCKERS[type] = lock
@@ -134,26 +111,56 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTI
   }
 
   @Throws(Exception::class)
-  private fun lock(type: RequestType<OWNER_TYPE, CREDENTIAL_TYPE>): Boolean {
+  private fun lock(type: Any) {
     val lock = getLock(type)
     if (!lock.lock.tryLock()) {
+      lock.waitCounter.incrementAndGet()
       lock.lock.lock()
       val exception = lock.errorContainer.get()
       if (exception != null) {
+        println(exception.toString())
         throw exception
       }
-      return true
     }
-    return false
   }
 
-  private fun unlock(type: RequestType<OWNER_TYPE, CREDENTIAL_TYPE>, wasWaiting: Boolean) {
+  private fun unlock(type: Any) {
     val lock = getLock(type)
-    if (wasWaiting && lock.waitCounter.decrementAndGet() <= 0) {
+    if (lock.waitCounter.getAndDecrement() <= 0) {
       lock.errorContainer.set(null)
     }
     lock.lock.unlock()
   }
+
+//  private fun getLock(type: RequestType<OWNER_TYPE, CREDENTIAL_TYPE>): AccountTokenLock {
+//    synchronized(type) {
+//      val lock: AccountTokenLock = TOKEN_TYPE_LOCKERS[type] ?: AccountTokenLock()
+//      TOKEN_TYPE_LOCKERS[type] = lock
+//      return lock
+//    }
+//  }
+//
+//  @Throws(Exception::class)
+//  private fun lock(type: RequestType<OWNER_TYPE, CREDENTIAL_TYPE>): Boolean {
+//    val lock = getLock(type)
+//    if (!lock.lock.tryLock()) {
+//      lock.lock.lock()
+//      val exception = lock.errorContainer.get()
+//      if (exception != null) {
+//        throw exception
+//      }
+//      return true
+//    }
+//    return false
+//  }
+//
+//  private fun unlock(type: RequestType<OWNER_TYPE, CREDENTIAL_TYPE>, wasWaiting: Boolean) {
+//    val lock = getLock(type)
+//    if (wasWaiting && lock.waitCounter.decrementAndGet() <= 0) {
+//      lock.errorContainer.set(null)
+//    }
+//    lock.lock.unlock()
+//  }
 
   internal data class AccountTokenLock(
     val lock: Lock = ReentrantLock(true),

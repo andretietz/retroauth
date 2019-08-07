@@ -40,7 +40,7 @@ class RefreshLockerTest {
     // parallel outgoing requests
     val requestCount = 200
     // token types
-    val tokenTypes = 1 // TODO: when increasing this number, test fails.
+    val tokenTypes = 5 // TODO: when increasing this number, test fails.
     // list of observers to test
     val list = mutableListOf<TestObserver<String>>()
     // this is a fake request interceptor
@@ -69,7 +69,7 @@ class RefreshLockerTest {
     }
 
     // each token type should be only refreshing the token once.
-    verify(runnable, times(tokenTypes)).run()
+    verify(runnable, times(1)).run()
   }
 
   private val lockingObjects = HashMap<String, String>()
@@ -91,9 +91,10 @@ internal class FakeInterceptor(private val refreshEmulator: Runnable) {
 
   companion object {
     private val TOKEN_TYPE_LOCKERS = HashMap<Any, AccountTokenLock>()
+    private val lock = Any()
   }
 
-  fun doRequest(lock: String): String {
+  fun doRequest(a: String): String {
     try {
       lock(lock)
       try {
@@ -110,7 +111,7 @@ internal class FakeInterceptor(private val refreshEmulator: Runnable) {
 
     // it actually doesn't need to return anything in the test. this is just to have the api
     // as close to the RL one as possible
-    return lock
+    return ""
   }
 
 
@@ -126,23 +127,18 @@ internal class FakeInterceptor(private val refreshEmulator: Runnable) {
   private fun lock(type: Any) {
     val lock = getLock(type)
     if (!lock.lock.tryLock()) {
-      println("Thread ${Thread.currentThread().id} is waiting.")
       lock.waitCounter.incrementAndGet()
       lock.lock.lock()
-      println("Thread ${Thread.currentThread().id} is locked.")
       val exception = lock.errorContainer.get()
       if (exception != null) {
         println(exception.toString())
         throw exception
       }
-    } else {
-      println("Thread ${Thread.currentThread().id} is locked.")
     }
   }
 
   private fun unlock(type: Any) {
     val lock = getLock(type)
-    println("unlocking Thread ${Thread.currentThread().id} waiting threads left: ${lock.waitCounter.get()}")
     if (lock.waitCounter.getAndDecrement() <= 0) {
       lock.errorContainer.set(null)
     }
