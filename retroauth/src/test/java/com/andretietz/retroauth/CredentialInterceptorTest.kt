@@ -9,14 +9,19 @@ import com.nhaarman.mockito_kotlin.never
 import com.nhaarman.mockito_kotlin.times
 import com.nhaarman.mockito_kotlin.verify
 import io.reactivex.Single
+import io.reactivex.observers.TestObserver
 import io.reactivex.schedulers.Schedulers
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.Response
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
 import org.junit.Before
+import org.junit.FixMethodOrder
 import org.junit.Test
+import org.junit.runners.MethodSorters
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
@@ -25,6 +30,7 @@ import retrofit2.http.GET
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class CredentialInterceptorTest {
 
   private val server = MockWebServer()
@@ -75,6 +81,59 @@ class CredentialInterceptorTest {
     testObserver.assertResult(Data("testdata"))
 
     verify(authenticator, never()).authenticateRequest(any(), anyString())
+  }
+
+  @Test
+  fun `authenticated call, no owner existing`() {
+    val methodCache = mock<MethodCache<String, String>> {
+      // when this returns null, the call is not recognized as authenticated call.
+      on { getCredentialType(any()) } doReturn RequestType("credentialType", "ownerType")
+    }
+
+    // setup ownerstore, without any owner existing
+    val ownerStorage = mock<OwnerStorage<String, String, String>> {
+      on { getActiveOwner(anyString()) } doReturn null as String?
+      on {
+        openOwnerPicker(anyString(), anyOrNull())
+      } doReturn object : Future<String?> {
+        override fun isDone() = false
+        override fun get() = null
+        override fun get(p0: Long, p1: TimeUnit) = get()
+        override fun cancel(p0: Boolean) = false
+        override fun isCancelled() = false
+      }
+    }
+
+    val credentialStorage = mock<CredentialStorage<String, String, String>>()
+    val authenticator = mock<Authenticator<String, String, String, String>>()
+
+    val interceptor = CredentialInterceptor(
+      authenticator,
+      ownerStorage,
+      credentialStorage,
+      methodCache
+    )
+
+
+    val api = Retrofit.Builder()
+      .baseUrl(server.url("/"))
+      .addConverterFactory(GsonConverterFactory.create())
+      .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+      .client(
+        OkHttpClient.Builder()
+          .addInterceptor(interceptor)
+          .build()
+      )
+      .build().create(SomeApi::class.java)
+
+
+    val testObserver = api.someCall()
+      .subscribeOn(Schedulers.io())
+      .test()
+
+    testObserver.awaitTerminalEvent()
+    verify(ownerStorage, times(1)).createOwner(anyString(), anyString(), anyOrNull())
+    testObserver.assertError { error -> error is AuthenticationRequiredException }
   }
 
   @Test
@@ -133,10 +192,308 @@ class CredentialInterceptorTest {
       .subscribeOn(Schedulers.io())
       .test()
 
-
+    testObserver.awaitTerminalEvent()
     testObserver.assertResult(Data("testdata"))
     verify(authenticator, times(1)).authenticateRequest(any(), anyString())
     assert(server.takeRequest().headers["auth-header"] == "auth-token")
+  }
+
+  @Test
+  fun `Invalid token, refreshes token`() {
+    server.enqueue(MockResponse().setBody("{\"data\": \"testdata\"}"))
+
+    val methodCache = mock<MethodCache<String, String>> {
+      // when this returns null, the call is not recognized as authenticated call.
+      on { getCredentialType(any()) } doReturn RequestType("credentialType", "ownerType")
+    }
+    val ownerStorage = mock<OwnerStorage<String, String, String>> {
+      on { getActiveOwner(anyString()) } doReturn "owner"
+    }
+    val credentialStorage = mock<CredentialStorage<String, String, String>> {
+      on {
+        getCredentials(any(), any(), anyOrNull())
+      } doReturn object : Future<String> {
+        override fun isDone() = false
+        override fun get() = "credential"
+        override fun get(p0: Long, p1: TimeUnit) = get()
+        override fun cancel(p0: Boolean) = false
+        override fun isCancelled() = false
+      }
+    }
+    val authenticator = mock<Authenticator<String, String, String, String>> {
+      on { isCredentialValid(anyString()) } doReturn false // token is invalid
+      on { authenticateRequest(any(), anyString()) } doAnswer { invocationOnMock ->
+        (invocationOnMock.arguments[0] as Request)
+          .newBuilder()
+          .addHeader("auth-header", "auth-token")
+          .build()
+      }
+      on {
+        refreshCredentials(anyString(), anyString(), anyString())
+      } doReturn "credential"
+    }
+
+    val interceptor = CredentialInterceptor(
+      authenticator,
+      ownerStorage,
+      credentialStorage,
+      methodCache
+    )
+
+
+    val api = Retrofit.Builder()
+      .baseUrl(server.url("/"))
+      .addConverterFactory(GsonConverterFactory.create())
+      .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+      .client(
+        OkHttpClient.Builder()
+          .addInterceptor(interceptor)
+          .build()
+      )
+      .build().create(SomeApi::class.java)
+
+
+    val testObserver = api.someCall()
+      .subscribeOn(Schedulers.io())
+      .test()
+
+    testObserver.awaitTerminalEvent()
+    testObserver.assertResult(Data("testdata"))
+    // old credentials removed
+    verify(credentialStorage, times(1)).removeCredentials(anyString(), anyString(), anyString())
+    // refresh credentials successfully
+    verify(authenticator, times(1)).refreshCredentials(anyString(), anyString(), anyString())
+    // store new token
+    verify(credentialStorage, times(1)).storeCredentials(anyString(), anyString(), anyString())
+    // authenticate request
+    verify(authenticator, times(1)).authenticateRequest(any(), anyString())
+    assert(server.takeRequest().headers["auth-header"] == "auth-token")
+  }
+
+  @Test
+  fun `Refresh required after failing call`() {
+    server.enqueue(MockResponse().setResponseCode(401))
+    server.enqueue(MockResponse().setBody("{\"data\": \"testdata\"}"))
+
+    val methodCache = mock<MethodCache<String, String>> {
+      // when this returns null, the call is not recognized as authenticated call.
+      on { getCredentialType(any()) } doReturn RequestType("credentialType", "ownerType")
+    }
+    val ownerStorage = mock<OwnerStorage<String, String, String>> {
+      on { getActiveOwner(anyString()) } doReturn "owner"
+    }
+    val credentialStorage = mock<CredentialStorage<String, String, String>> {
+      on {
+        getCredentials(any(), any(), anyOrNull())
+      } doReturn object : Future<String> {
+        override fun isDone() = false
+        override fun get() = "credential"
+        override fun get(p0: Long, p1: TimeUnit) = get()
+        override fun cancel(p0: Boolean) = false
+        override fun isCancelled() = false
+      }
+    }
+    val authenticator = mock<Authenticator<String, String, String, String>> {
+      on { isCredentialValid(anyString()) } doReturn true
+      on { authenticateRequest(any(), anyString()) } doAnswer { invocationOnMock ->
+        (invocationOnMock.arguments[0] as Request)
+          .newBuilder()
+          .addHeader("auth-header", "auth-token")
+          .build()
+      }
+      on {
+        refreshCredentials(anyString(), anyString(), anyString())
+      } doReturn "credential"
+      on {
+        refreshRequired(anyInt(), any())
+      } doAnswer { invocationOnMock ->
+        (invocationOnMock.arguments[1] as Response).code() != 200
+      }
+    }
+
+    val interceptor = CredentialInterceptor(
+      authenticator,
+      ownerStorage,
+      credentialStorage,
+      methodCache
+    )
+
+    val api = Retrofit.Builder()
+      .baseUrl(server.url("/"))
+      .addConverterFactory(GsonConverterFactory.create())
+      .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+      .client(
+        OkHttpClient.Builder()
+          .addInterceptor(interceptor)
+          .build()
+      )
+      .build().create(SomeApi::class.java)
+
+    val testObserver = api.someCall()
+      .subscribeOn(Schedulers.io())
+      .test()
+
+    testObserver.awaitTerminalEvent()
+    testObserver.assertResult(Data("testdata"))
+    verify(authenticator, times(2)).authenticateRequest(any(), anyString())
+    assert(server.takeRequest().headers["auth-header"] == "auth-token")
+  }
+
+
+  @Test
+  fun `Invalid token, refreshes token, 200 calls`() {
+    val range = IntRange(0, 199)
+    val methodCache = mock<MethodCache<String, String>> {
+      // when this returns null, the call is not recognized as authenticated call.
+      on { getCredentialType(any()) } doReturn RequestType("credentialType", "ownerType")
+    }
+    val ownerStorage = mock<OwnerStorage<String, String, String>> {
+      on { getActiveOwner(anyString()) } doReturn "owner"
+    }
+    var credential = "old-credential"
+    val credentialStorage = mock<CredentialStorage<String, String, String>> {
+      on {
+        getCredentials(any(), any(), anyOrNull())
+      } doReturn object : Future<String> {
+        override fun isDone() = false
+        override fun get() = credential
+        override fun get(p0: Long, p1: TimeUnit) = get()
+        override fun cancel(p0: Boolean) = false
+        override fun isCancelled() = false
+      }
+    }
+    val authenticator = mock<Authenticator<String, String, String, String>> {
+      on { isCredentialValid(anyString()) } doAnswer { invocationOnMock ->
+        (invocationOnMock.arguments[0] as String) == "credential"
+      }
+      on { authenticateRequest(any(), anyString()) } doAnswer { invocationOnMock ->
+        (invocationOnMock.arguments[0] as Request)
+          .newBuilder()
+          .addHeader("auth-header", "auth-token")
+          .build()
+      }
+      on {
+        refreshCredentials(anyString(), anyString(), anyString())
+      } doAnswer {
+        Thread.sleep(200)
+        credential = "credential"
+        credential
+      }
+    }
+
+    val interceptor = CredentialInterceptor(
+      authenticator,
+      ownerStorage,
+      credentialStorage,
+      methodCache
+    )
+
+    val api = Retrofit.Builder()
+      .baseUrl(server.url("/"))
+      .addConverterFactory(GsonConverterFactory.create())
+      .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+      .client(
+        OkHttpClient.Builder()
+          .addInterceptor(interceptor)
+          .build()
+      )
+      .build().create(SomeApi::class.java)
+
+    val calls = mutableListOf<TestObserver<Data>>()
+    for (i in range) {
+      server.enqueue(MockResponse().setBody("{\"data\": \"testdata\"}"))
+      calls.add(api.someCall()
+        .subscribeOn(Schedulers.io()) // makes sure a new thread is created foreach call
+        .test())
+    }
+
+    for (i in range) {
+      calls[i].awaitTerminalEvent()
+      calls[i].assertResult(Data("testdata"))
+      assert(server.takeRequest().headers["auth-header"] == "auth-token")
+    }
+
+    // old credentials removed, ONCE
+    verify(credentialStorage, times(1)).removeCredentials(anyString(), anyString(), anyString())
+    // refresh credentials successfully, ONCE
+    verify(authenticator, times(1)).refreshCredentials(anyString(), anyString(), anyString())
+    // store new token, ONCE
+    verify(credentialStorage, times(1)).storeCredentials(anyString(), anyString(), anyString())
+    // authenticate request -> 200 times (or how much range includes)
+    verify(authenticator, times(range.count())).authenticateRequest(any(), anyString())
+  }
+
+  @Test
+  fun `Invalid token, refreshes token an error occurs, 200 calls`() {
+    val range = IntRange(0, 199)
+    val methodCache = mock<MethodCache<String, String>> {
+      // when this returns null, the call is not recognized as authenticated call.
+      on { getCredentialType(any()) } doReturn RequestType("credentialType", "ownerType")
+    }
+    val ownerStorage = mock<OwnerStorage<String, String, String>> {
+      on { getActiveOwner(anyString()) } doReturn "owner"
+    }
+    val credentialStorage = mock<CredentialStorage<String, String, String>> {
+      on {
+        getCredentials(any(), any(), anyOrNull())
+      } doReturn object : Future<String> {
+        override fun isDone() = false
+        override fun get() = "old-credential"
+        override fun get(p0: Long, p1: TimeUnit) = get()
+        override fun cancel(p0: Boolean) = false
+        override fun isCancelled() = false
+      }
+    }
+    val authenticator = mock<Authenticator<String, String, String, String>> {
+      on { isCredentialValid(anyString()) } doReturn false
+      on {
+        refreshCredentials(anyString(), anyString(), anyString())
+      } doAnswer {
+        Thread.sleep(2000)
+        throw IllegalStateException("whatever error is thrown")
+      }
+    }
+
+    val interceptor = CredentialInterceptor(
+      authenticator,
+      ownerStorage,
+      credentialStorage,
+      methodCache
+    )
+
+    val api = Retrofit.Builder()
+      .baseUrl(server.url("/"))
+      .addConverterFactory(GsonConverterFactory.create())
+      .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+      .client(
+        OkHttpClient.Builder()
+          .addInterceptor(interceptor)
+          .build()
+      )
+      .build().create(SomeApi::class.java)
+
+    val calls = mutableListOf<TestObserver<Data>>()
+    for (i in range) {
+      server.enqueue(MockResponse().setBody("{\"data\": \"testdata\"}"))
+      calls.add(api.someCall()
+        .subscribeOn(Schedulers.io()) // makes sure a new thread is created foreach call
+        .test())
+    }
+
+    for (i in range) {
+      calls[i].awaitTerminalEvent()
+      calls[i].assertError { error -> error is IllegalStateException && error.message == "whatever error is thrown" }
+    }
+
+    // old credentials removed, ONCE
+    verify(credentialStorage, times(1)).removeCredentials(anyString(), anyString(), anyString())
+    verify(ownerStorage, times(1)).getActiveOwner(anyString())
+    // refresh credentials successfully, ONCE
+    verify(authenticator, times(1)).refreshCredentials(anyString(), anyString(), anyString())
+    // store new token, ONCE
+    verify(credentialStorage, never()).storeCredentials(anyString(), anyString(), anyString())
+    // authenticate request -> never
+    verify(authenticator, never()).authenticateRequest(any(), anyString())
   }
 }
 

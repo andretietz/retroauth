@@ -8,7 +8,7 @@ import org.mockito.junit.MockitoJUnitRunner
 import java.util.HashMap
 
 @RunWith(MockitoJUnitRunner::class)
-class TestUtils {
+class UtilsTest {
 
   @Test
   fun createUniqueIdentifier() {
