@@ -44,6 +44,7 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTI
     private val refreshLock = Any()
   }
 
+  @Suppress("Detekt.RethrowCaughtException")
   override fun intercept(chain: Interceptor.Chain): Response? {
     var response: Response?
     var request = chain.request()
@@ -130,7 +131,6 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTI
     }
     lock.lock.unlock()
   }
-
 
   internal data class AccountTokenLock(
     val lock: Lock = ReentrantLock(true),

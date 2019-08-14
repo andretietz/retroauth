@@ -10,7 +10,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.6.4'
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.13.0'
-        classpath "com.vanniktech:gradle-code-quality-tools-plugin:0.15.0"
+        classpath "com.vanniktech:gradle-code-quality-tools-plugin:0.18.0"
     }
 }
 
@@ -32,7 +32,6 @@ codeQualityTools {
     ktlint.toolVersion = '0.28.0'
     lint.lintConfig rootProject.file("quality/lint.xml")
     checkstyle.configFile rootProject.file("quality/checkstyle.xml").path
-
-    findbugs.enabled false
+    kotlin.allWarningsAsErrors false
     pmd.enabled false
 }

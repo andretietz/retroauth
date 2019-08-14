@@ -26,6 +26,7 @@ import retrofit2.http.GET
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 
+@Suppress("Detekt.LargeClass")
 class CredentialInterceptorTest {
   @get:Rule
   internal val serverRule = MockServerRule()
@@ -46,7 +47,6 @@ class CredentialInterceptorTest {
       credentialStorage,
       methodCache
     )
-
 
     val api = Retrofit.Builder()
       .baseUrl(serverRule.server.url("/"))
@@ -99,7 +99,6 @@ class CredentialInterceptorTest {
       methodCache
     )
 
-
     val api = Retrofit.Builder()
       .baseUrl(serverRule.server.url("/"))
       .addConverterFactory(GsonConverterFactory.create())
@@ -110,7 +109,6 @@ class CredentialInterceptorTest {
           .build()
       )
       .build().create(SomeApi::class.java)
-
 
     val testObserver = api.someCall()
       .subscribeOn(Schedulers.io())
@@ -160,7 +158,6 @@ class CredentialInterceptorTest {
       methodCache
     )
 
-
     val api = Retrofit.Builder()
       .baseUrl(serverRule.server.url("/"))
       .addConverterFactory(GsonConverterFactory.create())
@@ -171,7 +168,6 @@ class CredentialInterceptorTest {
           .build()
       )
       .build().create(SomeApi::class.java)
-
 
     val testObserver = api.someCall()
       .subscribeOn(Schedulers.io())
@@ -225,7 +221,6 @@ class CredentialInterceptorTest {
       methodCache
     )
 
-
     val api = Retrofit.Builder()
       .baseUrl(serverRule.server.url("/"))
       .addConverterFactory(GsonConverterFactory.create())
@@ -236,7 +231,6 @@ class CredentialInterceptorTest {
           .build()
       )
       .build().create(SomeApi::class.java)
-
 
     val testObserver = api.someCall()
       .subscribeOn(Schedulers.io())
@@ -348,7 +342,7 @@ class CredentialInterceptorTest {
     }
     val authenticator = mock<Authenticator<String, String, String, String>> {
       on { isCredentialValid(anyString()) } doAnswer { invocationOnMock ->
-        (invocationOnMock.arguments[0] as String) == "credential"
+        invocationOnMock.arguments[0] as String == "credential"
       }
       on { authenticateRequest(any(), anyString()) } doAnswer { invocationOnMock ->
         (invocationOnMock.arguments[0] as Request)
