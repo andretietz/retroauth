@@ -102,12 +102,10 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTI
     return response
   }
 
-  private fun getLock(type: Any): AccountTokenLock {
-    synchronized(type) {
+  @Synchronized private fun getLock(type: Any): AccountTokenLock {
       val lock: AccountTokenLock = TOKEN_TYPE_LOCKERS[type] ?: AccountTokenLock()
       TOKEN_TYPE_LOCKERS[type] = lock
       return lock
-    }
   }
 
   @Throws(Exception::class)
@@ -118,9 +116,10 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTI
       lock.lock.lock()
       val exception = lock.errorContainer.get()
       if (exception != null) {
-        println(exception.toString())
         throw exception
       }
+    } else {
+      lock.waitCounter.incrementAndGet()
     }
   }
 
@@ -132,35 +131,6 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTI
     lock.lock.unlock()
   }
 
-//  private fun getLock(type: RequestType<OWNER_TYPE, CREDENTIAL_TYPE>): AccountTokenLock {
-//    synchronized(type) {
-//      val lock: AccountTokenLock = TOKEN_TYPE_LOCKERS[type] ?: AccountTokenLock()
-//      TOKEN_TYPE_LOCKERS[type] = lock
-//      return lock
-//    }
-//  }
-//
-//  @Throws(Exception::class)
-//  private fun lock(type: RequestType<OWNER_TYPE, CREDENTIAL_TYPE>): Boolean {
-//    val lock = getLock(type)
-//    if (!lock.lock.tryLock()) {
-//      lock.lock.lock()
-//      val exception = lock.errorContainer.get()
-//      if (exception != null) {
-//        throw exception
-//      }
-//      return true
-//    }
-//    return false
-//  }
-//
-//  private fun unlock(type: RequestType<OWNER_TYPE, CREDENTIAL_TYPE>, wasWaiting: Boolean) {
-//    val lock = getLock(type)
-//    if (wasWaiting && lock.waitCounter.decrementAndGet() <= 0) {
-//      lock.errorContainer.set(null)
-//    }
-//    lock.lock.unlock()
-//  }
 
   internal data class AccountTokenLock(
     val lock: Lock = ReentrantLock(true),
