@@ -8,7 +8,7 @@ import org.junit.runners.model.Statement
 class MockServerRule : TestRule {
   val server = MockWebServer()
   override fun apply(base: Statement, description: Description) = object : Statement() {
-    @Synchronized override fun evaluate() {
+    override fun evaluate() {
       server.start()
       base.evaluate()
       server.shutdown()
