@@ -1,6 +1,5 @@
 ## 3.0.0 ()
 * Renaming Token -> Credentials
-* Added Test library to simplify testing your authenticated calls.
 * Converted the project to Kotlin
 * When getting the credentials, it CAN automatically read user data items, which are defined in the CredentialType
 * API changes
