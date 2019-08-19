@@ -1,5 +1,4 @@
 include ':retroauth'
-include ':retroauth-test'
 include ':retroauth-android'
 include ':demoandroid'
 
