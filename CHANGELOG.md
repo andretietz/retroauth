@@ -3,9 +3,9 @@
 * Converted the project to Kotlin
 * When getting the credentials, it CAN automatically read user data items, which are defined in the CredentialType
 * API changes
-  * Solving problem with multiple authenticated requests. -> removed the blocking functionality (obsolete)
-  * Renamed Provider to TokenProvider and added functionality
-  * Better separation of OwnerManager and TokenManager
+  * Solving problem with multiple authenticated requests.
+  * Renamed Provider to CredentialProvider and added functionality
+  * Better separation of OwnerStorage and TokenStorage
 * Fixed Demo app which is using Facebook with [scribe](https://github.com/scribejava/scribejava)
 * Added functionalities to refresh the credentials before the authenticated call is called.
 * Renaming TokenProvider to Authenticator
