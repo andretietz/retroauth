@@ -39,7 +39,7 @@ interface OwnerStorage<in OWNER_TYPE : Any, OWNER : Any, in CREDENTIAL_TYPE : An
   fun createOwner(
     ownerType: OWNER_TYPE,
     credentialType: CREDENTIAL_TYPE,
-    callback: Callback<OWNER>? = null
+    callback: Callback<OWNER?>? = null
   ): Future<OWNER>
 
   /**

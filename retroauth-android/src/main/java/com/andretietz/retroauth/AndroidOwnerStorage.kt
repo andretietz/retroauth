@@ -54,7 +54,7 @@ class AndroidOwnerStorage constructor(
   override fun createOwner(
     ownerType: String,
     credentialType: AndroidCredentialType,
-    callback: Callback<Account>?
+    callback: Callback<Account?>?
   ): Future<Account> {
     val future = accountManager.addAccount(
       ownerType,
@@ -203,14 +203,15 @@ class AndroidOwnerStorage constructor(
   /**
    * Callback wrapper for adding an account
    */
-  private class CreateAccountCallback(private val callback: Callback<Account>) : AccountManagerCallback<Bundle> {
+  private class CreateAccountCallback(private val callback: Callback<Account?>) : AccountManagerCallback<Bundle> {
 
     override fun run(accountManagerFuture: AccountManagerFuture<Bundle>) {
       val accountName = accountManagerFuture.result.getString(AccountManager.KEY_ACCOUNT_NAME)
       if (accountName != null) {
         callback.onResult(Account(accountName,
           accountManagerFuture.result.getString(AccountManager.KEY_ACCOUNT_TYPE)))
-        return
+      } else {
+        callback.onResult(null)
       }
     }
   }

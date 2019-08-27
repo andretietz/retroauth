@@ -72,11 +72,11 @@ class MainActivity : AppCompatActivity() {
     buttonInvalidateToken.setOnClickListener {
       ownerManager.getActiveOwner(provider.ownerType)?.let { account ->
         credentialStorage.getCredentials(account, provider.credentialType, object : Callback<AndroidCredentials> {
-          override fun onResult(result: AndroidCredentials?) {
+          override fun onResult(result: AndroidCredentials) {
             credentialStorage.storeCredentials(
               account,
               provider.credentialType,
-              AndroidCredentials("some-invalid-token", result?.data))
+              AndroidCredentials("some-invalid-token", result.data))
           }
         })
       }
@@ -85,7 +85,7 @@ class MainActivity : AppCompatActivity() {
     buttonLogout.setOnClickListener {
       ownerManager.getActiveOwner(provider.ownerType)?.let { account ->
         ownerManager.removeOwner(account.type, account, object : Callback<Boolean> {
-          override fun onResult(result: Boolean?) {
+          override fun onResult(result: Boolean) {
             show("Logged out!")
           }
         })
