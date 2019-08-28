@@ -52,22 +52,6 @@ interface OwnerStorage<in OWNER_TYPE : Any, OWNER : Any, in CREDENTIAL_TYPE : An
    */
   fun getOwner(ownerType: OWNER_TYPE, ownerName: String): OWNER?
 
-//  /**
-//   * Opens a picker to choose between owners of a specific type which exist on the system already. When the user chose
-//   * the owner it automatically calls [switchActiveOwner] with the chosen owner, so that it'll be active from now on.
-//   * If the user closes the picker without choosing throw an [AuthenticationCanceledException].
-//   * If the OwnerStorage doesn't contain any owners to choose from, throw an [AuthenticationRequiredException].
-//   *
-//   * @param ownerType you want to open the picker for.
-//   *
-//   * @return [OWNER] the user chose in the picker.
-//   *
-//   * @throws AuthenticationCanceledException
-//   * @throws AuthenticationRequiredException
-//   */
-//  @Throws(AuthenticationCanceledException::class, AuthenticationRequiredException::class)
-//  fun openOwnerPicker(ownerType: OWNER_TYPE, callback: Callback<OWNER>? = null): Future<OWNER>
-
   /**
    * @param ownerType type of the active owner you want to receive.
    *

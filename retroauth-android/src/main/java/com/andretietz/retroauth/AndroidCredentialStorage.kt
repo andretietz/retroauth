@@ -95,8 +95,9 @@ class AndroidCredentialStorage constructor(
       var token = future.result.getString(AccountManager.KEY_AUTHTOKEN)
       if (token == null) token = accountManager.peekAuthToken(owner, type.type)
       if (token == null) {
-        callback?.onError(AuthenticationCanceledException())
-        throw AuthenticationCanceledException()
+        val error = AuthenticationCanceledException()
+        callback?.onError(error)
+        throw error
       }
       return AndroidCredentials(
         token,
