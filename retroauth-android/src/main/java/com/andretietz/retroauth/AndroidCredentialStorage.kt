@@ -91,18 +91,21 @@ class AndroidCredentialStorage constructor(
         activityManager.activity,
         null,
         null)
-      return (future.result.getString(AccountManager.KEY_AUTHTOKEN)
-        ?: accountManager.peekAuthToken(owner, type.type)
-        ?: throw AuthenticationCanceledException()).let { token ->
-        AndroidCredentials(
-          token,
-          type.dataKeys
-            ?.associateTo(HashMap()) {
-              it to accountManager.getUserData(owner, createDataKey(type, it))
-            }
-        ).apply {
-          callback?.onResult(this)
-        }
+
+      var token = future.result.getString(AccountManager.KEY_AUTHTOKEN)
+      if (token == null) token = accountManager.peekAuthToken(owner, type.type)
+      if (token == null) {
+        callback?.onError(AuthenticationCanceledException())
+        throw AuthenticationCanceledException()
+      }
+      return AndroidCredentials(
+        token,
+        type.dataKeys
+          ?.associateTo(HashMap()) {
+            it to accountManager.getUserData(owner, createDataKey(type, it))
+          }
+      ).apply {
+        callback?.onResult(this)
       }
     }
   }

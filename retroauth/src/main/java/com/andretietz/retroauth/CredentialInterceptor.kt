@@ -61,7 +61,12 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTI
         lock(refreshLock)
         try {
           owner = ownerManager.getActiveOwner(authRequestType.ownerType)
-            ?: ownerManager.openOwnerPicker(authRequestType.ownerType).get()
+          if(owner == null) {
+            val owners = ownerManager.getOwners(authRequestType.ownerType)
+            if(owners.isNotEmpty()) {
+              owner = authenticator.chooseOwner(owners).get()
+            }
+          }
           if (owner != null) {
             // get the credential of the owner
             val localToken = credentialStorage.getCredentials(owner, authRequestType.credentialType).get()
@@ -103,10 +108,11 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTI
     return response
   }
 
-  @Synchronized private fun getLock(type: Any): AccountTokenLock {
-      val lock: AccountTokenLock = TOKEN_TYPE_LOCKERS[type] ?: AccountTokenLock()
-      TOKEN_TYPE_LOCKERS[type] = lock
-      return lock
+  @Synchronized
+  private fun getLock(type: Any): AccountTokenLock {
+    val lock: AccountTokenLock = TOKEN_TYPE_LOCKERS[type] ?: AccountTokenLock()
+    TOKEN_TYPE_LOCKERS[type] = lock
+    return lock
   }
 
   @Throws(Exception::class)
