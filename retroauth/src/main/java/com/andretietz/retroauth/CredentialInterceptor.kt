@@ -61,10 +61,11 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTI
         lock(refreshLock)
         try {
           owner = ownerManager.getActiveOwner(authRequestType.ownerType)
-          if(owner == null) {
+          if (owner == null) {
             val owners = ownerManager.getOwners(authRequestType.ownerType)
-            if(owners.isNotEmpty()) {
+            if (owners.isNotEmpty()) {
               owner = authenticator.chooseOwner(owners).get()
+              ownerManager.switchActiveOwner(authRequestType.ownerType, owner)
             }
           }
           if (owner != null) {
