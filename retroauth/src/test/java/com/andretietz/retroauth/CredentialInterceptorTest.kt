@@ -78,15 +78,7 @@ class CredentialInterceptorTest {
     // setup ownerstore, without any owner existing
     val ownerStorage = mock<OwnerStorage<String, String, String>> {
       on { getActiveOwner(anyString()) } doReturn null as String?
-      on {
-        openOwnerPicker(anyString(), anyOrNull())
-      } doReturn object : Future<String?> {
-        override fun isDone() = false
-        override fun get() = null
-        override fun get(p0: Long, p1: TimeUnit) = get()
-        override fun cancel(p0: Boolean) = false
-        override fun isCancelled() = false
-      }
+      on { getOwners(anyString()) } doReturn emptyList<String>()
     }
 
     val credentialStorage = mock<CredentialStorage<String, String, String>>()

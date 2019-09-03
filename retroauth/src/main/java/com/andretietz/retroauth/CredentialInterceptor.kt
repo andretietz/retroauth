@@ -18,7 +18,6 @@ package com.andretietz.retroauth
 
 import okhttp3.Interceptor
 import okhttp3.Response
-import java.util.HashMap
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.Lock
@@ -40,8 +39,7 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTI
 ) : Interceptor {
 
   companion object {
-    private val TOKEN_TYPE_LOCKERS = HashMap<Any, AccountTokenLock>()
-    private val refreshLock = Any()
+    private val refreshLock = AccountTokenLock()
   }
 
   @Suppress("Detekt.RethrowCaughtException")
@@ -58,7 +56,7 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTI
     var tryCount = 0
     do {
       try {
-        lock(refreshLock)
+        lock()
         try {
           owner = ownerManager.getActiveOwner(authRequestType.ownerType)
           if (owner == null) {
@@ -95,11 +93,11 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTI
             throw AuthenticationRequiredException()
           }
         } catch (error: Exception) {
-          getLock(refreshLock).errorContainer.set(error)
+          refreshLock.errorContainer.set(error)
           throw error
         }
       } finally {
-        unlock(refreshLock)
+        unlock()
       }
       // execute the request
       response = chain.proceed(request)
@@ -109,34 +107,25 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTI
     return response
   }
 
-  @Synchronized
-  private fun getLock(type: Any): AccountTokenLock {
-    val lock: AccountTokenLock = TOKEN_TYPE_LOCKERS[type] ?: AccountTokenLock()
-    TOKEN_TYPE_LOCKERS[type] = lock
-    return lock
-  }
-
   @Throws(Exception::class)
-  private fun lock(type: Any) {
-    val lock = getLock(type)
-    if (!lock.lock.tryLock()) {
-      lock.waitCounter.incrementAndGet()
-      lock.lock.lock()
-      val exception = lock.errorContainer.get()
+  private fun lock() {
+    if (!refreshLock.lock.tryLock()) {
+      refreshLock.waitCounter.incrementAndGet()
+      refreshLock.lock.lock()
+      val exception = refreshLock.errorContainer.get()
       if (exception != null) {
         throw exception
       }
     } else {
-      lock.waitCounter.incrementAndGet()
+      refreshLock.waitCounter.incrementAndGet()
     }
   }
 
-  private fun unlock(type: Any) {
-    val lock = getLock(type)
-    if (lock.waitCounter.getAndDecrement() <= 0) {
-      lock.errorContainer.set(null)
+  private fun unlock() {
+    if (refreshLock.waitCounter.getAndDecrement() <= 0) {
+      refreshLock.errorContainer.set(null)
     }
-    lock.lock.unlock()
+    refreshLock.lock.unlock()
   }
 
   internal data class AccountTokenLock(
