@@ -2,12 +2,12 @@ package com.andretietz.retroauth.demo
 
 import android.os.Build
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import android.webkit.CookieManager
 import android.widget.Toast
-import com.andretietz.retroauth.AndroidOwnerStorage
-import com.andretietz.retroauth.AndroidCredentials
+import androidx.appcompat.app.AppCompatActivity
 import com.andretietz.retroauth.AndroidCredentialStorage
+import com.andretietz.retroauth.AndroidCredentials
+import com.andretietz.retroauth.AndroidOwnerStorage
 import com.andretietz.retroauth.Callback
 import com.andretietz.retroauth.RetroauthAndroid
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -72,11 +72,15 @@ class MainActivity : AppCompatActivity() {
     buttonInvalidateToken.setOnClickListener {
       ownerManager.getActiveOwner(provider.ownerType)?.let { account ->
         credentialStorage.getCredentials(account, provider.credentialType, object : Callback<AndroidCredentials> {
-          override fun onResult(result: AndroidCredentials?) {
+          override fun onResult(result: AndroidCredentials) {
             credentialStorage.storeCredentials(
               account,
               provider.credentialType,
-              AndroidCredentials("some-invalid-token", result?.data))
+              AndroidCredentials("some-invalid-token", result.data))
+          }
+
+          override fun onError(error: Throwable) {
+            showError(error)
           }
         })
       }
@@ -85,8 +89,12 @@ class MainActivity : AppCompatActivity() {
     buttonLogout.setOnClickListener {
       ownerManager.getActiveOwner(provider.ownerType)?.let { account ->
         ownerManager.removeOwner(account.type, account, object : Callback<Boolean> {
-          override fun onResult(result: Boolean?) {
-            show("Logged out!")
+          override fun onResult(result: Boolean) {
+            show("Logged out: $result")
+          }
+
+          override fun onError(error: Throwable) {
+            showError(error)
           }
         })
       }

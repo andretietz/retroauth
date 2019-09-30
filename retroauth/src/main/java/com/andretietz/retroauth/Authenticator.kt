@@ -19,12 +19,37 @@ package com.andretietz.retroauth
 import okhttp3.Request
 import okhttp3.Response
 import java.net.HttpURLConnection
+import java.util.concurrent.Callable
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
 
 /**
  * The Authenticator interface is a very specific provider endpoint dependent implementation,
  * to authenticate your request and defines when or if to retry.
  */
-abstract class Authenticator<out OWNER_TYPE : Any, in OWNER : Any, CREDENTIAL_TYPE : Any, CREDENTIAL : Any> {
+abstract class Authenticator<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE : Any, CREDENTIAL : Any> {
+
+  companion object {
+    private val executors: ExecutorService by lazy { Executors.newSingleThreadExecutor() }
+  }
+
+  /**
+   * When there's no current owner set, take the existing ones and let the user choose, which one
+   * to pick.
+   *
+   * @param owners available [OWNER]s on that system. This will never be an empty list.
+   *
+   * @return a future that contains an owner to proceed.
+   *
+   * @throws AuthenticationCanceledException when the user cancels choosing an owner.
+   */
+  @Throws(AuthenticationCanceledException::class)
+  open fun chooseOwner(owners: List<OWNER>): Future<OWNER> =
+    /**
+     * The default implementation returns the first available owner.
+     */
+    executors.submit(Callable<OWNER> { owners[0] })
 
   /**
    * @param annotationCredentialType type of the credential reached in from the [Authenticated.credentialType]

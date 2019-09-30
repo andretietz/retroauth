@@ -20,18 +20,12 @@ import android.accounts.Account
 import android.accounts.AccountManager
 import android.accounts.AccountManagerCallback
 import android.accounts.AccountManagerFuture
-import android.app.AlertDialog
 import android.app.Application
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
-import android.os.Looper
-import android.view.WindowManager
-import java.util.concurrent.Callable
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
-import java.util.concurrent.FutureTask
 import java.util.concurrent.TimeUnit
 
 /**
@@ -85,16 +79,6 @@ class AndroidOwnerStorage constructor(
 
   override fun getOwners(ownerType: String): List<Account> = accountManager.accounts.toList()
 
-  override fun openOwnerPicker(ownerType: String, callback: Callback<Account?>?): Future<Account?> {
-    val task = ShowDialogPickerTask(application, accountManager, ownerType, callback)
-    if (Looper.myLooper() == Looper.getMainLooper()) {
-      return executor.submit(task)
-    }
-    val future = FutureTask(task)
-    future.run()
-    return future
-  }
-
   override fun switchActiveOwner(ownerType: String, owner: Account?) {
     val preferences = application.getSharedPreferences(ownerType, Context.MODE_PRIVATE)
     if (owner == null) {
@@ -118,88 +102,6 @@ class AndroidOwnerStorage constructor(
     return accountFuture
   }
 
-  private class ShowDialogPickerTask(
-    private val application: Application,
-    private val accountManager: AccountManager,
-    private val accountType: String,
-    private val callback: Callback<Account?>?
-  ) : Callable<Account?> {
-
-    private val activityManager = ActivityManager[application]
-
-    override fun call(): Account? {
-      val accounts = accountManager.getAccountsByType(accountType)
-      if (accounts.isEmpty()) return null
-      val accountList = accounts.map { it.name }.toMutableSet()
-      accountList.add(application.getString(R.string.add_account_button_label))
-      val countDownLatch = CountDownLatch(1)
-      val activity = activityManager.activity
-      // show the account chooser
-      val showDialog = ShowAccountChooser(
-        application,
-        activityManager,
-        accountList.toTypedArray(),
-        countDownLatch)
-      activity?.let {
-        activity.runOnUiThread(showDialog)
-        countDownLatch.await()
-      }
-      if (showDialog.canceled) {
-        throw AuthenticationCanceledException("User canceled authentication!")
-      }
-      val accountName = showDialog.selectedOption
-      for (account in accounts) {
-        if (accountName == account.name) {
-          val preferences = application.getSharedPreferences(accountType, Context.MODE_PRIVATE)
-          preferences.edit().putString(RETROAUTH_ACCOUNT_NAME_KEY, account.name).apply()
-          callback?.onResult(account)
-          return account
-        }
-      }
-      return null
-    }
-  }
-
-  /**
-   * This [Runnable] shows an [AlertDialog] where the user can choose an account or create a new one
-   */
-  private class ShowAccountChooser(
-    private val context: Context,
-    private val activityManager: ActivityManager,
-    private val options: Array<String>,
-    private val countDownLatch: CountDownLatch
-  ) : Runnable {
-    internal var canceled = false
-    var selectedOption: String? = null
-
-    init {
-      this.selectedOption = options[0]
-    }
-
-    override fun run() {
-      val builder = AlertDialog.Builder(activityManager.activity)
-        .setTitle(context.getString(R.string.choose_account_label))
-        .setCancelable(false)
-        .setSingleChoiceItems(options, 0) { _, which ->
-          selectedOption = if (which < options.size - 1) {
-            options[which]
-          } else null
-        }
-        .setNegativeButton(android.R.string.cancel) { _, _ -> canceled = true }
-        .setPositiveButton(android.R.string.ok) { _, _ -> canceled = false }
-      val dialog = builder.create()
-      dialog.setOnDismissListener { countDownLatch.countDown() }
-      dialog.show()
-      dialog.window?.let { window ->
-        window.attributes = WindowManager.LayoutParams().apply {
-          copyFrom(window.attributes)
-          width = WindowManager.LayoutParams.WRAP_CONTENT
-          height = WindowManager.LayoutParams.WRAP_CONTENT
-        }
-      }
-    }
-  }
-
   /**
    * Callback wrapper for adding an account
    */
@@ -207,11 +109,12 @@ class AndroidOwnerStorage constructor(
 
     override fun run(accountManagerFuture: AccountManagerFuture<Bundle>) {
       val accountName = accountManagerFuture.result.getString(AccountManager.KEY_ACCOUNT_NAME)
-      if (accountName != null) {
-        callback.onResult(Account(accountName,
-          accountManagerFuture.result.getString(AccountManager.KEY_ACCOUNT_TYPE)))
-        return
+      if (accountName == null) {
+        callback.onError(AuthenticationCanceledException())
+        throw AuthenticationCanceledException()
       }
+      callback.onResult(Account(accountName,
+        accountManagerFuture.result.getString(AccountManager.KEY_ACCOUNT_TYPE)))
     }
   }
 
@@ -226,7 +129,7 @@ class AndroidOwnerStorage constructor(
       try {
         callback.onResult(accountManagerFuture.result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT))
       } catch (e: Exception) {
-        callback.onResult(false)
+        callback.onError(e)
       }
     }
   }
@@ -240,7 +143,7 @@ class AndroidOwnerStorage constructor(
       try {
         callback.onResult(accountManagerFuture.result)
       } catch (e: Exception) {
-        callback.onResult(false)
+        callback.onError(e)
       }
     }
   }

@@ -1,9 +1,27 @@
+/*
+ * Copyright (c) 2016 Andre Tietz
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.andretietz.retroauth
 
 import java.io.IOException
 
 /**
- * This authentication gets thrown, if the stored credential is invalid or not existent and cannot be refreshed.
- * This is to cancel the request, which has been tried to call. The Login-Screen will open.
+ * This Exception is thrown, when the user requires to login in order to fulfill an action.
  */
-class AuthenticationRequiredException : IOException()
+class AuthenticationRequiredException @JvmOverloads constructor(
+  detailMessage: String? = null,
+  throwable: Throwable? = null
+) : IOException(detailMessage, throwable)
