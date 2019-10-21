@@ -120,7 +120,7 @@ as `action:name` contain the Action String you defined in #2
 For the Android Implementation you need to create an Authenticator:
 ```kotlin
 class YourAuthenticator
-    : Authenticator<String, Account, AndroidTokenType, AndroidToken>() {
+    : Authenticator<String, Account, AndroidCredentialType, AndroidCredentials>() {
 ```
 
 There are 3 Methods required to implement:
@@ -133,7 +133,7 @@ The value is optional! So if you don't need it, don't use it. A reason to use it
 
 * The Credential-Type
 ```kotlin
-    override fun getCredentialType(annotationTokenType: Int): AndroidCredentialType {
+    override fun getCredentialType(annotationCredentialType: Int): AndroidCredentialType {
         return AndroidCredentialType(
             "your.company.id.TOKEN_TYPE",
             setOf(
