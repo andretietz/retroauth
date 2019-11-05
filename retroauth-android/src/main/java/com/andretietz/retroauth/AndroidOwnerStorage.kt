@@ -44,7 +44,6 @@ class AndroidOwnerStorage constructor(
   private val executor by lazy { Executors.newSingleThreadExecutor() }
   private val accountManager by lazy { AccountManager.get(application) }
 
-  @Throws(AuthenticationCanceledException::class)
   override fun createOwner(
     ownerType: String,
     credentialType: AndroidCredentialType,
@@ -111,10 +110,10 @@ class AndroidOwnerStorage constructor(
       val accountName = accountManagerFuture.result.getString(AccountManager.KEY_ACCOUNT_NAME)
       if (accountName == null) {
         callback.onError(AuthenticationCanceledException())
-        throw AuthenticationCanceledException()
+      } else {
+        callback.onResult(Account(accountName,
+          accountManagerFuture.result.getString(AccountManager.KEY_ACCOUNT_TYPE)))
       }
-      callback.onResult(Account(accountName,
-        accountManagerFuture.result.getString(AccountManager.KEY_ACCOUNT_TYPE)))
     }
   }
 

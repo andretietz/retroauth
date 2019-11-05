@@ -25,17 +25,14 @@ interface OwnerStorage<in OWNER_TYPE : Any, OWNER : Any, in CREDENTIAL_TYPE : An
 
   /**
    * Creates an [OWNER] of a specific [ownerType] for a specific [credentialType]. So open a login and let the user
-   * login. If the User cancels the login an [AuthenticationCanceledException] should be thrown.
+   * login. If the User cancels, [Callback.onError] should be called with an [AuthenticationCanceledException].
    *
    * @param ownerType Type of owner you want to create.
    * @param credentialType Type of credential you want to open the login for.
    * @param callback Optional callback to get notified when the user was created `true` or not `false`.
    *
    * @return [OWNER] which was created.
-   *
-   * @throws AuthenticationCanceledException
    */
-  @Throws(AuthenticationCanceledException::class)
   fun createOwner(
     ownerType: OWNER_TYPE,
     credentialType: CREDENTIAL_TYPE,
