@@ -25,7 +25,8 @@ interface OwnerStorage<in OWNER_TYPE : Any, OWNER : Any, in CREDENTIAL_TYPE : An
 
   /**
    * Creates an [OWNER] of a specific [ownerType] for a specific [credentialType]. So open a login and let the user
-   * login. If the User cancels, [Callback.onError] should be called with an [AuthenticationCanceledException].
+   * login. If the User cancels, [Callback.onError] should be called with an [AuthenticationCanceledException] or if
+   * the [Future.get] is used, it'll throw that Exception
    *
    * @param ownerType Type of owner you want to create.
    * @param credentialType Type of credential you want to open the login for.
