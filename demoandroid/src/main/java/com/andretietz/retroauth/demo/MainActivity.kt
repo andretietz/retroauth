@@ -17,7 +17,6 @@ import kotlinx.android.synthetic.main.activity_main.buttonInvalidateToken
 import kotlinx.android.synthetic.main.activity_main.buttonLogin
 import kotlinx.android.synthetic.main.activity_main.buttonLogout
 import kotlinx.android.synthetic.main.activity_main.buttonRequestEmail
-import kotlinx.android.synthetic.main.activity_main.buttonSwitch
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
@@ -100,18 +99,6 @@ class MainActivity : AppCompatActivity() {
           }
         })
       }
-      /** remove all cookies to avoid an automatic relogin */
-      val cookieManager = CookieManager.getInstance()
-      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-        @Suppress("DEPRECATION")
-        cookieManager.removeAllCookie()
-      } else {
-        cookieManager.removeAllCookies(null)
-      }
-    }
-
-    buttonSwitch.setOnClickListener {
-      ownerManager.switchActiveOwner(provider.ownerType)
       /** remove all cookies to avoid an automatic relogin */
       val cookieManager = CookieManager.getInstance()
       if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {

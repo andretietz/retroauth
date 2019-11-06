@@ -23,12 +23,6 @@
         android:text="Invalidate Token"/>
 
     <Button
-        android:id="@+id/buttonSwitch"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Reset current"/>
-
-    <Button
         android:id="@+id/buttonLogout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
