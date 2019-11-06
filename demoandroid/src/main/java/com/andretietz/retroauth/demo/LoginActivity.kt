@@ -40,7 +40,6 @@ class LoginActivity : AuthenticationActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_login)
-    Timber.plant(Timber.DebugTree())
 
     webView.loadUrl(helper.authorizationUrl)
     @Suppress("UsePropertyAccessSyntax")

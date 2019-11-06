@@ -1,5 +1,6 @@
 package com.andretietz.retroauth.demo
 
+import android.accounts.Account
 import android.os.Build
 import android.os.Bundle
 import android.webkit.CookieManager
@@ -13,6 +14,7 @@ import com.andretietz.retroauth.RetroauthAndroid
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.buttonInvalidateToken
+import kotlinx.android.synthetic.main.activity_main.buttonLogin
 import kotlinx.android.synthetic.main.activity_main.buttonLogout
 import kotlinx.android.synthetic.main.activity_main.buttonRequestEmail
 import kotlinx.android.synthetic.main.activity_main.buttonSwitch
@@ -118,6 +120,18 @@ class MainActivity : AppCompatActivity() {
       } else {
         cookieManager.removeAllCookies(null)
       }
+    }
+
+    buttonLogin.setOnClickListener {
+      ownerManager.createOwner(provider.ownerType, provider.credentialType, object : Callback<Account> {
+        override fun onResult(result: Account) {
+          Timber.d("Logged in: $result")
+        }
+
+        override fun onError(error: Throwable) {
+          showError(error)
+        }
+      })
     }
   }
 
