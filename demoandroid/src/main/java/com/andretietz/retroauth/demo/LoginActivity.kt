@@ -96,7 +96,7 @@ class LoginActivity : AuthenticationActivity() {
   }
 
   internal interface FacebookInfoService {
-    @GET("v2.11/me")
+    @GET("v5.0/me")
     fun getUserInfo(@Query("fields") fields: String, @Query("access_token") token: String): Single<UserInfo>
   }
 

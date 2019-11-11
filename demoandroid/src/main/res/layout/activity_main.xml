@@ -11,6 +11,12 @@
     tools:activity=".MainActivity">
 
     <Button
+        android:id="@+id/buttonAddAccount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add Account"/>
+
+    <Button
         android:id="@+id/buttonRequestEmail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -23,15 +29,15 @@
         android:text="Invalidate Token"/>
 
     <Button
+        android:id="@+id/buttonSwitchAccount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Switch Account"/>
+
+    <Button
         android:id="@+id/buttonLogout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Logout"/>
-
-    <Button
-        android:id="@+id/buttonLogin"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Manual login"/>
 
 </LinearLayout>

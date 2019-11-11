@@ -7,7 +7,7 @@ dependencies {
     api "com.squareup.retrofit2:retrofit:$retrofitVersion"
 
     testImplementation "junit:junit:$junitVersion"
-    testImplementation "io.reactivex.rxjava2:rxjava:2.1.12"
+    testImplementation "io.reactivex.rxjava2:rxjava:2.2.8"
     testImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
     testImplementation "com.squareup.okhttp3:mockwebserver:$okhttpVersion"
     testImplementation "com.squareup.retrofit2:converter-moshi:$retrofitVersion"

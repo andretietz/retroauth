@@ -1,6 +1,8 @@
 package com.andretietz.retroauth.demo
 
 import android.accounts.Account
+import android.accounts.AccountManager
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.webkit.CookieManager
@@ -14,7 +16,8 @@ import com.andretietz.retroauth.RetroauthAndroid
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.buttonInvalidateToken
-import kotlinx.android.synthetic.main.activity_main.buttonLogin
+import kotlinx.android.synthetic.main.activity_main.buttonAddAccount
+import kotlinx.android.synthetic.main.activity_main.buttonSwitchAccount
 import kotlinx.android.synthetic.main.activity_main.buttonLogout
 import kotlinx.android.synthetic.main.activity_main.buttonRequestEmail
 import okhttp3.OkHttpClient
@@ -24,6 +27,11 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
+
+  companion object {
+    const val ACCOUNT_CHOOSER_REQUESTCODE = 0x123
+  }
+
   private lateinit var service: FacebookService
 
   private val ownerManager by lazy { AndroidOwnerStorage(application) }
@@ -60,6 +68,19 @@ class MainActivity : AppCompatActivity() {
      */
     service = retrofit.create(FacebookService::class.java)
 
+    buttonAddAccount.setOnClickListener {
+      cleanWebCookies()
+      ownerManager.createOwner(provider.ownerType, provider.credentialType, object : Callback<Account> {
+        override fun onResult(result: Account) {
+          Timber.d("Logged in: $result")
+        }
+
+        override fun onError(error: Throwable) {
+          showError(error)
+        }
+      })
+    }
+
     buttonRequestEmail.setOnClickListener {
       service.getUserDetails()
         .subscribeOn(Schedulers.io())
@@ -87,6 +108,35 @@ class MainActivity : AppCompatActivity() {
       }
     }
 
+    @Suppress("DEPRECATION")
+    buttonSwitchAccount.setOnClickListener {
+      cleanWebCookies()
+      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+        AccountManager.newChooseAccountIntent(
+          ownerManager.getActiveOwner(provider.ownerType),
+          null,
+          arrayOf(provider.ownerType),
+          true,
+          null,
+          null,
+          null,
+          null
+        )
+      } else {
+        AccountManager.newChooseAccountIntent(
+          ownerManager.getActiveOwner(provider.ownerType),
+          null,
+          arrayOf(provider.ownerType),
+          null,
+          null,
+          null,
+          null
+        )
+      }.also {
+        startActivityForResult(it, ACCOUNT_CHOOSER_REQUESTCODE)
+      }
+    }
+
     buttonLogout.setOnClickListener {
       ownerManager.getActiveOwner(provider.ownerType)?.let { account ->
         ownerManager.removeOwner(account.type, account, object : Callback<Boolean> {
@@ -99,26 +149,19 @@ class MainActivity : AppCompatActivity() {
           }
         })
       }
-      /** remove all cookies to avoid an automatic relogin */
-      val cookieManager = CookieManager.getInstance()
-      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-        @Suppress("DEPRECATION")
-        cookieManager.removeAllCookie()
-      } else {
-        cookieManager.removeAllCookies(null)
-      }
+      cleanWebCookies()
     }
 
-    buttonLogin.setOnClickListener {
-      ownerManager.createOwner(provider.ownerType, provider.credentialType, object : Callback<Account> {
-        override fun onResult(result: Account) {
-          Timber.d("Logged in: $result")
-        }
+  }
 
-        override fun onError(error: Throwable) {
-          showError(error)
-        }
-      })
+  private fun cleanWebCookies() {
+    /** remove all cookies to avoid an automatic relogin */
+    val cookieManager = CookieManager.getInstance()
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+      @Suppress("DEPRECATION")
+      cookieManager.removeAllCookie()
+    } else {
+      cookieManager.removeAllCookies(null)
     }
   }
 
@@ -128,5 +171,19 @@ class MainActivity : AppCompatActivity() {
 
   private fun showError(error: Throwable) {
     show(error.toString())
+  }
+
+  override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    super.onActivityResult(requestCode, resultCode, data)
+    if (requestCode == ACCOUNT_CHOOSER_REQUESTCODE && resultCode == RESULT_OK) {
+      if (data != null) {
+        val type = requireNotNull(data.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE))
+        val name = requireNotNull(data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME))
+        ownerManager.switchActiveOwner(type, Account(name, type))
+        show("Account switched to $name")
+      } else {
+        show("Wasn't able to switch accounts")
+      }
+    }
   }
 }

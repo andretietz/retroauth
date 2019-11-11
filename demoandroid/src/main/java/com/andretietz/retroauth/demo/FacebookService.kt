@@ -8,7 +8,7 @@ import retrofit2.http.GET
 interface FacebookService {
 
   @Authenticated
-  @GET("v2.11/me?fields=name,email")
+  @GET("v5.0/me?fields=name,email")
   fun getUserDetails(): Single<User>
 
   class User {
