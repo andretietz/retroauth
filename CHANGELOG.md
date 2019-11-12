@@ -5,7 +5,7 @@
 * API changes
   * Solving problem with multiple authenticated requests.
   * Renamed Provider to CredentialProvider and added functionality
-  * Better separation of OwnerStorage and TokenStorage
+  * Better separation of OwnerStorage and CredentialStorage
 * Fixed Demo app which is using Facebook with [scribe](https://github.com/scribejava/scribejava)
 * Added functionalities to refresh the credentials before the authenticated call is called.
 * Renaming TokenProvider to Authenticator

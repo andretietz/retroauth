@@ -3,17 +3,14 @@
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-retroauth-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/2195)
 [![Android Weekly](http://img.shields.io/badge/Android%20Weekly-%23163-2CB3E5.svg?style=flat)](http://androidweekly.net/issues/issue-163)
 [![Build Status](https://app.bitrise.io/app/333d6e2bdd7d7306/status.svg?token=XiPwuCStRxgZFLtYToFKTg&branch=master)](https://app.bitrise.io/app/333d6e2bdd7d7306)
+
 I split the project into 2 separate ones.
 
  * [retroauth](retroauth)
   This is the base implementation, to be used in plain java/kotlin projects.
  * [retroauth-android](retroauth-android/)
-  On top of the Kotlin implementation there's the Android implementation, which uses the
+  On top of the pure Kotlin implementation there's the Android implementation, which uses the
 Android AccountManager in order to store Owners (Accounts) and their Credentials.
-
-## Pull requests are welcome
-Since I am the only one working on that, I would like to know your opinion and/or your suggestions.
-Please feel free to create Pull-Requests!
 
 ## LICENSE
 ```
