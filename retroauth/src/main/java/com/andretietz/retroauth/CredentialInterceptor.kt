@@ -73,11 +73,11 @@ internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTI
             if (authenticator.isCredentialValid(localToken) && !refreshRequested) {
               credential = localToken
             } else {
-              // otherwise remove the current credential from the storage
-              credentialStorage.removeCredentials(owner, authRequestType.credentialType, localToken)
               // try to refresh the credential
               val refreshedToken = authenticator.refreshCredentials(owner, authRequestType.credentialType, localToken)
               credential = if (refreshedToken != null) {
+                // otherwise remove the current credential from the storage
+                credentialStorage.removeCredentials(owner, authRequestType.credentialType, localToken)
                 // if the credential was refreshed, store it
                 credentialStorage.storeCredentials(owner, authRequestType.credentialType, refreshedToken)
                 refreshedToken
