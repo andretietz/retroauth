@@ -1,13 +1,13 @@
 package com.andretietz.retroauth
 
-import com.nhaarman.mockito_kotlin.any
-import com.nhaarman.mockito_kotlin.anyOrNull
-import com.nhaarman.mockito_kotlin.doAnswer
-import com.nhaarman.mockito_kotlin.doReturn
-import com.nhaarman.mockito_kotlin.mock
-import com.nhaarman.mockito_kotlin.never
-import com.nhaarman.mockito_kotlin.times
-import com.nhaarman.mockito_kotlin.verify
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.anyOrNull
+import com.nhaarman.mockitokotlin2.doAnswer
+import com.nhaarman.mockitokotlin2.doReturn
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.never
+import com.nhaarman.mockitokotlin2.times
+import com.nhaarman.mockitokotlin2.verify
 import io.reactivex.Single
 import io.reactivex.observers.TestObserver
 import io.reactivex.schedulers.Schedulers
@@ -230,12 +230,79 @@ class CredentialInterceptorTest {
 
     testObserver.awaitTerminalEvent()
     testObserver.assertResult(Data("testdata"))
-    // old credentials removed
-    verify(credentialStorage, times(1)).removeCredentials(anyString(), anyString(), anyString())
     // refresh credentials successfully
     verify(authenticator, times(1)).refreshCredentials(anyString(), anyString(), anyString())
     // store new token
     verify(credentialStorage, times(1)).storeCredentials(anyString(), anyString(), anyString())
+    // authenticate request
+    verify(authenticator, times(1)).authenticateRequest(any(), anyString())
+    assert(serverRule.server.takeRequest().headers["auth-header"] == "auth-token")
+  }
+
+  @Test
+  fun `Invalid token, refresh token fails`() {
+    serverRule.server.enqueue(MockResponse().setBody("{\"data\": \"testdata\"}"))
+
+    val methodCache = mock<MethodCache<String, String>> {
+      // when this returns null, the call is not recognized as authenticated call.
+      on { getCredentialType(any()) } doReturn RequestType("credentialType", "ownerType")
+    }
+    val ownerStorage = mock<OwnerStorage<String, String, String>> {
+      on { getActiveOwner(anyString()) } doReturn "owner"
+    }
+    val credentialStorage = mock<CredentialStorage<String, String, String>> {
+      on {
+        getCredentials(any(), any(), anyOrNull())
+      } doReturn object : Future<String> {
+        override fun isDone() = false
+        override fun get() = "credential"
+        override fun get(p0: Long, p1: TimeUnit) = get()
+        override fun cancel(p0: Boolean) = false
+        override fun isCancelled() = false
+      }
+    }
+    val authenticator = mock<Authenticator<String, String, String, String>> {
+      on { isCredentialValid(anyString()) } doReturn false // token is invalid
+      on { authenticateRequest(any(), anyString()) } doAnswer { invocationOnMock ->
+        (invocationOnMock.arguments[0] as Request)
+          .newBuilder()
+          .addHeader("auth-header", "auth-token")
+          .build()
+      }
+      on {
+        refreshCredentials(anyString(), anyString(), anyString())
+      } doReturn null
+    }
+
+    val interceptor = CredentialInterceptor(
+      authenticator,
+      ownerStorage,
+      credentialStorage,
+      methodCache
+    )
+
+    val api = Retrofit.Builder()
+      .baseUrl(serverRule.server.url("/"))
+      .addConverterFactory(GsonConverterFactory.create())
+      .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+      .client(
+        OkHttpClient.Builder()
+          .addInterceptor(interceptor)
+          .build()
+      )
+      .build().create(SomeApi::class.java)
+
+    val testObserver = api.someCall()
+      .subscribeOn(Schedulers.io())
+      .test()
+
+    testObserver.awaitTerminalEvent()
+    testObserver.assertResult(Data("testdata"))
+
+    // old credentials removed, ONCE
+    verify(credentialStorage, times(1)).removeCredentials(anyString(), anyString(), anyString())
+    // refresh credentials successfully
+    verify(authenticator, times(1)).refreshCredentials(anyString(), anyString(), anyString())
     // authenticate request
     verify(authenticator, times(1)).authenticateRequest(any(), anyString())
     assert(serverRule.server.takeRequest().headers["auth-header"] == "auth-token")
@@ -382,9 +449,6 @@ class CredentialInterceptorTest {
       calls[i].assertResult(Data("testdata"))
       assert(serverRule.server.takeRequest().headers["auth-header"] == "auth-token")
     }
-
-    // old credentials removed, ONCE
-    verify(credentialStorage, times(1)).removeCredentials(anyString(), anyString(), anyString())
     // refresh credentials successfully, ONCE
     verify(authenticator, times(1)).refreshCredentials(anyString(), anyString(), anyString())
     // store new token, ONCE
@@ -453,8 +517,6 @@ class CredentialInterceptorTest {
       calls[i].awaitTerminalEvent()
       calls[i].assertError { error -> error is IllegalStateException && error.message == "whatever error is thrown" }
     }
-    // old credentials removed, ONCE
-    verify(credentialStorage, times(1)).removeCredentials(anyString(), anyString(), anyString())
 
     verify(ownerStorage, times(1)).getActiveOwner(anyString())
     // refresh credentials successfully, ONCE
