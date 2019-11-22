@@ -6,6 +6,7 @@ import android.content.Context
 import com.andretietz.retroauth.AndroidCredentialStorage
 import com.andretietz.retroauth.AndroidCredentialType
 import com.andretietz.retroauth.AndroidCredentials
+import com.andretietz.retroauth.AndroidOwnerStorage
 import com.andretietz.retroauth.Authenticator
 import okhttp3.Request
 
@@ -18,6 +19,7 @@ import okhttp3.Request
 class FacebookAuthenticator(application: Application) : Authenticator<String, Account, AndroidCredentialType, AndroidCredentials>() {
 
   private val credentialStorage by lazy { AndroidCredentialStorage(application) }
+  private val ownerStorage by lazy { AndroidOwnerStorage(application) }
 
   companion object {
     const val CLIENT_ID = "908466759214667"
@@ -70,6 +72,7 @@ class FacebookAuthenticator(application: Application) : Authenticator<String, Ac
     // https://developers.facebook.com/docs/facebook-login/access-tokens/refreshing
     // `At any point, you can generate a new long-lived credential by sending the
     // person back to the login flow used by your web app.`
+    ownerStorage.createOwner(owner.type, credentialType).get()
     return credentialStorage.getCredentials(owner, credentialType).get()
   }
 }
