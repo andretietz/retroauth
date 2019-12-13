@@ -76,7 +76,7 @@ class AndroidOwnerStorage constructor(
     return null
   }
 
-  override fun getOwners(ownerType: String): List<Account> = accountManager.accounts.toList()
+  override fun getOwners(ownerType: String): List<Account> = accountManager.accounts.toList().filter { it.type == ownerType }
 
   override fun switchActiveOwner(ownerType: String, owner: Account?) {
     val preferences = application.getSharedPreferences(ownerType, Context.MODE_PRIVATE)
