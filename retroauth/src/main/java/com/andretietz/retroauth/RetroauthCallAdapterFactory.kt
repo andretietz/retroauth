@@ -26,7 +26,6 @@ import java.lang.reflect.Type
  * requests using retrofit2.
  */
 internal class RetroauthCallAdapterFactory<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE : Any, CREDENTIAL : Any>(
-  private val callAdapterFactories: List<CallAdapter.Factory>,
   private val authenticator: Authenticator<OWNER_TYPE, OWNER, CREDENTIAL_TYPE, CREDENTIAL>,
   private val methodCache: MethodCache<OWNER_TYPE, CREDENTIAL_TYPE> = MethodCache.DefaultMethodCache()
 ) : CallAdapter.Factory() {
@@ -47,6 +46,8 @@ internal class RetroauthCallAdapterFactory<out OWNER_TYPE : Any, OWNER : Any, CR
   @Suppress("UNCHECKED_CAST")
   override fun get(returnType: Type, annotations: Array<Annotation>, retrofit: Retrofit): CallAdapter<*, *>? {
     val auth = isAuthenticated(annotations)
+    val callAdapterFactories = retrofit.callAdapterFactories()
+      .filterNot { it is RetroauthCallAdapterFactory<*, *, *, *> }
     for (i in callAdapterFactories.indices) {
       val adapter = callAdapterFactories[i].get(returnType, annotations, retrofit)
       adapter?.let {
