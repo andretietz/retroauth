@@ -21,7 +21,6 @@ import okhttp3.OkHttpClient
 import retrofit2.CallAdapter
 import retrofit2.Converter
 import retrofit2.Retrofit
-import retrofit2.Retrofit2Platform
 import java.util.LinkedList
 import java.util.concurrent.Executor
 
@@ -111,16 +110,15 @@ class Retroauth private constructor() {
      */
     fun build(): Retrofit {
 
-      // after adding the retrofit default callAdapter factories
-      callAdapterFactories.addAll(Retrofit2Platform.defaultCallAdapterFactories(executor))
-
       // creating a custom calladapter to handle authentication
-      val callAdapter = RetroauthCallAdapterFactory(callAdapterFactories,
+      val callAdapter = RetroauthCallAdapterFactory(
         authenticator,
         methodCache)
 
       // use this callAdapter to create the retrofit object
-      this.retrofitBuilder.addCallAdapterFactory(callAdapter)
+      retrofitBuilder.addCallAdapterFactory(callAdapter)
+
+      callAdapterFactories.forEach { retrofitBuilder.addCallAdapterFactory(it) }
 
       val builder = okHttpClient?.newBuilder() ?: OkHttpClient.Builder()
 
