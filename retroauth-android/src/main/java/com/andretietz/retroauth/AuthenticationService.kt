@@ -47,5 +47,5 @@ abstract class AuthenticationService : Service() {
    *
    * @param account that will be removed.
    */
-  open fun cleanupAccount(account: Account) = Unit
+  open fun cleanupAccount(account: Account) {}
 }

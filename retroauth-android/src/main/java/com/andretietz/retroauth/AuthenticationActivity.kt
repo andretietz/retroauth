@@ -54,11 +54,10 @@ abstract class AuthenticationActivity : AppCompatActivity() {
     val accountType = intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE)
     if (accountType == null) {
       accountAuthenticatorResponse?.onError(AccountManager.ERROR_CODE_CANCELED, "canceled")
-      throw IllegalStateException(
-        String.format(
-          "This Activity cannot be started without the \"%s\" extra in the intent! " +
-            "Use the \"createAccount\"-Method of the \"%s\" for opening the Login manually.",
-          AccountManager.KEY_ACCOUNT_TYPE, OwnerStorage::class.java.simpleName))
+      error(
+        "This Activity cannot be started without the \"%s\" extra in the intent! " +
+          "Use the \"createAccount\"-Method of the \"%s\" for opening the Login manually."
+            .format(AccountManager.KEY_ACCOUNT_TYPE, OwnerStorage::class.java.simpleName))
     }
     this.accountType = accountType
     credentialType = intent.getStringExtra(AccountAuthenticator.KEY_CREDENTIAL_TYPE)

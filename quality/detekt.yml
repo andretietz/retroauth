@@ -1,5 +1,3 @@
-failFast: true
-
 potential-bugs:
   UnsafeCast:
     active: false
@@ -13,6 +11,8 @@ complexity:
     active: false
   ComplexMethod:
     active: false
+  LongMethod:
+    excludes: "**/*Test.kt"
 
 exceptions:
   TooGenericExceptionCaught:
@@ -21,13 +21,13 @@ exceptions:
     active: false
 
 style:
-  PackageNaming:
-    active: false # retrofit
   ReturnCount:
     active: false
   UnnecessaryAbstractClass:
     active: false
   UseDataClass:
+    active: false
+  MandatoryBracesIfStatements:
     active: false
 
 comments:
@@ -38,4 +38,8 @@ comments:
   CommentOverPrivateFunction:
     active: false
   EndOfSentenceFormat:
+    active: false
+
+naming:
+  PackageNaming:
     active: false
