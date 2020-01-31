@@ -484,7 +484,7 @@ class CredentialInterceptorTest {
         refreshCredentials(anyString(), anyString(), anyString())
       } doAnswer {
         Thread.sleep(400)
-        throw IllegalStateException("whatever error is thrown")
+        error("whatever error is thrown")
       }
     }
 

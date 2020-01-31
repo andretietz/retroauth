@@ -125,6 +125,6 @@ class AccountAuthenticator(
   }
 
   companion object {
-    const val KEY_CREDENTIAL_TYPE = "account_credential_type"
+    internal const val KEY_CREDENTIAL_TYPE = "account_credential_type"
   }
 }

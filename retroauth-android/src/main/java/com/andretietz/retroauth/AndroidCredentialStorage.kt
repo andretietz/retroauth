@@ -20,7 +20,6 @@ import android.accounts.Account
 import android.accounts.AccountManager
 import android.app.Application
 import android.os.Looper
-import java.util.Locale
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
@@ -39,7 +38,7 @@ class AndroidCredentialStorage constructor(
   companion object {
     @JvmStatic
     private fun createDataKey(type: AndroidCredentialType, key: String) =
-      String.format(Locale.US, "%s_%s", type.type, key)
+      "%s_%s".format(type.type, key)
   }
 
   override fun getCredentials(
@@ -63,11 +62,12 @@ class AndroidCredentialStorage constructor(
     accountManager.setAuthToken(owner, type.type, credentials.token)
     if (type.dataKeys != null && credentials.data != null) {
       type.dataKeys.forEach {
-        if (!credentials.data.containsKey(it)) throw IllegalArgumentException(
-          String.format(Locale.US,
-            "The credentials you want to store, needs to contain credentials-data with the keys: %s",
-            type.dataKeys.toString())
-        )
+        require(credentials.data.containsKey(it)) {
+          throw IllegalArgumentException(
+            "The credentials you want to store, needs to contain credentials-data with the keys: %s"
+              .format(type.dataKeys.toString())
+          )
+        }
         accountManager.setUserData(owner, createDataKey(type, it), credentials.data[it])
       }
     }
