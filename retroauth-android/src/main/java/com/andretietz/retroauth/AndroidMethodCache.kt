@@ -22,7 +22,7 @@ import android.util.SparseArray
  * Since [SparseArray] is on Android slightly faster, you can use this instead of the default implementation
  * [MethodCache.DefaultMethodCache]
  */
-internal class AndroidMethodCache : MethodCache<String, AndroidCredentialType> {
+class AndroidMethodCache : MethodCache<String, AndroidCredentialType> {
   private val cache = SparseArray<RequestType<String, AndroidCredentialType>>()
 
   override fun register(requestIdentifier: Int, type: RequestType<String, AndroidCredentialType>) {
