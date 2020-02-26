@@ -31,7 +31,7 @@ import java.util.concurrent.locks.ReentrantLock
  * @param <OWNER> a type that represents the owner of a credential. Since there could be multiple users on one client.
  * @param <CREDENTIAL_TYPE> type of the credential that should be added to the request
  */
-internal class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE : Any, CREDENTIAL : Any>(
+class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE : Any, CREDENTIAL : Any>(
   private val authenticator: Authenticator<OWNER_TYPE, OWNER, CREDENTIAL_TYPE, CREDENTIAL>,
   private val ownerManager: OwnerStorage<OWNER_TYPE, OWNER, CREDENTIAL_TYPE>,
   private val credentialStorage: CredentialStorage<OWNER, CREDENTIAL_TYPE, CREDENTIAL>,
