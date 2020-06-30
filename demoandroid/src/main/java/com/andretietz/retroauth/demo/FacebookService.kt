@@ -1,8 +1,8 @@
 package com.andretietz.retroauth.demo
 
 import com.andretietz.retroauth.Authenticated
+import io.reactivex.rxjava3.core.Single
 
-import io.reactivex.Single
 import retrofit2.http.GET
 
 interface FacebookService {

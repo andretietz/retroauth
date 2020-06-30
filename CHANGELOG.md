@@ -1,4 +1,13 @@
-## 3.0.0 ()
+## 3.1.0 ()
+* increased min sdk level to 21+
+* okhttp version increase to 4.7.1 (3.12.0 was android api lvl 9+)
+* using appcompat startup library in order to initialize the ActivityManager
+
+## 3.0.1 (2020-02-26)
+* CredentialInterceptor not internal anymore (testing purposes)
+* AndroidMethodCache not internal anymore (testing purposes)
+
+## 3.0.0 (2020-01-31)
 * Renaming Token -> Credentials
 * Converted the project to Kotlin
 * When getting the credentials, it CAN automatically read user data items, which are defined in the CredentialType

@@ -13,8 +13,8 @@ import com.andretietz.retroauth.AndroidCredentials
 import com.andretietz.retroauth.AndroidOwnerStorage
 import com.andretietz.retroauth.Callback
 import com.andretietz.retroauth.RetroauthAndroid
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.buttonInvalidateToken
 import kotlinx.android.synthetic.main.activity_main.buttonAddAccount
 import kotlinx.android.synthetic.main.activity_main.buttonSwitchAccount
@@ -156,13 +156,7 @@ class MainActivity : AppCompatActivity() {
 
   private fun cleanWebCookies() {
     /** remove all cookies to avoid an automatic relogin */
-    val cookieManager = CookieManager.getInstance()
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-      @Suppress("DEPRECATION")
-      cookieManager.removeAllCookie()
-    } else {
-      cookieManager.removeAllCookies(null)
-    }
+    CookieManager.getInstance().removeAllCookies(null)
   }
 
   private fun show(toShow: String) {
