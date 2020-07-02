@@ -13,13 +13,13 @@ import com.github.scribejava.core.builder.ServiceBuilder
 import com.github.scribejava.core.model.OAuth2AccessToken
 import com.github.scribejava.core.oauth.OAuth20Service
 import com.github.scribejava.httpclient.okhttp.OkHttpHttpClient
-import io.reactivex.Single
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_login.webView
 //import kotlinx.android.synthetic.main.activity_login.webView
 import retrofit2.Retrofit
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
@@ -85,7 +85,7 @@ class LoginActivity : AuthenticationActivity() {
   private class TokenVerifier(private val service: OAuth20Service, private val code: String) : Callable<LoginResult> {
     private val api = Retrofit.Builder()
       .baseUrl("https://graph.facebook.com/")
-      .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+      .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
       .addConverterFactory(MoshiConverterFactory.create())
       .build().create(FacebookInfoService::class.java)
 

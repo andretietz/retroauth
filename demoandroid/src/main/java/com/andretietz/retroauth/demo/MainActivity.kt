@@ -15,14 +15,14 @@ import com.andretietz.retroauth.Callback
 import com.andretietz.retroauth.RetroauthAndroid
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.schedulers.Schedulers
-import kotlinx.android.synthetic.main.activity_main.buttonInvalidateToken
 import kotlinx.android.synthetic.main.activity_main.buttonAddAccount
-import kotlinx.android.synthetic.main.activity_main.buttonSwitchAccount
+import kotlinx.android.synthetic.main.activity_main.buttonInvalidateToken
 import kotlinx.android.synthetic.main.activity_main.buttonLogout
 import kotlinx.android.synthetic.main.activity_main.buttonRequestEmail
+import kotlinx.android.synthetic.main.activity_main.buttonSwitchAccount
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
 import timber.log.Timber
 
@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity() {
       .baseUrl("https://graph.facebook.com/")
       .client(httpClient)
       .addConverterFactory(MoshiConverterFactory.create())
-      .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+      .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
       .build()
 
     /**

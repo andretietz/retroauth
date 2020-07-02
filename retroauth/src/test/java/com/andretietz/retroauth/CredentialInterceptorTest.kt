@@ -8,9 +8,9 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
-import io.reactivex.Single
-import io.reactivex.observers.TestObserver
-import io.reactivex.schedulers.Schedulers
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.observers.TestObserver
+import io.reactivex.rxjava3.schedulers.Schedulers
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -20,20 +20,25 @@ import org.junit.Test
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import retrofit2.Retrofit
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
+import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 
 @Suppress("Detekt.LargeClass")
-class CredentialInterceptorTest {
+open class CredentialInterceptorTest {
   @get:Rule
-  internal val serverRule = MockServerRule()
+  val serverRule = MockServerRule()
+
+  companion object {
+    const val DUMMY_DATA = "{\"data\": \"testdata\"}"
+  }
 
   @Test
   fun `unauthenticated call with successful response`() {
-    serverRule.server.enqueue(MockResponse().setBody("{\"data\": \"testdata\"}"))
+    serverRule.server.enqueue(MockResponse().setBody(DUMMY_DATA))
     val methodCache = mock<MethodCache<String, String>> {
       // when this returns null, the call is not recognized as authenticated call.
       on { getCredentialType(any()) } doReturn null as RequestType<String, String>?
@@ -51,7 +56,7 @@ class CredentialInterceptorTest {
     val api = Retrofit.Builder()
       .baseUrl(serverRule.server.url("/"))
       .addConverterFactory(GsonConverterFactory.create())
-      .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+      .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
       .client(
         OkHttpClient.Builder()
           .addInterceptor(interceptor)
@@ -62,7 +67,7 @@ class CredentialInterceptorTest {
     val testObserver = api.someCall()
       .subscribeOn(Schedulers.io())
       .test()
-    testObserver.awaitTerminalEvent()
+    testObserver.await(1, TimeUnit.SECONDS)
     testObserver.assertResult(Data("testdata"))
 
     verify(authenticator, never()).authenticateRequest(any(), anyString())
@@ -94,7 +99,7 @@ class CredentialInterceptorTest {
     val api = Retrofit.Builder()
       .baseUrl(serverRule.server.url("/"))
       .addConverterFactory(GsonConverterFactory.create())
-      .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+      .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
       .client(
         OkHttpClient.Builder()
           .addInterceptor(interceptor)
@@ -106,14 +111,15 @@ class CredentialInterceptorTest {
       .subscribeOn(Schedulers.io())
       .test()
 
-    testObserver.awaitTerminalEvent()
+    testObserver.await(1, TimeUnit.SECONDS)
     verify(ownerStorage, times(1)).createOwner(anyString(), anyString(), anyOrNull())
+
     testObserver.assertError { error -> error is AuthenticationRequiredException }
   }
 
   @Test
   fun `authenticated call with successful response`() {
-    serverRule.server.enqueue(MockResponse().setBody("{\"data\": \"testdata\"}"))
+    serverRule.server.enqueue(MockResponse().setBody(DUMMY_DATA))
 
     val methodCache = mock<MethodCache<String, String>> {
       // when this returns null, the call is not recognized as authenticated call.
@@ -153,7 +159,7 @@ class CredentialInterceptorTest {
     val api = Retrofit.Builder()
       .baseUrl(serverRule.server.url("/"))
       .addConverterFactory(GsonConverterFactory.create())
-      .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+      .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
       .client(
         OkHttpClient.Builder()
           .addInterceptor(interceptor)
@@ -165,7 +171,7 @@ class CredentialInterceptorTest {
       .subscribeOn(Schedulers.io())
       .test()
 
-    testObserver.awaitTerminalEvent()
+    testObserver.await(1, TimeUnit.SECONDS)
     testObserver.assertResult(Data("testdata"))
     verify(authenticator, times(1)).authenticateRequest(any(), anyString())
     assert(serverRule.server.takeRequest().headers["auth-header"] == "auth-token")
@@ -173,7 +179,7 @@ class CredentialInterceptorTest {
 
   @Test
   fun `Invalid token, refreshes token`() {
-    serverRule.server.enqueue(MockResponse().setBody("{\"data\": \"testdata\"}"))
+    serverRule.server.enqueue(MockResponse().setBody(DUMMY_DATA))
 
     val methodCache = mock<MethodCache<String, String>> {
       // when this returns null, the call is not recognized as authenticated call.
@@ -216,7 +222,7 @@ class CredentialInterceptorTest {
     val api = Retrofit.Builder()
       .baseUrl(serverRule.server.url("/"))
       .addConverterFactory(GsonConverterFactory.create())
-      .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+      .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
       .client(
         OkHttpClient.Builder()
           .addInterceptor(interceptor)
@@ -228,7 +234,7 @@ class CredentialInterceptorTest {
       .subscribeOn(Schedulers.io())
       .test()
 
-    testObserver.awaitTerminalEvent()
+    testObserver.await(1, TimeUnit.SECONDS)
     testObserver.assertResult(Data("testdata"))
     // refresh credentials successfully
     verify(authenticator, times(1)).refreshCredentials(anyString(), anyString(), anyString())
@@ -241,7 +247,7 @@ class CredentialInterceptorTest {
 
   @Test
   fun `Invalid token, refresh token fails`() {
-    serverRule.server.enqueue(MockResponse().setBody("{\"data\": \"testdata\"}"))
+    serverRule.server.enqueue(MockResponse().setBody(DUMMY_DATA))
 
     val methodCache = mock<MethodCache<String, String>> {
       // when this returns null, the call is not recognized as authenticated call.
@@ -284,7 +290,7 @@ class CredentialInterceptorTest {
     val api = Retrofit.Builder()
       .baseUrl(serverRule.server.url("/"))
       .addConverterFactory(GsonConverterFactory.create())
-      .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+      .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
       .client(
         OkHttpClient.Builder()
           .addInterceptor(interceptor)
@@ -296,7 +302,7 @@ class CredentialInterceptorTest {
       .subscribeOn(Schedulers.io())
       .test()
 
-    testObserver.awaitTerminalEvent()
+    testObserver.await(1, TimeUnit.SECONDS)
     testObserver.assertResult(Data("testdata"))
 
     // old credentials removed, ONCE
@@ -311,7 +317,7 @@ class CredentialInterceptorTest {
   @Test
   fun `Refresh required after failing call`() {
     serverRule.server.enqueue(MockResponse().setResponseCode(401))
-    serverRule.server.enqueue(MockResponse().setBody("{\"data\": \"testdata\"}"))
+    serverRule.server.enqueue(MockResponse().setBody(DUMMY_DATA))
 
     val methodCache = mock<MethodCache<String, String>> {
       // when this returns null, the call is not recognized as authenticated call.
@@ -345,7 +351,7 @@ class CredentialInterceptorTest {
       on {
         refreshRequired(anyInt(), any())
       } doAnswer { invocationOnMock ->
-        (invocationOnMock.arguments[1] as Response).code() != 200
+        !(invocationOnMock.arguments[1] as Response).isSuccessful
       }
     }
 
@@ -359,7 +365,7 @@ class CredentialInterceptorTest {
     val api = Retrofit.Builder()
       .baseUrl(serverRule.server.url("/"))
       .addConverterFactory(GsonConverterFactory.create())
-      .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+      .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
       .client(
         OkHttpClient.Builder()
           .addInterceptor(interceptor)
@@ -371,7 +377,7 @@ class CredentialInterceptorTest {
       .subscribeOn(Schedulers.io())
       .test()
 
-    testObserver.awaitTerminalEvent()
+    testObserver.await(1, TimeUnit.SECONDS)
     testObserver.assertResult(Data("testdata"))
     verify(authenticator, times(2)).authenticateRequest(any(), anyString())
     assert(serverRule.server.takeRequest().headers["auth-header"] == "auth-token")
@@ -428,9 +434,10 @@ class CredentialInterceptorTest {
     val api = Retrofit.Builder()
       .baseUrl(serverRule.server.url("/"))
       .addConverterFactory(GsonConverterFactory.create())
-      .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+      .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
       .client(
         OkHttpClient.Builder()
+          .dispatcher(Dispatcher(Executors.newFixedThreadPool(200)))
           .addInterceptor(interceptor)
           .build()
       )
@@ -438,14 +445,14 @@ class CredentialInterceptorTest {
 
     val calls = mutableListOf<TestObserver<Data>>()
     for (i in range) {
-      serverRule.server.enqueue(MockResponse().setBody("{\"data\": \"testdata\"}"))
+      serverRule.server.enqueue(MockResponse().setBody(DUMMY_DATA))
       calls.add(api.someCall()
         .subscribeOn(Schedulers.io()) // makes sure a new thread is created foreach call
         .test())
     }
 
     for (i in range) {
-      calls[i].awaitTerminalEvent()
+      calls[i].await(5, TimeUnit.SECONDS)
       calls[i].assertResult(Data("testdata"))
       assert(serverRule.server.takeRequest().headers["auth-header"] == "auth-token")
     }
@@ -459,7 +466,7 @@ class CredentialInterceptorTest {
 
   @Test
   fun `Invalid token, refreshes token an error occurs, 200 calls`() {
-    val range = IntRange(0, 199)
+    val range = IntRange(0, 5)
     val methodCache = mock<MethodCache<String, String>> {
       // when this returns null, the call is not recognized as authenticated call.
       on { getCredentialType(any()) } doReturn RequestType("credentialType", "ownerType")
@@ -484,7 +491,7 @@ class CredentialInterceptorTest {
         refreshCredentials(anyString(), anyString(), anyString())
       } doAnswer {
         Thread.sleep(400)
-        error("whatever error is thrown")
+        throw IllegalStateException("whatever error is thrown")
       }
     }
 
@@ -498,7 +505,7 @@ class CredentialInterceptorTest {
     val api = Retrofit.Builder()
       .baseUrl(serverRule.server.url("/"))
       .addConverterFactory(GsonConverterFactory.create())
-      .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+      .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
       .client(
         OkHttpClient.Builder()
           .addInterceptor(interceptor)
@@ -508,13 +515,13 @@ class CredentialInterceptorTest {
 
     val calls = mutableListOf<TestObserver<Data>>()
     for (i in range) {
-      serverRule.server.enqueue(MockResponse().setBody("{\"data\": \"testdata\"}"))
+      serverRule.server.enqueue(MockResponse().setBody(DUMMY_DATA))
       calls.add(api.someCall()
-        .subscribeOn(Schedulers.io()) // makes sure a new thread is created foreach call
+        .subscribeOn(Schedulers.newThread()) // makes sure a new thread is created foreach call
         .test())
     }
     for (i in range) {
-      calls[i].awaitTerminalEvent()
+      calls[i].await()
       calls[i].assertError { error -> error is IllegalStateException && error.message == "whatever error is thrown" }
     }
 

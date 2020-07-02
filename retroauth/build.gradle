@@ -5,6 +5,7 @@ apply plugin: 'java-library'
 dependencies {
     api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     api "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
 
     testImplementation "junit:junit:$junitVersion"
     testImplementation "io.reactivex.rxjava3:rxjava:3.0.2"
