@@ -437,7 +437,6 @@ open class CredentialInterceptorTest {
       .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
       .client(
         OkHttpClient.Builder()
-          .dispatcher(Dispatcher(Executors.newFixedThreadPool(200)))
           .addInterceptor(interceptor)
           .build()
       )
@@ -521,7 +520,7 @@ open class CredentialInterceptorTest {
         .test())
     }
     for (i in range) {
-      calls[i].await()
+      calls[i].await(20, TimeUnit.SECONDS)
       calls[i].assertError { error -> error is IllegalStateException && error.message == "whatever error is thrown" }
     }
 
