@@ -23,7 +23,6 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
-import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 
@@ -465,7 +464,7 @@ open class CredentialInterceptorTest {
 
   @Test
   fun `Invalid token, refreshes token an error occurs, 200 calls`() {
-    val range = IntRange(0, 5)
+    val range = IntRange(0, 4)
     val methodCache = mock<MethodCache<String, String>> {
       // when this returns null, the call is not recognized as authenticated call.
       on { getCredentialType(any()) } doReturn RequestType("credentialType", "ownerType")
@@ -490,7 +489,7 @@ open class CredentialInterceptorTest {
         refreshCredentials(anyString(), anyString(), anyString())
       } doAnswer {
         Thread.sleep(400)
-        throw IllegalStateException("whatever error is thrown")
+        error("whatever error is thrown")
       }
     }
 
@@ -520,7 +519,8 @@ open class CredentialInterceptorTest {
         .test())
     }
     for (i in range) {
-      calls[i].await(20, TimeUnit.SECONDS)
+      calls[i].await(5, TimeUnit.SECONDS)
+//      calls[i].assertError { true }
       calls[i].assertError { error -> error is IllegalStateException && error.message == "whatever error is thrown" }
     }
 

@@ -57,6 +57,8 @@ class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE :
     do {
       try {
         lock()
+//        Thread.sleep(100)
+        println("try")
         try {
           owner = ownerManager.getActiveOwner(authRequestType.ownerType)
           if (owner == null) {
@@ -126,6 +128,7 @@ class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE :
       refreshLock.errorContainer.set(null)
     }
     refreshLock.lock.unlock()
+    println("Unlock ${refreshLock.waitCounter.get()} ${Thread.currentThread().id}")
   }
 
   internal data class AccountTokenLock(
