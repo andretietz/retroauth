@@ -27,26 +27,21 @@ android {
         }
     }
 
-
-    libraryVariants.all { variant ->
-        // replace with https://issuetracker.google.com/issues/72050365 once released.
-        variant.generateBuildConfigProvider.configure { it.enabled = false }
+    buildFeatures {
+        buildConfig = false
     }
-//    buildFeatures {
-//        buildConfig = false
-//    }
 }
 
 dependencies {
     implementation "androidx.appcompat:appcompat:$androidxCompat"
-    implementation "androidx.startup:startup-runtime:1.0.0-alpha01"
+    implementation "androidx.startup:startup-runtime:1.0.0-alpha02"
     api project(':retroauth')
 
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.robolectric:robolectric:4.3.1"
     testImplementation 'org.mockito:mockito-core:3.2.4'
 
-    androidTestImplementation 'org.mockito:mockito-android:2.17.0'
+    androidTestImplementation 'org.mockito:mockito-android:2.21.0'
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test:rules:1.2.0'
 
