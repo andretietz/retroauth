@@ -44,7 +44,7 @@ class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE :
 
   @Suppress("Detekt.RethrowCaughtException")
   override fun intercept(chain: Interceptor.Chain): Response {
-    var response: Response?
+    var response: Response
     var request = chain.request()
     // get the credential type required by this request
     val authRequestType = methodCache.getCredentialType(Utils.createUniqueIdentifier(request))
@@ -92,7 +92,7 @@ class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE :
             ownerManager.createOwner(authRequestType.ownerType, authRequestType.credentialType)
             throw AuthenticationRequiredException()
           }
-        } catch (error: Exception) {
+        } catch (error: Throwable) {
           refreshLock.errorContainer.set(error)
           throw error
         }
@@ -107,7 +107,7 @@ class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE :
     return response
   }
 
-  @Throws(Exception::class)
+  @Throws(Throwable::class)
   private fun lock() {
     if (!refreshLock.lock.tryLock()) {
       refreshLock.waitCounter.incrementAndGet()
