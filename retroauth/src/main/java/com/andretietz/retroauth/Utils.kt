@@ -30,5 +30,5 @@ internal object Utils {
    * @param request request to create the identifier for
    * @return an identifier
    */
-  fun createUniqueIdentifier(request: Request) = request.url().hashCode() + HASH_PRIME * request.method().hashCode()
+  fun createUniqueIdentifier(request: Request) = request.url.hashCode() + HASH_PRIME * request.method.hashCode()
 }

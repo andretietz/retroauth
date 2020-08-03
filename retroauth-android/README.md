@@ -2,9 +2,9 @@
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-retroauth-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/2195)
 [![Build Status](https://app.bitrise.io/app/333d6e2bdd7d7306/status.svg?token=XiPwuCStRxgZFLtYToFKTg&branch=master)](https://app.bitrise.io/app/333d6e2bdd7d7306)
 ## Dependencies
-* [Retrofit](https://github.com/square/retrofit) 2.6.0
-* androidx.appcompat 1.0.2
-* kotlin-stdlib 1.3.31
+* [Retrofit](https://github.com/square/retrofit) 2.9.0
+* androidx.appcompat 1.1.0
+* kotlin-stdlib 1.3.72
 
 ## What does it do?
 If you call a request method, annotated with the authenticated annotation, it'll do the following steps:

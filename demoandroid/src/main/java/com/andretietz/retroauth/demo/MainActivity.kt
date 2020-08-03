@@ -156,13 +156,7 @@ class MainActivity : AppCompatActivity() {
 
   private fun cleanWebCookies() {
     /** remove all cookies to avoid an automatic relogin */
-    val cookieManager = CookieManager.getInstance()
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-      @Suppress("DEPRECATION")
-      cookieManager.removeAllCookie()
-    } else {
-      cookieManager.removeAllCookies(null)
-    }
+    CookieManager.getInstance().removeAllCookies(null)
   }
 
   private fun show(toShow: String) {

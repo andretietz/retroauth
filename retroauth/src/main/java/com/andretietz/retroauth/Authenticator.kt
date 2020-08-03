@@ -82,7 +82,7 @@ abstract class Authenticator<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE 
    * @return {@code true} if a credential refresh is required, {@code false} if not
    */
   open fun refreshRequired(count: Int, response: Response): Boolean =
-    response.code() == HttpURLConnection.HTTP_UNAUTHORIZED && count <= 1
+    response.code == HttpURLConnection.HTTP_UNAUTHORIZED && count <= 1
 
   /**
    * This method will be called when [isCredentialValid] returned false or [refreshRequired] returned true.

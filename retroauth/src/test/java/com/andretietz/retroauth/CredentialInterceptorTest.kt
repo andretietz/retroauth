@@ -345,7 +345,7 @@ class CredentialInterceptorTest {
       on {
         refreshRequired(anyInt(), any())
       } doAnswer { invocationOnMock ->
-        (invocationOnMock.arguments[1] as Response).code() != 200
+        (invocationOnMock.arguments[1] as Response).code != 200
       }
     }
 
