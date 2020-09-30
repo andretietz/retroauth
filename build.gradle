@@ -4,13 +4,15 @@ buildscript {
         google()
         jcenter()
         gradlePluginPortal()
+        maven { url "https://plugins.gradle.org/m2/" }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.0.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:1.0.3'
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.28.0'
         classpath "com.vanniktech:gradle-code-quality-tools-plugin:0.20.0"
+        classpath 'com.vanniktech:gradle-maven-publish-plugin:0.13.0'
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:$kotlinVersion"
     }
 }
 

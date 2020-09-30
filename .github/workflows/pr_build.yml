@@ -1,0 +1,30 @@
+name: PR build
+
+on: [pull_request]
+
+jobs:
+  build:
+    name: PR Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Gradle Wrapper Validation
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: Install JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+
+      - name: Build
+        run: |
+          version=$(grep "VERSION_NAME" gradle.properties | cut -d'=' -f2 )
+          if [[ $version != *"-SNAPSHOT"* ]]; then
+            echo "Version string MUST contain \"-SNAPSHOT\"!"
+            exit 1;
+          fi
+          echo "Next Version: $version"
+          ./gradlew build --stacktrace --warning-mode all
