@@ -27,4 +27,4 @@ jobs:
             exit 1;
           fi
           echo "Next Version: $version"
-          ./gradlew build --stacktrace --warning-mode all
+          ./gradlew build --no-daemon --no-parallel --stacktrace --warning-mode all
