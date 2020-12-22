@@ -2,7 +2,8 @@
 
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-retroauth-brightgreen.svg?style=flat)](http://android-arsenal.com/details/1/2195)
 [![Android Weekly](http://img.shields.io/badge/Android%20Weekly-%23163-2CB3E5.svg?style=flat)](http://androidweekly.net/issues/issue-163)
-[![Build Status](https://app.bitrise.io/app/333d6e2bdd7d7306/status.svg?token=XiPwuCStRxgZFLtYToFKTg&branch=master)](https://app.bitrise.io/app/333d6e2bdd7d7306)
+[![Snapshot build](https://github.com/andretietz/retroauth/workflows/Snapshot%20build/badge.svg)](https://github.com/andretietz/retroauth/actions?query=workflow%3A%22Snapshot+build%22)
+
 
 I split the project into 2 separate ones.
 
