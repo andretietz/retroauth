@@ -48,7 +48,7 @@ internal class ActivityManager private constructor(application: Application) {
    * An implementation of [ActivityLifecycleCallbacks] which stores a reference to the [Activity] as long as
    * it is not stopped. If the [Activity] is stopped, the reference will be removed.
    */
-  private class LifecycleHandler() : ActivityLifecycleCallbacks {
+  private class LifecycleHandler : ActivityLifecycleCallbacks {
     private val activityStack = WeakActivityStack()
 
     val current: Activity? get() = activityStack.peek()
