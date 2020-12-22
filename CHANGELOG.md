@@ -1,4 +1,9 @@
-## 3.0.0 ()
+## 3.1.0 ()
+* Removing [startup hack](https://andretietz.medium.com/auto-initialize-your-android-library-2349daf06920) with google version of it.
+* increasing min SDK level from 14 to 21
+## 3.0.1 (2020-02-26)
+* opened CredentialInterceptor for use outside the library
+## 3.0.0 (2020-01-20)
 * Renaming Token -> Credentials
 * Converted the project to Kotlin
 * When getting the credentials, it CAN automatically read user data items, which are defined in the CredentialType

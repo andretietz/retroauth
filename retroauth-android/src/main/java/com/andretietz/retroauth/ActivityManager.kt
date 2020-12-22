@@ -48,10 +48,10 @@ internal class ActivityManager private constructor(application: Application) {
    * An implementation of [ActivityLifecycleCallbacks] which stores a reference to the [Activity] as long as
    * it is not stopped. If the [Activity] is stopped, the reference will be removed.
    */
-  private class LifecycleHandler internal constructor() : ActivityLifecycleCallbacks {
+  private class LifecycleHandler : ActivityLifecycleCallbacks {
     private val activityStack = WeakActivityStack()
 
-    internal val current: Activity? get() = activityStack.peek()
+    val current: Activity? get() = activityStack.peek()
 
     override fun onActivityResumed(activity: Activity) = Unit
 
@@ -63,7 +63,7 @@ internal class ActivityManager private constructor(application: Application) {
 
     override fun onActivityStopped(activity: Activity) = activityStack.remove(activity)
 
-    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle?) = Unit
+    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit
 
     override fun onActivityDestroyed(activity: Activity) = Unit
   }
