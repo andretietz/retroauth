@@ -63,7 +63,7 @@ internal class ActivityManager private constructor(application: Application) {
 
     override fun onActivityStopped(activity: Activity) = activityStack.remove(activity)
 
-    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle?) = Unit
+    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit
 
     override fun onActivityDestroyed(activity: Activity) = Unit
   }

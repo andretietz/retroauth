@@ -3,7 +3,7 @@
 [![Build Status](https://app.bitrise.io/app/333d6e2bdd7d7306/status.svg?token=XiPwuCStRxgZFLtYToFKTg&branch=master)](https://app.bitrise.io/app/333d6e2bdd7d7306)
 ## Dependencies
 * [Retrofit](https://github.com/square/retrofit) 2.9.0
-* androidx.appcompat 1.1.0
+* androidx.appcompat 1.2.0
 * kotlin-stdlib 1.3.72
 
 ## What does it do?
