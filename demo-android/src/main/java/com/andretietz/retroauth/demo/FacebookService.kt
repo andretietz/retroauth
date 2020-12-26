@@ -2,21 +2,16 @@ package com.andretietz.retroauth.demo
 
 import com.andretietz.retroauth.Authenticated
 
-import io.reactivex.Single
 import retrofit2.http.GET
 
 interface FacebookService {
 
   @Authenticated
   @GET("v5.0/me?fields=name,email")
-  fun getUserDetails(): Single<User>
+  suspend fun getUserDetails(): User
 
-  class User {
-    var name: String? = null
-    var email: String? = null
-
-    override fun toString(): String {
-      return String.format("%s (%s)", name, email)
-    }
-  }
+  data class User(
+    val name: String,
+    val email: String
+  )
 }

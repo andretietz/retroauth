@@ -8,21 +8,22 @@ import android.os.Bundle
 import android.webkit.CookieManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.andretietz.retroauth.AndroidCredentialStorage
 import com.andretietz.retroauth.AndroidCredentials
 import com.andretietz.retroauth.AndroidOwnerStorage
 import com.andretietz.retroauth.Callback
 import com.andretietz.retroauth.RetroauthAndroid
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.buttonInvalidateToken
 import kotlinx.android.synthetic.main.activity_main.buttonAddAccount
 import kotlinx.android.synthetic.main.activity_main.buttonSwitchAccount
 import kotlinx.android.synthetic.main.activity_main.buttonLogout
 import kotlinx.android.synthetic.main.activity_main.buttonRequestEmail
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
 import timber.log.Timber
 
@@ -60,7 +61,6 @@ class MainActivity : AppCompatActivity() {
       .baseUrl("https://graph.facebook.com/")
       .client(httpClient)
       .addConverterFactory(MoshiConverterFactory.create())
-      .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
       .build()
 
     /**
@@ -76,19 +76,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun onError(error: Throwable) {
-          showError(error)
+          lifecycleScope.launch { showError(error) }
         }
       })
     }
 
     buttonRequestEmail.setOnClickListener {
-      service.getUserDetails()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(
-          { item -> show(item.toString()) },
-          { error -> showError(error) }
-        )
+      lifecycleScope.launch(Dispatchers.IO) {
+        val user = service.getUserDetails().toString()
+        show(user)
+      }
     }
 
     buttonInvalidateToken.setOnClickListener {
@@ -102,7 +99,7 @@ class MainActivity : AppCompatActivity() {
           }
 
           override fun onError(error: Throwable) {
-            showError(error)
+            lifecycleScope.launch { showError(error) }
           }
         })
       }
@@ -141,11 +138,12 @@ class MainActivity : AppCompatActivity() {
       ownerManager.getActiveOwner(provider.ownerType)?.let { account ->
         ownerManager.removeOwner(account.type, account, object : Callback<Boolean> {
           override fun onResult(result: Boolean) {
-            show("Logged out: $result")
+            lifecycleScope.launch { show("Logged out: $result") }
+
           }
 
           override fun onError(error: Throwable) {
-            showError(error)
+            lifecycleScope.launch { showError(error) }
           }
         })
       }
@@ -159,24 +157,26 @@ class MainActivity : AppCompatActivity() {
     CookieManager.getInstance().removeAllCookies(null)
   }
 
-  private fun show(toShow: String) {
-    Toast.makeText(this, toShow, Toast.LENGTH_SHORT).show()
+  private suspend fun show(toShow: String) = withContext(Dispatchers.Main) {
+    Toast.makeText(applicationContext, toShow, Toast.LENGTH_SHORT).show()
   }
 
-  private fun showError(error: Throwable) {
+  private suspend fun showError(error: Throwable) {
     show(error.toString())
   }
 
   override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
     super.onActivityResult(requestCode, resultCode, data)
     if (requestCode == ACCOUNT_CHOOSER_REQUESTCODE && resultCode == RESULT_OK) {
-      if (data != null) {
-        val type = requireNotNull(data.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE))
-        val name = requireNotNull(data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME))
-        ownerManager.switchActiveOwner(type, Account(name, type))
-        show("Account switched to $name")
-      } else {
-        show("Wasn't able to switch accounts")
+      lifecycleScope.launch {
+        if (data != null) {
+          val type = requireNotNull(data.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE))
+          val name = requireNotNull(data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME))
+          ownerManager.switchActiveOwner(type, Account(name, type))
+          show("Account switched to $name")
+        } else {
+          show("Wasn't able to switch accounts")
+        }
       }
     }
   }
