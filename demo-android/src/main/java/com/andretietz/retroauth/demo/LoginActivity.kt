@@ -7,11 +7,11 @@ import android.webkit.WebViewClient
 import androidx.lifecycle.lifecycleScope
 import com.andretietz.retroauth.AndroidCredentials
 import com.andretietz.retroauth.AuthenticationActivity
+import com.andretietz.retroauth.demo.databinding.ActivityLoginBinding
 import com.github.scribejava.apis.FacebookApi
 import com.github.scribejava.core.builder.ServiceBuilder
 import com.github.scribejava.core.model.OAuth2AccessToken
 import com.github.scribejava.httpclient.okhttp.OkHttpHttpClient
-import kotlinx.android.synthetic.main.activity_login.webView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -35,14 +35,16 @@ class LoginActivity : AuthenticationActivity() {
     .addConverterFactory(MoshiConverterFactory.create())
     .build().create(FacebookInfoService::class.java)
 
+  private lateinit var views: ActivityLoginBinding
+
   @SuppressLint("SetJavaScriptEnabled")
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_login)
-
-    webView.loadUrl(helper.authorizationUrl)
-    webView.settings.javaScriptEnabled = true
-    webView.webViewClient = object : WebViewClient() {
+    views = ActivityLoginBinding.inflate(layoutInflater)
+    views.webView.loadUrl(helper.authorizationUrl)
+    views.webView.settings.javaScriptEnabled = true
+    views.webView.webViewClient = object : WebViewClient() {
       override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
         val authorization = helper.extractAuthorization(url)
         val code = authorization.code

@@ -14,11 +14,7 @@ import com.andretietz.retroauth.AndroidCredentials
 import com.andretietz.retroauth.AndroidOwnerStorage
 import com.andretietz.retroauth.Callback
 import com.andretietz.retroauth.RetroauthAndroid
-import kotlinx.android.synthetic.main.activity_main.buttonInvalidateToken
-import kotlinx.android.synthetic.main.activity_main.buttonAddAccount
-import kotlinx.android.synthetic.main.activity_main.buttonSwitchAccount
-import kotlinx.android.synthetic.main.activity_main.buttonLogout
-import kotlinx.android.synthetic.main.activity_main.buttonRequestEmail
+import com.andretietz.retroauth.demo.databinding.ActivityMainBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -38,9 +34,12 @@ class MainActivity : AppCompatActivity() {
   private val ownerManager by lazy { AndroidOwnerStorage(application) }
   private val credentialStorage by lazy { AndroidCredentialStorage(application) }
 
+  private lateinit var views: ActivityMainBinding
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
+    views = ActivityMainBinding.inflate(layoutInflater)
     Timber.plant(Timber.DebugTree())
 
     /**
@@ -68,7 +67,7 @@ class MainActivity : AppCompatActivity() {
      */
     service = retrofit.create(FacebookService::class.java)
 
-    buttonAddAccount.setOnClickListener {
+    views.buttonAddAccount.setOnClickListener {
       cleanWebCookies()
       ownerManager.createOwner(provider.ownerType, provider.credentialType, object : Callback<Account> {
         override fun onResult(result: Account) {
@@ -81,14 +80,14 @@ class MainActivity : AppCompatActivity() {
       })
     }
 
-    buttonRequestEmail.setOnClickListener {
+    views.buttonRequestEmail.setOnClickListener {
       lifecycleScope.launch(Dispatchers.IO) {
         val user = service.getUserDetails().toString()
         show(user)
       }
     }
 
-    buttonInvalidateToken.setOnClickListener {
+    views.buttonInvalidateToken.setOnClickListener {
       ownerManager.getActiveOwner(provider.ownerType)?.let { account ->
         credentialStorage.getCredentials(account, provider.credentialType, object : Callback<AndroidCredentials> {
           override fun onResult(result: AndroidCredentials) {
@@ -106,7 +105,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     @Suppress("DEPRECATION")
-    buttonSwitchAccount.setOnClickListener {
+    views.buttonSwitchAccount.setOnClickListener {
       cleanWebCookies()
       if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
         AccountManager.newChooseAccountIntent(
@@ -134,7 +133,7 @@ class MainActivity : AppCompatActivity() {
       }
     }
 
-    buttonLogout.setOnClickListener {
+    views.buttonLogout.setOnClickListener {
       ownerManager.getActiveOwner(provider.ownerType)?.let { account ->
         ownerManager.removeOwner(account.type, account, object : Callback<Boolean> {
           override fun onResult(result: Boolean) {

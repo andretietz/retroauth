@@ -4,7 +4,7 @@
 ## Dependencies
 * [Retrofit](https://github.com/square/retrofit) 2.9.0
 * androidx.appcompat 1.2.0
-* kotlin-stdlib 1.4.10
+* kotlin-stdlib 1.4.21
 
 ## What does it do?
 If you call a request method, annotated with the authenticated annotation, it'll do the following steps:
