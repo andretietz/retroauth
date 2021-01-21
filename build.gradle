@@ -28,7 +28,7 @@ allprojects {
 apply plugin: "com.vanniktech.code.quality.tools"
 codeQualityTools {
 
-    ignoreProjects = ["demoandroid"]
+    ignoreProjects = ["demo-android"]
 
     detekt.config = rootProject.file("quality/detekt.yml").path
     detekt.toolVersion = '1.5.0'
