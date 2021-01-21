@@ -11,3 +11,7 @@ mavenPublish {
         stagingProfile = "com.andretietz"
     }
 }
+
+signing {
+  useInMemoryPgpKeys(findProperty("signingKeyId"), findProperty("signingKey"), findProperty("signingPassword"))
+}
