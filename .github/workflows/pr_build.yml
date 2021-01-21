@@ -23,6 +23,6 @@ jobs:
         run: |
           cat <(echo -e "${{ secrets.GPG_SIGNING_KEY }}") | gpg --batch --import
           gpg --list-secret-keys --keyid-format SHORT
-          ls -la .gnupg
+          ls -la ~/.gnupg
           gpg --output test.sig --sign CHANGELOG.md
           ls -la CHANGELOG*
