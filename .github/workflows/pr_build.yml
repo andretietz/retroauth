@@ -21,6 +21,7 @@ jobs:
 
       - name: Build
         run: |
+          export GPG_TTY=$(tty)
           cat <(echo -e "${{ secrets.GPG_SIGNING_KEY }}") | gpg --batch --import
           gpg --list-secret-keys --keyid-format SHORT
           ls -la ~/.gnupg
