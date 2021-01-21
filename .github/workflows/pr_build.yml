@@ -21,9 +21,10 @@ jobs:
 
       - name: Build
         run: |
-          export GPG_TTY=$(tty)
-          cat <(echo -e "${{ secrets.GPG_SIGNING_KEY }}") | gpg --batch --import
-          gpg --list-secret-keys --keyid-format SHORT
-          ls -la ~/.gnupg
-          gpg --output test.sig --sign CHANGELOG.md
-          ls -la CHANGELOG*
+          version=$(grep "VERSION_NAME" gradle.properties | cut -d'=' -f2 )
+          if [[ $version != *"-SNAPSHOT"* ]]; then
+            echo "Version string MUST contain \"-SNAPSHOT\"!"
+            exit 1;
+          fi
+          echo "Next Version: $version"
+          ./gradlew build --no-daemon --no-parallel --stacktrace --warning-mode all
