@@ -1,4 +1,5 @@
-## 3.1.0 ()
+## 3.1.1 ()
+## 3.1.0 (2021-01-22)
 * Removing [startup hack](https://andretietz.medium.com/auto-initialize-your-android-library-2349daf06920) with google version of it.
 * increasing min SDK level from 14 to 21
 ## 3.0.1 (2020-02-26)
