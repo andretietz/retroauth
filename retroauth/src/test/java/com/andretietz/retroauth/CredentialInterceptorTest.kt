@@ -1,13 +1,6 @@
 package com.andretietz.retroauth
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.anyOrNull
-import com.nhaarman.mockitokotlin2.doAnswer
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.never
-import com.nhaarman.mockitokotlin2.times
-import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Single
 import io.reactivex.observers.TestObserver
 import io.reactivex.schedulers.Schedulers
@@ -34,18 +27,13 @@ class CredentialInterceptorTest {
   @Test
   fun `unauthenticated call with successful response`() {
     serverRule.server.enqueue(MockResponse().setBody("{\"data\": \"testdata\"}"))
-    val methodCache = mock<MethodCache<String, String>> {
-      // when this returns null, the call is not recognized as authenticated call.
-      on { getCredentialType(any()) } doReturn null as RequestType<String, String>?
-    }
     val ownerStorage = mock<OwnerStorage<String, String, String>>()
     val credentialStorage = mock<CredentialStorage<String, String, String>>()
     val authenticator = mock<Authenticator<String, String, String, String>>()
     val interceptor = CredentialInterceptor(
       authenticator,
       ownerStorage,
-      credentialStorage,
-      methodCache
+      credentialStorage
     )
 
     val api = Retrofit.Builder()
@@ -70,11 +58,6 @@ class CredentialInterceptorTest {
 
   @Test
   fun `authenticated call, no owner existing`() {
-    val methodCache = mock<MethodCache<String, String>> {
-      // when this returns null, the call is not recognized as authenticated call.
-      on { getCredentialType(any()) } doReturn RequestType("credentialType", "ownerType")
-    }
-
     // setup ownerstore, without any owner existing
     val ownerStorage = mock<OwnerStorage<String, String, String>> {
       on { getActiveOwner(anyString()) } doReturn null as String?
@@ -87,8 +70,7 @@ class CredentialInterceptorTest {
     val interceptor = CredentialInterceptor(
       authenticator,
       ownerStorage,
-      credentialStorage,
-      methodCache
+      credentialStorage
     )
 
     val api = Retrofit.Builder()
@@ -115,10 +97,6 @@ class CredentialInterceptorTest {
   fun `authenticated call with successful response`() {
     serverRule.server.enqueue(MockResponse().setBody("{\"data\": \"testdata\"}"))
 
-    val methodCache = mock<MethodCache<String, String>> {
-      // when this returns null, the call is not recognized as authenticated call.
-      on { getCredentialType(any()) } doReturn RequestType("credentialType", "ownerType")
-    }
     val ownerStorage = mock<OwnerStorage<String, String, String>> {
       on { getActiveOwner(anyString()) } doReturn "owner"
     }
@@ -146,8 +124,7 @@ class CredentialInterceptorTest {
     val interceptor = CredentialInterceptor(
       authenticator,
       ownerStorage,
-      credentialStorage,
-      methodCache
+      credentialStorage
     )
 
     val api = Retrofit.Builder()
@@ -175,10 +152,6 @@ class CredentialInterceptorTest {
   fun `Invalid token, refreshes token`() {
     serverRule.server.enqueue(MockResponse().setBody("{\"data\": \"testdata\"}"))
 
-    val methodCache = mock<MethodCache<String, String>> {
-      // when this returns null, the call is not recognized as authenticated call.
-      on { getCredentialType(any()) } doReturn RequestType("credentialType", "ownerType")
-    }
     val ownerStorage = mock<OwnerStorage<String, String, String>> {
       on { getActiveOwner(anyString()) } doReturn "owner"
     }
@@ -209,8 +182,7 @@ class CredentialInterceptorTest {
     val interceptor = CredentialInterceptor(
       authenticator,
       ownerStorage,
-      credentialStorage,
-      methodCache
+      credentialStorage
     )
 
     val api = Retrofit.Builder()
@@ -243,10 +215,6 @@ class CredentialInterceptorTest {
   fun `Invalid token, refresh token fails`() {
     serverRule.server.enqueue(MockResponse().setBody("{\"data\": \"testdata\"}"))
 
-    val methodCache = mock<MethodCache<String, String>> {
-      // when this returns null, the call is not recognized as authenticated call.
-      on { getCredentialType(any()) } doReturn RequestType("credentialType", "ownerType")
-    }
     val ownerStorage = mock<OwnerStorage<String, String, String>> {
       on { getActiveOwner(anyString()) } doReturn "owner"
     }
@@ -277,8 +245,7 @@ class CredentialInterceptorTest {
     val interceptor = CredentialInterceptor(
       authenticator,
       ownerStorage,
-      credentialStorage,
-      methodCache
+      credentialStorage
     )
 
     val api = Retrofit.Builder()
@@ -313,10 +280,6 @@ class CredentialInterceptorTest {
     serverRule.server.enqueue(MockResponse().setResponseCode(401))
     serverRule.server.enqueue(MockResponse().setBody("{\"data\": \"testdata\"}"))
 
-    val methodCache = mock<MethodCache<String, String>> {
-      // when this returns null, the call is not recognized as authenticated call.
-      on { getCredentialType(any()) } doReturn RequestType("credentialType", "ownerType")
-    }
     val ownerStorage = mock<OwnerStorage<String, String, String>> {
       on { getActiveOwner(anyString()) } doReturn "owner"
     }
@@ -352,8 +315,7 @@ class CredentialInterceptorTest {
     val interceptor = CredentialInterceptor(
       authenticator,
       ownerStorage,
-      credentialStorage,
-      methodCache
+      credentialStorage
     )
 
     val api = Retrofit.Builder()
@@ -380,10 +342,6 @@ class CredentialInterceptorTest {
   @Test
   fun `Invalid token, refreshes token, 200 calls`() {
     val range = IntRange(0, 199)
-    val methodCache = mock<MethodCache<String, String>> {
-      // when this returns null, the call is not recognized as authenticated call.
-      on { getCredentialType(any()) } doReturn RequestType("credentialType", "ownerType")
-    }
     val ownerStorage = mock<OwnerStorage<String, String, String>> {
       on { getActiveOwner(anyString()) } doReturn "owner"
     }
@@ -421,8 +379,7 @@ class CredentialInterceptorTest {
     val interceptor = CredentialInterceptor(
       authenticator,
       ownerStorage,
-      credentialStorage,
-      methodCache
+      credentialStorage
     )
 
     val api = Retrofit.Builder()
@@ -439,9 +396,11 @@ class CredentialInterceptorTest {
     val calls = mutableListOf<TestObserver<Data>>()
     for (i in range) {
       serverRule.server.enqueue(MockResponse().setBody("{\"data\": \"testdata\"}"))
-      calls.add(api.someCall()
-        .subscribeOn(Schedulers.io()) // makes sure a new thread is created foreach call
-        .test())
+      calls.add(
+        api.someCall()
+          .subscribeOn(Schedulers.io()) // makes sure a new thread is created foreach call
+          .test()
+      )
     }
 
     for (i in range) {
@@ -460,10 +419,7 @@ class CredentialInterceptorTest {
   @Test
   fun `Invalid token, refreshes token an error occurs, 200 calls`() {
     val range = IntRange(0, 199)
-    val methodCache = mock<MethodCache<String, String>> {
-      // when this returns null, the call is not recognized as authenticated call.
-      on { getCredentialType(any()) } doReturn RequestType("credentialType", "ownerType")
-    }
+
     val ownerStorage = mock<OwnerStorage<String, String, String>> {
       on { getActiveOwner(anyString()) } doReturn "owner"
     }
@@ -491,8 +447,7 @@ class CredentialInterceptorTest {
     val interceptor = CredentialInterceptor(
       authenticator,
       ownerStorage,
-      credentialStorage,
-      methodCache
+      credentialStorage
     )
 
     val api = Retrofit.Builder()
@@ -509,9 +464,11 @@ class CredentialInterceptorTest {
     val calls = mutableListOf<TestObserver<Data>>()
     for (i in range) {
       serverRule.server.enqueue(MockResponse().setBody("{\"data\": \"testdata\"}"))
-      calls.add(api.someCall()
-        .subscribeOn(Schedulers.io()) // makes sure a new thread is created foreach call
-        .test())
+      calls.add(
+        api.someCall()
+          .subscribeOn(Schedulers.io()) // makes sure a new thread is created foreach call
+          .test()
+      )
     }
     for (i in range) {
       calls[i].awaitTerminalEvent()

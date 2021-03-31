@@ -17,7 +17,9 @@
 package com.andretietz.retroauth
 
 import okhttp3.Interceptor
+import okhttp3.Request
 import okhttp3.Response
+import retrofit2.Invocation
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.locks.Lock
@@ -34,22 +36,22 @@ import java.util.concurrent.locks.ReentrantLock
 class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE : Any, CREDENTIAL : Any>(
   private val authenticator: Authenticator<OWNER_TYPE, OWNER, CREDENTIAL_TYPE, CREDENTIAL>,
   private val ownerManager: OwnerStorage<OWNER_TYPE, OWNER, CREDENTIAL_TYPE>,
-  private val credentialStorage: CredentialStorage<OWNER, CREDENTIAL_TYPE, CREDENTIAL>,
-  private val methodCache: MethodCache<OWNER_TYPE, CREDENTIAL_TYPE> = MethodCache.DefaultMethodCache()
+  private val credentialStorage: CredentialStorage<OWNER, CREDENTIAL_TYPE, CREDENTIAL>
 ) : Interceptor {
 
   companion object {
     private val refreshLock = AccountTokenLock()
+    private const val HASH_PRIME = 31
   }
+
+  private val registration = mutableMapOf<Int, RequestType<OWNER_TYPE, CREDENTIAL_TYPE>>()
 
   @Suppress("Detekt.RethrowCaughtException")
   override fun intercept(chain: Interceptor.Chain): Response {
     var response: Response
     var request = chain.request()
     // get the credential type required by this request
-    val authRequestType = methodCache.getCredentialType(Utils.createUniqueIdentifier(request))
-      ?: return chain.proceed(request)
-
+    val authRequestType = findRequestType(request) ?: return chain.proceed(request)
     var refreshRequested = false
     var credential: CREDENTIAL
     var owner: OWNER?
@@ -68,20 +70,30 @@ class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE :
           }
           if (owner != null) {
             // get the credential of the owner
-            val localToken = credentialStorage.getCredentials(owner, authRequestType.credentialType).get()
+            val localToken =
+              credentialStorage.getCredentials(owner, authRequestType.credentialType).get()
             // if the credential is still valid and no refresh has been requested
             if (authenticator.isCredentialValid(localToken) && !refreshRequested) {
               credential = localToken
             } else {
               // try to refreshing the credentials
-              val refreshedToken = authenticator.refreshCredentials(owner, authRequestType.credentialType, localToken)
+              val refreshedToken =
+                authenticator.refreshCredentials(owner, authRequestType.credentialType, localToken)
               credential = if (refreshedToken != null) {
                 // if the credential was refreshed, store it
-                credentialStorage.storeCredentials(owner, authRequestType.credentialType, refreshedToken)
+                credentialStorage.storeCredentials(
+                  owner,
+                  authRequestType.credentialType,
+                  refreshedToken
+                )
                 refreshedToken
               } else {
                 // otherwise remove the current credential from the storage
-                credentialStorage.removeCredentials(owner, authRequestType.credentialType, localToken)
+                credentialStorage.removeCredentials(
+                  owner,
+                  authRequestType.credentialType,
+                  localToken
+                )
                 // and use the "old" credential
                 localToken
               }
@@ -126,6 +138,24 @@ class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE :
       refreshLock.errorContainer.set(null)
     }
     refreshLock.lock.unlock()
+  }
+
+  private fun findRequestType(
+    request: Request
+  ): RequestType<OWNER_TYPE, CREDENTIAL_TYPE>? {
+    val key = request.url.hashCode() + HASH_PRIME * request.method.hashCode()
+    return registration[key] ?: request.tag(Invocation::class.java)
+      ?.method()
+      ?.annotations
+      ?.filterIsInstance<Authenticated>()
+      ?.firstOrNull()
+      ?.let {
+        RequestType(
+          authenticator.getCredentialType(it.credentialType),
+          authenticator.getOwnerType(it.ownerType)
+        )
+      }
+      ?.also { registration[key] = it }
   }
 
   internal data class AccountTokenLock(

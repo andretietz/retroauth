@@ -30,7 +30,11 @@ interface CredentialStorage<in OWNER : Any, in CREDENTIAL_TYPE : Any, CREDENTIAL
    * @param type the type of the Credentials you want to get
    * @return the Credentials to authenticate your request with
    */
-  fun getCredentials(owner: OWNER, type: CREDENTIAL_TYPE, callback: Callback<CREDENTIAL>? = null): Future<CREDENTIAL>
+  fun getCredentials(
+    owner: OWNER,
+    type: CREDENTIAL_TYPE,
+    callback: Callback<CREDENTIAL>? = null
+  ): Future<CREDENTIAL>
 
   /**
    * Removes the credentials of a specific type and owner from the credentials storage.

@@ -9,17 +9,14 @@ import android.webkit.CookieManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.andretietz.retroauth.AndroidCredentialStorage
-import com.andretietz.retroauth.AndroidCredentials
-import com.andretietz.retroauth.AndroidOwnerStorage
-import com.andretietz.retroauth.Callback
-import com.andretietz.retroauth.RetroauthAndroid
+import com.andretietz.retroauth.*
 import com.andretietz.retroauth.demo.databinding.ActivityMainBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import timber.log.Timber
 
@@ -54,13 +51,14 @@ class MainActivity : AppCompatActivity() {
     val provider = FacebookAuthenticator(application)
 
     /**
-     * Create your Retrofit Object using the [RetroauthAndroid.createBuilder]
+     * Create your Retrofit Object using the [Retrofit.androidAuthentication]
      */
-    val retrofit = RetroauthAndroid.createBuilder(application, provider)
+    val retrofit = Retrofit.Builder()
       .baseUrl("https://graph.facebook.com/")
       .client(httpClient)
       .addConverterFactory(MoshiConverterFactory.create())
       .build()
+      .androidAuthentication(application, provider)
 
     /**
      * Create your API Service
@@ -69,15 +67,18 @@ class MainActivity : AppCompatActivity() {
 
     views.buttonAddAccount.setOnClickListener {
       cleanWebCookies()
-      ownerManager.createOwner(provider.ownerType, provider.credentialType, object : Callback<Account> {
-        override fun onResult(result: Account) {
-          Timber.d("Logged in: $result")
-        }
+      ownerManager.createOwner(
+        provider.ownerType,
+        provider.credentialType,
+        object : Callback<Account> {
+          override fun onResult(result: Account) {
+            Timber.d("Logged in: $result")
+          }
 
-        override fun onError(error: Throwable) {
-          lifecycleScope.launch { showError(error) }
-        }
-      })
+          override fun onError(error: Throwable) {
+            lifecycleScope.launch { showError(error) }
+          }
+        })
     }
 
     views.buttonRequestEmail.setOnClickListener {
@@ -89,18 +90,22 @@ class MainActivity : AppCompatActivity() {
 
     views.buttonInvalidateToken.setOnClickListener {
       ownerManager.getActiveOwner(provider.ownerType)?.let { account ->
-        credentialStorage.getCredentials(account, provider.credentialType, object : Callback<AndroidCredentials> {
-          override fun onResult(result: AndroidCredentials) {
-            credentialStorage.storeCredentials(
-              account,
-              provider.credentialType,
-              AndroidCredentials("some-invalid-token", result.data))
-          }
+        credentialStorage.getCredentials(
+          account,
+          provider.credentialType,
+          object : Callback<AndroidCredentials> {
+            override fun onResult(result: AndroidCredentials) {
+              credentialStorage.storeCredentials(
+                account,
+                provider.credentialType,
+                AndroidCredentials("some-invalid-token", result.data)
+              )
+            }
 
-          override fun onError(error: Throwable) {
-            lifecycleScope.launch { showError(error) }
-          }
-        })
+            override fun onError(error: Throwable) {
+              lifecycleScope.launch { showError(error) }
+            }
+          })
       }
     }
 
