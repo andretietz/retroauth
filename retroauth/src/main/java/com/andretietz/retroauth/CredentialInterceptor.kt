@@ -81,19 +81,13 @@ class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE :
                 authenticator.refreshCredentials(owner, authRequestType.credentialType, localToken)
               credential = if (refreshedToken != null) {
                 // if the credential was refreshed, store it
-                credentialStorage.storeCredentials(
-                  owner,
-                  authRequestType.credentialType,
-                  refreshedToken
-                )
+                credentialStorage
+                  .storeCredentials(owner, authRequestType.credentialType, refreshedToken)
                 refreshedToken
               } else {
                 // otherwise remove the current credential from the storage
-                credentialStorage.removeCredentials(
-                  owner,
-                  authRequestType.credentialType,
-                  localToken
-                )
+                credentialStorage
+                  .removeCredentials(owner, authRequestType.credentialType, localToken)
                 // and use the "old" credential
                 localToken
               }

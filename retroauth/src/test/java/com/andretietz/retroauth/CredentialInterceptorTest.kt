@@ -1,6 +1,13 @@
 package com.andretietz.retroauth
 
-import com.nhaarman.mockitokotlin2.*
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.never
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.doReturn
+import com.nhaarman.mockitokotlin2.times
+import com.nhaarman.mockitokotlin2.anyOrNull
+import com.nhaarman.mockitokotlin2.doAnswer
 import io.reactivex.Single
 import io.reactivex.observers.TestObserver
 import io.reactivex.schedulers.Schedulers
@@ -65,7 +72,10 @@ class CredentialInterceptorTest {
     }
 
     val credentialStorage = mock<CredentialStorage<String, String, String>>()
-    val authenticator = mock<Authenticator<String, String, String, String>>()
+    val authenticator = mock<Authenticator<String, String, String, String>> {
+      on { getCredentialType(any()) } doReturn CREDENTIAL_TYPE
+      on { getOwnerType(any()) } doReturn OWNER_TYPE
+    }
 
     val interceptor = CredentialInterceptor(
       authenticator,
@@ -84,7 +94,7 @@ class CredentialInterceptorTest {
       )
       .build().create(SomeApi::class.java)
 
-    val testObserver = api.someCall()
+    val testObserver = api.someAuthenticatedCall()
       .subscribeOn(Schedulers.io())
       .test()
 
@@ -111,7 +121,10 @@ class CredentialInterceptorTest {
         override fun isCancelled() = false
       }
     }
+
     val authenticator = mock<Authenticator<String, String, String, String>> {
+      on { getCredentialType(any()) } doReturn CREDENTIAL_TYPE
+      on { getOwnerType(any()) } doReturn OWNER_TYPE
       on { isCredentialValid(anyString()) } doReturn true
       on { authenticateRequest(any(), anyString()) } doAnswer { invocationOnMock ->
         (invocationOnMock.arguments[0] as Request)
@@ -138,7 +151,7 @@ class CredentialInterceptorTest {
       )
       .build().create(SomeApi::class.java)
 
-    val testObserver = api.someCall()
+    val testObserver = api.someAuthenticatedCall()
       .subscribeOn(Schedulers.io())
       .test()
 
@@ -167,6 +180,8 @@ class CredentialInterceptorTest {
       }
     }
     val authenticator = mock<Authenticator<String, String, String, String>> {
+      on { getCredentialType(any()) } doReturn CREDENTIAL_TYPE
+      on { getOwnerType(any()) } doReturn OWNER_TYPE
       on { isCredentialValid(anyString()) } doReturn false // token is invalid
       on { authenticateRequest(any(), anyString()) } doAnswer { invocationOnMock ->
         (invocationOnMock.arguments[0] as Request)
@@ -196,7 +211,7 @@ class CredentialInterceptorTest {
       )
       .build().create(SomeApi::class.java)
 
-    val testObserver = api.someCall()
+    val testObserver = api.someAuthenticatedCall()
       .subscribeOn(Schedulers.io())
       .test()
 
@@ -230,6 +245,8 @@ class CredentialInterceptorTest {
       }
     }
     val authenticator = mock<Authenticator<String, String, String, String>> {
+      on { getCredentialType(any()) } doReturn CREDENTIAL_TYPE
+      on { getOwnerType(any()) } doReturn OWNER_TYPE
       on { isCredentialValid(anyString()) } doReturn false // token is invalid
       on { authenticateRequest(any(), anyString()) } doAnswer { invocationOnMock ->
         (invocationOnMock.arguments[0] as Request)
@@ -259,7 +276,7 @@ class CredentialInterceptorTest {
       )
       .build().create(SomeApi::class.java)
 
-    val testObserver = api.someCall()
+    val testObserver = api.someAuthenticatedCall()
       .subscribeOn(Schedulers.io())
       .test()
 
@@ -295,6 +312,8 @@ class CredentialInterceptorTest {
       }
     }
     val authenticator = mock<Authenticator<String, String, String, String>> {
+      on { getCredentialType(any()) } doReturn CREDENTIAL_TYPE
+      on { getOwnerType(any()) } doReturn OWNER_TYPE
       on { isCredentialValid(anyString()) } doReturn true
       on { authenticateRequest(any(), anyString()) } doAnswer { invocationOnMock ->
         (invocationOnMock.arguments[0] as Request)
@@ -329,7 +348,7 @@ class CredentialInterceptorTest {
       )
       .build().create(SomeApi::class.java)
 
-    val testObserver = api.someCall()
+    val testObserver = api.someAuthenticatedCall()
       .subscribeOn(Schedulers.io())
       .test()
 
@@ -358,6 +377,8 @@ class CredentialInterceptorTest {
       }
     }
     val authenticator = mock<Authenticator<String, String, String, String>> {
+      on { getCredentialType(any()) } doReturn CREDENTIAL_TYPE
+      on { getOwnerType(any()) } doReturn OWNER_TYPE
       on { isCredentialValid(anyString()) } doAnswer { invocationOnMock ->
         invocationOnMock.arguments[0] as String == "credential"
       }
@@ -397,7 +418,7 @@ class CredentialInterceptorTest {
     for (i in range) {
       serverRule.server.enqueue(MockResponse().setBody("{\"data\": \"testdata\"}"))
       calls.add(
-        api.someCall()
+        api.someAuthenticatedCall()
           .subscribeOn(Schedulers.io()) // makes sure a new thread is created foreach call
           .test()
       )
@@ -435,6 +456,8 @@ class CredentialInterceptorTest {
       }
     }
     val authenticator = mock<Authenticator<String, String, String, String>> {
+      on { getCredentialType(any()) } doReturn CREDENTIAL_TYPE
+      on { getOwnerType(any()) } doReturn OWNER_TYPE
       on { isCredentialValid(anyString()) } doReturn false
       on {
         refreshCredentials(anyString(), anyString(), anyString())
@@ -465,7 +488,7 @@ class CredentialInterceptorTest {
     for (i in range) {
       serverRule.server.enqueue(MockResponse().setBody("{\"data\": \"testdata\"}"))
       calls.add(
-        api.someCall()
+        api.someAuthenticatedCall()
           .subscribeOn(Schedulers.io()) // makes sure a new thread is created foreach call
           .test()
       )
@@ -483,6 +506,11 @@ class CredentialInterceptorTest {
     // authenticate request -> never
     verify(authenticator, never()).authenticateRequest(any(), anyString())
   }
+
+  companion object {
+    private const val OWNER_TYPE = "owner_type"
+    private const val CREDENTIAL_TYPE = "credential_type"
+  }
 }
 
 data class Data(val data: String)
@@ -490,4 +518,8 @@ data class Data(val data: String)
 interface SomeApi {
   @GET("/some/path")
   fun someCall(): Single<Data>
+
+  @Authenticated
+  @GET("/some/other/path")
+  fun someAuthenticatedCall(): Single<Data>
 }
