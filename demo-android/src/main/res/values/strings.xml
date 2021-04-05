@@ -3,4 +3,6 @@
     <string name="authentication.ACTION" translatable="false">com.andretietz.retroauth.demo.ACTION</string>
     <string name="authentication.ACCOUNT" translatable="false">com.andretietz.retroauth.demo.ACCOUNT</string>
     <string name="authentication.TOKEN" translatable="false">com.andretietz.retroauth.demo.TOKEN</string>
+    <string name="icon_description_private_repository">This is a private repository</string>
+    <string name="icon_description_open_repository" translatable="false">This is a public repository</string>
 </resources>

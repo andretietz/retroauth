@@ -1,4 +1,4 @@
-package com.andretietz.retroauth.demo
+package com.andretietz.retroauth.demo.auth
 
 import android.accounts.Account
 import android.app.Application
@@ -8,6 +8,7 @@ import com.andretietz.retroauth.AndroidCredentialType
 import com.andretietz.retroauth.AndroidCredentials
 import com.andretietz.retroauth.AndroidOwnerStorage
 import com.andretietz.retroauth.Authenticator
+import com.andretietz.retroauth.demo.R
 import okhttp3.Request
 
 /**
@@ -16,15 +17,15 @@ import okhttp3.Request
  * If the credential for some reason is invalid, the returning 401 will cause the deletion of the credential and a retry of the
  * call, in which it will get refreshed
  */
-class FacebookAuthenticator(application: Application) : Authenticator<String, Account, AndroidCredentialType, AndroidCredentials>() {
+class GithubAuthenticator(application: Application) : Authenticator<String, Account, AndroidCredentialType, AndroidCredentials>() {
 
   private val credentialStorage by lazy { AndroidCredentialStorage(application) }
   private val ownerStorage by lazy { AndroidOwnerStorage(application) }
 
   companion object {
-    const val CLIENT_ID = "908466759214667"
-    const val CLIENT_SECRET = "6254dc69ac506d95b897d35d0dcf9e1f"
-    const val CLIENT_CALLBACK = "https://localhost:8000/accounts/facebook/login/callback/"
+    const val CLIENT_ID = "bb86ddeb2dd22163192f"
+    const val CLIENT_SECRET = "0b2a017a3e481c1cb69739ff5a6c4de37009ed7a"
+    const val CLIENT_CALLBACK = "https://localhost:8000/accounts/github/login/callback/"
     const val KEY_TOKEN_VALIDITY = "credential_validity"
 
     @JvmStatic
@@ -39,9 +40,9 @@ class FacebookAuthenticator(application: Application) : Authenticator<String, Ac
     }
   }
 
-  val credentialType = createTokenType(application)
+  private val credentialType = createTokenType(application)
 
-  val ownerType: String = application.getString(R.string.authentication_ACCOUNT)
+  private val ownerType: String = application.getString(R.string.authentication_ACCOUNT)
 
   override fun getCredentialType(annotationCredentialType: Int): AndroidCredentialType = credentialType
 
@@ -51,16 +52,6 @@ class FacebookAuthenticator(application: Application) : Authenticator<String, Ac
     return request.newBuilder()
       .header("Authorization", "Bearer ${credential.token}")
       .build()
-  }
-
-  override fun isCredentialValid(credential: AndroidCredentials): Boolean {
-    credential.data?.let {
-      it[KEY_TOKEN_VALIDITY]?.let { validity ->
-        // return false if the credential is no longer valid
-        return validity.toLong() > System.currentTimeMillis()
-      }
-    }
-    return true
   }
 
   override fun refreshCredentials(
