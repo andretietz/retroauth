@@ -5,7 +5,7 @@ apply plugin: 'java-library'
 dependencies {
     api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
     api "com.squareup.retrofit2:retrofit:$retrofitVersion"
-    implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
+    api "com.squareup.okhttp3:okhttp:$okhttpVersion"
 
     testImplementation "junit:junit:$junitVersion"
     testImplementation "io.reactivex.rxjava2:rxjava:2.2.16"
@@ -15,6 +15,11 @@ dependencies {
     testImplementation "com.squareup.retrofit2:adapter-rxjava2:$retrofitVersion"
     testImplementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 apply from: rootProject.file('gradle/publish.gradle')

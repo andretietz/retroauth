@@ -9,7 +9,7 @@ I split the project into 2 separate ones.
 
  * [retroauth](retroauth)
   This is the base implementation, to be used in plain java/kotlin projects.
- * [retroauth-android](retroauth-android/)
+ * [android-accountmanager](android-accountmanager/)
   On top of the pure Kotlin implementation there's the Android implementation, which uses the
 Android AccountManager in order to store Owners (Accounts) and their Credentials.
 

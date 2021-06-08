@@ -16,7 +16,7 @@ interface SomeService {
 
 ```
 
-If you're an Android Developer feel free to go directly to the [android implementation](retroauth-android/).
+If you're an Android Developer feel free to go directly to the [android implementation](android-accountmanager/).
 ## How to use it?
 
 Add it as dependency:

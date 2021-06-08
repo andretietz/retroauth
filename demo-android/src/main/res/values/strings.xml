@@ -3,4 +3,9 @@
     <string name="authentication.ACTION" translatable="false">com.andretietz.retroauth.demo.ACTION</string>
     <string name="authentication.ACCOUNT" translatable="false">com.andretietz.retroauth.demo.ACCOUNT</string>
     <string name="authentication.TOKEN" translatable="false">com.andretietz.retroauth.demo.TOKEN</string>
+    <string name="menuitem_add_account">Add Account</string>
+    <string name="menuitem_invalidate_token">Invalidate Token</string>
+    <string name="menuitem_switch_accounts">Switch Account</string>
+    <string name="menuitem_logout">Logout</string>
+    <string name="label_empty_state">To load repositories, pull to load/refresh</string>
 </resources>
