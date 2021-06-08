@@ -29,10 +29,11 @@ import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 
 /**
- * This is the Android implementation of an [OwnerStorage]. It does all the Android [Account] handling
+ * This is the Android implementation of an [OwnerStorage]. It does all the Android [Account]
+ * handling using tha Android [AccountManager].
  */
 @Suppress("unused")
-class AndroidOwnerStorage constructor(
+class AndroidAccountManagerOwnerStorage constructor(
   private val application: Application
 ) : OwnerStorage<String, Account, AndroidCredentialType> {
 

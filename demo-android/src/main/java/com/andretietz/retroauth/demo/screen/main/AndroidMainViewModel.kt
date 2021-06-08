@@ -2,8 +2,8 @@ package com.andretietz.retroauth.demo.screen.main
 
 import android.accounts.Account
 import androidx.lifecycle.ViewModel
-import com.andretietz.retroauth.AndroidCredentialStorage
-import com.andretietz.retroauth.AndroidOwnerStorage
+import com.andretietz.retroauth.AndroidAccountManagerCredentialStorage
+import com.andretietz.retroauth.AndroidAccountManagerOwnerStorage
 import com.andretietz.retroauth.demo.auth.GithubAuthenticator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -15,8 +15,8 @@ import javax.inject.Inject
 @HiltViewModel
 class AndroidMainViewModel @Inject constructor(
   retrofit: Retrofit,
-  private val ownerStorage: AndroidOwnerStorage,
-  credentialStorage: AndroidCredentialStorage,
+  private val ownerStorage: AndroidAccountManagerOwnerStorage,
+  credentialStorage: AndroidAccountManagerCredentialStorage,
   private val authenticator: GithubAuthenticator,
   cache: Cache
 ) : ViewModel(), MainViewModel<Account> by CommonMainViewModel(

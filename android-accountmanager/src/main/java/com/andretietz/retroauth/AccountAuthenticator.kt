@@ -72,7 +72,7 @@ class AccountAuthenticator(
     accountType: String,
     credentialType: String?,
     accountName: String?
-  ): Bundle? = Bundle().apply {
+  ): Bundle = Bundle().apply {
     putParcelable(
       AccountManager.KEY_INTENT,
       Intent(action).apply {

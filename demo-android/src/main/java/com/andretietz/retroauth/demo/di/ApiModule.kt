@@ -1,8 +1,8 @@
 package com.andretietz.retroauth.demo.di
 
 import android.app.Application
-import com.andretietz.retroauth.AndroidCredentialStorage
-import com.andretietz.retroauth.AndroidOwnerStorage
+import com.andretietz.retroauth.AndroidAccountManagerCredentialStorage
+import com.andretietz.retroauth.AndroidAccountManagerOwnerStorage
 import com.andretietz.retroauth.androidAuthentication
 import com.andretietz.retroauth.demo.auth.GithubAuthenticator
 import com.github.scribejava.apis.GitHubApi
@@ -52,10 +52,6 @@ class ApiModule {
     val httpClient = OkHttpClient.Builder()
       .addNetworkInterceptor(HttpLoggingInterceptor()
         .also { it.level = HttpLoggingInterceptor.Level.BODY })
-      .addInterceptor(HttpLoggingInterceptor()
-        .also {
-          it.level = HttpLoggingInterceptor.Level.HEADERS
-        })
       .addInterceptor { chain: Interceptor.Chain ->
         val request = chain.request().newBuilder()
           .addHeader("Accept", "application/vnd.github.v3+json")
@@ -78,11 +74,11 @@ class ApiModule {
 
   @Singleton
   @Provides
-  fun providesOwnerStorage(application: Application) = AndroidOwnerStorage(application)
+  fun providesOwnerStorage(application: Application) = AndroidAccountManagerOwnerStorage(application)
 
   @Singleton
   @Provides
-  fun providesCredentialStorage(application: Application) = AndroidCredentialStorage(application)
+  fun providesCredentialStorage(application: Application) = AndroidAccountManagerCredentialStorage(application)
 
   @Singleton
   @Provides

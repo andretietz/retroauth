@@ -3,10 +3,10 @@ package com.andretietz.retroauth.demo.auth
 import android.accounts.Account
 import android.app.Application
 import android.content.Context
-import com.andretietz.retroauth.AndroidCredentialStorage
+import com.andretietz.retroauth.AndroidAccountManagerCredentialStorage
 import com.andretietz.retroauth.AndroidCredentialType
 import com.andretietz.retroauth.AndroidCredentials
-import com.andretietz.retroauth.AndroidOwnerStorage
+import com.andretietz.retroauth.AndroidAccountManagerOwnerStorage
 import com.andretietz.retroauth.Authenticator
 import com.andretietz.retroauth.demo.R
 import okhttp3.Request
@@ -19,8 +19,8 @@ import okhttp3.Request
  */
 class GithubAuthenticator(application: Application) : Authenticator<String, Account, AndroidCredentialType, AndroidCredentials>() {
 
-  private val credentialStorage by lazy { AndroidCredentialStorage(application) }
-  private val ownerStorage by lazy { AndroidOwnerStorage(application) }
+  private val credentialStorage by lazy { AndroidAccountManagerCredentialStorage(application) }
+  private val ownerStorage by lazy { AndroidAccountManagerOwnerStorage(application) }
 
   companion object {
     const val CLIENT_ID = "bb86ddeb2dd22163192f"

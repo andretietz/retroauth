@@ -28,7 +28,7 @@ import java.util.concurrent.FutureTask
 /**
  * This is the implementation of a [CredentialStorage] in Android using the Android [AccountManager]
  */
-class AndroidCredentialStorage constructor(
+class AndroidAccountManagerCredentialStorage constructor(
   private val application: Application
 ) : CredentialStorage<Account, AndroidCredentialType, AndroidCredentials> {
 

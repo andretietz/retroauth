@@ -7,7 +7,7 @@ android {
 
     defaultConfig {
         minSdkVersion 21
-        testInstrumentationRunner "androidx.test.ext.junit.runners.AndroidJUnit4"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
