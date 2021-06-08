@@ -213,7 +213,7 @@ val retrofit: Retrofit = Retrofit.Builder()
 
 
 // create your services
-val service = authRetrofit.create(SomeAuthenticatedService.class)
+val service = retrofit.create(SomeAuthenticatedService.class)
 // use them
 service.someAuthenticatedCall().execute()
 ```
