@@ -1,5 +1,5 @@
 # A simple way of calling authenticated requests using retrofit
-[![Build Status](https://app.bitrise.io/app/333d6e2bdd7d7306/status.svg?token=XiPwuCStRxgZFLtYToFKTg&branch=master)](https://app.bitrise.io/app/333d6e2bdd7d7306)
+[![Snapshot build](https://github.com/andretietz/retroauth/workflows/Snapshot%20build/badge.svg)](https://github.com/andretietz/retroauth/actions?query=workflow%3A%22Snapshot+build%22)
 ## Dependencies
 * [Retrofit](https://github.com/square/retrofit) 2.5.0
 
