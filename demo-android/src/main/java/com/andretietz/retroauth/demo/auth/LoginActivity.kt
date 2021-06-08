@@ -45,7 +45,6 @@ class LoginActivity : AuthenticationActivity() {
         } else {
           lifecycleScope.launch(Dispatchers.IO) {
             val token = helper.getAccessToken(code)
-
             val userInfo = api.getUser("Bearer ${token.accessToken}")
             withContext(Dispatchers.Main) {
               val account = createOrGetAccount(userInfo.login)

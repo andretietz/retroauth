@@ -1,23 +1,25 @@
 package com.andretietz.retroauth
 
-import org.junit.Assert.assertNotNull
+import android.app.Application
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.RuntimeEnvironment
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(AndroidJUnit4::class)
 class ActivityManagerTest {
+  private val application = ApplicationProvider.getApplicationContext<Application>()
 
   @Before
   fun setup() {
-    ActivityManager[RuntimeEnvironment.application]
+    ActivityManager[application]
   }
 
   @Test
   fun initializing() {
-    val activityManager = ActivityManager[RuntimeEnvironment.application]
-    assertNotNull(activityManager)
+    val activityManager = ActivityManager[application]
+    assertThat(activityManager).isNotNull
   }
 }

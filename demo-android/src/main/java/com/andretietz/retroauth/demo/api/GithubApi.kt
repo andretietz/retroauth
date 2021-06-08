@@ -9,8 +9,8 @@ interface GithubApi {
   /**
    * https://docs.github.com/en/rest/reference/repos#list-repositories-for-the-authenticated-user
    */
-//  @Authenticated
-  @GET("user/repos?visibility=private")
+  @Authenticated
+  @GET("user/repos?visibility=all")
   suspend fun getRepositories(): List<Repository>
 
   @JsonClass(generateAdapter = true)

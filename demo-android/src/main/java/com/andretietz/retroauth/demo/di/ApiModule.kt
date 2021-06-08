@@ -35,6 +35,7 @@ class ApiModule {
       .apiSecret(GithubAuthenticator.CLIENT_SECRET)
       .callback(GithubAuthenticator.CLIENT_CALLBACK)
       .httpClient(OkHttpHttpClient())
+      .defaultScope("repo user:email")
       .build(GitHubApi.instance())
   }
 
@@ -42,6 +43,7 @@ class ApiModule {
   @Provides
   fun provideRetrofit(
     application: Application,
+    cache: Cache,
     authenticator: GithubAuthenticator
   ): Retrofit {
     /**
@@ -60,23 +62,18 @@ class ApiModule {
           .build()
         chain.proceed(request)
       }
-      .cache(Cache(application.cacheDir, 50 * 1024 * 1024))
+      .cache(cache)
       .build()
 
     /**
      * Create your Retrofit Object using the [Retrofit.androidAuthentication]
      */
-    val retrofit = Retrofit.Builder()
+    return Retrofit.Builder()
       .baseUrl("https://api.github.com")
       .client(httpClient)
       .addConverterFactory(MoshiConverterFactory.create())
       .build()
       .androidAuthentication(application, authenticator)
-
-    /**
-     * Create your API Service
-     */
-    return retrofit
   }
 
   @Singleton
@@ -91,4 +88,9 @@ class ApiModule {
   @Provides
   fun providesAuthenticator(application: Application): GithubAuthenticator =
     GithubAuthenticator(application)
+
+  @Singleton
+  @Provides
+  fun provideCache(application: Application): Cache =
+    Cache(application.cacheDir, 50 * 1024 * 1024)
 }

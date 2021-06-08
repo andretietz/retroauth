@@ -43,10 +43,6 @@ class RepositoryAdapter : RecyclerView.Adapter<RepositoryAdapter.RepositoryViewH
         if (repository.private) R.drawable.ic_baseline_lock_24
         else R.drawable.ic_baseline_lock_open_24
       )
-      binding.imagePrivate.contentDescription = binding.root.context.getText(
-        if (repository.private) R.string.icon_description_private_repository
-        else R.string.icon_description_open_repository
-      )
     }
   }
 

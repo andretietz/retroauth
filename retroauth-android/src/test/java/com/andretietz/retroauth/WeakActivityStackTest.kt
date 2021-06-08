@@ -1,13 +1,13 @@
 package com.andretietz.retroauth
 
 import android.app.Activity
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(AndroidJUnit4::class)
 class WeakActivityStackTest {
 
   private val stack = WeakActivityStack()

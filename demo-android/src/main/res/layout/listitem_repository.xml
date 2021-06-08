@@ -12,11 +12,13 @@
             tools:text="Some Repository Name"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
             app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginTop="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/imagePrivate"
             app:layout_constraintHorizontal_bias="0.0"
-            android:layout_marginStart="16dp" />
+            android:layout_marginStart="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp" />
 
     <ImageView
             android:layout_width="wrap_content"
@@ -25,7 +27,7 @@
             android:id="@+id/imagePrivate"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginTop="16dp"
             android:layout_marginStart="16dp"
-            android:contentDescription="@string/icon_description_private_repository" />
+            tools:ignore="ContentDescription"
+            app:layout_constraintBottom_toBottomOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

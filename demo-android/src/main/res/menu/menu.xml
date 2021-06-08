@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+            android:id="@+id/menuitem_add_account"
+            android:title="@string/menuitem_add_account" />
+    <item
+            android:id="@+id/menuitem_invalidate_token"
+            android:title="@string/menuitem_invalidate_token" />
+    <item
+            android:id="@+id/menuitem_switch_accounts"
+            android:title="@string/menuitem_switch_accounts" />
+    <item
+            android:id="@+id/menuitem_logout"
+            android:title="@string/menuitem_logout" />
+</menu>
