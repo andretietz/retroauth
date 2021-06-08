@@ -3,8 +3,8 @@
 [![Build Status](https://app.bitrise.io/app/333d6e2bdd7d7306/status.svg?token=XiPwuCStRxgZFLtYToFKTg&branch=master)](https://app.bitrise.io/app/333d6e2bdd7d7306)
 ## Dependencies
 * [Retrofit](https://github.com/square/retrofit) 2.9.0
-* androidx.appcompat 1.2.0
-* kotlin-stdlib 1.4.21
+* androidx.appcompat 1.3.0
+* kotlin-stdlib 1.5.10
 
 ## What does it do?
 If you call a request method, annotated with the authenticated annotation, it'll do the following steps:
@@ -17,7 +17,7 @@ If you call a request method, annotated with the authenticated annotation, it'll
 
 Add it as dependency:
 ```groovy
-implementation 'com.andretietz.retroauth:retroauth-android:x.y.z'
+implementation 'com.andretietz.retroauth:android-accountmanager:x.y.z'
 ```
 ## Setup
 ### 1. Define an Account-Type String

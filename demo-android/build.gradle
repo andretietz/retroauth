@@ -57,5 +57,5 @@ dependencies {
     implementation 'com.github.scribejava:scribejava-apis:8.1.0'
     implementation 'com.github.scribejava:scribejava-httpclient-okhttp:8.1.0'
 
-    implementation project(':retroauth-android')
+    implementation project(':android-accountmanager')
 }

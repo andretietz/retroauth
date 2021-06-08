@@ -46,7 +46,7 @@ jobs:
 
       - name: Build, upload and release Android Version
         run: |
-          ./gradlew retroauth-android:uploadArchives --stacktrace --no-daemon --no-parallel --warning-mode all
+          ./gradlew android-accountmanager:uploadArchives --stacktrace --no-daemon --no-parallel --warning-mode all
           ./gradlew closeAndReleaseRepository --no-daemon --no-parallel --warning-mode all
         env:
           ORG_GRADLE_PROJECT_mavenCentralRepositoryUsername: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
