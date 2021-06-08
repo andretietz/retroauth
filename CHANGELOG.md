@@ -2,6 +2,7 @@
 * Removing the Retrofit CallAdapter in order to enrich the requests using [this method](https://andretietz.com/2021/04/06/custom-retrofit2-annotations-revisited/)
 * using the github api instead of facebook in the demo.
 * Renaming retroauth-android to android-accountmanager. WARNING: This changes the project-import!!!
+* Renaming AndroidOwnerStorage to AndroidAccountManagerOwnerStorage and AndroidCredentialStorage to AndroidAccountManagerCredentialStorage
 ## 3.1.0 (2021-01-22)
 * Removing [startup hack](https://andretietz.medium.com/auto-initialize-your-android-library-2349daf06920) with google version of it.
 * increasing min SDK level from 14 to 21

@@ -40,13 +40,13 @@ abstract class AuthenticationActivity : AppCompatActivity() {
   private lateinit var accountManager: AccountManager
   private var credentialType: String? = null
   private lateinit var resultBundle: Bundle
-  private lateinit var credentialStorage: AndroidCredentialStorage
-  private val ownerManager by lazy { AndroidOwnerStorage(application) }
+  private lateinit var credentialStorage: AndroidAccountManagerCredentialStorage
+  private val ownerManager by lazy { AndroidAccountManagerOwnerStorage(application) }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     accountManager = AccountManager.get(application)
-    credentialStorage = AndroidCredentialStorage(application)
+    credentialStorage = AndroidAccountManagerCredentialStorage(application)
 
     accountAuthenticatorResponse = intent.getParcelableExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)
     accountAuthenticatorResponse?.onRequestContinued()

@@ -172,14 +172,46 @@ interface SomeAuthenticatedService {
 ```
  
  * Create the Retrofit object and instantiate it
-```java
-Retrofit retrofit = RetroauthAndroidBuilder.create(application, YourAuthenticator()))
+```kotlin
+val authenticator: Authenticator = YourAuthenticator() // See Usage
+val baseRetrofit: Retrofit = Retrofit.Builder()
         .baseUrl("https://api.awesome.com/")
-        // add whatever you used to do with retrofit2
-        // i.e.:
+        // setup your retrofit as you wish...
         .addConverterFactory(GsonConverterFactory.create())
-        
-        .build();
+        .build()
+
+// Either this (which also works in plain java)
+val authRetrofit: Retrofit = RetroauthAndroid.setup(
+    retrofit,
+    application,
+    authenticator
+)
+// OR this
+val authRetrofit = baseRetrofit.androidAuthentication(application, authenticator)
+
+// create your services
+val service = authRetrofit.create(SomeAuthenticatedService.class)
+// use them
+service.someAuthenticatedCall().execute()
+```
+Another option is to create the retrofit instance completely yourself:
+```kotlin
+// OR if you want to have full control:
+val authenticator: Authenticator = YourAuthenticator() // See Usage
+val ownerStorage: OwnerStorage<String, Account, AndroidCredentialType> = AndroidAccountManagerOwnerStorage(application)
+val credentialStorage: CredentialStorage<Account, AndroidCredentialType, AndroidCredentials> = AndroidAccountManagerCredentialStorage(application)
+val retrofit: Retrofit = Retrofit.Builder()
+        .baseUrl("https://api.awesome.com/")
+        // setup your retrofit as you wish...
+        .addConverterFactory(GsonConverterFactory.create())
+        .client(
+            OkHttpClient.Builder()
+                .addInterceptor(CredentialInterceptor(authenticator, ownerStorage, credentialStorage))
+                .build()
+        )   
+        .build()
+
+
 // create your services
 val service = retrofit.create(SomeAuthenticatedService.class)
 // use them

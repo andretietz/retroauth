@@ -14,8 +14,8 @@ object RetroauthAndroid {
     return Retroauth.setup(
       retrofit,
       authenticator,
-      AndroidOwnerStorage(application),
-      AndroidCredentialStorage(application)
+      AndroidAccountManagerOwnerStorage(application),
+      AndroidAccountManagerCredentialStorage(application)
     )
   }
 }

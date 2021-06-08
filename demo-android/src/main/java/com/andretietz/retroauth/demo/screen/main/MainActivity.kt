@@ -12,7 +12,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.andretietz.retroauth.AndroidOwnerStorage
+import com.andretietz.retroauth.AndroidAccountManagerOwnerStorage
 import com.andretietz.retroauth.demo.R
 import com.andretietz.retroauth.demo.databinding.ActivityRepositoryListBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
   private val viewModel: AndroidMainViewModel by viewModels()
 
   @Inject
-  lateinit var ownerStorage: AndroidOwnerStorage
+  lateinit var ownerStorage: AndroidAccountManagerOwnerStorage
 
   private lateinit var binding: ActivityRepositoryListBinding
 
