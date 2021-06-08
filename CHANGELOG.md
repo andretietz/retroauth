@@ -1,4 +1,6 @@
-## 3.2.0 ()
+## 3.2.1 ()
+* Kotlin script migration
+## 3.2.0 (2021-06-08)
 * Removing the Retrofit CallAdapter in order to enrich the requests using [this method](https://andretietz.com/2021/04/06/custom-retrofit2-annotations-revisited/)
 * using the github api instead of facebook in the demo.
 * Renaming retroauth-android to android-accountmanager. WARNING: This changes the project-import!!!
