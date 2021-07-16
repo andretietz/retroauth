@@ -16,8 +16,6 @@
 
 package com.andretietz.retroauth
 
-import java.util.concurrent.Future
-
 /**
  * This is the interface of a credential storage.
  */
@@ -32,9 +30,8 @@ interface CredentialStorage<in OWNER : Any, in CREDENTIAL_TYPE : Any, CREDENTIAL
    */
   fun getCredentials(
     owner: OWNER,
-    type: CREDENTIAL_TYPE,
-    callback: Callback<CREDENTIAL>? = null
-  ): Future<CREDENTIAL>
+    type: CREDENTIAL_TYPE
+  ): CREDENTIAL
 
   /**
    * Removes the credentials of a specific type and owner from the credentials storage.

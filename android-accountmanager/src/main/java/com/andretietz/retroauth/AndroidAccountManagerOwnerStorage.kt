@@ -47,18 +47,17 @@ class AndroidAccountManagerOwnerStorage constructor(
 
   override fun createOwner(
     ownerType: String,
-    credentialType: AndroidCredentialType,
-    callback: Callback<Account>?
-  ): Future<Account> {
+    credentialType: AndroidCredentialType
+  ): Account {
     val future = accountManager.addAccount(
       ownerType,
       credentialType.type,
       null,
       null,
       activityManager.activity,
-      if (callback != null) CreateAccountCallback(callback) else null,
+      null,
       null)
-    return AccountFuture(future)
+    return AccountFuture(future).get()
   }
 
   override fun getOwner(ownerType: String, ownerName: String): Account? {
@@ -89,18 +88,16 @@ class AndroidAccountManagerOwnerStorage constructor(
     }
   }
 
-  override fun removeOwner(ownerType: String, owner: Account, callback: Callback<Boolean>?): Future<Boolean> {
+  override fun removeOwner(ownerType: String, owner: Account): Boolean {
     val accountFuture: Future<Boolean>
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-      val rac = if (callback != null) RemoveLollipopAccountCallback(callback) else null
-      accountFuture = RemoveAccountFuture(accountManager.removeAccount(owner, null, rac, null))
+      accountFuture = RemoveAccountFuture(accountManager.removeAccount(owner, null, null, null))
     } else {
-      val rac = if (callback != null) RemoveAccountCallback(callback) else null
       @Suppress("DEPRECATION")
-      accountFuture = PreLollipopRemoveAccountFuture(accountManager.removeAccount(owner, rac, null))
+      accountFuture = PreLollipopRemoveAccountFuture(accountManager.removeAccount(owner, null, null))
     }
     switchActiveOwner(owner.type)
-    return accountFuture
+    return accountFuture.get()
   }
 
   /**

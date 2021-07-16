@@ -49,7 +49,7 @@ abstract class Authenticator<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE 
     /**
      * The default implementation returns the first available owner.
      */
-    executors.submit(Callable<OWNER> { owners[0] })
+    executors.submit(Callable { owners[0] })
 
   /**
    * @param annotationCredentialType type of the credential reached in from the [Authenticated.credentialType]

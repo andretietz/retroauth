@@ -16,6 +16,8 @@
 
 package com.andretietz.retroauth
 
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
@@ -71,7 +73,7 @@ class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE :
           if (owner != null) {
             // get the credential of the owner
             val localToken =
-              credentialStorage.getCredentials(owner, authRequestType.credentialType).get()
+              credentialStorage.getCredentials(owner, authRequestType.credentialType)
             // if the credential is still valid and no refresh has been requested
             if (authenticator.isCredentialValid(localToken) && !refreshRequested) {
               credential = localToken

@@ -3,7 +3,8 @@ plugins {
 }
 
 dependencies {
-  api(Dependencies.kotlin)
+  api(Dependencies.kotlin.kotlin)
+  api(Dependencies.kotlin.coroutines)
   api(Dependencies.retrofit.retrofit)
   api(Dependencies.okhttp.okhttp)
 

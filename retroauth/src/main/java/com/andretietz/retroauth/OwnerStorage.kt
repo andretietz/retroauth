@@ -16,29 +16,24 @@
 
 package com.andretietz.retroauth
 
-import java.util.concurrent.Future
-
 /**
  * Since every credential belongs to a specific user, this users have to be managed.
  */
 interface OwnerStorage<in OWNER_TYPE : Any, OWNER : Any, in CREDENTIAL_TYPE : Any> {
 
   /**
-   * Creates an [OWNER] of a specific [ownerType] for a specific [credentialType]. So open a login and let the user
-   * login. If the User cancels, [Callback.onError] should be called with an [AuthenticationCanceledException] or if
-   * the [Future.get] is used, it'll throw that Exception
+   * Creates an [OWNER] of a specific [ownerType] for a specific [credentialType].
+   * So open a login and let the user login.
    *
    * @param ownerType Type of owner you want to create.
    * @param credentialType Type of credential you want to open the login for.
-   * @param callback Optional callback to get notified when the user was created `true` or not `false`.
    *
    * @return [OWNER] which was created.
    */
   fun createOwner(
     ownerType: OWNER_TYPE,
-    credentialType: CREDENTIAL_TYPE,
-    callback: Callback<OWNER>? = null
-  ): Future<OWNER>
+    credentialType: CREDENTIAL_TYPE
+  )
 
   /**
    * Returns the owner if exists
@@ -80,5 +75,5 @@ interface OwnerStorage<in OWNER_TYPE : Any, OWNER : Any, in CREDENTIAL_TYPE : An
    * @param owner the owner to remove.
    * @param callback Optional to get notified when the removal is complete.
    */
-  fun removeOwner(ownerType: OWNER_TYPE, owner: OWNER, callback: Callback<Boolean>? = null): Future<Boolean>
+  fun removeOwner(ownerType: OWNER_TYPE, owner: OWNER): Boolean
 }

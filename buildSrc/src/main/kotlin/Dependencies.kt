@@ -1,6 +1,7 @@
 object Versions {
   const val scribe = "8.1.0"
   const val kotlin = "1.5.10"
+  const val coroutines = "1.5.0"
   const val junit = "4.13.2"
   const val retrofit = "2.9.0"
   const val okhttp = "4.9.1"
@@ -47,8 +48,13 @@ object Versions {
 }
 
 object Dependencies {
-  const val kotlin = "org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin}"
   const val rxjava2 = "io.reactivex.rxjava2:rxjava:${Versions.rxjava2}"
+
+  object kotlin {
+    const val kotlin = "org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin}"
+    const val coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}"
+    const val coroutinesReactive = "org.jetbrains.kotlinx:kotlinx-coroutines-reactive:${Versions.coroutines}"
+  }
 
   object scribe {
     const val scribe = "com.github.scribejava:scribejava-apis:${Versions.scribe}"

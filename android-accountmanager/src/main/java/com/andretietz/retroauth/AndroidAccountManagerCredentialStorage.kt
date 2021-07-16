@@ -22,7 +22,6 @@ import android.app.Application
 import android.os.Looper
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
-import java.util.concurrent.Future
 import java.util.concurrent.FutureTask
 
 /**
@@ -43,14 +42,13 @@ class AndroidAccountManagerCredentialStorage constructor(
 
   override fun getCredentials(
     owner: Account,
-    type: AndroidCredentialType,
-    callback: Callback<AndroidCredentials>?
-  ): Future<AndroidCredentials> {
-    val task = GetTokenTask(application, accountManager, owner, type, callback)
+    type: AndroidCredentialType
+  ): AndroidCredentials {
+    val task = GetTokenTask(application, accountManager, owner, type)
     return if (Looper.myLooper() == Looper.getMainLooper())
-      executor.submit(task)
+      executor.submit(task).get()
     else
-      FutureTask(task).also { it.run() }
+      FutureTask(task).also { it.run() }.get()
   }
 
   override fun removeCredentials(owner: Account, type: AndroidCredentialType, credentials: AndroidCredentials) {
@@ -77,8 +75,7 @@ class AndroidAccountManagerCredentialStorage constructor(
     application: Application,
     private val accountManager: AccountManager,
     private val owner: Account,
-    private val type: AndroidCredentialType,
-    private val callback: Callback<AndroidCredentials>?
+    private val type: AndroidCredentialType
   ) : Callable<AndroidCredentials> {
 
     private val activityManager = ActivityManager[application]
@@ -94,20 +91,14 @@ class AndroidAccountManagerCredentialStorage constructor(
 
       var token = future.result.getString(AccountManager.KEY_AUTHTOKEN)
       if (token == null) token = accountManager.peekAuthToken(owner, type.type)
-      if (token == null) {
-        val error = AuthenticationCanceledException()
-        callback?.onError(error)
-        throw error
-      }
+      if (token == null) throw AuthenticationCanceledException()
       return AndroidCredentials(
         token,
         type.dataKeys
           ?.associateTo(HashMap()) {
             it to accountManager.getUserData(owner, createDataKey(type, it))
           }
-      ).apply {
-        callback?.onResult(this)
-      }
+      )
     }
   }
 }
