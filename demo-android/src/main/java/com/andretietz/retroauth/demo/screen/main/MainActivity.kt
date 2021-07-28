@@ -24,7 +24,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-  private val viewModel: AndroidMainViewModel by viewModels()
+  private val viewModel: MainViewModel by viewModels()
 
   @Inject
   lateinit var ownerStorage: AndroidAccountManagerOwnerStorage
@@ -54,23 +54,23 @@ class MainActivity : AppCompatActivity() {
         Timber.e("result")
         binding.swipeToRefresh.isRefreshing = false
         when (it) {
-          is MainViewModel.ViewState.InitialState -> {
+          is MainViewState.InitialState -> {
             adapter.update(emptyList())
             binding.repositoryList.visibility = View.GONE
             binding.textEmpty.visibility = View.VISIBLE
           }
-          is MainViewModel.ViewState.RepositoryUpdate -> {
+          is MainViewState.RepositoryUpdate -> {
             binding.repositoryList.visibility = View.VISIBLE
             binding.textEmpty.visibility = View.GONE
             adapter.update(it.repos)
           }
-          is MainViewModel.ViewState.Error -> showError(it.throwable)
-          is MainViewModel.ViewState.LoginSuccess -> {
+          is MainViewState.Error -> showError(it.throwable)
+          is MainViewState.LoginSuccess<*> -> {
             binding.repositoryList.visibility = View.VISIBLE
             binding.textEmpty.visibility = View.GONE
             show("Login success!")
           }
-          is MainViewModel.ViewState.LogoutSuccess -> {
+          is MainViewState.LogoutSuccess -> {
             binding.repositoryList.visibility = View.GONE
             binding.textEmpty.visibility = View.VISIBLE
             show("Logout success!")

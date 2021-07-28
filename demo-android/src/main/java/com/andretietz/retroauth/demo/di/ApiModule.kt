@@ -13,7 +13,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import okhttp3.Cache
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -43,7 +42,6 @@ object ApiModule {
   @Provides
   fun provideRetrofit(
     application: Application,
-    cache: Cache,
     authenticator: GithubAuthenticator
   ): Retrofit {
     /**
@@ -58,7 +56,6 @@ object ApiModule {
           .build()
         chain.proceed(request)
       }
-      .cache(cache)
       .build()
 
     /**
@@ -84,9 +81,4 @@ object ApiModule {
   @Provides
   fun providesAuthenticator(application: Application): GithubAuthenticator =
     GithubAuthenticator(application)
-
-  @Singleton
-  @Provides
-  fun provideCache(application: Application): Cache =
-    Cache(application.cacheDir, 50 * 1024 * 1024L)
 }

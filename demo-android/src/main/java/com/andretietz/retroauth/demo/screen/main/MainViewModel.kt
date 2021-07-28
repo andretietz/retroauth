@@ -1,81 +1,70 @@
 package com.andretietz.retroauth.demo.screen.main
 
-import com.andretietz.retroauth.*
+import android.accounts.Account
+import androidx.lifecycle.ViewModel
+import com.andretietz.retroauth.AndroidAccountManagerCredentialStorage
+import com.andretietz.retroauth.AndroidAccountManagerOwnerStorage
+import com.andretietz.retroauth.AndroidCredentials
+import com.andretietz.retroauth.AuthenticationRequiredException
+import com.andretietz.retroauth.Callback
 import com.andretietz.retroauth.demo.api.GithubApi
-import com.andretietz.retroauth.demo.screen.main.MainViewModel.ViewState
+import com.andretietz.retroauth.demo.auth.GithubAuthenticator
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import okhttp3.Cache
 import retrofit2.Retrofit
+import javax.inject.Inject
 
-interface MainViewModel<OWNER : Any> {
-  val state: StateFlow<ViewState<OWNER>>
-
-  fun addAccount()
-  fun loadRepositories()
-  fun invalidateTokens()
-  fun logout()
-
-
-  sealed class ViewState<out OWNER> {
-    object InitialState : ViewState<Nothing>()
-    data class LoginSuccess<OWNER>(val account: OWNER) : ViewState<OWNER>()
-    object LogoutSuccess : ViewState<Nothing>()
-    data class Error(val throwable: Throwable) : ViewState<Nothing>()
-    data class RepositoryUpdate(val repos: List<GithubApi.Repository>) : ViewState<Nothing>()
-  }
-}
-
-class CommonMainViewModel<CREDENTIAL_TYPE : Any, CREDENTIAL : Any, OWNER_TYPE : Any, OWNER : Any>(
+@HiltViewModel
+class MainViewModel @Inject constructor(
   retrofit: Retrofit,
-  private val ownerStorage: OwnerStorage<OWNER_TYPE, OWNER, CREDENTIAL_TYPE>,
-  private val credentialStorage: CredentialStorage<OWNER, CREDENTIAL_TYPE, CREDENTIAL>,
-  private val authenticator: Authenticator<OWNER_TYPE, OWNER, CREDENTIAL_TYPE, CREDENTIAL>,
-  private val cache: Cache,
-  private val scope: CoroutineScope
-) : MainViewModel<OWNER> {
+  private val ownerStorage: AndroidAccountManagerOwnerStorage,
+  private val credentialStorage: AndroidAccountManagerCredentialStorage,
+  private val authenticator: GithubAuthenticator
+) : ViewModel() {
 
-  private val _state = MutableStateFlow<ViewState<OWNER>>(ViewState.InitialState)
+  private val _state = MutableStateFlow<MainViewState>(MainViewState.InitialState)
+
+  private val scope = CoroutineScope(Dispatchers.Default + CoroutineName("ViewModelScope"))
 
   private val errorHandler = CoroutineExceptionHandler { _, error ->
-    _state.value = ViewState.Error(error)
+    _state.value = MainViewState.Error(error)
   }
 
-  override val state = _state.asStateFlow()
+  val state = _state
 
   private val api = retrofit.create(GithubApi::class.java)
 
-  override fun addAccount() {
+  fun addAccount() {
 //    cleanWebCookies()
     ownerStorage.createOwner(
       authenticator.getOwnerType(),
       authenticator.getCredentialType(),
-      object : Callback<OWNER> {
-        override fun onResult(result: OWNER) {
+      object : Callback<Account> {
+        override fun onResult(result: Account) {
 //          Timber.d("Logged in: $result")
-          _state.value = ViewState.InitialState
-          _state.value = ViewState.LoginSuccess(result)
+          _state.value = MainViewState.InitialState
+          _state.value = MainViewState.LoginSuccess(result)
         }
 
         override fun onError(error: Throwable) {
-          _state.value = ViewState.Error(error)
+          _state.value = MainViewState.Error(error)
         }
       })
   }
 
-  override fun loadRepositories() {
+  fun loadRepositories() {
     scope.launch(Dispatchers.IO + errorHandler) {
       try {
-        _state.value = ViewState.RepositoryUpdate(api.getRepositories())
+        _state.value = MainViewState.RepositoryUpdate(api.getRepositories(), System.currentTimeMillis())
 //        Timber.e("result")
       } catch (error: AuthenticationRequiredException) {
 //        Timber.e(error, "result")
-        _state.value = ViewState.InitialState
+        _state.value = MainViewState.InitialState
 //        withContext(Dispatchers.Main) {
 //        }
 //        Timber.i("User not logged in! Opening Login Screen")
@@ -83,40 +72,41 @@ class CommonMainViewModel<CREDENTIAL_TYPE : Any, CREDENTIAL : Any, OWNER_TYPE : 
     }
   }
 
-  override fun invalidateTokens() {
+  fun invalidateTokens() {
     ownerStorage.getActiveOwner(authenticator.getOwnerType())?.let { account ->
       credentialStorage.getCredentials(
         account,
         authenticator.getCredentialType(),
-        object : Callback<CREDENTIAL> {
-          override fun onResult(result: CREDENTIAL) {
-//            credentialStorage.storeCredentials(
-//              account,
-//              authenticator.getCredentialType(),
-//              AndroidCredentials("some-invalid-token", result.data)
-//            )
+        object : Callback<AndroidCredentials> {
+          override fun onResult(result: AndroidCredentials) {
+            credentialStorage.storeCredentials(
+              account,
+              authenticator.getCredentialType(),
+              AndroidCredentials("some-invalid-token", result.data)
+            )
           }
 
           override fun onError(error: Throwable) {
-            _state.value = ViewState.Error(error)
+            _state.value = MainViewState.Error(error)
           }
         })
     }
   }
 
-  override fun logout() {
+  fun logout() {
     ownerStorage.getActiveOwner(authenticator.getOwnerType())?.let { account ->
       ownerStorage.removeOwner(authenticator.getOwnerType(), account, object : Callback<Boolean> {
         override fun onResult(result: Boolean) {
-          if (result) _state.value = ViewState.LogoutSuccess
+          if (result) _state.value = MainViewState.LogoutSuccess
         }
 
         override fun onError(error: Throwable) {
-          _state.value = ViewState.Error(error)
+          _state.value = MainViewState.Error(error)
         }
       })
     }
-    cache.delete()
   }
+
+  fun getCurrentAccount() = ownerStorage.getActiveOwner(authenticator.getOwnerType())
 
 }
