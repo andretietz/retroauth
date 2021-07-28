@@ -26,7 +26,7 @@ class GithubAuthenticator(application: Application) : Authenticator<String, Acco
     const val CLIENT_ID = "bb86ddeb2dd22163192f"
     const val CLIENT_SECRET = "0b2a017a3e481c1cb69739ff5a6c4de37009ed7a"
     const val CLIENT_CALLBACK = "https://localhost:8000/accounts/github/login/callback/"
-    const val KEY_TOKEN_VALIDITY = "credential_validity"
+    private const val KEY_TOKEN_VALIDITY = "credential_validity"
 
     @JvmStatic
     fun createTokenType(context: Context): AndroidCredentialType {

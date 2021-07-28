@@ -15,18 +15,18 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.andretietz.retroauth.AndroidAccountManagerOwnerStorage
 import com.andretietz.retroauth.demo.R
 import com.andretietz.retroauth.demo.databinding.ActivityRepositoryListBinding
-import dagger.hilt.android.AndroidEntryPoint
+//import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
-import javax.inject.Inject
+//import javax.inject.Inject
 
-@AndroidEntryPoint
+//@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
   private val viewModel: AndroidMainViewModel by viewModels()
 
-  @Inject
+//  @Inject
   lateinit var ownerStorage: AndroidAccountManagerOwnerStorage
 
   private lateinit var binding: ActivityRepositoryListBinding
@@ -39,7 +39,9 @@ class MainActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
     binding = ActivityRepositoryListBinding.inflate(layoutInflater)
     setContentView(binding.root)
-
+//    setContent {
+//      emptyView()
+//    }
     val adapter = RepositoryAdapter()
 
     binding.repositoryList.layoutManager = LinearLayoutManager(this)
@@ -79,6 +81,26 @@ class MainActivity : AppCompatActivity() {
 
   }
 
+  //
+//
+//  @Preview
+//  @Composable
+//  fun emptyView() {
+//    Text(getString(R.string.label_empty_state))
+//  }
+////
+////  @Composable
+////  fun showRepositories() {
+////
+////    LazyColumn {
+////      items(repositories, key = { it.id }) {
+////        Row {
+////          Icon()
+////          Text(it.name)
+////        }
+////      }
+////    }
+////  }
   override fun onCreateOptionsMenu(menu: Menu): Boolean {
     val inflater: MenuInflater = menuInflater
     inflater.inflate(R.menu.menu, menu)

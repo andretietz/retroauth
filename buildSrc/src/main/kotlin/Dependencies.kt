@@ -1,6 +1,7 @@
 object Versions {
   const val scribe = "8.1.0"
   const val kotlin = "1.5.10"
+  const val coroutines = "1.5.0"
   const val junit = "4.13.2"
   const val retrofit = "2.9.0"
   const val okhttp = "4.9.1"
@@ -13,7 +14,7 @@ object Versions {
     const val swipeRefresh = "1.1.0"
     const val fragment = "1.3.4"
     const val timber = "4.7.1"
-    const val hilt = "2.36"
+    const val hilt = "2.38"
     const val appcompat = "1.3.0"
     const val viewmodel = "2.4.0-alpha01"
     const val constraintLayout = "2.0.4"
@@ -37,7 +38,7 @@ object Versions {
 
   object gradle {
     object plugin {
-      const val android = "4.2.1"
+      const val android = "4.2.2"
       const val compose = "0.4.0"
       const val dokka = "1.4.32"
       const val mavenPublish = "0.14.1"
@@ -49,7 +50,7 @@ object Versions {
 object Dependencies {
   const val kotlin = "org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin}"
   const val rxjava2 = "io.reactivex.rxjava2:rxjava:${Versions.rxjava2}"
-
+  const val coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}"
   object scribe {
     const val scribe = "com.github.scribejava:scribejava-apis:${Versions.scribe}"
     const val okhttp = "com.github.scribejava:scribejava-httpclient-okhttp:${Versions.scribe}"
