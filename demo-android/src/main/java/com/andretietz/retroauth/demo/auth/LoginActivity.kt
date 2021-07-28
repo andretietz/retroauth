@@ -10,22 +10,22 @@ import com.andretietz.retroauth.AuthenticationActivity
 import com.andretietz.retroauth.demo.databinding.ActivityLoginBinding
 import com.github.scribejava.core.oauth.OAuth20Service
 import com.squareup.moshi.JsonClass
-//import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.http.GET
 import retrofit2.http.Header
-//import javax.inject.Inject
+import javax.inject.Inject
 
-//@AndroidEntryPoint
+@AndroidEntryPoint
 class LoginActivity : AuthenticationActivity() {
 
-//  @Inject
+  @Inject
   lateinit var helper: OAuth20Service
 
-//  @Inject
+  @Inject
   lateinit var retrofit: Retrofit
 
   @SuppressLint("SetJavaScriptEnabled")

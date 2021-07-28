@@ -9,27 +9,27 @@ import com.github.scribejava.apis.GitHubApi
 import com.github.scribejava.core.builder.ServiceBuilder
 import com.github.scribejava.core.oauth.OAuth20Service
 import com.github.scribejava.httpclient.okhttp.OkHttpHttpClient
-//import dagger.Module
-//import dagger.Provides
-//import dagger.hilt.InstallIn
-//import dagger.hilt.components.SingletonComponent
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import okhttp3.Cache
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
-//import javax.inject.Singleton
+import javax.inject.Singleton
 
-//@Module
-//@InstallIn(SingletonComponent::class)
+@Module
+@InstallIn(SingletonComponent::class)
 object ApiModule {
 
   /**
    * provides the scribejava object to authenticate using github.
    */
-//  @Singleton
-//  @Provides
+  @Singleton
+  @Provides
   fun provideOauthService(): OAuth20Service {
     return ServiceBuilder(GithubAuthenticator.CLIENT_ID)
       .apiSecret(GithubAuthenticator.CLIENT_SECRET)
@@ -39,8 +39,8 @@ object ApiModule {
       .build(GitHubApi.instance())
   }
 
-//  @Singleton
-//  @Provides
+  @Singleton
+  @Provides
   fun provideRetrofit(
     application: Application,
     cache: Cache,
@@ -72,21 +72,21 @@ object ApiModule {
       .androidAuthentication(application, authenticator)
   }
 
-//  @Singleton
-//  @Provides
+  @Singleton
+  @Provides
   fun providesOwnerStorage(application: Application) = AndroidAccountManagerOwnerStorage(application)
 
-//  @Singleton
-//  @Provides
+  @Singleton
+  @Provides
   fun providesCredentialStorage(application: Application) = AndroidAccountManagerCredentialStorage(application)
 
-//  @Singleton
-//  @Provides
+  @Singleton
+  @Provides
   fun providesAuthenticator(application: Application): GithubAuthenticator =
     GithubAuthenticator(application)
 
-//  @Singleton
-//  @Provides
+  @Singleton
+  @Provides
   fun provideCache(application: Application): Cache =
-    Cache(application.cacheDir, 50 * 1024 * 1024)
+    Cache(application.cacheDir, 50 * 1024 * 1024L)
 }

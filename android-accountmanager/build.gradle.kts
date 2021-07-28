@@ -1,6 +1,7 @@
 plugins {
   id("com.android.library")
   id("com.github.ben-manes.versions")
+  kotlin("android")
 }
 
 android {

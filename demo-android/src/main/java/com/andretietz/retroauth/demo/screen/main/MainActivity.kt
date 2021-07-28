@@ -15,18 +15,18 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.andretietz.retroauth.AndroidAccountManagerOwnerStorage
 import com.andretietz.retroauth.demo.R
 import com.andretietz.retroauth.demo.databinding.ActivityRepositoryListBinding
-//import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
-//import javax.inject.Inject
+import javax.inject.Inject
 
-//@AndroidEntryPoint
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
   private val viewModel: AndroidMainViewModel by viewModels()
 
-//  @Inject
+  @Inject
   lateinit var ownerStorage: AndroidAccountManagerOwnerStorage
 
   private lateinit var binding: ActivityRepositoryListBinding

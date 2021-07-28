@@ -2,7 +2,7 @@ plugins {
   id("com.android.application")
   kotlin("android")
   kotlin("kapt")
-//  id("dagger.hilt.android.plugin")
+  id("dagger.hilt.android.plugin")
 }
 android {
   compileSdkVersion(30)
@@ -59,8 +59,8 @@ dependencies {
   }
   kapt(Dependencies.moshi.moshiCodegen)
 
-//  implementation(Dependencies.android.hilt)
-//  kapt(Dependencies.android.hiltCodegen)
+  implementation(Dependencies.android.hilt)
+  kapt(Dependencies.android.hiltCodegen)
 
   // handling oauth login types. In this case: github
   implementation(Dependencies.scribe.scribe)
