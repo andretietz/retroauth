@@ -17,7 +17,7 @@ import okhttp3.Request
  * If the credential for some reason is invalid, the returning 401 will cause the deletion of the credential and a retry of the
  * call, in which it will get refreshed
  */
-class GithubAuthenticator(application: Application) : Authenticator<String, Account, AndroidCredentials>() {
+class GithubAuthenticator(application: Application) : Authenticator<Account, AndroidCredentials>() {
 
   private val credentialStorage by lazy { AndroidAccountManagerCredentialStorage(application) }
   private val ownerStorage by lazy { AndroidAccountManagerOwnerStorage(application) }
@@ -26,7 +26,6 @@ class GithubAuthenticator(application: Application) : Authenticator<String, Acco
     const val CLIENT_ID = "bb86ddeb2dd22163192f"
     const val CLIENT_SECRET = "0b2a017a3e481c1cb69739ff5a6c4de37009ed7a"
     const val CLIENT_CALLBACK = "https://localhost:8000/accounts/github/login/callback/"
-    private const val KEY_TOKEN_VALIDITY = "credential_validity"
 
     @JvmStatic
     fun createTokenType(context: Context) = CredentialType(
@@ -36,11 +35,7 @@ class GithubAuthenticator(application: Application) : Authenticator<String, Acco
 
   private val credentialType = createTokenType(application)
 
-  private val ownerType: String = application.getString(R.string.authentication_ACCOUNT)
-
-  override fun getCredentialType(annotationCredentialType: Int): CredentialType = credentialType
-
-  override fun getOwnerType(annotationOwnerType: Int): String = ownerType
+  override fun getCredentialType(credentialType: Int): CredentialType = this.credentialType
 
   override fun authenticateRequest(request: Request, credential: AndroidCredentials): Request {
     return request.newBuilder()

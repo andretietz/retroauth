@@ -16,8 +16,11 @@
 
 package com.andretietz.retroauth
 
+import com.andretietz.retroauth.OwnerStorage.Companion.DEFAULT_OWNER_TYPE
 import kotlin.annotation.AnnotationRetention.RUNTIME
-import kotlin.annotation.AnnotationTarget.*
+import kotlin.annotation.AnnotationTarget.FUNCTION
+import kotlin.annotation.AnnotationTarget.PROPERTY_GETTER
+import kotlin.annotation.AnnotationTarget.PROPERTY_SETTER
 
 /**
  * This is the annotation you can use to authorize your request.
@@ -25,7 +28,7 @@ import kotlin.annotation.AnnotationTarget.*
 @Target(FUNCTION, PROPERTY_GETTER, PROPERTY_SETTER)
 @Retention(RUNTIME)
 annotation class Authorize(
-  val ownerType: Int = 0,
+  val ownerType: String = DEFAULT_OWNER_TYPE,
   val credentialType: Int = 0
 )
 

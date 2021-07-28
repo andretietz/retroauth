@@ -33,9 +33,9 @@ import java.util.concurrent.locks.ReentrantLock
  * @param <OWNER> a type that represents the owner of a credential. Since there could be multiple users on one client.
  * @param <CREDENTIAL_TYPE> type of the credential that should be added to the request
  */
-class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL : Any>(
-  private val authenticator: Authenticator<OWNER_TYPE, OWNER, CREDENTIAL>,
-  private val ownerManager: OwnerStorage<OWNER_TYPE, OWNER>,
+class CredentialInterceptor<OWNER : Any, CREDENTIAL : Any>(
+  private val authenticator: Authenticator<OWNER, CREDENTIAL>,
+  private val ownerManager: OwnerStorage<OWNER>,
   private val credentialStorage: CredentialStorage<OWNER, CREDENTIAL>
 ) : Interceptor {
 
@@ -44,7 +44,7 @@ class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL : Any>
     private const val HASH_PRIME = 31
   }
 
-  private val registration = mutableMapOf<Int, RequestType<OWNER_TYPE>>()
+  private val registration = mutableMapOf<Int, RequestType>()
 
   @Suppress("Detekt.RethrowCaughtException")
   override fun intercept(chain: Interceptor.Chain): Response {
@@ -136,12 +136,12 @@ class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL : Any>
 
   private fun findRequestType(
     request: Request
-  ): RequestType<OWNER_TYPE>? {
+  ): RequestType? {
     val key = request.url.hashCode() + HASH_PRIME * request.method.hashCode()
     return registration[key] ?: request.tag(Invocation::class.java)
       ?.method()
       ?.annotations
-      ?.filterIsInstance<Authenticated>()
+      ?.filterIsInstance<Authorize>()
       ?.firstOrNull()
       ?.let {
         RequestType(

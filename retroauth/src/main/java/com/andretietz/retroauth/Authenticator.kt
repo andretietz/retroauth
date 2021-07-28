@@ -16,6 +16,7 @@
 
 package com.andretietz.retroauth
 
+import com.andretietz.retroauth.OwnerStorage.Companion.DEFAULT_OWNER_TYPE
 import okhttp3.Request
 import okhttp3.Response
 import java.net.HttpURLConnection
@@ -28,7 +29,7 @@ import java.util.concurrent.Future
  * The Authenticator interface is a very specific provider endpoint dependent implementation,
  * to authenticate your request and defines when or if to retry.
  */
-abstract class Authenticator<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL : Any> {
+abstract class Authenticator<OWNER : Any, CREDENTIAL : Any> {
 
   companion object {
     private val executors: ExecutorService by lazy { Executors.newSingleThreadExecutor() }
@@ -49,21 +50,21 @@ abstract class Authenticator<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL : Any
     /**
      * The default implementation returns the first available owner.
      */
-    executors.submit(Callable<OWNER> { owners[0] })
+    executors.submit(Callable { owners[0] })
 
   /**
-   * @param annotationCredentialType type of the credential reached in from the [Authenticated.credentialType]
+   * @param credentialType type of the credential reached in from the [Authorize.credentialType]
    * Annotation of the request.
    *
    * @return type of the credential
    */
-  abstract fun getCredentialType(annotationCredentialType: Int = 0): CredentialType
+  abstract fun getCredentialType(credentialType: Int = 0): CredentialType
 
   /**
-   * @param annotationOwnerType type of the owner reached in from the [Authenticated.ownerType]
+   * @param ownerType type of the owner handed in, from the [Authorize.ownerType]
    * Annotation of the request.
    */
-  abstract fun getOwnerType(annotationOwnerType: Int = 0): OWNER_TYPE
+  open fun getOwnerType(ownerType: String = DEFAULT_OWNER_TYPE): String = ownerType
 
   /**
    * Authenticates a [Request].

@@ -23,10 +23,10 @@ import retrofit2.Retrofit
  * This is the wrapper builder to create the [Retrofit] object.
  */
 object Retroauth {
-  fun <OWNER_TYPE : Any, OWNER : Any, CREDENTIAL : Any> setup(
+  fun <OWNER : Any, CREDENTIAL : Any> setup(
     retrofit: Retrofit,
-    authenticator: Authenticator<OWNER_TYPE, OWNER, CREDENTIAL>,
-    ownerStorage: OwnerStorage<OWNER_TYPE, OWNER>,
+    authenticator: Authenticator<OWNER, CREDENTIAL>,
+    ownerStorage: OwnerStorage<OWNER>,
     credentialStorage: CredentialStorage<OWNER, CREDENTIAL>
   ): Retrofit {
     val okHttpClient = retrofit.callFactory().let { callFactory ->
@@ -41,8 +41,8 @@ object Retroauth {
   }
 }
 
-fun <OWNER_TYPE : Any, OWNER : Any, CREDENTIAL : Any> Retrofit.authentication(
-  authenticator: Authenticator<OWNER_TYPE, OWNER, CREDENTIAL>,
-  ownerStorage: OwnerStorage<OWNER_TYPE, OWNER>,
+fun <OWNER : Any, CREDENTIAL : Any> Retrofit.authentication(
+  authenticator: Authenticator<OWNER, CREDENTIAL>,
+  ownerStorage: OwnerStorage<OWNER>,
   credentialStorage: CredentialStorage<OWNER, CREDENTIAL>
 ): Retrofit = Retroauth.setup(this, authenticator, ownerStorage, credentialStorage)
