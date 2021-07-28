@@ -59,10 +59,6 @@ class GithubAuthenticator(application: Application) : Authenticator<String, Acco
     credentialType: AndroidCredentialType,
     credential: AndroidCredentials
   ): AndroidCredentials? {
-    // This is very implementation specific!
-    // https://developers.facebook.com/docs/facebook-login/access-tokens/refreshing
-    // `At any point, you can generate a new long-lived credential by sending the
-    // person back to the login flow used by your web app.`
     ownerStorage.createOwner(owner.type, credentialType).get()
     return credentialStorage.getCredentials(owner, credentialType).get()
   }
