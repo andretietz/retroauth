@@ -17,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -40,13 +41,12 @@ class MainViewModel @Inject constructor(
   private val api = retrofit.create(GithubApi::class.java)
 
   fun addAccount() {
-//    cleanWebCookies()
     ownerStorage.createOwner(
       authenticator.getOwnerType(),
       authenticator.getCredentialType(),
       object : Callback<Account> {
         override fun onResult(result: Account) {
-//          Timber.d("Logged in: $result")
+          Timber.d("Logged in: $result")
           _state.value = MainViewState.InitialState
           _state.value = MainViewState.LoginSuccess(result)
         }
@@ -61,13 +61,10 @@ class MainViewModel @Inject constructor(
     scope.launch(Dispatchers.IO + errorHandler) {
       try {
         _state.value = MainViewState.RepositoryUpdate(api.getRepositories(), System.currentTimeMillis())
-//        Timber.e("result")
+        Timber.e("result")
       } catch (error: AuthenticationRequiredException) {
-//        Timber.e(error, "result")
+        Timber.e(error, "result")
         _state.value = MainViewState.InitialState
-//        withContext(Dispatchers.Main) {
-//        }
-//        Timber.i("User not logged in! Opening Login Screen")
       }
     }
   }
