@@ -30,20 +30,20 @@ import java.util.concurrent.FutureTask
  */
 class AndroidAccountManagerCredentialStorage constructor(
   private val application: Application
-) : CredentialStorage<Account, AndroidCredentialType, AndroidCredentials> {
+) : CredentialStorage<Account, AndroidCredentials> {
 
   private val executor by lazy { Executors.newSingleThreadExecutor() }
   private val accountManager by lazy { AccountManager.get(application) }
 
   companion object {
     @JvmStatic
-    private fun createDataKey(type: AndroidCredentialType, key: String) =
+    private fun createDataKey(type: CredentialType, key: String) =
       "%s_%s".format(type.type, key)
   }
 
   override fun getCredentials(
     owner: Account,
-    type: AndroidCredentialType,
+    type: CredentialType,
     callback: Callback<AndroidCredentials>?
   ): Future<AndroidCredentials> {
     val task = GetTokenTask(application, accountManager, owner, type, callback)
@@ -53,15 +53,16 @@ class AndroidAccountManagerCredentialStorage constructor(
       FutureTask(task).also { it.run() }
   }
 
-  override fun removeCredentials(owner: Account, type: AndroidCredentialType, credentials: AndroidCredentials) {
+  override fun removeCredentials(owner: Account, type: CredentialType, credentials: AndroidCredentials) {
     accountManager.invalidateAuthToken(owner.type, credentials.token)
     type.dataKeys?.forEach { accountManager.setUserData(owner, createDataKey(type, it), null) }
   }
 
-  override fun storeCredentials(owner: Account, type: AndroidCredentialType, credentials: AndroidCredentials) {
+  override fun storeCredentials(owner: Account, type: CredentialType, credentials: AndroidCredentials) {
     accountManager.setAuthToken(owner, type.type, credentials.token)
-    if (type.dataKeys != null && credentials.data != null) {
-      type.dataKeys.forEach {
+    val dataKeys = type.dataKeys
+    if (dataKeys != null && credentials.data != null) {
+      dataKeys.forEach {
         require(credentials.data.containsKey(it)) {
           throw IllegalArgumentException(
             "The credentials you want to store, needs to contain credentials-data with the keys: %s"
@@ -77,7 +78,7 @@ class AndroidAccountManagerCredentialStorage constructor(
     application: Application,
     private val accountManager: AccountManager,
     private val owner: Account,
-    private val type: AndroidCredentialType,
+    private val type: CredentialType,
     private val callback: Callback<AndroidCredentials>?
   ) : Callable<AndroidCredentials> {
 

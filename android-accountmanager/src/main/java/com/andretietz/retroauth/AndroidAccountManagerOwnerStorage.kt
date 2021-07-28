@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit
 @Suppress("unused")
 class AndroidAccountManagerOwnerStorage constructor(
   private val application: Application
-) : OwnerStorage<String, Account, AndroidCredentialType> {
+) : OwnerStorage<String, Account> {
 
   companion object {
     private const val RETROAUTH_ACCOUNT_NAME_KEY = "com.andretietz.retroauth.ACTIVE_ACCOUNT"
@@ -47,7 +47,7 @@ class AndroidAccountManagerOwnerStorage constructor(
 
   override fun createOwner(
     ownerType: String,
-    credentialType: AndroidCredentialType,
+    credentialType: CredentialType,
     callback: Callback<Account>?
   ): Future<Account> {
     val future = accountManager.addAccount(

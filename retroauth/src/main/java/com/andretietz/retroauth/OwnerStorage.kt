@@ -21,7 +21,7 @@ import java.util.concurrent.Future
 /**
  * Since every credential belongs to a specific user, this users have to be managed.
  */
-interface OwnerStorage<in OWNER_TYPE : Any, OWNER : Any, in CREDENTIAL_TYPE : Any> {
+interface OwnerStorage<in OWNER_TYPE : Any, OWNER : Any> {
 
   /**
    * Creates an [OWNER] of a specific [ownerType] for a specific [credentialType]. So open a login and let the user
@@ -36,7 +36,7 @@ interface OwnerStorage<in OWNER_TYPE : Any, OWNER : Any, in CREDENTIAL_TYPE : An
    */
   fun createOwner(
     ownerType: OWNER_TYPE,
-    credentialType: CREDENTIAL_TYPE,
+    credentialType: CredentialType,
     callback: Callback<OWNER>? = null
   ): Future<OWNER>
 

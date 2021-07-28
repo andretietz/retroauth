@@ -17,16 +17,17 @@
 package com.andretietz.retroauth
 
 import kotlin.annotation.AnnotationRetention.RUNTIME
-import kotlin.annotation.AnnotationTarget.FUNCTION
-import kotlin.annotation.AnnotationTarget.PROPERTY_GETTER
-import kotlin.annotation.AnnotationTarget.PROPERTY_SETTER
+import kotlin.annotation.AnnotationTarget.*
 
 /**
- * This is the annotation you can use to add authentication handling onto your request.
+ * This is the annotation you can use to authorize your request.
  */
 @Target(FUNCTION, PROPERTY_GETTER, PROPERTY_SETTER)
 @Retention(RUNTIME)
-annotation class Authenticated(
+annotation class Authorize(
   val ownerType: Int = 0,
   val credentialType: Int = 0
 )
+
+@Deprecated("has been renamed to avoid misunderstandings.")
+typealias Authenticated = Authorize

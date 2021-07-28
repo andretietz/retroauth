@@ -23,11 +23,11 @@ import retrofit2.Retrofit
  * This is the wrapper builder to create the [Retrofit] object.
  */
 object Retroauth {
-  fun <OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE : Any, CREDENTIAL : Any> setup(
+  fun <OWNER_TYPE : Any, OWNER : Any, CREDENTIAL : Any> setup(
     retrofit: Retrofit,
-    authenticator: Authenticator<OWNER_TYPE, OWNER, CREDENTIAL_TYPE, CREDENTIAL>,
-    ownerStorage: OwnerStorage<OWNER_TYPE, OWNER, CREDENTIAL_TYPE>,
-    credentialStorage: CredentialStorage<OWNER, CREDENTIAL_TYPE, CREDENTIAL>
+    authenticator: Authenticator<OWNER_TYPE, OWNER, CREDENTIAL>,
+    ownerStorage: OwnerStorage<OWNER_TYPE, OWNER>,
+    credentialStorage: CredentialStorage<OWNER, CREDENTIAL>
   ): Retrofit {
     val okHttpClient = retrofit.callFactory().let { callFactory ->
       check(callFactory is OkHttpClient) { "Retroauth only works with OkHttp as Http Client!" }
@@ -41,8 +41,8 @@ object Retroauth {
   }
 }
 
-fun <OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE : Any, CREDENTIAL : Any> Retrofit.authentication(
-  authenticator: Authenticator<OWNER_TYPE, OWNER, CREDENTIAL_TYPE, CREDENTIAL>,
-  ownerStorage: OwnerStorage<OWNER_TYPE, OWNER, CREDENTIAL_TYPE>,
-  credentialStorage: CredentialStorage<OWNER, CREDENTIAL_TYPE, CREDENTIAL>
+fun <OWNER_TYPE : Any, OWNER : Any, CREDENTIAL : Any> Retrofit.authentication(
+  authenticator: Authenticator<OWNER_TYPE, OWNER, CREDENTIAL>,
+  ownerStorage: OwnerStorage<OWNER_TYPE, OWNER>,
+  credentialStorage: CredentialStorage<OWNER, CREDENTIAL>
 ): Retrofit = Retroauth.setup(this, authenticator, ownerStorage, credentialStorage)

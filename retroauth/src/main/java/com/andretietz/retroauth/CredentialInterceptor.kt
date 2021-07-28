@@ -33,10 +33,10 @@ import java.util.concurrent.locks.ReentrantLock
  * @param <OWNER> a type that represents the owner of a credential. Since there could be multiple users on one client.
  * @param <CREDENTIAL_TYPE> type of the credential that should be added to the request
  */
-class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE : Any, CREDENTIAL : Any>(
-  private val authenticator: Authenticator<OWNER_TYPE, OWNER, CREDENTIAL_TYPE, CREDENTIAL>,
-  private val ownerManager: OwnerStorage<OWNER_TYPE, OWNER, CREDENTIAL_TYPE>,
-  private val credentialStorage: CredentialStorage<OWNER, CREDENTIAL_TYPE, CREDENTIAL>
+class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL : Any>(
+  private val authenticator: Authenticator<OWNER_TYPE, OWNER, CREDENTIAL>,
+  private val ownerManager: OwnerStorage<OWNER_TYPE, OWNER>,
+  private val credentialStorage: CredentialStorage<OWNER, CREDENTIAL>
 ) : Interceptor {
 
   companion object {
@@ -44,7 +44,7 @@ class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE :
     private const val HASH_PRIME = 31
   }
 
-  private val registration = mutableMapOf<Int, RequestType<OWNER_TYPE, CREDENTIAL_TYPE>>()
+  private val registration = mutableMapOf<Int, RequestType<OWNER_TYPE>>()
 
   @Suppress("Detekt.RethrowCaughtException")
   override fun intercept(chain: Interceptor.Chain): Response {
@@ -136,7 +136,7 @@ class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE :
 
   private fun findRequestType(
     request: Request
-  ): RequestType<OWNER_TYPE, CREDENTIAL_TYPE>? {
+  ): RequestType<OWNER_TYPE>? {
     val key = request.url.hashCode() + HASH_PRIME * request.method.hashCode()
     return registration[key] ?: request.tag(Invocation::class.java)
       ?.method()

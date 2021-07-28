@@ -4,10 +4,10 @@ import android.accounts.Account
 import android.app.Application
 import android.content.Context
 import com.andretietz.retroauth.AndroidAccountManagerCredentialStorage
-import com.andretietz.retroauth.AndroidCredentialType
-import com.andretietz.retroauth.AndroidCredentials
 import com.andretietz.retroauth.AndroidAccountManagerOwnerStorage
+import com.andretietz.retroauth.AndroidCredentials
 import com.andretietz.retroauth.Authenticator
+import com.andretietz.retroauth.CredentialType
 import com.andretietz.retroauth.demo.R
 import okhttp3.Request
 
@@ -17,7 +17,7 @@ import okhttp3.Request
  * If the credential for some reason is invalid, the returning 401 will cause the deletion of the credential and a retry of the
  * call, in which it will get refreshed
  */
-class GithubAuthenticator(application: Application) : Authenticator<String, Account, AndroidCredentialType, AndroidCredentials>() {
+class GithubAuthenticator(application: Application) : Authenticator<String, Account, AndroidCredentials>() {
 
   private val credentialStorage by lazy { AndroidAccountManagerCredentialStorage(application) }
   private val ownerStorage by lazy { AndroidAccountManagerOwnerStorage(application) }
@@ -29,22 +29,16 @@ class GithubAuthenticator(application: Application) : Authenticator<String, Acco
     private const val KEY_TOKEN_VALIDITY = "credential_validity"
 
     @JvmStatic
-    fun createTokenType(context: Context): AndroidCredentialType {
-      return AndroidCredentialType(
-        // type of the credential
-        context.getString(R.string.authentication_TOKEN),
-        // key(s) of additional values to store to the credential
-        // i.e. credential validity time
-        setOf(KEY_TOKEN_VALIDITY)
-      )
-    }
+    fun createTokenType(context: Context) = CredentialType(
+      context.getString(R.string.authentication_TOKEN)
+    )
   }
 
   private val credentialType = createTokenType(application)
 
   private val ownerType: String = application.getString(R.string.authentication_ACCOUNT)
 
-  override fun getCredentialType(annotationCredentialType: Int): AndroidCredentialType = credentialType
+  override fun getCredentialType(annotationCredentialType: Int): CredentialType = credentialType
 
   override fun getOwnerType(annotationOwnerType: Int): String = ownerType
 
@@ -56,7 +50,7 @@ class GithubAuthenticator(application: Application) : Authenticator<String, Acco
 
   override fun refreshCredentials(
     owner: Account,
-    credentialType: AndroidCredentialType,
+    credentialType: CredentialType,
     credential: AndroidCredentials
   ): AndroidCredentials? {
     ownerStorage.createOwner(owner.type, credentialType).get()

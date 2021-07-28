@@ -28,7 +28,7 @@ import java.util.concurrent.Future
  * The Authenticator interface is a very specific provider endpoint dependent implementation,
  * to authenticate your request and defines when or if to retry.
  */
-abstract class Authenticator<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE : Any, CREDENTIAL : Any> {
+abstract class Authenticator<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL : Any> {
 
   companion object {
     private val executors: ExecutorService by lazy { Executors.newSingleThreadExecutor() }
@@ -57,7 +57,7 @@ abstract class Authenticator<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE 
    *
    * @return type of the credential
    */
-  abstract fun getCredentialType(annotationCredentialType: Int = 0): CREDENTIAL_TYPE
+  abstract fun getCredentialType(annotationCredentialType: Int = 0): CredentialType
 
   /**
    * @param annotationOwnerType type of the owner reached in from the [Authenticated.ownerType]
@@ -92,7 +92,7 @@ abstract class Authenticator<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE 
   @Suppress("UNUSED_PARAMETER")
   open fun refreshCredentials(
     owner: OWNER,
-    credentialType: CREDENTIAL_TYPE,
+    credentialType: CredentialType,
     credential: CREDENTIAL
   ): CREDENTIAL? = credential
 

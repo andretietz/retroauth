@@ -1,6 +1,6 @@
 package com.andretietz.retroauth
 
-data class RequestType<out OWNER_TYPE : Any, out CREDENTIAL_TYPE : Any>(
-  val credentialType: CREDENTIAL_TYPE,
+data class RequestType<out OWNER_TYPE : Any>(
+  val credentialType: CredentialType,
   val ownerType: OWNER_TYPE
 )
