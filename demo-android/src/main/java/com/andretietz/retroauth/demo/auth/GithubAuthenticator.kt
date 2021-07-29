@@ -3,13 +3,8 @@ package com.andretietz.retroauth.demo.auth
 import android.accounts.Account
 import android.app.Application
 import android.content.Context
-import com.andretietz.retroauth.AndroidAccountManagerCredentialStorage
-import com.andretietz.retroauth.AndroidAccountManagerOwnerStorage
-import com.andretietz.retroauth.AndroidCredential
-import com.andretietz.retroauth.Authenticator
-import com.andretietz.retroauth.CredentialType
+import com.andretietz.retroauth.*
 import com.andretietz.retroauth.demo.R
-import kotlinx.coroutines.runBlocking
 import okhttp3.Request
 
 /**
@@ -46,16 +41,5 @@ class GithubAuthenticator(private val application: Application) : Authenticator<
     return request.newBuilder()
       .header("Authorization", "Bearer ${credential.token}")
       .build()
-  }
-
-  override fun refreshCredentials(
-    owner: Account,
-    credentialType: CredentialType,
-    credential: AndroidCredential
-  ): AndroidCredential? {
-    runBlocking {
-      ownerStorage.createOwner(owner.type, credentialType)
-    }
-    return credentialStorage.getCredentials(owner, credentialType)
   }
 }

@@ -70,10 +70,12 @@ abstract class Authenticator<OWNER : Any, CREDENTIAL : Any> {
     owner: OWNER,
     credentialType: CredentialType,
     credential: CREDENTIAL
-  ): CREDENTIAL? = credential
+  ): CREDENTIAL? = null
 
   /**
-   * This method is called on each authenticated request, to make sure the current credential is still valid.
+   * This method is called on each authenticated request, to make sure the current credential
+   * is still valid. With this method, you can refresh your token before the first request is
+   * called.
    *
    * @param credential The current credential
    */

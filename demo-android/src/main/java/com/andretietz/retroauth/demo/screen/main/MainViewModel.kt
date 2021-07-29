@@ -14,13 +14,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import retrofit2.Retrofit
 import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-  retrofit: Retrofit,
+  private val api: GithubApi,
   private val ownerStorage: AndroidAccountManagerOwnerStorage,
   private val credentialStorage: AndroidAccountManagerCredentialStorage,
   private val authenticator: GithubAuthenticator
@@ -30,13 +29,7 @@ class MainViewModel @Inject constructor(
 
   private val scope = CoroutineScope(Dispatchers.Default + CoroutineName("ViewModelScope"))
 
-//  private val errorHandler = CoroutineExceptionHandler { _, error ->
-//    _state.value = MainViewState.Error(error)
-//  }
-
   val state = _state
-
-  private val api = retrofit.create(GithubApi::class.java)
 
   fun addAccount() {
     scope.launch {

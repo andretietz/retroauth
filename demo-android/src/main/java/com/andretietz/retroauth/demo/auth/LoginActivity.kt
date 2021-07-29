@@ -2,6 +2,7 @@ package com.andretietz.retroauth.demo.auth
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.webkit.CookieManager
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.lifecycle.lifecycleScope
@@ -14,7 +15,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import retrofit2.Retrofit
 import retrofit2.http.GET
 import retrofit2.http.Header
 import javax.inject.Inject
@@ -26,14 +26,14 @@ class LoginActivity : AuthenticationActivity() {
   lateinit var helper: OAuth20Service
 
   @Inject
-  lateinit var retrofit: Retrofit
+  lateinit var api: SignInApi
 
   @SuppressLint("SetJavaScriptEnabled")
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    CookieManager.getInstance().removeAllCookies { }
     val views = ActivityLoginBinding.inflate(layoutInflater)
     setContentView(views.root)
-    val api = retrofit.create(SignInApi::class.java)
     views.webView.loadUrl(helper.authorizationUrl)
     views.webView.settings.javaScriptEnabled = true
     views.webView.webViewClient = object : WebViewClient() {

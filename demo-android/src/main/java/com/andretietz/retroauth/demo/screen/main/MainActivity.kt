@@ -109,7 +109,6 @@ class MainActivity : AppCompatActivity() {
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
     return when (item.itemId) {
       R.id.menuitem_add_account -> {
-        CookieManager.getInstance().removeAllCookies { }
         viewModel.addAccount()
         true
       }
@@ -123,7 +122,6 @@ class MainActivity : AppCompatActivity() {
       }
       R.id.menuitem_logout -> {
         viewModel.logout()
-        CookieManager.getInstance().removeAllCookies { }
         true
       }
       else -> super.onOptionsItemSelected(item)

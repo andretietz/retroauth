@@ -4,7 +4,9 @@ import android.app.Application
 import com.andretietz.retroauth.AndroidAccountManagerCredentialStorage
 import com.andretietz.retroauth.AndroidAccountManagerOwnerStorage
 import com.andretietz.retroauth.androidAuthentication
+import com.andretietz.retroauth.demo.api.GithubApi
 import com.andretietz.retroauth.demo.auth.GithubAuthenticator
+import com.andretietz.retroauth.demo.auth.LoginActivity
 import com.github.scribejava.apis.GitHubApi
 import com.github.scribejava.core.builder.ServiceBuilder
 import com.github.scribejava.core.oauth.OAuth20Service
@@ -81,4 +83,14 @@ object ApiModule {
   @Provides
   fun providesAuthenticator(application: Application): GithubAuthenticator =
     GithubAuthenticator(application)
+
+  @Singleton
+  @Provides
+  fun providesGithubSignInApi(retrofit: Retrofit): LoginActivity.SignInApi =
+    retrofit.create(LoginActivity.SignInApi::class.java)
+
+  @Singleton
+  @Provides
+  fun providesGithubApi(retrofit: Retrofit): GithubApi =
+    retrofit.create(GithubApi::class.java)
 }
