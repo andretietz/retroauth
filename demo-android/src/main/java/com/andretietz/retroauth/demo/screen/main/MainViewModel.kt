@@ -6,7 +6,6 @@ import com.andretietz.retroauth.AndroidAccountManagerOwnerStorage
 import com.andretietz.retroauth.AndroidCredential
 import com.andretietz.retroauth.AuthenticationCanceledException
 import com.andretietz.retroauth.AuthenticationRequiredException
-import com.andretietz.retroauth.Callback
 import com.andretietz.retroauth.demo.api.GithubApi
 import com.andretietz.retroauth.demo.auth.GithubAuthenticator
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -79,17 +78,13 @@ class MainViewModel @Inject constructor(
     }
   }
 
-  fun logout() {
+  fun logout() = scope.launch(Dispatchers.Default) {
     ownerStorage.getActiveOwner(authenticator.getOwnerType())?.let { account ->
-      ownerStorage.removeOwner(authenticator.getOwnerType(), account, object : Callback<Boolean> {
-        override fun onResult(result: Boolean) {
-          if (result) _state.value = MainViewState.LogoutSuccess
-        }
-
-        override fun onError(error: Throwable) {
-          _state.value = MainViewState.Error(error)
-        }
-      })
+      if (ownerStorage.removeOwner(authenticator.getOwnerType(), account)) {
+        _state.value = MainViewState.LogoutSuccess
+      } else {
+        _state.value = MainViewState.Error(UnknownError())
+      }
     }
   }
 

@@ -16,23 +16,19 @@
 
 package com.andretietz.retroauth
 
-import java.util.concurrent.Future
-
 /**
  * Since every credential belongs to a specific user, this users have to be managed.
  */
 interface OwnerStorage<OWNER : Any> {
 
   /**
-   * Creates an [OWNER] of a specific [ownerType] for a specific [credentialType]. So open a login and let the user
-   * login. If the User cancels, [Callback.onError] should be called with an [AuthenticationCanceledException] or if
-   * the [Future.get] is used, it'll throw that Exception
+   * Creates an [OWNER] of a specific [ownerType] for a specific [credentialType].
+   * So open a login and let the user login.
    *
    * @param ownerType Type of owner you want to create.
    * @param credentialType Type of credential you want to open the login for.
-   * @param callback Optional callback to get notified when the user was created `true` or not `false`.
    *
-   * @return [OWNER] which was created.
+   * @return [OWNER] which was created or null if canceled
    */
   suspend fun createOwner(
     ownerType: String,
@@ -53,7 +49,8 @@ interface OwnerStorage<OWNER : Any> {
    * @param ownerType type of the active owner you want to receive.
    *
    * @return [OWNER] that is currently active (important for multi user systems i.e. there could be
-   * multiple users logged in, but there's only one active). If there's no user currently active return `null`
+   * multiple users logged in, but there's only one active). If there's no user currently
+   * active return `null`
    */
   fun getActiveOwner(ownerType: String): OWNER?
 
@@ -65,8 +62,8 @@ interface OwnerStorage<OWNER : Any> {
   fun getOwners(ownerType: String): List<OWNER>
 
   /**
-   * Switches the active owner of the given [ownerType]. If the [owner] is `null`, it resets the active owner. So there
-   * won't be an active user.
+   * Switches the active owner of the given [ownerType]. If the [owner] is `null`, it resets the
+   * active owner. So there won't be an active user.
    *
    * @param ownerType which to consider.
    * @param owner to which to switch
@@ -77,11 +74,9 @@ interface OwnerStorage<OWNER : Any> {
    * Removes the given owner from the system.
    *
    * @param owner the owner to remove.
-   * @param callback Optional to get notified when the removal is complete.
+   *
+   * @return `true` when successfully removed, `false` otherwise.
    */
-  fun removeOwner(ownerType: String, owner: OWNER, callback: Callback<Boolean>? = null): Future<Boolean>
+  fun removeOwner(ownerType: String, owner: OWNER): Boolean
 
-  companion object {
-    const val DEFAULT_OWNER_TYPE = "default-owner-type"
-  }
 }

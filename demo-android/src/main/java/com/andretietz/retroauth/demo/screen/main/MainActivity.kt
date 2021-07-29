@@ -5,6 +5,7 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import android.webkit.CookieManager
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -18,7 +19,6 @@ import com.andretietz.retroauth.demo.databinding.ActivityRepositoryListBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -51,7 +51,6 @@ class MainActivity : AppCompatActivity() {
 
     viewModel.state.flowWithLifecycle(this.lifecycle, Lifecycle.State.STARTED)
       .onEach {
-        Timber.e("result")
         binding.swipeToRefresh.isRefreshing = false
         when (it) {
           is MainViewState.InitialState -> {
@@ -110,6 +109,7 @@ class MainActivity : AppCompatActivity() {
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
     return when (item.itemId) {
       R.id.menuitem_add_account -> {
+        CookieManager.getInstance().removeAllCookies { }
         viewModel.addAccount()
         true
       }
@@ -123,6 +123,7 @@ class MainActivity : AppCompatActivity() {
       }
       R.id.menuitem_logout -> {
         viewModel.logout()
+        CookieManager.getInstance().removeAllCookies { }
         true
       }
       else -> super.onOptionsItemSelected(item)

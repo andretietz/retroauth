@@ -66,26 +66,21 @@ class CredentialInterceptor<OWNER : Any, CREDENTIAL : Any>(
         lock()
         try {
           owner = ownerManager.getActiveOwner(authRequestType.ownerType)
-          if (owner == null) {
-            val owners = ownerManager.getOwners(authRequestType.ownerType)
-            if (owners.isNotEmpty()) {
-              owner = authenticator.chooseOwner(owners).get()
-              ownerManager.switchActiveOwner(authRequestType.ownerType, owner)
-            }
-          }
+            ?: ownerManager.getOwners(authRequestType.ownerType).firstOrNull()
+              ?.also { ownerManager.switchActiveOwner(authRequestType.ownerType, it) }
           if (owner != null) {
             // get the credential of the owner
             val localToken =
               credentialStorage.getCredentials(owner, authRequestType.credentialType)
                 ?: throw AuthenticationRequiredException()
             // if the credential is still valid and no refresh has been requested
-            if (authenticator.isCredentialValid(localToken) && !refreshRequested) {
-              credential = localToken
+            credential = if (authenticator.isCredentialValid(localToken) && !refreshRequested) {
+              localToken
             } else {
               // try to refreshing the credentials
               val refreshedToken =
                 authenticator.refreshCredentials(owner, authRequestType.credentialType, localToken)
-              credential = if (refreshedToken != null) {
+              if (refreshedToken != null) {
                 // if the credential was refreshed, store it
                 credentialStorage
                   .storeCredentials(owner, authRequestType.credentialType, refreshedToken)
@@ -104,10 +99,11 @@ class CredentialInterceptor<OWNER : Any, CREDENTIAL : Any>(
             scope.launch {
               ownerManager.createOwner(authRequestType.ownerType, authRequestType.credentialType)
             }
-            // cannot authorize request -> cancel request
+            // cannot authorize request -> cancel running request
             throw AuthenticationRequiredException()
           }
         } catch (error: Throwable) {
+          // store the error for the other requests that might be queued
           refreshLock.errorContainer.set(error)
           throw error
         }
