@@ -16,7 +16,6 @@
 
 package com.andretietz.retroauth
 
-import com.andretietz.retroauth.OwnerStorage.Companion.DEFAULT_OWNER_TYPE
 import okhttp3.Request
 import okhttp3.Response
 import java.net.HttpURLConnection
@@ -64,7 +63,7 @@ abstract class Authenticator<OWNER : Any, CREDENTIAL : Any> {
    * @param ownerType type of the owner handed in, from the [Authorize.ownerType]
    * Annotation of the request.
    */
-  open fun getOwnerType(ownerType: String = DEFAULT_OWNER_TYPE): String = ownerType
+  abstract fun getOwnerType(ownerType: Int = 0): String
 
   /**
    * Authenticates a [Request].

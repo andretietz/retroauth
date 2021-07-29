@@ -16,7 +16,6 @@
 
 package com.andretietz.retroauth
 
-import com.andretietz.retroauth.OwnerStorage.Companion.DEFAULT_OWNER_TYPE
 import kotlin.annotation.AnnotationRetention.RUNTIME
 import kotlin.annotation.AnnotationTarget.FUNCTION
 import kotlin.annotation.AnnotationTarget.PROPERTY_GETTER
@@ -28,7 +27,7 @@ import kotlin.annotation.AnnotationTarget.PROPERTY_SETTER
 @Target(FUNCTION, PROPERTY_GETTER, PROPERTY_SETTER)
 @Retention(RUNTIME)
 annotation class Authorize(
-  val ownerType: String = DEFAULT_OWNER_TYPE,
+  val ownerType: Int = 0,
   val credentialType: Int = 0
 )
 
