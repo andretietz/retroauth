@@ -1,16 +1,15 @@
 package com.andretietz.retroauth.demo.screen.main
 
-import android.accounts.Account
 import androidx.lifecycle.ViewModel
 import com.andretietz.retroauth.AndroidAccountManagerCredentialStorage
 import com.andretietz.retroauth.AndroidAccountManagerOwnerStorage
-import com.andretietz.retroauth.AndroidCredentials
+import com.andretietz.retroauth.AndroidCredential
+import com.andretietz.retroauth.AuthenticationCanceledException
 import com.andretietz.retroauth.AuthenticationRequiredException
 import com.andretietz.retroauth.Callback
 import com.andretietz.retroauth.demo.api.GithubApi
 import com.andretietz.retroauth.demo.auth.GithubAuthenticator
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -32,61 +31,51 @@ class MainViewModel @Inject constructor(
 
   private val scope = CoroutineScope(Dispatchers.Default + CoroutineName("ViewModelScope"))
 
-  private val errorHandler = CoroutineExceptionHandler { _, error ->
-    _state.value = MainViewState.Error(error)
-  }
+//  private val errorHandler = CoroutineExceptionHandler { _, error ->
+//    _state.value = MainViewState.Error(error)
+//  }
 
   val state = _state
 
   private val api = retrofit.create(GithubApi::class.java)
 
   fun addAccount() {
-    ownerStorage.createOwner(
-      authenticator.getOwnerType(),
-      authenticator.getCredentialType(),
-      object : Callback<Account> {
-        override fun onResult(result: Account) {
-          Timber.d("Logged in: $result")
-          _state.value = MainViewState.InitialState
-          _state.value = MainViewState.LoginSuccess(result)
-        }
-
-        override fun onError(error: Throwable) {
-          _state.value = MainViewState.Error(error)
-        }
-      })
+    scope.launch {
+      val account = ownerStorage.createOwner(
+        authenticator.getOwnerType(),
+        authenticator.getCredentialType())
+      if (account == null) {
+        _state.value = MainViewState.Error(AuthenticationCanceledException())
+      } else {
+        Timber.d("Logged in: $account")
+        _state.value = MainViewState.InitialState
+        _state.value = MainViewState.LoginSuccess(account)
+      }
+    }
   }
 
-  fun loadRepositories() {
-    scope.launch(Dispatchers.IO + errorHandler) {
-      try {
-        _state.value = MainViewState.RepositoryUpdate(api.getRepositories(), System.currentTimeMillis())
-        Timber.e("result")
-      } catch (error: AuthenticationRequiredException) {
-        Timber.e(error, "result")
-        _state.value = MainViewState.InitialState
-      }
+  fun loadRepositories() = scope.launch(Dispatchers.IO) {
+    try {
+      _state.value = MainViewState.RepositoryUpdate(api.getRepositories())
+    } catch (error: AuthenticationRequiredException) {
+      _state.value = MainViewState.InitialState
     }
   }
 
   fun invalidateTokens() {
     ownerStorage.getActiveOwner(authenticator.getOwnerType())?.let { account ->
-      credentialStorage.getCredentials(
+      val credential = credentialStorage.getCredentials(
         account,
-        authenticator.getCredentialType(),
-        object : Callback<AndroidCredentials> {
-          override fun onResult(result: AndroidCredentials) {
-            credentialStorage.storeCredentials(
-              account,
-              authenticator.getCredentialType(),
-              AndroidCredentials("some-invalid-token", result.data)
-            )
-          }
-
-          override fun onError(error: Throwable) {
-            _state.value = MainViewState.Error(error)
-          }
-        })
+        authenticator.getCredentialType())
+      if (credential == null) {
+        _state.value = MainViewState.Error(AuthenticationCanceledException())
+      } else {
+        credentialStorage.storeCredentials(
+          account,
+          authenticator.getCredentialType(),
+          AndroidCredential("some-invalid-token", credential.data)
+        )
+      }
     }
   }
 

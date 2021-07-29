@@ -34,11 +34,10 @@ interface OwnerStorage<OWNER : Any> {
    *
    * @return [OWNER] which was created.
    */
-  fun createOwner(
+  suspend fun createOwner(
     ownerType: String,
-    credentialType: CredentialType,
-    callback: Callback<OWNER>? = null
-  ): Future<OWNER>
+    credentialType: CredentialType
+  ): OWNER?
 
   /**
    * Returns the owner if exists

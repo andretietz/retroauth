@@ -20,7 +20,7 @@ package com.andretietz.retroauth
  * The default android token represents a token string and additional data to it
  */
 
-data class AndroidCredentials @JvmOverloads constructor(
+data class AndroidCredential @JvmOverloads constructor(
   val token: String,
   val data: Map<String, String>? = null
 )

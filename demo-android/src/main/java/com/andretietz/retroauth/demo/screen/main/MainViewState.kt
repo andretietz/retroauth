@@ -7,8 +7,7 @@ sealed class MainViewState {
   data class LoginSuccess<OWNER>(val account: OWNER) : MainViewState()
   object LogoutSuccess : MainViewState()
   data class Error(val throwable: Throwable) : MainViewState()
-  data class RepositoryUpdate(
-    val repos: List<GithubApi.Repository>,
-    val timestamp: Long
-    ) : MainViewState()
+  class RepositoryUpdate(
+    val repos: List<GithubApi.Repository>
+  ) : MainViewState()
 }

@@ -24,6 +24,8 @@ import android.app.Application
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
@@ -45,28 +47,25 @@ class AndroidAccountManagerOwnerStorage constructor(
   private val executor by lazy { Executors.newSingleThreadExecutor() }
   private val accountManager by lazy { AccountManager.get(application) }
 
-  override fun createOwner(
-    ownerType: String,
-    credentialType: CredentialType,
-    callback: Callback<Account>?
-  ): Future<Account> {
+  override suspend fun createOwner(ownerType: String, credentialType: CredentialType): Account? {
     val future = accountManager.addAccount(
       ownerType,
       credentialType.type,
       null,
       null,
       activityManager.activity,
-      if (callback != null) CreateAccountCallback(callback) else null,
+      null,
       null)
-    return AccountFuture(future)
+    return createAccount(AccountFuture(future))
   }
 
+  @Suppress("BlockingMethodInNonBlockingContext")
+  private suspend fun createAccount(accountFuture: AccountFuture): Account? =
+    withContext(Dispatchers.Default) { accountFuture.get() }
+
   override fun getOwner(ownerType: String, ownerName: String): Account? {
-    val accounts = accountManager.getAccountsByType(ownerType)
-    for (account in accounts) {
-      if (ownerName == account.name) return account
-    }
-    return null
+    return accountManager.getAccountsByType(ownerType)
+      .firstOrNull { ownerName == it.name }
   }
 
   override fun getActiveOwner(ownerType: String): Account? {

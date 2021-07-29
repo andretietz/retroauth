@@ -6,6 +6,7 @@ dependencies {
   api(Dependencies.kotlin)
   api(Dependencies.retrofit.retrofit)
   api(Dependencies.okhttp.okhttp)
+  api(Dependencies.coroutines)
 
   testImplementation(Dependencies.test.junit)
   testImplementation(Dependencies.rxjava2)

@@ -5,10 +5,11 @@ import android.app.Application
 import android.content.Context
 import com.andretietz.retroauth.AndroidAccountManagerCredentialStorage
 import com.andretietz.retroauth.AndroidAccountManagerOwnerStorage
-import com.andretietz.retroauth.AndroidCredentials
+import com.andretietz.retroauth.AndroidCredential
 import com.andretietz.retroauth.Authenticator
 import com.andretietz.retroauth.CredentialType
 import com.andretietz.retroauth.demo.R
+import kotlinx.coroutines.runBlocking
 import okhttp3.Request
 
 /**
@@ -17,7 +18,7 @@ import okhttp3.Request
  * If the credential for some reason is invalid, the returning 401 will cause the deletion of the credential and a retry of the
  * call, in which it will get refreshed
  */
-class GithubAuthenticator(private val application: Application) : Authenticator<Account, AndroidCredentials>() {
+class GithubAuthenticator(private val application: Application) : Authenticator<Account, AndroidCredential>() {
 
   private val credentialStorage by lazy { AndroidAccountManagerCredentialStorage(application) }
   private val ownerStorage by lazy { AndroidAccountManagerOwnerStorage(application) }
@@ -41,7 +42,7 @@ class GithubAuthenticator(private val application: Application) : Authenticator<
     return application.getString(R.string.authentication_ACCOUNT)
   }
 
-  override fun authenticateRequest(request: Request, credential: AndroidCredentials): Request {
+  override fun authenticateRequest(request: Request, credential: AndroidCredential): Request {
     return request.newBuilder()
       .header("Authorization", "Bearer ${credential.token}")
       .build()
@@ -50,9 +51,11 @@ class GithubAuthenticator(private val application: Application) : Authenticator<
   override fun refreshCredentials(
     owner: Account,
     credentialType: CredentialType,
-    credential: AndroidCredentials
-  ): AndroidCredentials? {
-    ownerStorage.createOwner(owner.type, credentialType).get()
-    return credentialStorage.getCredentials(owner, credentialType).get()
+    credential: AndroidCredential
+  ): AndroidCredential? {
+    runBlocking {
+      ownerStorage.createOwner(owner.type, credentialType)
+    }
+    return credentialStorage.getCredentials(owner, credentialType)
   }
 }

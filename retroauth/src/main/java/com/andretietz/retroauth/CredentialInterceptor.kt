@@ -16,6 +16,9 @@
 
 package com.andretietz.retroauth
 
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
@@ -46,6 +49,8 @@ class CredentialInterceptor<OWNER : Any, CREDENTIAL : Any>(
 
   private val registration = mutableMapOf<Int, RequestType>()
 
+  private val scope = CoroutineScope(CoroutineName("InterceptorScope"))
+
   @Suppress("Detekt.RethrowCaughtException")
   override fun intercept(chain: Interceptor.Chain): Response {
     var response: Response
@@ -71,7 +76,8 @@ class CredentialInterceptor<OWNER : Any, CREDENTIAL : Any>(
           if (owner != null) {
             // get the credential of the owner
             val localToken =
-              credentialStorage.getCredentials(owner, authRequestType.credentialType).get()
+              credentialStorage.getCredentials(owner, authRequestType.credentialType)
+                ?: throw AuthenticationRequiredException()
             // if the credential is still valid and no refresh has been requested
             if (authenticator.isCredentialValid(localToken) && !refreshRequested) {
               credential = localToken
@@ -87,7 +93,7 @@ class CredentialInterceptor<OWNER : Any, CREDENTIAL : Any>(
               } else {
                 // otherwise remove the current credential from the storage
                 credentialStorage
-                  .removeCredentials(owner, authRequestType.credentialType, localToken)
+                  .removeCredentials(owner, authRequestType.credentialType)
                 // and use the "old" credential
                 localToken
               }
@@ -95,7 +101,10 @@ class CredentialInterceptor<OWNER : Any, CREDENTIAL : Any>(
             // authenticate the request using the credential
             request = authenticator.authenticateRequest(request, credential)
           } else {
-            ownerManager.createOwner(authRequestType.ownerType, authRequestType.credentialType)
+            scope.launch {
+              ownerManager.createOwner(authRequestType.ownerType, authRequestType.credentialType)
+            }
+            // cannot authorize request -> cancel request
             throw AuthenticationRequiredException()
           }
         } catch (error: Throwable) {
