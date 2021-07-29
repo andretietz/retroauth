@@ -1,5 +1,8 @@
-## 3.2.1 ()
+## 3.3.0 ()
 * Kotlin script migration
+* API Breaking changes
+  * Interfaces Authenticator, OwnerStorage, CredentialStorage have been changed
+    * removed all usages of `Future` or callbacks
 ## 3.2.0 (2021-06-08)
 * Removing the Retrofit CallAdapter in order to enrich the requests using [this method](https://andretietz.com/2021/04/06/custom-retrofit2-annotations-revisited/)
 * using the github api instead of facebook in the demo.
