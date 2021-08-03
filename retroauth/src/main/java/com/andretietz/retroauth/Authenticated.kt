@@ -26,10 +26,7 @@ import kotlin.annotation.AnnotationTarget.PROPERTY_SETTER
  */
 @Target(FUNCTION, PROPERTY_GETTER, PROPERTY_SETTER)
 @Retention(RUNTIME)
-annotation class Authorize(
+annotation class Authenticated(
   val ownerType: Int = 0,
   val credentialType: Int = 0
 )
-
-@Deprecated("has been renamed to avoid misunderstandings.")
-typealias Authenticated = Authorize

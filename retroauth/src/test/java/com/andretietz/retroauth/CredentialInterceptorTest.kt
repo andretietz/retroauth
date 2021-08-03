@@ -12,6 +12,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.Dispatcher
+import okhttp3.HttpUrl
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -45,15 +47,7 @@ class CredentialInterceptorTest {
       credentialStorage
     )
 
-    val api = Retrofit.Builder()
-      .baseUrl(serverRule.server.url("/"))
-      .addConverterFactory(GsonConverterFactory.create())
-      .client(
-        OkHttpClient.Builder()
-          .addInterceptor(interceptor)
-          .build()
-      )
-      .build().create(SomeApi::class.java)
+    val api = createSomeApi(serverRule.server.url("/"), interceptor)
 
     val data = api.someCall()
 
@@ -83,15 +77,7 @@ class CredentialInterceptorTest {
       credentialStorage
     )
 
-    val api = Retrofit.Builder()
-      .baseUrl(serverRule.server.url("/"))
-      .addConverterFactory(GsonConverterFactory.create())
-      .client(
-        OkHttpClient.Builder()
-          .addInterceptor(interceptor)
-          .build()
-      )
-      .build().create(SomeApi::class.java)
+    val api = createSomeApi(serverRule.server.url("/"), interceptor)
 
     try {
       api.someAuthenticatedCall()
@@ -134,15 +120,7 @@ class CredentialInterceptorTest {
       credentialStorage
     )
 
-    val api = Retrofit.Builder()
-      .baseUrl(serverRule.server.url("/"))
-      .addConverterFactory(GsonConverterFactory.create())
-      .client(
-        OkHttpClient.Builder()
-          .addInterceptor(interceptor)
-          .build()
-      )
-      .build().create(SomeApi::class.java)
+    val api = createSomeApi(serverRule.server.url("/"), interceptor)
 
     val data = api.someAuthenticatedCall()
 
@@ -185,15 +163,7 @@ class CredentialInterceptorTest {
       credentialStorage
     )
 
-    val api = Retrofit.Builder()
-      .baseUrl(serverRule.server.url("/"))
-      .addConverterFactory(GsonConverterFactory.create())
-      .client(
-        OkHttpClient.Builder()
-          .addInterceptor(interceptor)
-          .build()
-      )
-      .build().create(SomeApi::class.java)
+    val api = createSomeApi(serverRule.server.url("/"), interceptor)
 
     val data = api.someAuthenticatedCall()
 
@@ -239,15 +209,7 @@ class CredentialInterceptorTest {
       credentialStorage
     )
 
-    val api = Retrofit.Builder()
-      .baseUrl(serverRule.server.url("/"))
-      .addConverterFactory(GsonConverterFactory.create())
-      .client(
-        OkHttpClient.Builder()
-          .addInterceptor(interceptor)
-          .build()
-      )
-      .build().create(SomeApi::class.java)
+    val api = createSomeApi(serverRule.server.url("/"), interceptor)
 
     val data = api.someAuthenticatedCall()
 
@@ -301,15 +263,7 @@ class CredentialInterceptorTest {
       credentialStorage
     )
 
-    val api = Retrofit.Builder()
-      .baseUrl(serverRule.server.url("/"))
-      .addConverterFactory(GsonConverterFactory.create())
-      .client(
-        OkHttpClient.Builder()
-          .addInterceptor(interceptor)
-          .build()
-      )
-      .build().create(SomeApi::class.java)
+    val api = createSomeApi(serverRule.server.url("/"), interceptor)
 
     val data = api.someAuthenticatedCall()
 
@@ -366,26 +320,7 @@ class CredentialInterceptorTest {
       credentialStorage
     )
 
-    /**
-     * Since okhttp supports 5 connections at a time. in order to test what we want to test we need
-     * to increase that limit.
-     * https://square.github.io/okhttp/4.x/okhttp/okhttp3/-dispatcher/
-     * https://stackoverflow.com/questions/42299791/okhttpclient-limit-number-of-connections
-     */
-    val extremeDispatcher = Dispatcher()
-    extremeDispatcher.maxRequests = EXTREME_REQUEST_COUNT
-    extremeDispatcher.maxRequestsPerHost = EXTREME_REQUEST_COUNT
-
-    val api = Retrofit.Builder()
-      .baseUrl(serverRule.server.url("/"))
-      .addConverterFactory(GsonConverterFactory.create())
-      .client(
-        OkHttpClient.Builder()
-          .dispatcher(extremeDispatcher)
-          .addInterceptor(interceptor)
-          .build()
-      )
-      .build().create(SomeApi::class.java)
+    val api = createSomeApi(serverRule.server.url("/"), interceptor)
 
     launch {
       repeat(EXTREME_REQUEST_COUNT) {
@@ -428,6 +363,9 @@ class CredentialInterceptorTest {
       on {
         refreshCredentials(anyString(), any(), anyString())
       } doAnswer {
+        // with this we make sure that the first request within the lock
+        // takes a bit longer, so that all other 199 requests queue up before the first call
+        // unlocks the mutex in the CredentialInterceptor
         Thread.sleep(500)
         error("some error was thrown")
       }
@@ -438,21 +376,7 @@ class CredentialInterceptorTest {
       ownerStorage,
       credentialStorage
     )
-
-    val extremeDispatcher = Dispatcher()
-    extremeDispatcher.maxRequests = 200
-    extremeDispatcher.maxRequestsPerHost = 200
-
-    val api = Retrofit.Builder()
-      .baseUrl(serverRule.server.url("/"))
-      .addConverterFactory(GsonConverterFactory.create())
-      .client(
-        OkHttpClient.Builder()
-          .dispatcher(extremeDispatcher)
-          .addInterceptor(interceptor)
-          .build()
-      )
-      .build().create(SomeApi::class.java)
+    val api = createSomeApi(serverRule.server.url("/"), interceptor)
 
     launch {
       repeat(200) {
@@ -485,7 +409,29 @@ class CredentialInterceptorTest {
     private const val OWNER_TYPE = "owner_type"
     private val CREDENTIAL_TYPE = CredentialType("credential_type")
 
-    private val EXTREME_REQUEST_COUNT = 200
+    private const val EXTREME_REQUEST_COUNT = 200
+
+    private fun createSomeApi(url: HttpUrl, interceptor: Interceptor): SomeApi {
+      return Retrofit.Builder()
+        .baseUrl(url)
+        .addConverterFactory(GsonConverterFactory.create())
+        .client(
+          OkHttpClient.Builder()
+            /**
+             * Since okhttp supports 5 connections at a time. in order to test what we want to test we need
+             * to increase that limit.
+             * https://square.github.io/okhttp/4.x/okhttp/okhttp3/-dispatcher/
+             * https://stackoverflow.com/questions/42299791/okhttpclient-limit-number-of-connections
+             */
+            .dispatcher(Dispatcher().also {
+              it.maxRequests = EXTREME_REQUEST_COUNT
+              it.maxRequestsPerHost = EXTREME_REQUEST_COUNT
+            })
+            .addInterceptor(interceptor)
+            .build()
+        )
+        .build().create(SomeApi::class.java)
+    }
   }
 }
 
