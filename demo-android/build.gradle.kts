@@ -5,12 +5,14 @@ plugins {
   id("dagger.hilt.android.plugin")
 }
 android {
-  compileSdkVersion(30)
+  compileSdkVersion(31)
   defaultConfig {
     applicationId = "com.andretietz.retroauth.demo"
     minSdkVersion(23)
     versionCode = 1
     versionName = "1.0.0"
+//    buildConfigField("String", "GITHUB_CLIENT_ID", "\"${System.getenv("GITHUB_CLIENT_ID")}\"")
+//    buildConfigField("String", "GITHUB_CLIENT_SECRET", "\"${System.getenv("GITHUB_CLIENT_SECRET")}\"")
   }
   buildTypes {
     getByName("release") {

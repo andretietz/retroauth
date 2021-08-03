@@ -3,7 +3,9 @@ package com.andretietz.retroauth.demo.auth
 import android.accounts.Account
 import android.app.Application
 import android.content.Context
-import com.andretietz.retroauth.*
+import com.andretietz.retroauth.AndroidCredential
+import com.andretietz.retroauth.Authenticator
+import com.andretietz.retroauth.CredentialType
 import com.andretietz.retroauth.demo.R
 import okhttp3.Request
 
@@ -14,9 +16,6 @@ import okhttp3.Request
  * call, in which it will get refreshed
  */
 class GithubAuthenticator(private val application: Application) : Authenticator<Account, AndroidCredential>() {
-
-  private val credentialStorage by lazy { AndroidAccountManagerCredentialStorage(application) }
-  private val ownerStorage by lazy { AndroidAccountManagerOwnerStorage(application) }
 
   companion object {
     const val CLIENT_ID = "bb86ddeb2dd22163192f"
@@ -34,6 +33,7 @@ class GithubAuthenticator(private val application: Application) : Authenticator<
   override fun getCredentialType(credentialType: Int): CredentialType = this.credentialType
 
   override fun getOwnerType(ownerType: Int): String {
+    // if you would have more than one owner type, here's the chance to toggle
     return application.getString(R.string.authentication_ACCOUNT)
   }
 

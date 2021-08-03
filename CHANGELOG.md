@@ -1,4 +1,4 @@
-## 3.3.0 ()
+## 3.3.0 (2021)
 * Kotlin script migration
 * API Breaking changes
   * Interfaces Authenticator, OwnerStorage, CredentialStorage have been changed
