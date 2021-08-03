@@ -8,7 +8,7 @@ class AndroidCredentialTest {
 
   @Test
   fun dataCheck() {
-    val androidCredentials = AndroidCredentials("token", mapOf("refresh" to "refresh"))
+    val androidCredentials = AndroidCredential("token", mapOf("refresh" to "refresh"))
     assertEquals("token", androidCredentials.token)
     assertEquals("refresh", requireNotNull(androidCredentials.data)["refresh"])
   }

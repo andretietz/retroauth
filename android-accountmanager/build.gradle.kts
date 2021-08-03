@@ -1,10 +1,11 @@
 plugins {
   id("com.android.library")
   id("com.github.ben-manes.versions")
+  kotlin("android")
 }
 
 android {
-    compileSdkVersion(30)
+    compileSdkVersion(31)
 
     defaultConfig {
         minSdkVersion(21)

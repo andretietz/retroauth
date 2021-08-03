@@ -1,21 +1,17 @@
 package com.andretietz.retroauth.sqlite
 
-import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.dao.id.IntIdTable
 
 
-object Users : Table() {
-  val id = integer("id")
-  val active = bool("active")
+object Users : IntIdTable() {
+  val active = bool("active").default(false)
   val type = varchar("type", 100)
   val name = varchar("name", 100)
   val email = varchar("email", 100)
-  override val primaryKey = PrimaryKey(id)
 }
 
-object Credentials : Table() {
-  val id = integer("id")
-  val userId = integer("user_id") references Users.id
+object Credentials : IntIdTable() {
+  val user = reference("user", Users)
   val key = varchar("key", 200)
-  val content = text("value")
-  override val primaryKey = PrimaryKey(Users.id)
+  val value = text("value")
 }

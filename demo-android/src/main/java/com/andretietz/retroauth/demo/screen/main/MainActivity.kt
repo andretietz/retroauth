@@ -5,6 +5,7 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import android.webkit.CookieManager
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -18,13 +19,12 @@ import com.andretietz.retroauth.demo.databinding.ActivityRepositoryListBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-  private val viewModel: AndroidMainViewModel by viewModels()
+  private val viewModel: MainViewModel by viewModels()
 
   @Inject
   lateinit var ownerStorage: AndroidAccountManagerOwnerStorage
@@ -39,7 +39,9 @@ class MainActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
     binding = ActivityRepositoryListBinding.inflate(layoutInflater)
     setContentView(binding.root)
-
+//    setContent {
+//      emptyView()
+//    }
     val adapter = RepositoryAdapter()
 
     binding.repositoryList.layoutManager = LinearLayoutManager(this)
@@ -49,26 +51,25 @@ class MainActivity : AppCompatActivity() {
 
     viewModel.state.flowWithLifecycle(this.lifecycle, Lifecycle.State.STARTED)
       .onEach {
-        Timber.e("result")
         binding.swipeToRefresh.isRefreshing = false
         when (it) {
-          is MainViewModel.ViewState.InitialState -> {
+          is MainViewState.InitialState -> {
             adapter.update(emptyList())
             binding.repositoryList.visibility = View.GONE
             binding.textEmpty.visibility = View.VISIBLE
           }
-          is MainViewModel.ViewState.RepositoryUpdate -> {
+          is MainViewState.RepositoryUpdate -> {
             binding.repositoryList.visibility = View.VISIBLE
             binding.textEmpty.visibility = View.GONE
             adapter.update(it.repos)
           }
-          is MainViewModel.ViewState.Error -> showError(it.throwable)
-          is MainViewModel.ViewState.LoginSuccess -> {
+          is MainViewState.Error -> showError(it.throwable)
+          is MainViewState.LoginSuccess<*> -> {
             binding.repositoryList.visibility = View.VISIBLE
             binding.textEmpty.visibility = View.GONE
             show("Login success!")
           }
-          is MainViewModel.ViewState.LogoutSuccess -> {
+          is MainViewState.LogoutSuccess -> {
             binding.repositoryList.visibility = View.GONE
             binding.textEmpty.visibility = View.VISIBLE
             show("Logout success!")
@@ -79,6 +80,26 @@ class MainActivity : AppCompatActivity() {
 
   }
 
+  //
+//
+//  @Preview
+//  @Composable
+//  fun emptyView() {
+//    Text(getString(R.string.label_empty_state))
+//  }
+////
+////  @Composable
+////  fun showRepositories() {
+////
+////    LazyColumn {
+////      items(repositories, key = { it.id }) {
+////        Row {
+////          Icon()
+////          Text(it.name)
+////        }
+////      }
+////    }
+////  }
   override fun onCreateOptionsMenu(menu: Menu): Boolean {
     val inflater: MenuInflater = menuInflater
     inflater.inflate(R.menu.menu, menu)

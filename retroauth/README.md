@@ -49,7 +49,7 @@ The API provides 3 interaces and an abstract class. All of the
 
 ## Pull requests are welcome
 Since I am the only one working on that, I would like to know your opinion and/or your suggestions.
-Please feel free to create Pull-Requests!
+Please feel free to create Pull-Requests!u
 
 ## LICENSE
 ```

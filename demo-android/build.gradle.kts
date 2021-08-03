@@ -5,12 +5,14 @@ plugins {
   id("dagger.hilt.android.plugin")
 }
 android {
-  compileSdkVersion(30)
+  compileSdkVersion(31)
   defaultConfig {
     applicationId = "com.andretietz.retroauth.demo"
     minSdkVersion(23)
     versionCode = 1
     versionName = "1.0.0"
+//    buildConfigField("String", "GITHUB_CLIENT_ID", "\"${System.getenv("GITHUB_CLIENT_ID")}\"")
+//    buildConfigField("String", "GITHUB_CLIENT_SECRET", "\"${System.getenv("GITHUB_CLIENT_SECRET")}\"")
   }
   buildTypes {
     getByName("release") {
@@ -25,11 +27,24 @@ android {
 
   buildFeatures {
     viewBinding = true
+//    compose = true
   }
+
+  kotlinOptions {
+    jvmTarget = "1.8"
+  }
+
+//  composeOptions {
+//    kotlinCompilerVersion = Versions.kotlin
+//    kotlinCompilerExtensionVersion = "1.0.0-rc02"
+//  }
 }
 
 dependencies {
+  api(project(":android-accountmanager"))
+  implementation(project(":retroauth"))
   implementation(Dependencies.android.appcompat)
+  implementation(Dependencies.coroutines)
   implementation(Dependencies.android.timber)
   implementation(Dependencies.android.fragment)
   implementation(Dependencies.android.constraintLayout)
@@ -41,7 +56,9 @@ dependencies {
   implementation(Dependencies.okhttp.okhttp)
   implementation(Dependencies.okhttp.loggingInterceptor)
   implementation(Dependencies.retrofit.moshiConverter)
-  implementation(Dependencies.moshi.moshi)
+  implementation(Dependencies.moshi.moshi) {
+    exclude("org.jetbrains.kotlin", "kotlin-reflect")
+  }
   kapt(Dependencies.moshi.moshiCodegen)
 
   implementation(Dependencies.android.hilt)
@@ -51,9 +68,15 @@ dependencies {
   implementation(Dependencies.scribe.scribe)
   implementation(Dependencies.scribe.okhttp)
 
-  implementation(project(":android-accountmanager"))
-}
+//  implementation("androidx.compose.runtime:runtime:1.0.0-rc02")
+//  implementation("androidx.compose.ui:ui:1.0.0-rc02")
+//  implementation("androidx.compose.foundation:foundation-layout:1.0.0-rc02")
+//  implementation("androidx.compose.material:material:1.0.0-rc02")
+//  implementation("androidx.compose.material:material-icons-extended:1.0.0-rc02")
+//  implementation("androidx.compose.foundation:foundation:1.0.0-rc02")
+//  implementation("androidx.compose.animation:animation:1.0.0-rc02")
+//  implementation("androidx.compose.ui:ui-tooling:1.0.0-rc02")
+//  implementation("androidx.activity:activity-compose:1.3.0-rc02")
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-  kotlinOptions.jvmTarget = "1.8"
+
 }

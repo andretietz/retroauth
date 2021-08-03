@@ -4,7 +4,9 @@ import android.app.Application
 import com.andretietz.retroauth.AndroidAccountManagerCredentialStorage
 import com.andretietz.retroauth.AndroidAccountManagerOwnerStorage
 import com.andretietz.retroauth.androidAuthentication
+import com.andretietz.retroauth.demo.api.GithubApi
 import com.andretietz.retroauth.demo.auth.GithubAuthenticator
+import com.andretietz.retroauth.demo.auth.LoginActivity
 import com.github.scribejava.apis.GitHubApi
 import com.github.scribejava.core.builder.ServiceBuilder
 import com.github.scribejava.core.oauth.OAuth20Service
@@ -13,7 +15,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import okhttp3.Cache
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -23,7 +24,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-class ApiModule {
+object ApiModule {
 
   /**
    * provides the scribejava object to authenticate using github.
@@ -43,7 +44,6 @@ class ApiModule {
   @Provides
   fun provideRetrofit(
     application: Application,
-    cache: Cache,
     authenticator: GithubAuthenticator
   ): Retrofit {
     /**
@@ -58,7 +58,6 @@ class ApiModule {
           .build()
         chain.proceed(request)
       }
-      .cache(cache)
       .build()
 
     /**
@@ -87,6 +86,11 @@ class ApiModule {
 
   @Singleton
   @Provides
-  fun provideCache(application: Application): Cache =
-    Cache(application.cacheDir, 50 * 1024 * 1024)
+  fun providesGithubSignInApi(retrofit: Retrofit): LoginActivity.SignInApi =
+    retrofit.create(LoginActivity.SignInApi::class.java)
+
+  @Singleton
+  @Provides
+  fun providesGithubApi(retrofit: Retrofit): GithubApi =
+    retrofit.create(GithubApi::class.java)
 }

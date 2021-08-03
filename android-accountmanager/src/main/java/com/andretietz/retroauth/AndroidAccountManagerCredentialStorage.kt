@@ -19,47 +19,61 @@ package com.andretietz.retroauth
 import android.accounts.Account
 import android.accounts.AccountManager
 import android.app.Application
-import android.os.Looper
-import java.util.concurrent.Callable
-import java.util.concurrent.Executors
-import java.util.concurrent.FutureTask
 
 /**
  * This is the implementation of a [CredentialStorage] in Android using the Android [AccountManager]
  */
 class AndroidAccountManagerCredentialStorage constructor(
   private val application: Application
-) : CredentialStorage<Account, AndroidCredentialType, AndroidCredentials> {
+) : CredentialStorage<Account, AndroidCredential> {
 
-  private val executor by lazy { Executors.newSingleThreadExecutor() }
   private val accountManager by lazy { AccountManager.get(application) }
 
   companion object {
     @JvmStatic
-    private fun createDataKey(type: AndroidCredentialType, key: String) =
+    private fun createDataKey(type: CredentialType, key: String) =
       "%s_%s".format(type.type, key)
   }
 
   override fun getCredentials(
     owner: Account,
-    type: AndroidCredentialType
-  ): AndroidCredentials {
-    val task = GetTokenTask(application, accountManager, owner, type)
-    return if (Looper.myLooper() == Looper.getMainLooper())
-      executor.submit(task).get()
-    else
-      FutureTask(task).also { it.run() }.get()
+    type: CredentialType
+  ): AndroidCredential? {
+    val future = accountManager.getAuthToken(
+      owner,
+      type.type,
+      null,
+      ActivityManager[application].activity,
+      null,
+      null)
+
+    var token = future.result.getString(AccountManager.KEY_AUTHTOKEN)
+    if (token == null) token = accountManager.peekAuthToken(owner, type.type)
+    if (token == null) {
+      return null
+//  TODO: before:    throw AuthenticationCanceledException()
+    }
+    return AndroidCredential(
+      token,
+      type.dataKeys
+        ?.associateTo(HashMap()) {
+          it to accountManager.getUserData(owner, createDataKey(type, it))
+        }
+    )
   }
 
-  override fun removeCredentials(owner: Account, type: AndroidCredentialType, credentials: AndroidCredentials) {
-    accountManager.invalidateAuthToken(owner.type, credentials.token)
-    type.dataKeys?.forEach { accountManager.setUserData(owner, createDataKey(type, it), null) }
+  override fun removeCredentials(owner: Account, type: CredentialType) {
+    getCredentials(owner, type)?.let { credential ->
+      accountManager.invalidateAuthToken(owner.type, credential.token)
+      type.dataKeys?.forEach { accountManager.setUserData(owner, createDataKey(type, it), null) }
+    }
   }
 
-  override fun storeCredentials(owner: Account, type: AndroidCredentialType, credentials: AndroidCredentials) {
+  override fun storeCredentials(owner: Account, type: CredentialType, credentials: AndroidCredential) {
     accountManager.setAuthToken(owner, type.type, credentials.token)
-    if (type.dataKeys != null && credentials.data != null) {
-      type.dataKeys.forEach {
+    val dataKeys = type.dataKeys
+    if (dataKeys != null && credentials.data != null) {
+      dataKeys.forEach {
         require(credentials.data.containsKey(it)) {
           throw IllegalArgumentException(
             "The credentials you want to store, needs to contain credentials-data with the keys: %s"
@@ -68,37 +82,6 @@ class AndroidAccountManagerCredentialStorage constructor(
         }
         accountManager.setUserData(owner, createDataKey(type, it), credentials.data[it])
       }
-    }
-  }
-
-  private class GetTokenTask(
-    application: Application,
-    private val accountManager: AccountManager,
-    private val owner: Account,
-    private val type: AndroidCredentialType
-  ) : Callable<AndroidCredentials> {
-
-    private val activityManager = ActivityManager[application]
-
-    override fun call(): AndroidCredentials {
-      val future = accountManager.getAuthToken(
-        owner,
-        type.type,
-        null,
-        activityManager.activity,
-        null,
-        null)
-
-      var token = future.result.getString(AccountManager.KEY_AUTHTOKEN)
-      if (token == null) token = accountManager.peekAuthToken(owner, type.type)
-      if (token == null) throw AuthenticationCanceledException()
-      return AndroidCredentials(
-        token,
-        type.dataKeys
-          ?.associateTo(HashMap()) {
-            it to accountManager.getUserData(owner, createDataKey(type, it))
-          }
-      )
     }
   }
 }

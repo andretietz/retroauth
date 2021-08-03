@@ -19,51 +19,27 @@ package com.andretietz.retroauth
 import okhttp3.Request
 import okhttp3.Response
 import java.net.HttpURLConnection
-import java.util.concurrent.Callable
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
-import java.util.concurrent.Future
 
 /**
  * The Authenticator interface is a very specific provider endpoint dependent implementation,
  * to authenticate your request and defines when or if to retry.
+ * This needs to be an abstract class in order to be java 7 compatible (android).
  */
-abstract class Authenticator<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE : Any, CREDENTIAL : Any> {
-
-  companion object {
-    private val executors: ExecutorService by lazy { Executors.newSingleThreadExecutor() }
-  }
+abstract class Authenticator<OWNER : Any, CREDENTIAL : Any> {
 
   /**
-   * When there's no current owner set, take the existing ones and let the user choose, which one
-   * to pick.
-   *
-   * @param owners available [OWNER]s on that system. This will never be an empty list.
-   *
-   * @return a future that contains an owner to proceed.
-   *
-   * @throws AuthenticationCanceledException when the user cancels choosing an owner.
-   */
-  @Throws(AuthenticationCanceledException::class)
-  open fun chooseOwner(owners: List<OWNER>): Future<OWNER> =
-    /**
-     * The default implementation returns the first available owner.
-     */
-    executors.submit(Callable { owners[0] })
-
-  /**
-   * @param annotationCredentialType type of the credential reached in from the [Authenticated.credentialType]
+   * @param credentialType type of the credential reached in from the [Authorize.credentialType]
    * Annotation of the request.
    *
    * @return type of the credential
    */
-  abstract fun getCredentialType(annotationCredentialType: Int = 0): CREDENTIAL_TYPE
+  abstract fun getCredentialType(credentialType: Int = 0): CredentialType
 
   /**
-   * @param annotationOwnerType type of the owner reached in from the [Authenticated.ownerType]
+   * @param ownerType type of the owner handed in, from the [Authorize.ownerType]
    * Annotation of the request.
    */
-  abstract fun getOwnerType(annotationOwnerType: Int = 0): OWNER_TYPE
+  abstract fun getOwnerType(ownerType: Int = 0): String
 
   /**
    * Authenticates a [Request].
@@ -92,12 +68,14 @@ abstract class Authenticator<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE 
   @Suppress("UNUSED_PARAMETER")
   open fun refreshCredentials(
     owner: OWNER,
-    credentialType: CREDENTIAL_TYPE,
+    credentialType: CredentialType,
     credential: CREDENTIAL
-  ): CREDENTIAL? = credential
+  ): CREDENTIAL? = null
 
   /**
-   * This method is called on each authenticated request, to make sure the current credential is still valid.
+   * This method is called on each authenticated request, to make sure the current credential
+   * is still valid. With this method, you can refresh your token before the first request is
+   * called.
    *
    * @param credential The current credential
    */

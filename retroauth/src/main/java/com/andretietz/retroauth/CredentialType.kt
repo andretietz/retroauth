@@ -13,20 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.andretietz.retroauth
 
-import kotlin.annotation.AnnotationRetention.RUNTIME
-import kotlin.annotation.AnnotationTarget.FUNCTION
-import kotlin.annotation.AnnotationTarget.PROPERTY_GETTER
-import kotlin.annotation.AnnotationTarget.PROPERTY_SETTER
-
-/**
- * This is the annotation you can use to authorize your request.
- */
-@Target(FUNCTION, PROPERTY_GETTER, PROPERTY_SETTER)
-@Retention(RUNTIME)
-annotation class Authenticated(
-  val ownerType: Int = 0,
-  val credentialType: Int = 0
+data class CredentialType @JvmOverloads constructor(
+  val type: String,
+  val dataKeys: Set<String>? = null
 )

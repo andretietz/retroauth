@@ -7,15 +7,16 @@ dependencies {
   api(Dependencies.kotlin.coroutines)
   api(Dependencies.retrofit.retrofit)
   api(Dependencies.okhttp.okhttp)
+  api(Dependencies.coroutines)
 
   testImplementation(Dependencies.test.junit)
-  testImplementation(Dependencies.rxjava2)
+  testImplementation(Dependencies.test.coroutines)
   testImplementation(kotlin("reflect", version = Versions.kotlin))
   testImplementation(Dependencies.okhttp.mockwebserver)
   testImplementation(Dependencies.retrofit.moshiConverter)
-  testImplementation(Dependencies.retrofit.rxjava2Adapter)
   testImplementation(Dependencies.retrofit.gsonConverter)
   testImplementation(Dependencies.test.mockitoKotlin)
+  testImplementation(Dependencies.test.assertj)
 }
 
 apply {

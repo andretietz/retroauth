@@ -1,61 +1,55 @@
 package com.andretietz.retroauth
 
+import com.andretietz.retroauth.sqlite.User
 import com.andretietz.retroauth.sqlite.Users
-import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.update
 
 class SQLiteOwnerManager(
+  private val database: Database
+) : OwnerStorage<Account> {
 
-) : OwnerStorage<String, Account, String> {
-
-  override fun createOwner(ownerType: String, credentialType: String): Account {
+  override suspend fun createOwner(ownerType: String, credentialType: CredentialType): Account? {
     TODO("Not yet implemented")
   }
 
-  override fun getOwner(ownerType: String, ownerName: String): Account? {
-    return Users
-      .select { Users.name.eq(ownerName) }
+  override fun getOwner(ownerType: String, ownerName: String): Account? = transaction(database) {
+    User.find { Users.type eq ownerType }
       .firstOrNull()
-      ?.let { transform(it) }
+      ?.let { Account(it.id.value, it.name, it.email) }
   }
 
-  override fun getActiveOwner(ownerType: String): Account? {
-    return Users
-      .select { Users.active.eq(true) }
+  override fun getActiveOwner(ownerType: String): Account? = transaction(database) {
+    User.find { Users.active eq true }
       .firstOrNull()
-      ?.let { transform(it) }
+      ?.let { Account(it.id.value, it.name, it.email) }
   }
 
-  override fun getOwners(ownerType: String): List<Account> {
-    return Users.selectAll()
-      .map { transform(it) }
+
+  override fun getOwners(ownerType: String): List<Account> = transaction(database) {
+    User.all().map { Account(it.id.value, it.name, it.email) }
   }
+
 
   override fun switchActiveOwner(ownerType: String, owner: Account?) {
-    transaction {
-      Users.update({ Users.type.eq(ownerType) }) {
-        it[active] = false
-      }
-      owner?.let {
-        Users.update({ Users.type.eq(ownerType).and { Users.name.eq(it.name) } }) {
-          it[active] = true
-        }
+    transaction(database) {
+      User.all().map {
+        it.active = (owner != null &&
+          it.type == ownerType &&
+          it.name == owner.name &&
+          it.email == owner.email)
       }
     }
   }
 
   override fun removeOwner(ownerType: String, owner: Account): Boolean {
-    return transaction {
-//      Credentials.deleteWhere {  }
-      Users.deleteWhere { Users.type.eq(ownerType).and { Users.name.eq(owner.name) } }
-    } > 0
+    return transaction(database) {
+      User.find { Users.type.eq(ownerType).and { Users.name.eq(owner.name) } }
+        .map { it.delete() }
+        .toList()
+        .isNotEmpty()
+    }
   }
-
-  private fun transform(result: ResultRow) = Account(result[Users.name], result[Users.email])
 
 }
