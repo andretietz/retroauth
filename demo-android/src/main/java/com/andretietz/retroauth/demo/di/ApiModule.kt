@@ -4,6 +4,7 @@ import android.app.Application
 import com.andretietz.retroauth.AndroidAccountManagerCredentialStorage
 import com.andretietz.retroauth.AndroidAccountManagerOwnerStorage
 import com.andretietz.retroauth.androidAuthentication
+import com.andretietz.retroauth.demo.R
 import com.andretietz.retroauth.demo.api.GithubApi
 import com.andretietz.retroauth.demo.auth.GithubAuthenticator
 import com.andretietz.retroauth.demo.auth.LoginActivity
@@ -73,7 +74,10 @@ object ApiModule {
 
   @Singleton
   @Provides
-  fun providesOwnerStorage(application: Application) = AndroidAccountManagerOwnerStorage(application)
+  fun providesOwnerStorage(application: Application) =
+    AndroidAccountManagerOwnerStorage(
+      application,
+      application.getString(R.string.retroauth_authentication_ACCOUNT))
 
   @Singleton
   @Provides

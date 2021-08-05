@@ -7,6 +7,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.lifecycle.lifecycleScope
 import com.andretietz.retroauth.AuthenticationActivity
+import com.andretietz.retroauth.Credentials
 import com.andretietz.retroauth.demo.databinding.ActivityLoginBinding
 import com.github.scribejava.core.oauth.OAuth20Service
 import com.squareup.moshi.JsonClass
@@ -50,7 +51,7 @@ class LoginActivity : AuthenticationActivity() {
               storeCredentials(
                 account,
                 GithubAuthenticator.createTokenType(application),
-                AndroidCredential(token.accessToken)
+                Credentials(token.accessToken)
               )
 //              storeUserData(account, "email", userInfo.email)
               finalizeAuthentication(account)

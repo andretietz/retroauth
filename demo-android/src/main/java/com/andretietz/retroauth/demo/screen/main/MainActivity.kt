@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
   private lateinit var binding: ActivityRepositoryListBinding
 
   private val switchAccount = registerForActivityResult(SwitchAccountContract()) { account ->
-    account?.let { ownerStorage.switchActiveOwner(it.type, it) }
+    account?.let { ownerStorage.switchActiveOwner(it) }
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {

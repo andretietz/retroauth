@@ -22,53 +22,47 @@ package com.andretietz.retroauth
 interface OwnerStorage<OWNER : Any> {
 
   /**
-   * Creates an [OWNER] of a specific [ownerType] for a specific [credentialType].
+   * Creates an [OWNER]  for a specific [credentialType].
    * So open a login and let the user login.
    *
-   * @param ownerType Type of owner you want to create.
    * @param credentialType Type of credential you want to open the login for.
    *
    * @return [OWNER] which was created or null if canceled
    */
   suspend fun createOwner(
-    ownerType: String,
     credentialType: String
   ): OWNER?
 
   /**
    * Returns the owner if exists
    *
-   * @param ownerType type of the owner you need.
    * @param ownerName name of the owner you want to receive.
    *
    * @return [OWNER] if the owner exists on the system. If not, return `null`.
    */
-  fun getOwner(ownerType: String, ownerName: String): OWNER?
+  fun getOwner(ownerName: String): OWNER?
 
   /**
-   * @param ownerType type of the active owner you want to receive.
    *
    * @return [OWNER] that is currently active (important for multi user systems i.e. there could be
    * multiple users logged in, but there's only one active). If there's no user currently
    * active return `null`
    */
-  fun getActiveOwner(ownerType: String): OWNER?
+  fun getActiveOwner(): OWNER?
 
   /**
-   * @param ownerType type of the owners you want to receive.
    *
    * @return a list of [OWNER]s of the given type
    */
-  fun getOwners(ownerType: String): List<OWNER>
+  fun getOwners(): List<OWNER>
 
   /**
-   * Switches the active owner of the given [ownerType]. If the [owner] is `null`, it resets the
+   * Switches the active owner. If the [owner] is `null`, it resets the
    * active owner. So there won't be an active user.
    *
-   * @param ownerType which to consider.
    * @param owner to which to switch
    */
-  fun switchActiveOwner(ownerType: String, owner: OWNER? = null)
+  fun switchActiveOwner(owner: OWNER? = null)
 
   /**
    * Removes the given owner from the system.
@@ -77,6 +71,6 @@ interface OwnerStorage<OWNER : Any> {
    *
    * @return `true` when successfully removed, `false` otherwise.
    */
-  fun removeOwner(ownerType: String, owner: OWNER): Boolean
+  fun removeOwner(owner: OWNER): Boolean
 
 }

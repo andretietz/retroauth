@@ -38,7 +38,7 @@ import android.util.Log
  */
 class AccountAuthenticator(
   context: Context,
-  internal val action: String,
+  private val action: String,
   private val cleanupUserData: (account: Account) -> Unit
 ) : AbstractAccountAuthenticator(context) {
 

@@ -30,7 +30,8 @@ import kotlinx.coroutines.withContext
  */
 @Suppress("unused")
 class AndroidAccountManagerOwnerStorage constructor(
-  private val application: Application
+  private val application: Application,
+  private val ownerType: String
 ) : OwnerStorage<Account> {
 
   companion object {
@@ -41,7 +42,7 @@ class AndroidAccountManagerOwnerStorage constructor(
   private val accountManager by lazy { AccountManager.get(application) }
 
   @Suppress("BlockingMethodInNonBlockingContext")
-  override suspend fun createOwner(ownerType: String, credentialType: String): Account? =
+  override suspend fun createOwner(credentialType: String): Account? =
     withContext(Dispatchers.Default) {
       val bundle = accountManager.addAccount(
         ownerType,
@@ -58,22 +59,22 @@ class AndroidAccountManagerOwnerStorage constructor(
     }
 
 
-  override fun getOwner(ownerType: String, ownerName: String): Account? {
+  override fun getOwner(ownerName: String): Account? {
     return accountManager.getAccountsByType(ownerType)
       .firstOrNull { ownerName == it.name }
   }
 
-  override fun getActiveOwner(ownerType: String): Account? {
+  override fun getActiveOwner(): Account? {
     return application.getSharedPreferences(ownerType, Context.MODE_PRIVATE)
       .getString(RETROAUTH_ACCOUNT_NAME_KEY, null)?.let { accountName ->
-        getOwner(ownerType, accountName)
+        getOwner(accountName)
       }
   }
 
-  override fun getOwners(ownerType: String): List<Account> = accountManager.accounts.toList()
+  override fun getOwners(): List<Account> = accountManager.accounts.toList()
     .filter { it.type == ownerType }
 
-  override fun switchActiveOwner(ownerType: String, owner: Account?) {
+  override fun switchActiveOwner(owner: Account?) {
     val preferences = application.getSharedPreferences(ownerType, Context.MODE_PRIVATE)
     if (owner == null) {
       preferences.edit().remove(RETROAUTH_ACCOUNT_NAME_KEY).apply()
@@ -82,7 +83,7 @@ class AndroidAccountManagerOwnerStorage constructor(
     }
   }
 
-  override fun removeOwner(ownerType: String, owner: Account): Boolean {
+  override fun removeOwner(owner: Account): Boolean {
     val success = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
       accountManager.removeAccount(owner, null, null, null).result
         .getBoolean(AccountManager.KEY_BOOLEAN_RESULT)
@@ -90,7 +91,7 @@ class AndroidAccountManagerOwnerStorage constructor(
       @Suppress("DEPRECATION")
       accountManager.removeAccount(owner, null, null).result
     }
-    if (success) switchActiveOwner(owner.type)
+    if (success) switchActiveOwner(owner)
     return success
   }
 }

@@ -63,9 +63,9 @@ class CredentialInterceptor<OWNER : Any>(
     do {
       try {
         lock()
-        owner = ownerManager.getActiveOwner(authRequestType.ownerType)
-          ?: ownerManager.getOwners(authRequestType.ownerType).firstOrNull()
-            ?.also { ownerManager.switchActiveOwner(authRequestType.ownerType, it) }
+        owner = ownerManager.getActiveOwner()
+          ?: ownerManager.getOwners().firstOrNull()
+            ?.also { ownerManager.switchActiveOwner(it) }
         if (owner != null) {
           // get the credential of the owner
           val localToken =
@@ -96,7 +96,7 @@ class CredentialInterceptor<OWNER : Any>(
         } else {
           scope.launch {
             // async creation of an owner
-            ownerManager.createOwner(authRequestType.ownerType, authRequestType.credentialType)
+            ownerManager.createOwner(authRequestType.credentialType)
           }
           // cannot authorize request -> cancel running request
           throw AuthenticationRequiredException()
@@ -144,10 +144,7 @@ class CredentialInterceptor<OWNER : Any>(
       ?.filterIsInstance<Authenticated>()
       ?.firstOrNull()
       ?.let {
-        RequestType(
-          authenticator.getCredentialType(it.credentialType),
-          authenticator.getOwnerType(it.ownerType)
-        )
+        RequestType(authenticator.getCredentialType(it.credentialType))
       }
       ?.also { registration[key] = it }
   }

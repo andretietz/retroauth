@@ -55,7 +55,7 @@ class SQLiteOwnerStoreTest {
     ) = DatabaseCredential.new {
       this.user = user
       this.type = credentialType
-      this.value = "this is some token"
+      this.value = token
     }
   }
 }

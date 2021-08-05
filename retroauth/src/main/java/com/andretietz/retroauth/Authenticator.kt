@@ -36,12 +36,6 @@ abstract class Authenticator<OWNER : Any> {
   abstract fun getCredentialType(credentialType: Int = 0): String
 
   /**
-   * @param ownerType type of the owner handed in, from the ownerType
-   * Annotation of the request.
-   */
-  abstract fun getOwnerType(ownerType: Int = 0): String
-
-  /**
    * Authenticates a [Request].
    *
    * @param request request to authenticate

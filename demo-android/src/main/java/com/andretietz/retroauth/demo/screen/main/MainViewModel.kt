@@ -5,6 +5,7 @@ import com.andretietz.retroauth.AndroidAccountManagerCredentialStorage
 import com.andretietz.retroauth.AndroidAccountManagerOwnerStorage
 import com.andretietz.retroauth.AuthenticationCanceledException
 import com.andretietz.retroauth.AuthenticationRequiredException
+import com.andretietz.retroauth.Credentials
 import com.andretietz.retroauth.demo.api.GithubApi
 import com.andretietz.retroauth.demo.auth.GithubAuthenticator
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,7 +34,6 @@ class MainViewModel @Inject constructor(
   fun addAccount() {
     scope.launch {
       val account = ownerStorage.createOwner(
-        authenticator.getOwnerType(),
         authenticator.getCredentialType())
       if (account == null) {
         _state.value = MainViewState.Error(AuthenticationCanceledException())
@@ -54,7 +54,7 @@ class MainViewModel @Inject constructor(
   }
 
   fun invalidateTokens() {
-    ownerStorage.getActiveOwner(authenticator.getOwnerType())?.let { account ->
+    ownerStorage.getActiveOwner()?.let { account ->
       val credential = credentialStorage.getCredentials(
         account,
         authenticator.getCredentialType())
@@ -64,15 +64,15 @@ class MainViewModel @Inject constructor(
         credentialStorage.storeCredentials(
           account,
           authenticator.getCredentialType(),
-          AndroidCredential("some-invalid-token", credential.data)
+          Credentials("some-invalid-token", credential.data)
         )
       }
     }
   }
 
   fun logout() = scope.launch(Dispatchers.Default) {
-    ownerStorage.getActiveOwner(authenticator.getOwnerType())?.let { account ->
-      if (ownerStorage.removeOwner(authenticator.getOwnerType(), account)) {
+    ownerStorage.getActiveOwner()?.let { account ->
+      if (ownerStorage.removeOwner(account)) {
         _state.value = MainViewState.LogoutSuccess
       } else {
         _state.value = MainViewState.Error(UnknownError())
@@ -80,6 +80,6 @@ class MainViewModel @Inject constructor(
     }
   }
 
-  fun getCurrentAccount() = ownerStorage.getActiveOwner(authenticator.getOwnerType())
+  fun getCurrentAccount() = ownerStorage.getActiveOwner()
 
 }

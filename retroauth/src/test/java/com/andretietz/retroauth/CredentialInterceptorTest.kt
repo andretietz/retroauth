@@ -39,8 +39,8 @@ class CredentialInterceptorTest {
   fun `unauthenticated call with successful response`() = runBlocking {
     serverRule.server.enqueue(MockResponse().setBody("{\"data\": \"testdata\"}"))
     val ownerStorage = mock<OwnerStorage<String>>()
-    val credentialStorage = mock<CredentialStorage<String, String>>()
-    val authenticator = mock<Authenticator<String, String>>()
+    val credentialStorage = mock<CredentialStorage<String>>()
+    val authenticator = mock<Authenticator<String>>()
     val interceptor = CredentialInterceptor(
       authenticator,
       ownerStorage,
@@ -53,7 +53,7 @@ class CredentialInterceptorTest {
 
     assertThat(data).isEqualTo(Data("testdata"))
 
-    verify(authenticator, never()).authenticateRequest(any(), anyString())
+    verify(authenticator, never()).authenticateRequest(any(), any())
     Unit
   }
 
@@ -61,14 +61,13 @@ class CredentialInterceptorTest {
   fun `authenticated call, no owner existing`() = runBlocking {
     // setup ownerstore, without any owner existing
     val ownerStorage = mock<OwnerStorage<String>> {
-      on { getActiveOwner(anyString()) } doReturn null as String?
-      on { getOwners(anyString()) } doReturn emptyList<String>()
+      on { getActiveOwner() } doReturn null as String?
+      on { getOwners() } doReturn emptyList()
     }
 
-    val credentialStorage = mock<CredentialStorage<String, String>>()
-    val authenticator = mock<Authenticator<String, String>> {
+    val credentialStorage = mock<CredentialStorage<String>>()
+    val authenticator = mock<Authenticator<String>> {
       on { getCredentialType(any()) } doReturn CREDENTIAL_TYPE
-      on { getOwnerType(any()) } doReturn OWNER_TYPE
     }
 
     val interceptor = CredentialInterceptor(
@@ -94,19 +93,18 @@ class CredentialInterceptorTest {
     serverRule.server.enqueue(MockResponse().setBody("{\"data\": \"testdata\"}"))
 
     val ownerStorage = mock<OwnerStorage<String>> {
-      on { getActiveOwner(anyString()) } doReturn "owner"
+      on { getActiveOwner() } doReturn "owner"
     }
-    val credentialStorage = mock<CredentialStorage<String, String>> {
+    val credentialStorage = mock<CredentialStorage<String>> {
       on {
         getCredentials(any(), any())
-      } doReturn "credential"
+      } doReturn Credentials("credential")
     }
 
-    val authenticator = mock<Authenticator<String, String>> {
+    val authenticator = mock<Authenticator<String>> {
       on { getCredentialType(any()) } doReturn CREDENTIAL_TYPE
-      on { getOwnerType(any()) } doReturn OWNER_TYPE
-      on { isCredentialValid(anyString()) } doReturn true
-      on { authenticateRequest(any(), anyString()) } doAnswer { invocationOnMock ->
+      on { isCredentialValid(any()) } doReturn true
+      on { authenticateRequest(any(), any()) } doAnswer { invocationOnMock ->
         (invocationOnMock.arguments[0] as Request)
           .newBuilder()
           .addHeader("auth-header", "auth-token")
@@ -125,7 +123,7 @@ class CredentialInterceptorTest {
     val data = api.someAuthenticatedCall()
 
     assertThat(data).isEqualTo(Data("testdata"))
-    verify(authenticator, times(1)).authenticateRequest(any(), anyString())
+    verify(authenticator, times(1)).authenticateRequest(any(), any())
     assertThat(serverRule.server.takeRequest().headers["auth-header"]).isEqualTo("auth-token")
     Unit
   }
@@ -135,26 +133,25 @@ class CredentialInterceptorTest {
     serverRule.server.enqueue(MockResponse().setBody("{\"data\": \"testdata\"}"))
 
     val ownerStorage = mock<OwnerStorage<String>> {
-      on { getActiveOwner(anyString()) } doReturn "owner"
+      on { getActiveOwner() } doReturn "owner"
     }
-    val credentialStorage = mock<CredentialStorage<String, String>> {
+    val credentialStorage = mock<CredentialStorage<String>> {
       on {
         getCredentials(any(), any())
-      } doReturn "credential"
+      } doReturn Credentials("credential")
     }
-    val authenticator = mock<Authenticator<String, String>> {
+    val authenticator = mock<Authenticator<String>> {
       on { getCredentialType(any()) } doReturn CREDENTIAL_TYPE
-      on { getOwnerType(any()) } doReturn OWNER_TYPE
-      on { isCredentialValid(anyString()) } doReturn false // token is invalid
-      on { authenticateRequest(any(), anyString()) } doAnswer { invocationOnMock ->
+      on { isCredentialValid(any()) } doReturn false // token is invalid
+      on { authenticateRequest(any(), any()) } doAnswer { invocationOnMock ->
         (invocationOnMock.arguments[0] as Request)
           .newBuilder()
           .addHeader("auth-header", "auth-token")
           .build()
       }
       on {
-        refreshCredentials(anyString(), any(), anyString())
-      } doReturn "credential"
+        refreshCredentials(anyString(), any(), any())
+      } doReturn Credentials("credential")
     }
 
     val interceptor = CredentialInterceptor(
@@ -168,12 +165,12 @@ class CredentialInterceptorTest {
     val data = api.someAuthenticatedCall()
 
     assertThat(data).isEqualTo(Data("testdata"))
-    verify(authenticator, times(1)).authenticateRequest(any(), anyString())
+    verify(authenticator, times(1)).authenticateRequest(any(), any())
     assertThat(serverRule.server.takeRequest().headers["auth-header"]).isEqualTo("auth-token")
     // refresh credentials successfully
-    verify(authenticator, times(1)).refreshCredentials(anyString(), any(), anyString())
+    verify(authenticator, times(1)).refreshCredentials(anyString(), any(), any())
     // store new token
-    verify(credentialStorage, times(1)).storeCredentials(anyString(), any(), anyString())
+    verify(credentialStorage, times(1)).storeCredentials(anyString(), any(), any())
   }
 
   @Test
@@ -181,25 +178,24 @@ class CredentialInterceptorTest {
     serverRule.server.enqueue(MockResponse().setBody("{\"data\": \"testdata\"}"))
 
     val ownerStorage = mock<OwnerStorage<String>> {
-      on { getActiveOwner(anyString()) } doReturn "owner"
+      on { getActiveOwner() } doReturn "owner"
     }
-    val credentialStorage = mock<CredentialStorage<String, String>> {
+    val credentialStorage = mock<CredentialStorage<String>> {
       on {
         getCredentials(any(), any())
-      } doReturn "credential"
+      } doReturn Credentials("credential")
     }
-    val authenticator = mock<Authenticator<String, String>> {
+    val authenticator = mock<Authenticator<String>> {
       on { getCredentialType(any()) } doReturn CREDENTIAL_TYPE
-      on { getOwnerType(any()) } doReturn OWNER_TYPE
-      on { isCredentialValid(anyString()) } doReturn false // token is invalid
-      on { authenticateRequest(any(), anyString()) } doAnswer { invocationOnMock ->
+      on { isCredentialValid(any()) } doReturn false // token is invalid
+      on { authenticateRequest(any(), any()) } doAnswer { invocationOnMock ->
         (invocationOnMock.arguments[0] as Request)
           .newBuilder()
           .addHeader("auth-header", "auth-token")
           .build()
       }
       on {
-        refreshCredentials(anyString(), any(), anyString())
+        refreshCredentials(anyString(), any(), any())
       } doReturn null
     }
 
@@ -214,12 +210,12 @@ class CredentialInterceptorTest {
     val data = api.someAuthenticatedCall()
 
     assertThat(data).isEqualTo(Data("testdata"))
-    verify(authenticator, times(1)).authenticateRequest(any(), anyString())
+    verify(authenticator, times(1)).authenticateRequest(any(), any())
     assertThat(serverRule.server.takeRequest().headers["auth-header"]).isEqualTo("auth-token")
     // old credentials removed, ONCE
     verify(credentialStorage, times(1)).removeCredentials(anyString(), any())
     // refresh credentials successfully
-    verify(authenticator, times(1)).refreshCredentials(anyString(), any(), anyString())
+    verify(authenticator, times(1)).refreshCredentials(anyString(), any(), any())
 
     Unit
   }
@@ -230,26 +226,25 @@ class CredentialInterceptorTest {
     serverRule.server.enqueue(MockResponse().setBody("{\"data\": \"testdata\"}"))
 
     val ownerStorage = mock<OwnerStorage<String>> {
-      on { getActiveOwner(anyString()) } doReturn "owner"
+      on { getActiveOwner() } doReturn "owner"
     }
-    val credentialStorage = mock<CredentialStorage<String, String>> {
+    val credentialStorage = mock<CredentialStorage<String>> {
       on {
         getCredentials(any(), any())
-      } doReturn "credential"
+      } doReturn Credentials("credential")
     }
-    val authenticator = mock<Authenticator<String, String>> {
+    val authenticator = mock<Authenticator<String>> {
       on { getCredentialType(any()) } doReturn CREDENTIAL_TYPE
-      on { getOwnerType(any()) } doReturn OWNER_TYPE
-      on { isCredentialValid(anyString()) } doReturn true
-      on { authenticateRequest(any(), anyString()) } doAnswer { invocationOnMock ->
+      on { isCredentialValid(any()) } doReturn true
+      on { authenticateRequest(any(), any()) } doAnswer { invocationOnMock ->
         (invocationOnMock.arguments[0] as Request)
           .newBuilder()
           .addHeader("auth-header", "auth-token")
           .build()
       }
       on {
-        refreshCredentials(anyString(), any(), anyString())
-      } doReturn "credential"
+        refreshCredentials(anyString(), any(), any())
+      } doReturn Credentials("credential")
       on {
         refreshRequired(anyInt(), any())
       } doAnswer { invocationOnMock ->
@@ -268,7 +263,7 @@ class CredentialInterceptorTest {
     val data = api.someAuthenticatedCall()
 
     assertThat(data).isEqualTo(Data("testdata"))
-    verify(authenticator, times(2)).authenticateRequest(any(), anyString())
+    verify(authenticator, times(2)).authenticateRequest(any(), any())
     assertThat(serverRule.server.takeRequest().headers["auth-header"]).isEqualTo("auth-token")
 
     Unit
@@ -285,31 +280,30 @@ class CredentialInterceptorTest {
   @Test
   fun `Invalid token, refreshes token, EXTREME_REQUEST_COUNT calls`() = runBlocking {
     val ownerStorage = mock<OwnerStorage<String>> {
-      on { getActiveOwner(anyString()) } doReturn "owner"
+      on { getActiveOwner() } doReturn "owner"
     }
-    var credential = "old-credential"
-    val credentialStorage = mock<CredentialStorage<String, String>> {
+    var credential = Credentials("old-credential")
+    val credentialStorage = mock<CredentialStorage<String>> {
       on {
         getCredentials(any(), any())
       } doAnswer { credential }
     }
-    val authenticator = mock<Authenticator<String, String>> {
+    val authenticator = mock<Authenticator<String>> {
       on { getCredentialType(any()) } doReturn CREDENTIAL_TYPE
-      on { getOwnerType(any()) } doReturn OWNER_TYPE
-      on { isCredentialValid(anyString()) } doAnswer { invocationOnMock ->
-        invocationOnMock.arguments[0] as String == "credential"
+      on { isCredentialValid(any()) } doAnswer { invocationOnMock ->
+        (invocationOnMock.arguments[0] as Credentials).token == "credential"
       }
-      on { authenticateRequest(any(), anyString()) } doAnswer { invocationOnMock ->
+      on { authenticateRequest(any(), any()) } doAnswer { invocationOnMock ->
         (invocationOnMock.arguments[0] as Request)
           .newBuilder()
           .addHeader("auth-header", "auth-token")
           .build()
       }
       on {
-        refreshCredentials(anyString(), any(), anyString())
+        refreshCredentials(anyString(), any(), any())
       } doAnswer {
         Thread.sleep(200)
-        credential = "credential"
+        credential = Credentials("credential")
         credential
       }
     }
@@ -332,11 +326,11 @@ class CredentialInterceptorTest {
     }.join()
 
     // refresh credentials successfully, ONCE
-    verify(authenticator, times(1)).refreshCredentials(anyString(), any(), anyString())
+    verify(authenticator, times(1)).refreshCredentials(anyString(), any(), any())
     // store new token, ONCE
-    verify(credentialStorage, times(1)).storeCredentials(anyString(), any(), anyString())
+    verify(credentialStorage, times(1)).storeCredentials(anyString(), any(), any())
     // authenticate request -> 200 times (or how much range includes)
-    verify(authenticator, times(EXTREME_REQUEST_COUNT)).authenticateRequest(any(), anyString())
+    verify(authenticator, times(EXTREME_REQUEST_COUNT)).authenticateRequest(any(), any())
 
     Unit
   }
@@ -349,19 +343,18 @@ class CredentialInterceptorTest {
   @Test
   fun `Invalid token, refreshes token an error occurs, 200 calls`() = runBlocking {
     val ownerStorage = mock<OwnerStorage<String>> {
-      on { getActiveOwner(anyString()) } doReturn "owner"
+      on { getActiveOwner() } doReturn "owner"
     }
-    val credentialStorage = mock<CredentialStorage<String, String>> {
+    val credentialStorage = mock<CredentialStorage<String>> {
       on {
         getCredentials(any(), any())
-      } doReturn "old-credential"
+      } doReturn Credentials("old-credential")
     }
-    val authenticator = mock<Authenticator<String, String>> {
+    val authenticator = mock<Authenticator<String>> {
       on { getCredentialType(any()) } doReturn CREDENTIAL_TYPE
-      on { getOwnerType(any()) } doReturn OWNER_TYPE
-      on { isCredentialValid(anyString()) } doReturn false
+      on { isCredentialValid(any()) } doReturn false
       on {
-        refreshCredentials(anyString(), any(), anyString())
+        refreshCredentials(anyString(), any(), any())
       } doAnswer {
         // with this we make sure that the first request within the lock
         // takes a bit longer, so that all other 199 requests queue up before the first call
@@ -393,21 +386,20 @@ class CredentialInterceptorTest {
     }.join()
 
     // get the active owner ONCE
-    verify(ownerStorage, times(1)).getActiveOwner(anyString())
+    verify(ownerStorage, times(1)).getActiveOwner()
     // try to refresh credentials, ONCE
     // this is throwing an exception
-    verify(authenticator, times(1)).refreshCredentials(anyString(), any(), anyString())
+    verify(authenticator, times(1)).refreshCredentials(anyString(), any(), any())
     // store new token, ONCE
-    verify(credentialStorage, never()).storeCredentials(anyString(), any(), anyString())
+    verify(credentialStorage, never()).storeCredentials(anyString(), any(), any())
     // authenticate request -> never
-    verify(authenticator, never()).authenticateRequest(any(), anyString())
+    verify(authenticator, never()).authenticateRequest(any(), any())
 
     Unit
   }
 
   companion object {
-    private const val OWNER_TYPE = "owner_type"
-    private val CREDENTIAL_TYPE = CredentialType("credential_type")
+    private const val CREDENTIAL_TYPE = "credential_type"
 
     private const val EXTREME_REQUEST_COUNT = 200
 
@@ -441,7 +433,7 @@ interface SomeApi {
   @GET("/some/path")
   suspend fun someCall(): Data
 
-  @Authorize
+  @Authenticated
   @GET("/some/other/path")
   suspend fun someAuthenticatedCall(): Data
 }
