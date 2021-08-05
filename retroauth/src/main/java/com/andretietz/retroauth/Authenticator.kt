@@ -25,18 +25,18 @@ import java.net.HttpURLConnection
  * to authenticate your request and defines when or if to retry.
  * This needs to be an abstract class in order to be java 7 compatible (android).
  */
-abstract class Authenticator<OWNER : Any, CREDENTIAL : Any> {
+abstract class Authenticator<OWNER : Any> {
 
   /**
-   * @param credentialType type of the credential reached in from the [Authorize.credentialType]
+   * @param credentialType type of the credential reached in from the credentialType
    * Annotation of the request.
    *
    * @return type of the credential
    */
-  abstract fun getCredentialType(credentialType: Int = 0): CredentialType
+  abstract fun getCredentialType(credentialType: Int = 0): String
 
   /**
-   * @param ownerType type of the owner handed in, from the [Authorize.ownerType]
+   * @param ownerType type of the owner handed in, from the ownerType
    * Annotation of the request.
    */
   abstract fun getOwnerType(ownerType: Int = 0): String
@@ -48,7 +48,7 @@ abstract class Authenticator<OWNER : Any, CREDENTIAL : Any> {
    * @param credential Token to authenticate
    * @return a modified version of the incoming request, which is authenticated
    */
-  abstract fun authenticateRequest(request: Request, credential: CREDENTIAL): Request
+  abstract fun authenticateRequest(request: Request, credential: Credentials): Request
 
   /**
    * Checks if the credential needs to be refreshed or not.
@@ -68,9 +68,9 @@ abstract class Authenticator<OWNER : Any, CREDENTIAL : Any> {
   @Suppress("UNUSED_PARAMETER")
   open fun refreshCredentials(
     owner: OWNER,
-    credentialType: CredentialType,
-    credential: CREDENTIAL
-  ): CREDENTIAL? = null
+    credentialType: String,
+    credential: Credentials
+  ): Credentials? = null
 
   /**
    * This method is called on each authenticated request, to make sure the current credential
@@ -80,5 +80,5 @@ abstract class Authenticator<OWNER : Any, CREDENTIAL : Any> {
    * @param credential The current credential
    */
   @Suppress("UNUSED_PARAMETER")
-  open fun isCredentialValid(credential: CREDENTIAL): Boolean = true
+  open fun isCredentialValid(credential: Credentials): Boolean = true
 }

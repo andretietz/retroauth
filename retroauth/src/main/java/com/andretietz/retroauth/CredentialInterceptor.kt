@@ -36,10 +36,10 @@ import java.util.concurrent.atomic.AtomicReference
  * @param <OWNER> a type that represents the owner of a credential. Since there could be multiple users on one client.
  * @param <CREDENTIAL> credential that should be added to the request
  */
-class CredentialInterceptor<OWNER : Any, CREDENTIAL : Any>(
-  private val authenticator: Authenticator<OWNER, CREDENTIAL>,
+class CredentialInterceptor<OWNER : Any>(
+  private val authenticator: Authenticator<OWNER>,
   private val ownerManager: OwnerStorage<OWNER>,
-  private val credentialStorage: CredentialStorage<OWNER, CREDENTIAL>,
+  private val credentialStorage: CredentialStorage<OWNER>,
   private val scope: CoroutineScope = CoroutineScope(CoroutineName("InterceptorScope"))
 ) : Interceptor {
 
@@ -57,7 +57,7 @@ class CredentialInterceptor<OWNER : Any, CREDENTIAL : Any>(
     // get the credential type required by this request
     val authRequestType = findRequestType(request) ?: return chain.proceed(request)
     var refreshRequested = false
-    var credential: CREDENTIAL
+    var credential: Credentials
     var owner: OWNER?
     var tryCount = 0
     do {

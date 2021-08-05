@@ -41,11 +41,11 @@ class AndroidAccountManagerOwnerStorage constructor(
   private val accountManager by lazy { AccountManager.get(application) }
 
   @Suppress("BlockingMethodInNonBlockingContext")
-  override suspend fun createOwner(ownerType: String, credentialType: CredentialType): Account? =
+  override suspend fun createOwner(ownerType: String, credentialType: String): Account? =
     withContext(Dispatchers.Default) {
       val bundle = accountManager.addAccount(
         ownerType,
-        credentialType.type,
+        credentialType,
         null,
         null,
         activityManager.activity,

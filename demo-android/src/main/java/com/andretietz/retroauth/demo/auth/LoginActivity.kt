@@ -6,7 +6,6 @@ import android.webkit.CookieManager
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.lifecycle.lifecycleScope
-import com.andretietz.retroauth.AndroidCredential
 import com.andretietz.retroauth.AuthenticationActivity
 import com.andretietz.retroauth.demo.databinding.ActivityLoginBinding
 import com.github.scribejava.core.oauth.OAuth20Service

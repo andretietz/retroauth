@@ -3,7 +3,6 @@ package com.andretietz.retroauth.demo.auth
 import android.accounts.Account
 import android.app.Application
 import android.content.Context
-import com.andretietz.retroauth.AndroidCredential
 import com.andretietz.retroauth.Authenticator
 import com.andretietz.retroauth.CredentialType
 import com.andretietz.retroauth.demo.R

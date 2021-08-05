@@ -3,7 +3,6 @@ package com.andretietz.retroauth.demo.screen.main
 import androidx.lifecycle.ViewModel
 import com.andretietz.retroauth.AndroidAccountManagerCredentialStorage
 import com.andretietz.retroauth.AndroidAccountManagerOwnerStorage
-import com.andretietz.retroauth.AndroidCredential
 import com.andretietz.retroauth.AuthenticationCanceledException
 import com.andretietz.retroauth.AuthenticationRequiredException
 import com.andretietz.retroauth.demo.api.GithubApi

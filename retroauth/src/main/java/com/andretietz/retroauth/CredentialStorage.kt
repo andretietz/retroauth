@@ -19,34 +19,34 @@ package com.andretietz.retroauth
 /**
  * This is the interface of a credential storage.
  */
-interface CredentialStorage<in OWNER : Any, CREDENTIAL : Any> {
+interface CredentialStorage<in OWNER : Any> {
 
   /**
    * This method returns an authentication credential that is stored locally.
    *
    * @param owner The owner type of the credential you want to get
-   * @param type the type of the Credentials you want to get
+   * @param credentialType the type of the Credentials you want to get
    * @return the Credentials to authenticate your request with
    */
   fun getCredentials(
     owner: OWNER,
-    type: CredentialType
-  ): CREDENTIAL?
+    credentialType: String
+  ): Credentials?
 
   /**
    * Removes the credentials of a specific type and owner from the credentials storage.
    *
    * @param owner Owner of the Credentials
-   * @param type Type of the Credentials
+   * @param credentialType Type of the Credentials
    */
-  fun removeCredentials(owner: OWNER, type: CredentialType)
+  fun removeCredentials(owner: OWNER, credentialType: String)
 
   /**
    * Stores a credentials of a specific type and owner to the credentials storage.
    *
    * @param owner Owner of the Credentials
-   * @param type Type of the Credentials
+   * @param credentialType Type of the Credentials
    * @param credentials Credentials to store
    */
-  fun storeCredentials(owner: OWNER, type: CredentialType, credentials: CREDENTIAL)
+  fun storeCredentials(owner: OWNER, credentialType: String, credentials: Credentials)
 }

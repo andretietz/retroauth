@@ -1,4 +1,4 @@
-package com.andretietz.retroauth
+package com.andretietz.retroauth.sqlite.data
 
 data class Account(
   val id: Int,

@@ -19,68 +19,79 @@ package com.andretietz.retroauth
 import android.accounts.Account
 import android.accounts.AccountManager
 import android.app.Application
+import android.util.Base64
+import android.util.Base64.DEFAULT
 
 /**
  * This is the implementation of a [CredentialStorage] in Android using the Android [AccountManager]
  */
 class AndroidAccountManagerCredentialStorage constructor(
   private val application: Application
-) : CredentialStorage<Account, AndroidCredential> {
+) : CredentialStorage<Account> {
 
   private val accountManager by lazy { AccountManager.get(application) }
 
   companion object {
-    @JvmStatic
-    private fun createDataKey(type: CredentialType, key: String) =
-      "%s_%s".format(type.type, key)
+    private fun createDataKey(type: String, key: String) = "${type}_$key"
   }
 
   override fun getCredentials(
     owner: Account,
-    type: CredentialType
-  ): AndroidCredential? {
+    credentialType: String
+  ): Credentials? {
     val future = accountManager.getAuthToken(
       owner,
-      type.type,
+      credentialType,
       null,
       ActivityManager[application].activity,
       null,
-      null)
+      null
+    )
 
     var token = future.result.getString(AccountManager.KEY_AUTHTOKEN)
-    if (token == null) token = accountManager.peekAuthToken(owner, type.type)
+    if (token == null) token = accountManager.peekAuthToken(owner, credentialType)
     if (token == null) {
       return null
-//  TODO: before:    throw AuthenticationCanceledException()
     }
-    return AndroidCredential(
+
+    val dataKeys = accountManager.getUserData(owner, "keys_${owner.type}_$credentialType")
+      ?.let { Base64.decode(it, DEFAULT).toString() }
+      ?.split(",")
+    return Credentials(
       token,
-      type.dataKeys
-        ?.associateTo(HashMap()) {
-          it to accountManager.getUserData(owner, createDataKey(type, it))
+      dataKeys
+        ?.associate {
+          it to accountManager.getUserData(owner, createDataKey(credentialType, it))
         }
     )
   }
 
-  override fun removeCredentials(owner: Account, type: CredentialType) {
-    getCredentials(owner, type)?.let { credential ->
+  override fun removeCredentials(owner: Account, credentialType: String) {
+    getCredentials(owner, credentialType)?.let { credential ->
       accountManager.invalidateAuthToken(owner.type, credential.token)
-      type.dataKeys?.forEach { accountManager.setUserData(owner, createDataKey(type, it), null) }
+      val dataKeys = accountManager.getUserData(owner, "keys_${owner.type}_$credentialType")
+        ?.let { Base64.decode(it, DEFAULT).toString() }
+        ?.split(",")
+      dataKeys?.forEach {
+        accountManager.setUserData(
+          owner,
+          createDataKey(credentialType, it),
+          null
+        )
+      }
     }
   }
 
-  override fun storeCredentials(owner: Account, type: CredentialType, credentials: AndroidCredential) {
-    accountManager.setAuthToken(owner, type.type, credentials.token)
-    val dataKeys = type.dataKeys
-    if (dataKeys != null && credentials.data != null) {
-      dataKeys.forEach {
-        require(credentials.data.containsKey(it)) {
-          throw IllegalArgumentException(
-            "The credentials you want to store, needs to contain credentials-data with the keys: %s"
-              .format(type.dataKeys.toString())
-          )
-        }
-        accountManager.setUserData(owner, createDataKey(type, it), credentials.data[it])
+  override fun storeCredentials(owner: Account, credentialType: String, credentials: Credentials) {
+    accountManager.setAuthToken(owner, credentialType, credentials.token)
+    val data = credentials.data
+    if (data != null) {
+      val dataKeys = data.keys
+        .map { Base64.encodeToString(it.toByteArray(), DEFAULT) }
+        .joinToString { it }
+      accountManager.setUserData(owner, "keys_${owner.type}_$credentialType", dataKeys)
+      data.forEach { (key, value) ->
+        accountManager.setUserData(owner, createDataKey(credentialType, key), value)
       }
     }
   }

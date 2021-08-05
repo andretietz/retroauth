@@ -32,7 +32,7 @@ interface OwnerStorage<OWNER : Any> {
    */
   suspend fun createOwner(
     ownerType: String,
-    credentialType: CredentialType
+    credentialType: String
   ): OWNER?
 
   /**

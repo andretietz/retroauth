@@ -73,7 +73,7 @@ abstract class AuthenticationActivity : AppCompatActivity() {
    * @param credentialType type of the credentials you want to store
    * @param credential the AndroidToken
    */
-  fun storeCredentials(account: Account, credentialType: CredentialType, credential: AndroidCredential) {
+  fun storeCredentials(account: Account, credentialType: String, credential: Credentials) {
     credentialStorage.storeCredentials(account, credentialType, credential)
   }
 
