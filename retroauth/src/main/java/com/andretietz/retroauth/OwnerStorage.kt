@@ -29,7 +29,7 @@ interface OwnerStorage<OWNER : Any> {
    *
    * @return [OWNER] which was created or null if canceled
    */
-  suspend fun createOwner(
+  fun createOwner(
     credentialType: String
   ): OWNER?
 

@@ -31,6 +31,12 @@ class MainViewModel @Inject constructor(
 
   val state = _state
 
+  init {
+      scope.launch {
+        loadRepositories()
+      }
+  }
+
   fun addAccount() {
     scope.launch {
       val account = ownerStorage.createOwner(

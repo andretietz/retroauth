@@ -5,12 +5,11 @@ import org.jetbrains.exposed.dao.id.IntIdTable
 
 internal object UserTable : IntIdTable() {
   val active = bool("active").default(false)
-  val type = varchar("type", 100)
   val name = varchar("name", 100)
   val email = varchar("email", 100)
 
   init {
-    uniqueIndex("IDX_user", name, email, type)
+    uniqueIndex("IDX_user", name, email)
   }
 }
 

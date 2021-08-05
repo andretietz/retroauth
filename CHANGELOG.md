@@ -1,8 +1,12 @@
-## 3.3.0 (2021)
+## 4.0.0 (2021)
 * Kotlin script migration
 * API Breaking changes
   * Interfaces Authenticator, OwnerStorage, CredentialStorage have been changed
     * removed all usages of `Future` or callbacks
+  * Generics have been reduced to a minimum (from production experiences, it was not needed)
+    * Removed the owner-type from the api
+    * Credential is now a predefined data object, that should cover all cases
+    * credential-type is now just a string
 ## 3.2.0 (2021-06-08)
 * Removing the Retrofit CallAdapter in order to enrich the requests using [this method](https://andretietz.com/2021/04/06/custom-retrofit2-annotations-revisited/)
 * using the github api instead of facebook in the demo.

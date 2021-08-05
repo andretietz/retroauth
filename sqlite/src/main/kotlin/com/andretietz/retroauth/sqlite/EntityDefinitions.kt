@@ -9,7 +9,6 @@ internal class DatabaseUser(id: EntityID<Int>) : IntEntity(id) {
 
   var name by UserTable.name
   var email by UserTable.email
-  var type by UserTable.type
   var active by UserTable.active
 }
 
