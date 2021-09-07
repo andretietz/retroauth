@@ -10,7 +10,7 @@ object RetroauthAndroid {
     retrofit: Retrofit,
     application: Application,
     authenticator: Authenticator<Account>,
-    ownerType: String = application.getString(R.string.retroauth_authentication_ACCOUNT)
+    ownerType: String
   ): Retrofit {
     return Retroauth.setup(
       retrofit,
@@ -24,5 +24,5 @@ object RetroauthAndroid {
 fun Retrofit.androidAuthentication(
   application: Application,
   authenticator: Authenticator<Account>,
-  ownerType: String = application.getString(R.string.retroauth_authentication_ACCOUNT)
+  ownerType: String
 ) = RetroauthAndroid.setup(this, application, authenticator, ownerType)

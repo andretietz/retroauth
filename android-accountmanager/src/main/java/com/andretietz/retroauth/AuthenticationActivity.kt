@@ -44,7 +44,7 @@ abstract class AuthenticationActivity : AppCompatActivity() {
   private val ownerManager by lazy {
     AndroidAccountManagerOwnerStorage(
       application,
-      getString(R.string.retroauth_authentication_ACCOUNT)
+      accountType
     )
   }
 

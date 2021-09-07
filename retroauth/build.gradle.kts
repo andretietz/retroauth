@@ -4,10 +4,8 @@ plugins {
 
 dependencies {
   api(Dependencies.kotlin.kotlin)
-  api(Dependencies.kotlin.coroutines)
   api(Dependencies.retrofit.retrofit)
   api(Dependencies.okhttp.okhttp)
-  api(Dependencies.coroutines)
 
   testImplementation(Dependencies.test.junit)
   testImplementation(Dependencies.test.coroutines)

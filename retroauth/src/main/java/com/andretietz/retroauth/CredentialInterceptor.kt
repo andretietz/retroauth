@@ -16,17 +16,14 @@
 
 package com.andretietz.retroauth
 
-import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
 import retrofit2.Invocation
+import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
+import java.util.concurrent.locks.ReentrantLock
 
 /**
  * This interceptor intercepts the okhttp requests and checks if authentication is required.
@@ -39,8 +36,7 @@ import java.util.concurrent.atomic.AtomicReference
 class CredentialInterceptor<OWNER : Any>(
   private val authenticator: Authenticator<OWNER>,
   private val ownerManager: OwnerStorage<OWNER>,
-  private val credentialStorage: CredentialStorage<OWNER>,
-  private val scope: CoroutineScope = CoroutineScope(CoroutineName("InterceptorScope"))
+  private val credentialStorage: CredentialStorage<OWNER>
 ) : Interceptor {
 
   companion object {
@@ -49,6 +45,8 @@ class CredentialInterceptor<OWNER : Any>(
   }
 
   private val registration = mutableMapOf<Int, RequestType>()
+
+  private val executor = Executors.newSingleThreadExecutor()
 
   @Suppress("Detekt.RethrowCaughtException")
   override fun intercept(chain: Interceptor.Chain): Response {
@@ -94,7 +92,7 @@ class CredentialInterceptor<OWNER : Any>(
           // authenticate the request using the credential
           request = authenticator.authenticateRequest(request, credential)
         } else {
-          scope.launch {
+          executor.submit {
             // async creation of an owner
             ownerManager.createOwner(authRequestType.credentialType)
           }
@@ -117,7 +115,7 @@ class CredentialInterceptor<OWNER : Any>(
   }
 
   @Throws(Throwable::class)
-  private fun lock() = runBlocking {
+  private fun lock() {
     if (!refreshLock.get().lock.tryLock()) {
       refreshLock.get().count.incrementAndGet()
       refreshLock.get().lock.lock()
@@ -150,7 +148,7 @@ class CredentialInterceptor<OWNER : Any>(
   }
 
   internal data class AccountTokenLock(
-    val lock: Mutex = Mutex(),
+    val lock: ReentrantLock = ReentrantLock(),
     var error: Throwable? = null,
     var count: AtomicInteger = AtomicInteger(0)
   )

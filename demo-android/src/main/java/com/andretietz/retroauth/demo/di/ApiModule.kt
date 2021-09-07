@@ -69,7 +69,7 @@ object ApiModule {
       .client(httpClient)
       .addConverterFactory(MoshiConverterFactory.create())
       .build()
-      .androidAuthentication(application, authenticator)
+      .androidAuthentication(application, authenticator, application.getString(R.string.authentication_ACCOUNT))
   }
 
   @Singleton
@@ -77,7 +77,7 @@ object ApiModule {
   fun providesOwnerStorage(application: Application) =
     AndroidAccountManagerOwnerStorage(
       application,
-      application.getString(R.string.retroauth_authentication_ACCOUNT))
+      application.getString(R.string.authentication_ACCOUNT))
 
   @Singleton
   @Provides

@@ -28,7 +28,7 @@ class SwitchAccountContract : ActivityResultContract<Account, Account?>() {
       Intent(context, LoginActivity::class.java).also {
         it.putExtra(
           AccountManager.KEY_ACCOUNT_TYPE,
-          context.getText(R.string.retroauth_authentication_ACCOUNT)
+          context.getText(R.string.authentication_ACCOUNT)
         )
       }
     }

@@ -1,5 +1,6 @@
 package com.andretietz.retroauth.demo.screen.main
 
+import androidx.annotation.WorkerThread
 import androidx.lifecycle.ViewModel
 import com.andretietz.retroauth.AndroidAccountManagerCredentialStorage
 import com.andretietz.retroauth.AndroidAccountManagerOwnerStorage

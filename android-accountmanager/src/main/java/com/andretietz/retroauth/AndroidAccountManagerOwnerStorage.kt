@@ -21,8 +21,6 @@ import android.accounts.AccountManager
 import android.app.Application
 import android.content.Context
 import android.os.Build
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 /**
  * This is the Android implementation of an [OwnerStorage]. It does all the Android [Account]
@@ -42,8 +40,7 @@ class AndroidAccountManagerOwnerStorage constructor(
   private val accountManager by lazy { AccountManager.get(application) }
 
   @Suppress("BlockingMethodInNonBlockingContext")
-  override suspend fun createOwner(credentialType: String): Account? =
-    withContext(Dispatchers.Default) {
+  override fun createOwner(credentialType: String): Account? {
       val bundle = accountManager.addAccount(
         ownerType,
         credentialType,
@@ -52,7 +49,7 @@ class AndroidAccountManagerOwnerStorage constructor(
         activityManager.activity,
         null,
         null).result
-      bundle.getString(AccountManager.KEY_ACCOUNT_NAME)?.let {
+      return bundle.getString(AccountManager.KEY_ACCOUNT_NAME)?.let {
         Account(bundle.getString(AccountManager.KEY_ACCOUNT_NAME),
           bundle.getString(AccountManager.KEY_ACCOUNT_TYPE))
       }

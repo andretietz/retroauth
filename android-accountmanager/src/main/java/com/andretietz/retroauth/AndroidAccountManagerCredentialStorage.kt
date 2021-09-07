@@ -19,8 +19,12 @@ package com.andretietz.retroauth
 import android.accounts.Account
 import android.accounts.AccountManager
 import android.app.Application
+import android.os.Looper
 import android.util.Base64
 import android.util.Base64.DEFAULT
+import java.util.concurrent.Callable
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 /**
  * This is the implementation of a [CredentialStorage] in Android using the Android [AccountManager]
@@ -30,6 +34,8 @@ class AndroidAccountManagerCredentialStorage constructor(
 ) : CredentialStorage<Account> {
 
   private val accountManager by lazy { AccountManager.get(application) }
+
+  private val executor = Executors.newSingleThreadExecutor()
 
   companion object {
     private fun createDataKey(type: String, key: String) = "${type}_$key"
@@ -47,8 +53,11 @@ class AndroidAccountManagerCredentialStorage constructor(
       null,
       null
     )
-
-    var token = future.result.getString(AccountManager.KEY_AUTHTOKEN)
+    var token: String? = if (Looper.myLooper() == Looper.getMainLooper()) {
+      executor.submit(Callable<String?> {
+        future.result.getString(AccountManager.KEY_AUTHTOKEN)
+      }).get(100, TimeUnit.MILLISECONDS)
+    } else future.result.getString(AccountManager.KEY_AUTHTOKEN)
     if (token == null) token = accountManager.peekAuthToken(owner, credentialType)
     if (token == null) {
       return null
