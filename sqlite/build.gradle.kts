@@ -1,6 +1,7 @@
 plugins {
   kotlin("jvm")
-  id("com.vanniktech.maven.publish")
+  // TODO: do not publish yet
+//  id("com.vanniktech.maven.publish")
 }
 
 dependencies {
