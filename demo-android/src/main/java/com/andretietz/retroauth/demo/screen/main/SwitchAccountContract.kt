@@ -14,6 +14,7 @@ class SwitchAccountContract : ActivityResultContract<Account, Account?>() {
   override fun createIntent(context: Context, input: Account?): Intent {
     CookieManager.getInstance().removeAllCookies(null)
     return if (input != null) {
+      // this method is the reason for min API 23
       AccountManager.newChooseAccountIntent(
         input,
         null,

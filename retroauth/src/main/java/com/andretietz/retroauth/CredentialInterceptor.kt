@@ -20,9 +20,9 @@ import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
 import retrofit2.Invocation
+import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
-import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
 /**
@@ -31,20 +31,22 @@ import java.util.concurrent.locks.ReentrantLock
  * applies the credential to the request
  *
  * @param <OWNER> a type that represents the owner of a credential. Since there could be multiple users on one client.
- * @param <CREDENTIAL_TYPE> type of the credential that should be added to the request
+ * @param <CREDENTIAL> credential that should be added to the request
  */
-class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE : Any, CREDENTIAL : Any>(
-  private val authenticator: Authenticator<OWNER_TYPE, OWNER, CREDENTIAL_TYPE, CREDENTIAL>,
-  private val ownerManager: OwnerStorage<OWNER_TYPE, OWNER, CREDENTIAL_TYPE>,
-  private val credentialStorage: CredentialStorage<OWNER, CREDENTIAL_TYPE, CREDENTIAL>
+class CredentialInterceptor<OWNER : Any>(
+  private val authenticator: Authenticator<OWNER>,
+  private val ownerManager: OwnerStorage<OWNER>,
+  private val credentialStorage: CredentialStorage<OWNER>
 ) : Interceptor {
 
   companion object {
-    private val refreshLock = AccountTokenLock()
+    private val refreshLock = AtomicReference(AccountTokenLock())
     private const val HASH_PRIME = 31
   }
 
-  private val registration = mutableMapOf<Int, RequestType<OWNER_TYPE, CREDENTIAL_TYPE>>()
+  private val registration = mutableMapOf<Int, RequestType>()
+
+  private val executor = Executors.newSingleThreadExecutor()
 
   @Suppress("Detekt.RethrowCaughtException")
   override fun intercept(chain: Interceptor.Chain): Response {
@@ -53,55 +55,54 @@ class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE :
     // get the credential type required by this request
     val authRequestType = findRequestType(request) ?: return chain.proceed(request)
     var refreshRequested = false
-    var credential: CREDENTIAL
+    var credential: Credentials
     var owner: OWNER?
     var tryCount = 0
     do {
       try {
         lock()
-        try {
-          owner = ownerManager.getActiveOwner(authRequestType.ownerType)
-          if (owner == null) {
-            val owners = ownerManager.getOwners(authRequestType.ownerType)
-            if (owners.isNotEmpty()) {
-              owner = authenticator.chooseOwner(owners).get()
-              ownerManager.switchActiveOwner(authRequestType.ownerType, owner)
-            }
-          }
-          if (owner != null) {
-            // get the credential of the owner
-            val localToken =
-              credentialStorage.getCredentials(owner, authRequestType.credentialType).get()
-            // if the credential is still valid and no refresh has been requested
-            if (authenticator.isCredentialValid(localToken) && !refreshRequested) {
-              credential = localToken
-            } else {
-              // try to refreshing the credentials
-              val refreshedToken =
-                authenticator.refreshCredentials(owner, authRequestType.credentialType, localToken)
-              credential = if (refreshedToken != null) {
-                // if the credential was refreshed, store it
-                credentialStorage
-                  .storeCredentials(owner, authRequestType.credentialType, refreshedToken)
-                refreshedToken
-              } else {
-                // otherwise remove the current credential from the storage
-                credentialStorage
-                  .removeCredentials(owner, authRequestType.credentialType, localToken)
-                // and use the "old" credential
-                localToken
-              }
-            }
-            // authenticate the request using the credential
-            request = authenticator.authenticateRequest(request, credential)
+        owner = ownerManager.getActiveOwner()
+          ?: ownerManager.getOwners().firstOrNull()
+            ?.also { ownerManager.switchActiveOwner(it) }
+        if (owner != null) {
+          // get the credential of the owner
+          val localToken =
+            credentialStorage.getCredentials(owner, authRequestType.credentialType)
+              ?: throw AuthenticationRequiredException()
+          // if the credential is still valid and no refresh has been requested
+          credential = if (authenticator.isCredentialValid(localToken) && !refreshRequested) {
+            localToken
           } else {
-            ownerManager.createOwner(authRequestType.ownerType, authRequestType.credentialType)
-            throw AuthenticationRequiredException()
+            // try to refreshing the credentials
+            val refreshedToken =
+              authenticator.refreshCredentials(owner, authRequestType.credentialType, localToken)
+            if (refreshedToken != null) {
+              // if the credential was refreshed, store it
+              credentialStorage
+                .storeCredentials(owner, authRequestType.credentialType, refreshedToken)
+              refreshedToken
+            } else {
+              // otherwise remove the current credential from the storage
+              credentialStorage
+                .removeCredentials(owner, authRequestType.credentialType)
+              // and use the "old" credential
+              localToken
+            }
           }
-        } catch (error: Throwable) {
-          refreshLock.errorContainer.set(error)
-          throw error
+          // authenticate the request using the credential
+          request = authenticator.authenticateRequest(request, credential)
+        } else {
+          executor.submit {
+            // async creation of an owner
+            ownerManager.createOwner(authRequestType.credentialType)
+          }
+          // cannot authorize request -> cancel running request
+          throw AuthenticationRequiredException()
         }
+      } catch (error: Throwable) {
+        // store the error for the other requests that might be queued
+        refreshLock.get().error = error
+        throw error
       } finally {
         unlock()
       }
@@ -115,28 +116,25 @@ class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE :
 
   @Throws(Throwable::class)
   private fun lock() {
-    if (!refreshLock.lock.tryLock()) {
-      refreshLock.waitCounter.incrementAndGet()
-      refreshLock.lock.lock()
-      val exception = refreshLock.errorContainer.get()
-      if (exception != null) {
-        throw exception
-      }
+    if (!refreshLock.get().lock.tryLock()) {
+      refreshLock.get().count.incrementAndGet()
+      refreshLock.get().lock.lock()
+      refreshLock.get().error?.let { throw it }
     } else {
-      refreshLock.waitCounter.incrementAndGet()
+      refreshLock.get().count.incrementAndGet()
     }
   }
 
   private fun unlock() {
-    if (refreshLock.waitCounter.getAndDecrement() <= 0) {
-      refreshLock.errorContainer.set(null)
+    if (refreshLock.get().count.decrementAndGet() <= 0) {
+      refreshLock.get().error = null
     }
-    refreshLock.lock.unlock()
+    refreshLock.get().lock.unlock()
   }
 
   private fun findRequestType(
     request: Request
-  ): RequestType<OWNER_TYPE, CREDENTIAL_TYPE>? {
+  ): RequestType? {
     val key = request.url.hashCode() + HASH_PRIME * request.method.hashCode()
     return registration[key] ?: request.tag(Invocation::class.java)
       ?.method()
@@ -144,17 +142,14 @@ class CredentialInterceptor<out OWNER_TYPE : Any, OWNER : Any, CREDENTIAL_TYPE :
       ?.filterIsInstance<Authenticated>()
       ?.firstOrNull()
       ?.let {
-        RequestType(
-          authenticator.getCredentialType(it.credentialType),
-          authenticator.getOwnerType(it.ownerType)
-        )
+        RequestType(authenticator.getCredentialType(it.credentialType))
       }
       ?.also { registration[key] = it }
   }
 
   internal data class AccountTokenLock(
-    val lock: Lock = ReentrantLock(true),
-    val errorContainer: AtomicReference<Throwable> = AtomicReference(),
-    val waitCounter: AtomicInteger = AtomicInteger()
+    val lock: ReentrantLock = ReentrantLock(),
+    var error: Throwable? = null,
+    var count: AtomicInteger = AtomicInteger(0)
   )
 }

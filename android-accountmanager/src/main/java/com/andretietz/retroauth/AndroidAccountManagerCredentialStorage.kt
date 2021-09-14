@@ -20,93 +20,87 @@ import android.accounts.Account
 import android.accounts.AccountManager
 import android.app.Application
 import android.os.Looper
+import android.util.Base64
+import android.util.Base64.DEFAULT
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
-import java.util.concurrent.Future
-import java.util.concurrent.FutureTask
+import java.util.concurrent.TimeUnit
 
 /**
  * This is the implementation of a [CredentialStorage] in Android using the Android [AccountManager]
  */
 class AndroidAccountManagerCredentialStorage constructor(
   private val application: Application
-) : CredentialStorage<Account, AndroidCredentialType, AndroidCredentials> {
+) : CredentialStorage<Account> {
 
-  private val executor by lazy { Executors.newSingleThreadExecutor() }
   private val accountManager by lazy { AccountManager.get(application) }
 
+  private val executor = Executors.newSingleThreadExecutor()
+
   companion object {
-    @JvmStatic
-    private fun createDataKey(type: AndroidCredentialType, key: String) =
-      "%s_%s".format(type.type, key)
+    private fun createDataKey(type: String, key: String) = "${type}_$key"
   }
 
   override fun getCredentials(
     owner: Account,
-    type: AndroidCredentialType,
-    callback: Callback<AndroidCredentials>?
-  ): Future<AndroidCredentials> {
-    val task = GetTokenTask(application, accountManager, owner, type, callback)
-    return if (Looper.myLooper() == Looper.getMainLooper())
-      executor.submit(task)
-    else
-      FutureTask(task).also { it.run() }
-  }
+    credentialType: String
+  ): Credentials? {
+    val future = accountManager.getAuthToken(
+      owner,
+      credentialType,
+      null,
+      ActivityManager[application].activity,
+      null,
+      null
+    )
+    var token: String? = if (Looper.myLooper() == Looper.getMainLooper()) {
+      executor.submit(Callable<String?> {
+        future.result.getString(AccountManager.KEY_AUTHTOKEN)
+      }).get(100, TimeUnit.MILLISECONDS)
+    } else future.result.getString(AccountManager.KEY_AUTHTOKEN)
+    if (token == null) token = accountManager.peekAuthToken(owner, credentialType)
+    if (token == null) {
+      return null
+    }
 
-  override fun removeCredentials(owner: Account, type: AndroidCredentialType, credentials: AndroidCredentials) {
-    accountManager.invalidateAuthToken(owner.type, credentials.token)
-    type.dataKeys?.forEach { accountManager.setUserData(owner, createDataKey(type, it), null) }
-  }
-
-  override fun storeCredentials(owner: Account, type: AndroidCredentialType, credentials: AndroidCredentials) {
-    accountManager.setAuthToken(owner, type.type, credentials.token)
-    if (type.dataKeys != null && credentials.data != null) {
-      type.dataKeys.forEach {
-        require(credentials.data.containsKey(it)) {
-          throw IllegalArgumentException(
-            "The credentials you want to store, needs to contain credentials-data with the keys: %s"
-              .format(type.dataKeys.toString())
-          )
+    val dataKeys = accountManager.getUserData(owner, "keys_${owner.type}_$credentialType")
+      ?.let { Base64.decode(it, DEFAULT).toString() }
+      ?.split(",")
+    return Credentials(
+      token,
+      dataKeys
+        ?.associate {
+          it to accountManager.getUserData(owner, createDataKey(credentialType, it))
         }
-        accountManager.setUserData(owner, createDataKey(type, it), credentials.data[it])
+    )
+  }
+
+  override fun removeCredentials(owner: Account, credentialType: String) {
+    getCredentials(owner, credentialType)?.let { credential ->
+      accountManager.invalidateAuthToken(owner.type, credential.token)
+      val dataKeys = accountManager.getUserData(owner, "keys_${owner.type}_$credentialType")
+        ?.let { Base64.decode(it, DEFAULT).toString() }
+        ?.split(",")
+      dataKeys?.forEach {
+        accountManager.setUserData(
+          owner,
+          createDataKey(credentialType, it),
+          null
+        )
       }
     }
   }
 
-  private class GetTokenTask(
-    application: Application,
-    private val accountManager: AccountManager,
-    private val owner: Account,
-    private val type: AndroidCredentialType,
-    private val callback: Callback<AndroidCredentials>?
-  ) : Callable<AndroidCredentials> {
-
-    private val activityManager = ActivityManager[application]
-
-    override fun call(): AndroidCredentials {
-      val future = accountManager.getAuthToken(
-        owner,
-        type.type,
-        null,
-        activityManager.activity,
-        null,
-        null)
-
-      var token = future.result.getString(AccountManager.KEY_AUTHTOKEN)
-      if (token == null) token = accountManager.peekAuthToken(owner, type.type)
-      if (token == null) {
-        val error = AuthenticationCanceledException()
-        callback?.onError(error)
-        throw error
-      }
-      return AndroidCredentials(
-        token,
-        type.dataKeys
-          ?.associateTo(HashMap()) {
-            it to accountManager.getUserData(owner, createDataKey(type, it))
-          }
-      ).apply {
-        callback?.onResult(this)
+  override fun storeCredentials(owner: Account, credentialType: String, credentials: Credentials) {
+    accountManager.setAuthToken(owner, credentialType, credentials.token)
+    val data = credentials.data
+    if (data != null) {
+      val dataKeys = data.keys
+        .map { Base64.encodeToString(it.toByteArray(), DEFAULT) }
+        .joinToString { it }
+      accountManager.setUserData(owner, "keys_${owner.type}_$credentialType", dataKeys)
+      data.forEach { (key, value) ->
+        accountManager.setUserData(owner, createDataKey(credentialType, key), value)
       }
     }
   }

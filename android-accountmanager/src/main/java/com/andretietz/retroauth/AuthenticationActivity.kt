@@ -41,14 +41,20 @@ abstract class AuthenticationActivity : AppCompatActivity() {
   private var credentialType: String? = null
   private lateinit var resultBundle: Bundle
   private lateinit var credentialStorage: AndroidAccountManagerCredentialStorage
-  private val ownerManager by lazy { AndroidAccountManagerOwnerStorage(application) }
+  private val ownerManager by lazy {
+    AndroidAccountManagerOwnerStorage(
+      application,
+      accountType
+    )
+  }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     accountManager = AccountManager.get(application)
     credentialStorage = AndroidAccountManagerCredentialStorage(application)
 
-    accountAuthenticatorResponse = intent.getParcelableExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)
+    accountAuthenticatorResponse =
+      intent.getParcelableExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)
     accountAuthenticatorResponse?.onRequestContinued()
 
     val accountType = intent.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE)
@@ -57,7 +63,8 @@ abstract class AuthenticationActivity : AppCompatActivity() {
       error(
         "This Activity cannot be started without the \"%s\" extra in the intent! " +
           "Use the \"createAccount\"-Method of the \"%s\" for opening the Login manually."
-            .format(AccountManager.KEY_ACCOUNT_TYPE, OwnerStorage::class.java.simpleName))
+            .format(AccountManager.KEY_ACCOUNT_TYPE, OwnerStorage::class.java.simpleName)
+      )
     }
     this.accountType = accountType
     credentialType = intent.getStringExtra(AccountAuthenticator.KEY_CREDENTIAL_TYPE)
@@ -71,10 +78,10 @@ abstract class AuthenticationActivity : AppCompatActivity() {
    *
    * @param account Account you want to store the credentials for
    * @param credentialType type of the credentials you want to store
-   * @param credentials the AndroidToken
+   * @param credential the AndroidToken
    */
-  fun storeCredentials(account: Account, credentialType: AndroidCredentialType, credentials: AndroidCredentials) {
-    credentialStorage.storeCredentials(account, credentialType, credentials)
+  fun storeCredentials(account: Account, credentialType: String, credential: Credentials) {
+    credentialStorage.storeCredentials(account, credentialType, credential)
   }
 
   /**
@@ -99,7 +106,7 @@ abstract class AuthenticationActivity : AppCompatActivity() {
   @JvmOverloads
   fun finalizeAuthentication(account: Account, finishActivity: Boolean = true) {
     resultBundle.putString(AccountManager.KEY_ACCOUNT_NAME, account.name)
-    ownerManager.switchActiveOwner(account.type, account)
+    ownerManager.switchActiveOwner(account)
     if (finishActivity) finish()
   }
 
