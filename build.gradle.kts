@@ -26,13 +26,5 @@ allprojects {
     maven("https://oss.sonatype.org/content/repositories/snapshots")
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
   }
-//  configurations.all {
-//    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-//      def requested = details.requested
-//        if (requested.group == 'org.jetbrains.kotlin') {
-//          details.useVersion "$kotlinVersion"
-//        }
-//    }
-//  }
 }
 

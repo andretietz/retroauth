@@ -39,9 +39,6 @@ class MainActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
     binding = ActivityRepositoryListBinding.inflate(layoutInflater)
     setContentView(binding.root)
-//    setContent {
-//      emptyView()
-//    }
     val adapter = RepositoryAdapter()
 
     binding.repositoryList.layoutManager = LinearLayoutManager(this)
@@ -80,26 +77,6 @@ class MainActivity : AppCompatActivity() {
 
   }
 
-  //
-//
-//  @Preview
-//  @Composable
-//  fun emptyView() {
-//    Text(getString(R.string.label_empty_state))
-//  }
-////
-////  @Composable
-////  fun showRepositories() {
-////
-////    LazyColumn {
-////      items(repositories, key = { it.id }) {
-////        Row {
-////          Icon()
-////          Text(it.name)
-////        }
-////      }
-////    }
-////  }
   override fun onCreateOptionsMenu(menu: Menu): Boolean {
     val inflater: MenuInflater = menuInflater
     inflater.inflate(R.menu.menu, menu)

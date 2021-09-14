@@ -5,14 +5,12 @@ plugins {
   id("dagger.hilt.android.plugin")
 }
 android {
-  compileSdkVersion(31)
+  compileSdk = 31
   defaultConfig {
     applicationId = "com.andretietz.retroauth.demo"
-    minSdkVersion(23)
+    minSdk = 23
     versionCode = 1
     versionName = "1.0.0"
-//    buildConfigField("String", "GITHUB_CLIENT_ID", "\"${System.getenv("GITHUB_CLIENT_ID")}\"")
-//    buildConfigField("String", "GITHUB_CLIENT_SECRET", "\"${System.getenv("GITHUB_CLIENT_SECRET")}\"")
   }
   buildTypes {
     getByName("release") {
@@ -27,17 +25,11 @@ android {
 
   buildFeatures {
     viewBinding = true
-//    compose = true
   }
 
   kotlinOptions {
     jvmTarget = "1.8"
   }
-
-//  composeOptions {
-//    kotlinCompilerVersion = Versions.kotlin
-//    kotlinCompilerExtensionVersion = "1.0.0-rc02"
-//  }
 }
 
 dependencies {
@@ -77,6 +69,4 @@ dependencies {
 //  implementation("androidx.compose.animation:animation:1.0.0-rc02")
 //  implementation("androidx.compose.ui:ui-tooling:1.0.0-rc02")
 //  implementation("androidx.activity:activity-compose:1.3.0-rc02")
-
-
 }
