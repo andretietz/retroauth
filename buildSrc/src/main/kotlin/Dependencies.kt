@@ -12,7 +12,7 @@ object Versions {
     const val swipeRefresh = "1.1.0"
     const val fragment = "1.3.4"
     const val timber = "4.7.1"
-    const val hilt = "2.38"
+    const val hilt = "2.38.1"
     const val appcompat = "1.3.0"
     const val viewmodel = "2.4.0-alpha01"
     const val constraintLayout = "2.0.4"
@@ -36,12 +36,10 @@ object Versions {
 
   object gradle {
     object plugin {
-      const val android = "4.2.2"
-
-      //      const val android = "7.0.0"
+      const val android = "7.0.2"
       const val compose = "0.4.0"
       const val dokka = "1.4.32"
-      const val mavenPublish = "0.14.1"
+      const val mavenPublish = "0.18.0"
       const val versions = "0.28.0"
     }
   }

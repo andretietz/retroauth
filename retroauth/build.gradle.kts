@@ -1,5 +1,6 @@
 plugins {
   kotlin("jvm")
+  id("com.vanniktech.maven.publish")
 }
 
 dependencies {
@@ -15,8 +16,4 @@ dependencies {
   testImplementation(Dependencies.retrofit.gsonConverter)
   testImplementation(Dependencies.test.mockitoKotlin)
   testImplementation(Dependencies.test.assertj)
-}
-
-apply {
-  from("$rootDir/gradle/publish.gradle")
 }

@@ -1,6 +1,5 @@
 buildscript {
   repositories {
-    // TODO: remove after new build is published
     google()
     mavenCentral()
     maven("https://oss.sonatype.org/content/repositories/snapshots")

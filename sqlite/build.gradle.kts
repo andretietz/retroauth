@@ -1,5 +1,6 @@
 plugins {
   kotlin("jvm")
+  id("com.vanniktech.maven.publish")
 }
 
 dependencies {
@@ -20,6 +21,3 @@ dependencies {
 
 }
 
-apply {
-  from("$rootDir/gradle/publish.gradle")
-}
