@@ -129,6 +129,46 @@ class CredentialInterceptorTest {
   }
 
   @Test
+  fun `credential type is selected from each Retrofit method`() = runBlocking {
+    serverRule.server.enqueue(MockResponse().setBody("{\"data\": \"first\"}"))
+    serverRule.server.enqueue(MockResponse().setBody("{\"data\": \"second\"}"))
+
+    val ownerStorage = mock<OwnerStorage<String>> {
+      on { getActiveOwner() } doReturn "owner"
+    }
+    val credentialStorage = mock<CredentialStorage<String>> {
+      on { getCredentials(any(), any()) } doAnswer { invocation ->
+        Credentials(invocation.getArgument(1))
+      }
+    }
+    val authenticator = mock<Authenticator<String>> {
+      on { getCredentialType(any()) } doAnswer { invocation ->
+        "type-${invocation.getArgument<Int>(0)}"
+      }
+      on { isCredentialValid(any()) } doReturn true
+      on { authenticateRequest(any(), any()) } doAnswer { invocation ->
+        val request = invocation.getArgument<Request>(0)
+        val credentials = invocation.getArgument<Credentials>(1)
+        request.newBuilder().header("auth-token", credentials.token).build()
+      }
+    }
+    val interceptor = CredentialInterceptor(authenticator, ownerStorage, credentialStorage)
+    val api = Retrofit.Builder()
+      .baseUrl(serverRule.server.url("/"))
+      .addConverterFactory(GsonConverterFactory.create())
+      .client(OkHttpClient.Builder().addInterceptor(interceptor).build())
+      .build()
+      .create(CredentialTypeApi::class.java)
+
+    api.first()
+    api.second()
+
+    assertThat(serverRule.server.takeRequest().getHeader("auth-token")).isEqualTo("type-1")
+    assertThat(serverRule.server.takeRequest().getHeader("auth-token")).isEqualTo("type-2")
+    Unit
+  }
+
+  @Test
   fun `Invalid token, refreshes token`() = runBlocking {
     serverRule.server.enqueue(MockResponse().setBody("{\"data\": \"testdata\"}"))
 
@@ -436,4 +476,14 @@ interface SomeApi {
   @Authenticated
   @GET("/some/other/path")
   suspend fun someAuthenticatedCall(): Data
+}
+
+private interface CredentialTypeApi {
+  @Authenticated(credentialType = 1)
+  @GET("/same")
+  suspend fun first(): Data
+
+  @Authenticated(credentialType = 2)
+  @GET("/same")
+  suspend fun second(): Data
 }

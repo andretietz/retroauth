@@ -20,6 +20,8 @@ import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
 import retrofit2.Invocation
+import java.lang.reflect.Method
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
@@ -41,10 +43,9 @@ class CredentialInterceptor<OWNER : Any>(
 
   companion object {
     private val refreshLock = AtomicReference(AccountTokenLock())
-    private const val HASH_PRIME = 31
   }
 
-  private val registration = mutableMapOf<Int, RequestType>()
+  private val registration = ConcurrentHashMap<Method, RequestType>()
 
   private val executor = Executors.newSingleThreadExecutor()
 
@@ -135,16 +136,14 @@ class CredentialInterceptor<OWNER : Any>(
   private fun findRequestType(
     request: Request
   ): RequestType? {
-    val key = request.url.hashCode() + HASH_PRIME * request.method.hashCode()
-    return registration[key] ?: request.tag(Invocation::class.java)
-      ?.method()
-      ?.annotations
-      ?.filterIsInstance<Authenticated>()
-      ?.firstOrNull()
+    val method = request.tag(Invocation::class.java)?.method() ?: return null
+    return registration[method] ?: method.annotations
+      .filterIsInstance<Authenticated>()
+      .firstOrNull()
       ?.let {
         RequestType(authenticator.getCredentialType(it.credentialType))
       }
-      ?.also { registration[key] = it }
+      ?.also { registration.putIfAbsent(method, it) }
   }
 
   internal data class AccountTokenLock(
